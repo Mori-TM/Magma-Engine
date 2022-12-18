@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Editor">
+      <UniqueIdentifier>{033f5896-ccff-4b81-b335-7dd683b44e2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Renderer">
+      <UniqueIdentifier>{ee6ea06d-fc4f-4f54-b3bc-61e222ca826a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Renderer\Helper">
+      <UniqueIdentifier>{5af73833-0494-4a02-a437-d77ad9a25615}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Renderer\Pipelines">
+      <UniqueIdentifier>{e113d3a4-5748-434d-a19f-bc4caca076fd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Helper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\AssetBrowser.h">
+      <Filter>Header Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Camera.h">
+      <Filter>Header Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Editor.h">
+      <Filter>Header Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EntityManager.h">
+      <Filter>Header Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Helper.h">
+      <Filter>Header Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Inspector.h">
+      <Filter>Header Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\SceneManager.h">
+      <Filter>Header Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ScriptEngine.h">
+      <Filter>Header Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Helper\Buffers.h">
+      <Filter>Header Files\Renderer\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Helper\DescriptorPool.h">
+      <Filter>Header Files\Renderer\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Helper\DescriptorSetLayouts.h">
+      <Filter>Header Files\Renderer\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Helper\Helper.h">
+      <Filter>Header Files\Renderer\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Helper\ImGuiHelper.h">
+      <Filter>Header Files\Renderer\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Helper\Meshes.h">
+      <Filter>Header Files\Renderer\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Helper\Sampler.h">
+      <Filter>Header Files\Renderer\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\BlurHelper.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\BlurPipeline.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\DebugHelper.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\DebugPipeline.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\SceneHelper.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\ScenePipeline.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\ShadowHelper.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\ShadowPipeline.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\SwapChainHelper.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\SwapChainPipeline.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Renderer.h">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\AudioEngine.h">
+      <Filter>Header Files\Editor</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\Shader\BlurFragment.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\BlurVertex.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\DebugFragment.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\DebugVertex.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\SceneFragment.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\SceneVertex.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\ShadowFragment.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\ShadowVertex.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\SwapChainFragment.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\SwapChainVertex.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

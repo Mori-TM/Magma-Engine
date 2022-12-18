@@ -1,4 +1,4 @@
-#define MAX_FRAMES_IN_FLIGHT 2
+#define MAX_FRAMES_IN_FLIGHT 3
 
 typedef struct
 {
@@ -7,8 +7,8 @@ typedef struct
 
 typedef struct
 {
-	uint32_t DescriptorPoolCount;
-	VkDescriptorPool* DescriptorPools;
+	VkDescriptorPool DescriptorPool;
+	CMA_MemoryZone DescriptorSets;
 } VkDescriptorPoolInfo;
 
 typedef struct
@@ -20,23 +20,28 @@ typedef struct
 {
 	VkBuffer Buffers[MAX_FRAMES_IN_FLIGHT];
 	VkDeviceMemory BufferMemories[MAX_FRAMES_IN_FLIGHT];
-} VkUniformBufferInfo;
+	VkDeviceSize Size;
+} VkDynamicBufferInfo;
 
 typedef struct
 {
-	VkImage TextureImage;
-	VkImageView TextureImageView;
-	VkDeviceMemory TextureImageMemory;
-} VkTextureImageInfo;
+	VkFormat Format;
+	VkImage Image;
+	VkImageView ImageView;
+	VkDeviceMemory ImageMemory;
+} VkImageInfo;
 
 typedef struct
 {
 	VkBuffer Buffer;
 	VkDeviceMemory BufferMemory;
-} VkBufferInfo;
+} VkStaticBufferInfo;
 
 typedef struct
 {
+	uint32_t DeviceExtensionCount;
+	const char* DeviceExtensions[32];
+
 	VkInstance Instance;
 	VkPhysicalDevice PhysicalDevice;
 	VkDevice Device;
@@ -53,16 +58,21 @@ typedef struct
 	VkImage* SwapChainImages;
 	VkImageView* SwapChainImageViews;
 
-	uint32_t ImageCount;
-	VkImage* Images;
-	VkDeviceMemory* ImageMemories;
-	VkImageView* ImageViews;
+	VkDeviceSize BufferMemoryAlignment;
+
+//	uint32_t ImageCount;
+//	VkImage* Images;
+//	VkDeviceMemory* ImageMemories;
+//	VkImageView* ImageViews;
+	CMA_MemoryZone ImageAttachments;
 
 	uint32_t RenderPassCount;
 	VkRenderPass* RenderPasses;
 
-	uint32_t PipelineCount;
+	uint32_t PipelineLayoutCount;
 	VkPipelineLayout* PipelineLayouts;
+
+	uint32_t PipelineCount;
 	VkPipeline* Pipelines;
 
 	uint32_t FramebufferCount;
@@ -88,10 +98,11 @@ typedef struct
 //	uint32_t BufferCount;
 //	VkBuffer* Buffers;
 //	VkDeviceMemory* BufferMemories;
-	CMA_MemoryZone Buffers;
+	CMA_MemoryZone StaticBuffers;
 
-	uint32_t UniformBufferCount;
-	VkUniformBufferInfo* UniformBuffers;
+	CMA_MemoryZone DynamicBuffers;
+//	uint32_t UniformBufferCount;
+//	VkDynamicBufferInfo* UniformBuffers;
 
 	uint32_t MipLevels;
 
@@ -99,7 +110,7 @@ typedef struct
 //	VkImage* TextureImages;
 //	VkImageView* TextureImageViews;
 //	VkDeviceMemory* TextureImageMemories;
-	CMA_MemoryZone TextureImages;
+	CMA_MemoryZone Images;
 
 //	uint32_t SamplerCount;
 //	VkSampler* Sampler;
@@ -107,8 +118,9 @@ typedef struct
 
 	VkSampleCountFlagBits MsaaSamples;
 
-	VkDescriptorPoolInfo DynamicDescriptorPools;
-	VkDescriptorPoolInfo StaticDescriptorPools;
+	CMA_MemoryZone DescriptorPools;
+//	VkDescriptorPoolInfo DynamicDescriptorPools;
+//	VkDescriptorPoolInfo StaticDescriptorPools;
 
 	VkPhysicalDeviceProperties PhysicalDeviceProperties;
 	VkPhysicalDeviceFeatures PhysicalDeviceFeatures;
@@ -133,8 +145,6 @@ VkRendererInfo VkRenderer = { NULL };
 
 OpenVkBool VkIsPhysicalDeviceSuitable(VkPhysicalDevice PhysicalDevice)
 {
-	VkPhysicalDeviceProperties DeviceProperties;
-	VkPhysicalDeviceFeatures DeviceFeatures;
 	vkGetPhysicalDeviceProperties(PhysicalDevice, &VkRenderer.PhysicalDeviceProperties);
 	vkGetPhysicalDeviceFeatures(PhysicalDevice, &VkRenderer.PhysicalDeviceFeatures);
 
@@ -269,22 +279,24 @@ VkImageView VkCreateImageView(VkImage Image, VkFormat Format, VkImageAspectFlags
 	return ImageView;
 }
 
-OpenVkBool VkCreateShaderModule(const char* Path, VkShaderModule* ShaderModule)
+OpenVkBool VkCreateShaderModule(OpenVkFile File, VkShaderModule* ShaderModule)
 {
-	size_t Size;
-	char* Code = OpenVkReadFileData(Path, &Size);
-
 	VkShaderModuleCreateInfo CreateInfo;
 	CreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 	CreateInfo.pNext = NULL;
 	CreateInfo.flags = 0;
-	CreateInfo.codeSize = Size;
-	CreateInfo.pCode = (uint32_t*)Code;
+	CreateInfo.codeSize = File.Size;
+	CreateInfo.pCode = (const uint32_t*)File.Data;
 
-	if (vkCreateShaderModule(VkRenderer.Device, &CreateInfo, NULL, ShaderModule) != VK_SUCCESS)
+	if (File.Size == 0 || File.Data == NULL || vkCreateShaderModule(VkRenderer.Device, &CreateInfo, NULL, ShaderModule) != VK_SUCCESS)
 		return OpenVkRuntimeError("Failed to Create Shader Module");
 
-	OpenVkFree(Code);
+	if (File.Freeable)
+	{
+		OpenVkFree(File.Data);
+		File.Data = NULL;
+		File.Size = 0;
+	}
 
 	return 1;
 }
@@ -300,6 +312,85 @@ uint32_t VkFindMemoryType(uint32_t TypeFilter, VkMemoryPropertyFlags Properties)
 
 	return OpenVkRuntimeError("Failed To find a Suitable Memory Type");
 }
+
+VkCommandBuffer VkBeginSingleTimeCommands()
+{
+	VkCommandBufferAllocateInfo AllocateInfo;
+	AllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	AllocateInfo.pNext = NULL;
+	AllocateInfo.commandPool = VkRenderer.CommandPool;
+	AllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	AllocateInfo.commandBufferCount = 1;
+
+	VkCommandBuffer CommandBuffer;
+	if (vkAllocateCommandBuffers(VkRenderer.Device, &AllocateInfo, &CommandBuffer) != VK_SUCCESS)
+		OpenVkRuntimeError("Failed to allocate single time command buffer");
+
+	VkCommandBufferBeginInfo BeginInfo;
+	BeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	BeginInfo.pNext = NULL;
+	BeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	BeginInfo.pInheritanceInfo = NULL;
+
+	if (vkBeginCommandBuffer(CommandBuffer, &BeginInfo) != VK_SUCCESS)
+		OpenVkRuntimeError("Failed to begin single time command buffer");
+
+	return CommandBuffer;
+}
+
+OpenVkBool VkEndSingleTimeCommandBuffer(VkCommandBuffer CommandBuffer)
+{
+	if (vkEndCommandBuffer(CommandBuffer) != VK_SUCCESS)
+		return OpenVkRuntimeError("Failed to end single time command buffer");
+	
+	VkSubmitInfo SubmitInfo;
+	SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	SubmitInfo.pNext = NULL;
+	SubmitInfo.waitSemaphoreCount = 0;
+	SubmitInfo.pWaitSemaphores = NULL;
+	SubmitInfo.pWaitDstStageMask = NULL;
+	SubmitInfo.commandBufferCount = 1;
+	SubmitInfo.pCommandBuffers = &CommandBuffer;
+	SubmitInfo.signalSemaphoreCount = 0;
+	SubmitInfo.pSignalSemaphores = NULL;
+
+	VkFenceCreateInfo FenceCreateInfo;
+	FenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	FenceCreateInfo.pNext = NULL;
+	FenceCreateInfo.flags = 0;
+	VkFence Fence;
+	
+
+	if (vkCreateFence(VkRenderer.Device, &FenceCreateInfo, NULL, &Fence) != VK_SUCCESS)
+		return OpenVkRuntimeError("Failed to create single time command buffer fence");
+
+	if (vkQueueSubmit(VkRenderer.GraphicsQueue, 1, &SubmitInfo, Fence) != VK_SUCCESS)
+		return OpenVkRuntimeError("Failed to submit single time command buffer queue");
+
+	if (vkWaitForFences(VkRenderer.Device, 1, &Fence, VK_TRUE, UINT64_MAX) != VK_SUCCESS)
+		return OpenVkRuntimeError("Failed to wait for single time command buffer fence");
+
+	vkDestroyFence(VkRenderer.Device, Fence, NULL);
+
+	vkFreeCommandBuffers(VkRenderer.Device, VkRenderer.CommandPool, 1, &CommandBuffer);
+	
+	return OpenVkTrue;
+}
+
+void VkCopyBuffer(VkBuffer SrcBuffer, VkBuffer DstBuffer, VkDeviceSize Size)
+{
+	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
+
+	VkBufferCopy CopyRegion;
+	CopyRegion.srcOffset = 0;
+	CopyRegion.dstOffset = 0;
+	CopyRegion.size = Size;
+
+	vkCmdCopyBuffer(CommandBuffer, SrcBuffer, DstBuffer, 1, &CopyRegion);
+
+	VkEndSingleTimeCommandBuffer(CommandBuffer);
+}
+
 OpenVkBool VkCreateBuffer(VkDeviceSize Size, VkBufferUsageFlags Usage, VkMemoryPropertyFlags Properties, VkBuffer* Buffer, VkDeviceMemory* BufferMemory)
 {
 	VkBufferCreateInfo BufferInfo;
@@ -317,6 +408,7 @@ OpenVkBool VkCreateBuffer(VkDeviceSize Size, VkBufferUsageFlags Usage, VkMemoryP
 
 	VkMemoryRequirements MemoryRequirements;
 	vkGetBufferMemoryRequirements(VkRenderer.Device, *Buffer, &MemoryRequirements);
+	VkRenderer.BufferMemoryAlignment = (VkRenderer.BufferMemoryAlignment > MemoryRequirements.alignment) ? VkRenderer.BufferMemoryAlignment : MemoryRequirements.alignment;
 
 	VkMemoryAllocateInfo AllocateInfo;
 	AllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -324,70 +416,121 @@ OpenVkBool VkCreateBuffer(VkDeviceSize Size, VkBufferUsageFlags Usage, VkMemoryP
 	AllocateInfo.allocationSize = MemoryRequirements.size;
 	AllocateInfo.memoryTypeIndex = VkFindMemoryType(MemoryRequirements.memoryTypeBits, Properties);
 
+	VkMemoryAllocateFlagsInfoKHR AllocateFlagsInfo;
+	if (Usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) 
+	{
+		AllocateFlagsInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO_KHR;
+		AllocateFlagsInfo.pNext = NULL;
+		AllocateFlagsInfo.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;		
+		AllocateFlagsInfo.deviceMask = 0;
+		AllocateInfo.pNext = &AllocateFlagsInfo;
+	}
+
 	if (vkAllocateMemory(VkRenderer.Device, &AllocateInfo, NULL, BufferMemory) != VK_SUCCESS)
 		return OpenVkRuntimeError("Failed to Allocate Buffer Memory");
 
-	vkBindBufferMemory(VkRenderer.Device, *Buffer, *BufferMemory, 0);
+	if (vkBindBufferMemory(VkRenderer.Device, *Buffer, *BufferMemory, 0) != VK_SUCCESS)
+		return OpenVkRuntimeError("Failed to bind Buffer Memory");
 
 	return 1;
 }
 
-VkCommandBuffer VkBeginSingleTimeCommands()
+OpenVkBool VkCreateVkBufferExt(VkBufferUsageFlags SrcUsage, VkMemoryPropertyFlags SrcProperties, VkBufferUsageFlags DstUsage, VkMemoryPropertyFlags DstProperties, size_t Size, const void* InData, VkBuffer* Buffer, VkDeviceMemory* BufferMemory)
 {
-	VkCommandBufferAllocateInfo AllocateInfo;
-	AllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	AllocateInfo.pNext = NULL;
-	AllocateInfo.commandPool = VkRenderer.CommandPool;
-	AllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	AllocateInfo.commandBufferCount = 1;
+	VkBuffer StagingBuffer;
+	VkDeviceMemory StagingBufferMemory;
+	if (VkCreateBuffer(Size, SrcUsage, SrcProperties, &StagingBuffer, &StagingBufferMemory) == OPENVK_ERROR)
+		return OpenVkRuntimeError("Failed to Create Buffer: Func 0");
 
-	VkCommandBuffer CommandBuffer;
-	vkAllocateCommandBuffers(VkRenderer.Device, &AllocateInfo, &CommandBuffer);
+	void* Data;
+	vkMapMemory(VkRenderer.Device, StagingBufferMemory, 0, Size, 0, &Data);
+	memcpy(Data, InData, Size);
 
-	VkCommandBufferBeginInfo BeginInfo;
-	BeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	BeginInfo.pNext = NULL;
-	BeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-	BeginInfo.pInheritanceInfo = NULL;
+	if ((SrcProperties & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
+	{
+		VkMappedMemoryRange MappedRange;
+		MappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+		MappedRange.pNext = NULL;
+		MappedRange.memory = StagingBufferMemory;
+		MappedRange.offset = 0;
+		MappedRange.size = VK_WHOLE_SIZE;
+		if (vkFlushMappedMemoryRanges(VkRenderer.Device, 1, &MappedRange) != VK_SUCCESS)
+			return OpenVkRuntimeError("Failed to flush mapped buffer memory ranges");
+	}
 
-	vkBeginCommandBuffer(CommandBuffer, &BeginInfo);
+	vkUnmapMemory(VkRenderer.Device, StagingBufferMemory);
 
-	return CommandBuffer;
+	if (VkCreateBuffer(Size, DstUsage, DstProperties, Buffer, BufferMemory) == OPENVK_ERROR)
+		return OpenVkRuntimeError("Failed to Create Buffer: Func 1");
+
+	VkCopyBuffer(StagingBuffer, *Buffer, Size);
+
+	vkDestroyBuffer(VkRenderer.Device, StagingBuffer, NULL);
+	vkFreeMemory(VkRenderer.Device, StagingBufferMemory, NULL);
+
+	return OpenVkTrue;
 }
 
-void VkEndSingleTimeCommandBuffer(VkCommandBuffer CommandBuffer)
+uint32_t VkCreateBufferExt(VkBufferUsageFlags SrcUsage, VkMemoryPropertyFlags SrcProperties, VkBufferUsageFlags DstUsage, VkMemoryPropertyFlags DstProperties, size_t Size, const void* InData)
 {
-	vkEndCommandBuffer(CommandBuffer);
+	VkStaticBufferInfo BufferInfo;
 
-	VkSubmitInfo SubmitInfo;
-	SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	SubmitInfo.pNext = NULL;
-	SubmitInfo.waitSemaphoreCount = 0;
-	SubmitInfo.pWaitSemaphores = NULL;
-	SubmitInfo.pWaitDstStageMask = NULL;
-	SubmitInfo.commandBufferCount = 1;
-	SubmitInfo.pCommandBuffers = &CommandBuffer;
-	SubmitInfo.signalSemaphoreCount = 0;
-	SubmitInfo.pSignalSemaphores = NULL;
+	VkCreateVkBufferExt(SrcUsage, SrcProperties, DstUsage, DstProperties, Size, InData, &BufferInfo.Buffer, &BufferInfo.BufferMemory);
 
-	vkQueueSubmit(VkRenderer.GraphicsQueue, 1, &SubmitInfo, VK_NULL_HANDLE);
-	vkQueueWaitIdle(VkRenderer.GraphicsQueue);
-
-	vkFreeCommandBuffers(VkRenderer.Device, VkRenderer.CommandPool, 1, &CommandBuffer);
+	return CMA_Push(&VkRenderer.StaticBuffers, &BufferInfo);
 }
 
-void VkCopyBuffer(VkBuffer SrcBuffer, VkBuffer DstBuffer, VkDeviceSize Size)
+uint32_t VkCreateDynamicBuffer(size_t Size, VkBufferUsageFlags Usage)
 {
-	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
+	VkDynamicBufferInfo Buffer;
 
-	VkBufferCopy CopyRegion;
-	CopyRegion.srcOffset = 0;
-	CopyRegion.dstOffset = 0;
-	CopyRegion.size = Size;
+	Buffer.Size = OpenVkAlignedSize(Size, VkRenderer.BufferMemoryAlignment);
 
-	vkCmdCopyBuffer(CommandBuffer, SrcBuffer, DstBuffer, 1, &CopyRegion);
+	for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		if (VkCreateBuffer(Buffer.Size, Usage, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &Buffer.Buffers[i], &Buffer.BufferMemories[i]) == OPENVK_ERROR)
+			return OpenVkRuntimeError("Failed to create dynamic vertex buffer");
 
-	VkEndSingleTimeCommandBuffer(CommandBuffer);
+	VkMemoryRequirements MemoryRequirements;
+	vkGetBufferMemoryRequirements(VkRenderer.Device, Buffer.Buffers[0], &MemoryRequirements);
+	VkRenderer.BufferMemoryAlignment = (VkRenderer.BufferMemoryAlignment > MemoryRequirements.alignment) ? VkRenderer.BufferMemoryAlignment : MemoryRequirements.alignment;
+	Buffer.Size = MemoryRequirements.size;
+
+	return CMA_Push(&VkRenderer.DynamicBuffers, &Buffer);
+}
+
+void VkDestroyBuffer(uint32_t Buffer)
+{
+	vkDeviceWaitIdle(VkRenderer.Device);
+
+	VkStaticBufferInfo* BufferInfo = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Buffer);
+	if (BufferInfo != NULL)
+	{
+		vkDestroyBuffer(VkRenderer.Device, BufferInfo->Buffer, NULL);
+		vkFreeMemory(VkRenderer.Device, BufferInfo->BufferMemory, NULL);
+		CMA_Pop(&VkRenderer.StaticBuffers, Buffer);
+		return;
+	}
+
+	OpenVkRuntimeError("Failed To Find Static Destroy Buffer");
+}
+
+void VkDestroyDynamicBuffer(uint32_t Buffer)
+{
+	vkDeviceWaitIdle(VkRenderer.Device);
+
+	VkDynamicBufferInfo* BufferInfo = (VkDynamicBufferInfo*)CMA_GetAt(&VkRenderer.DynamicBuffers, Buffer);
+	if (BufferInfo != NULL)
+	{
+		for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			vkDestroyBuffer(VkRenderer.Device, BufferInfo->Buffers[i], NULL);
+			vkFreeMemory(VkRenderer.Device, BufferInfo->BufferMemories[i], NULL);
+			CMA_Pop(&VkRenderer.DynamicBuffers, Buffer);
+		}		
+		return;
+	}
+
+	OpenVkRuntimeError("Failed To Find Dynamic Destroy Buffer");
 }
 
 OpenVkBool VkCreateImage(uint32_t Width, uint32_t Height, uint32_t MipLevels, VkSampleCountFlagBits NumSamples, VkFormat Format, VkImageTiling Tiling, VkImageUsageFlags Usage, VkMemoryPropertyFlags Properties, VkImage* Image, VkDeviceMemory* ImageMemory)
@@ -451,6 +594,7 @@ VkFormat VkFindDepthFormat()
 	return VkFindSupportedFormat(Formats, 3, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
 
+//wtf?
 VkDescriptorSetAllocateInfo VkAllocateDescriptorSets(VkDescriptorPool DescriptorPool, uint32_t Count, VkDescriptorSetLayout* SetLayouts)
 {
 	VkDescriptorSetAllocateInfo AllocateInfo;
@@ -463,18 +607,18 @@ VkDescriptorSetAllocateInfo VkAllocateDescriptorSets(VkDescriptorPool Descriptor
 	return AllocateInfo;
 }
 
-VkWriteDescriptorSet VkDescriptorSetWrite(VkDescriptorSet DstSet, uint32_t DstBinding, VkDescriptorType DescriptorType, uint32_t DescriptorCount, VkDescriptorImageInfo* ImageInfo, VkDescriptorBufferInfo* BufferInfo)
+VkWriteDescriptorSet VkDescriptorSetWrite(VkDescriptorSet DstSet, uint32_t DstBinding, VkDescriptorType DescriptorType, uint32_t DescriptorCount, VkDescriptorImageInfo* ImageInfos, VkDescriptorBufferInfo* BufferInfos, VkWriteDescriptorSetAccelerationStructureKHR* ASInfos)
 {
 	VkWriteDescriptorSet DescriptorWrite;
 	DescriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	DescriptorWrite.pNext = NULL;
+	DescriptorWrite.pNext = ASInfos;
 	DescriptorWrite.dstSet = DstSet;
 	DescriptorWrite.dstBinding = DstBinding;
 	DescriptorWrite.dstArrayElement = 0;
 	DescriptorWrite.descriptorCount = DescriptorCount;
 	DescriptorWrite.descriptorType = DescriptorType;
-	DescriptorWrite.pImageInfo = ImageInfo;
-	DescriptorWrite.pBufferInfo = BufferInfo;
+	DescriptorWrite.pImageInfo = ImageInfos;
+	DescriptorWrite.pBufferInfo = BufferInfos;
 	DescriptorWrite.pTexelBufferView = NULL;
 
 	return DescriptorWrite;
@@ -497,58 +641,169 @@ VkSampleCountFlagBits VkGetMaxSampleCount()
 	return VK_SAMPLE_COUNT_1_BIT;
 }
 
-//Textures
-void VkTransitionImageLayout(VkImage Image, VkFormat Format, VkImageLayout OldLayout, VkImageLayout NewLayout, uint32_t MipLevels)
+//get the vulkan color format from openvk
+VkFormat VkGetOpenVkFormat(uint32_t Format)
 {
-	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
+	VkFormat ColorFormat = VkRenderer.SwapChainImageFormat;
 
-	VkImageMemoryBarrier Barrier;
-	Barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	Barrier.pNext = NULL;
-	Barrier.srcAccessMask = 0;
-	Barrier.dstAccessMask = 0;
-	Barrier.oldLayout = OldLayout;
-	Barrier.newLayout = NewLayout;
-	Barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	Barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	Barrier.image = Image;
-	Barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	Barrier.subresourceRange.baseMipLevel = 0;
-	Barrier.subresourceRange.levelCount = MipLevels;
-	Barrier.subresourceRange.baseArrayLayer = 0;
-	Barrier.subresourceRange.layerCount = 1;
-
-	VkPipelineStageFlags SourceStage;
-	VkPipelineStageFlags DestinationStage;
-
-	if (OldLayout == VK_IMAGE_LAYOUT_UNDEFINED && NewLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+	switch (Format)
 	{
-		Barrier.srcAccessMask = 0;
-		Barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	case OPENVK_FORMAT_R:
+		ColorFormat = VK_FORMAT_R8_UNORM;
+		break;
+	case OPENVK_FORMAT_RG:
+		ColorFormat = VK_FORMAT_R8G8_UNORM;
+		break;
+	case OPENVK_FORMAT_RGB:
+		ColorFormat = VK_FORMAT_R8G8B8_UNORM;
+		break;
+	case OPENVK_FORMAT_RGBA:
+		ColorFormat = VK_FORMAT_R8G8B8A8_UNORM;
+		break;
 
-		SourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-		DestinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+	case OPENVK_FORMAT_R16F:
+		ColorFormat = VK_FORMAT_R16_SFLOAT;
+		break;
+	case OPENVK_FORMAT_RG16F:
+		ColorFormat = VK_FORMAT_R16G16_SFLOAT;
+		break;
+	case OPENVK_FORMAT_RGB16F:
+		ColorFormat = VK_FORMAT_R16G16B16_SFLOAT;
+		break;
+	case OPENVK_FORMAT_RGBA16F:
+		ColorFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+		break;
+
+	case OPENVK_FORMAT_R32F:
+		ColorFormat = VK_FORMAT_R32_SFLOAT;
+		break;
+	case OPENVK_FORMAT_RG32F:
+		ColorFormat = VK_FORMAT_R32G32_SFLOAT;
+		break;
+	case OPENVK_FORMAT_RGB32F:
+		ColorFormat = VK_FORMAT_R32G32B32_SFLOAT;
+		break;
+	case OPENVK_FORMAT_RGBA32F:
+		ColorFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
+		break;
+
+	case OPENVK_FORMAT_R_UINT:
+		ColorFormat = VK_FORMAT_R8_UINT;
+		break;
+	case OPENVK_FORMAT_RG_UINT:
+		ColorFormat = VK_FORMAT_R8G8_UINT;
+		break;
+	case OPENVK_FORMAT_RGB_UINT:
+		ColorFormat = VK_FORMAT_R8G8B8_UINT;
+		break;
+	case OPENVK_FORMAT_RGBA_UINT:
+		ColorFormat = VK_FORMAT_R8G8B8A8_UINT;
+		break;
+
+	default:
+		break;
 	}
-	else if (OldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && NewLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+
+	return ColorFormat;
+}
+
+void VkSetImageLayout(VkCommandBuffer CommandBuffer, VkImage Image, VkImageLayout OldImageLayout, VkImageLayout NewImageLayout, uint32_t MipLevels, VkImageSubresourceRange* SubresourceRange)
+{
+	VkImageMemoryBarrier ImageMemoryBarrier;
+	ImageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	ImageMemoryBarrier.pNext = NULL;
+	ImageMemoryBarrier.srcAccessMask = 0;
+	ImageMemoryBarrier.dstAccessMask = 0;
+	ImageMemoryBarrier.oldLayout = OldImageLayout;
+	ImageMemoryBarrier.newLayout = NewImageLayout;
+	ImageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	ImageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	ImageMemoryBarrier.image = Image;
+	if (SubresourceRange)
 	{
-		Barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-		Barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-		SourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-		DestinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		ImageMemoryBarrier.subresourceRange = *SubresourceRange;
 	}
-	else if (OldLayout == VK_IMAGE_LAYOUT_UNDEFINED && NewLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+	else
 	{
-		Barrier.srcAccessMask = 0;
-		Barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		ImageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		ImageMemoryBarrier.subresourceRange.baseMipLevel = 0;
+		ImageMemoryBarrier.subresourceRange.levelCount = MipLevels;
+		ImageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
+		ImageMemoryBarrier.subresourceRange.layerCount = 1;
+	}
+	
+	switch (OldImageLayout)
+	{
+	case VK_IMAGE_LAYOUT_UNDEFINED:
+		ImageMemoryBarrier.srcAccessMask = 0;
+		break;
 
-		SourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-		DestinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+	case VK_IMAGE_LAYOUT_PREINITIALIZED:
+		ImageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		ImageMemoryBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+		ImageMemoryBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+		ImageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+		ImageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+		ImageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		break;
+	default:
+		break;
 	}
 
-	vkCmdPipelineBarrier(CommandBuffer, SourceStage, DestinationStage, 0, 0, NULL, 0, NULL, 1, &Barrier);
+	switch (NewImageLayout)
+	{
+	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+		ImageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		break;
 
-	VkEndSingleTimeCommandBuffer(CommandBuffer);
+	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+		ImageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		ImageMemoryBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+		ImageMemoryBarrier.dstAccessMask = ImageMemoryBarrier.dstAccessMask | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+		if (ImageMemoryBarrier.srcAccessMask == 0)
+			ImageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+		ImageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		break;
+	default:
+		break;
+	}
+	
+
+	VkPipelineStageFlags SourceStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+	VkPipelineStageFlags DestinationStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+
+	vkCmdPipelineBarrier(
+		CommandBuffer,
+		SourceStage,
+		DestinationStage,
+		0,
+		0, NULL,
+		0, NULL,
+		1, &ImageMemoryBarrier);
 }
 
 void VkCopyBufferToImage(VkBuffer Buffer, VkImage Image, uint32_t Width, uint32_t Height)
@@ -627,8 +882,8 @@ void VkGenerateMipmaps(VkImage Image, VkFormat ImageFormat, int32_t TextureWidth
 		Blit.dstOffsets[0].x = 0;
 		Blit.dstOffsets[0].y = 0;
 		Blit.dstOffsets[0].z = 0;
-		Blit.dstOffsets[1].x = MipWidth > 1 ? MipWidth * 0.5 : 1;
-		Blit.dstOffsets[1].y = MipHeight > 1 ? MipHeight * 0.5 : 1;
+		Blit.dstOffsets[1].x = MipWidth > 1 ? MipWidth / 2 : 1;
+		Blit.dstOffsets[1].y = MipHeight > 1 ? MipHeight / 2 : 1;
 		Blit.dstOffsets[1].z = 1;
 
 		vkCmdBlitImage(CommandBuffer, Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &Blit, VK_FILTER_LINEAR);

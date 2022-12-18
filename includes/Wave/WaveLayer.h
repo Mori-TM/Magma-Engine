@@ -3,59 +3,150 @@
 #include <string.h>
 #include <stdint.h>
 
+#define WAVE_MAX_LENGTH 4096
+
 #ifdef _WIN32
 #include <Windows.h>
 #include <psapi.h>
 #include <Commdlg.h>
-HWND WaveHwnd;
-char LastPath[4096];
+HWND WaveHwnd = NULL;
+#ifdef UNICODE
+WCHAR LastPath[WAVE_MAX_LENGTH];
+#else
+char LastPath[WAVE_MAX_LENGTH];
+#endif // UNICODE
 
-int32_t WaveOpenFileDialog(char* Path, const char* FileExtensions)
+//OFN_ALLOWMULTISELECT | OFN_EXPLORER
+
+LPWSTR WaveToLPWSTR(const char* String)
 {
-//	char FinalExtensions[2048];
-//	sprintf(FinalExtensions, "%s\0%s\0", FileTypes, FileExtensions);
-//	printf("%s\n", FinalExtensions);
-//	printf("%s\n", OBJDAE);
+	WCHAR Out[WAVE_MAX_LENGTH];
+	memset(Out, 0, WAVE_MAX_LENGTH * sizeof(WCHAR));
 
-	OPENFILENAME ofn;
+	size_t Length = strlen(String);
+	for (size_t i = 0; i < Length; i++)
+		Out[i] = String[i];
 
-	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	return Out;
+}
 
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = WaveHwnd;
-	ofn.lpstrFile = Path;
-	ofn.lpstrFile[0] = '\0';
-	ofn.nMaxFile = 1000;
-	ofn.lpstrFilter = FileExtensions;
-	ofn.nFilterIndex = 1;
+char* WaveToChar(LPWSTR String)
+{
+	char Out[WAVE_MAX_LENGTH];
+	memset(Out, 0, WAVE_MAX_LENGTH * sizeof(char));
+
+	size_t Length = lstrlenW(String);
+	for (size_t i = 0; i < Length; i++)
+		Out[i] = (char)String[i];
+
+	return Out;
+}
+
+
+int32_t WaveOpenFileDialog(char* Path, int MultiSelect, unsigned short* Offset, const char* FileExtensions)
+{
+	OPENFILENAME OFN;
+
+	ZeroMemory(&OFN, sizeof(OPENFILENAME));
+
+#ifdef UNICODE
+	WCHAR WinPath[WAVE_MAX_LENGTH];
+	OFN.lpstrFile = WinPath;
+	OFN.lpstrFilter = WaveToLPWSTR(FileExtensions);
+	wprintf(OFN.lpstrFilter);
+#else
+	OFN.lpstrFile = Path;
+	OFN.lpstrFilter = FileExtensions;
+
+#endif 
 	
-//	char CurrentPath[4096];
-	GetCurrentDirectory(4096, LastPath);
-	int32_t Ret = GetOpenFileName(&ofn);
-//	SetCurrentDirectory(CurrentPath);
+	OFN.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	if (MultiSelect)
+		OFN.Flags |= OFN_EXPLORER | OFN_ALLOWMULTISELECT;
+
+	OFN.lStructSize = sizeof(OPENFILENAME);
+	OFN.hwndOwner = WaveHwnd;	
+	OFN.lpstrFile[0] = '\0';
+	OFN.nMaxFile = WAVE_MAX_LENGTH;
+	OFN.nFilterIndex = 1;
+
+	GetCurrentDirectory(WAVE_MAX_LENGTH, LastPath);
+
+	int32_t Ret = GetOpenFileName(&OFN);
+
+	if (Offset != NULL)
+		*Offset = OFN.nFileOffset;
+
+#ifdef WAVE_AUTO_PATH_RESET
+	SetCurrentDirectory(CurrentPath);
+#endif
+
+#ifdef UNICODE
+	char* Out = WaveToChar(WinPath);
+	strcpy(Path, Out);
+#endif 
 
 	return Ret;
 }
 
 int32_t WaveSaveFileDialog(char* Path, const char* FileExtensions)
 {
+	OPENFILENAME OFN;
+
+	ZeroMemory(&OFN, sizeof(OPENFILENAME));
+
+#ifdef UNICODE
+	WCHAR WinPath[WAVE_MAX_LENGTH];
+	OFN.lpstrFile = WinPath;
+	OFN.lpstrFilter = WaveToLPWSTR(FileExtensions);
+
+#else
+	OFN.lpstrFile = Path;
+	OFN.lpstrFilter = FileExtensions;
+
+#endif 
+
+	OFN.lStructSize = sizeof(OPENFILENAME);
+	OFN.hwndOwner = WaveHwnd;
+	OFN.lpstrFile[0] = '\0';
+	OFN.nMaxFile = WAVE_MAX_LENGTH;
+	OFN.nFilterIndex = 1;
+	OFN.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	GetCurrentDirectory(WAVE_MAX_LENGTH, LastPath);
+	int32_t Ret = GetSaveFileName(&OFN);
+
+#ifdef WAVE_AUTO_PATH_RESET
+	SetCurrentDirectory(CurrentPath);
+#endif
+
+#ifdef UNICODE
+	char* Out = WaveToChar(WinPath);
+	strcpy(Path, Out);
+#endif 
+	/*
+
 	OPENFILENAME ofn;
 
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));
-
+	
+	WCHAR WinPath[WAVE_MAX_LENGTH];
 	ofn.lStructSize = sizeof(OPENFILENAME);
 	ofn.hwndOwner = WaveHwnd;
-	ofn.lpstrFile = Path;
+	ofn.lpstrFile = WinPath;
 	ofn.lpstrFile[0] = '\0';
 	ofn.nMaxFile = 1000;
-	ofn.lpstrFilter = FileExtensions;
+	ofn.lpstrFilter = WaveToLPWSTR(FileExtensions);
 	ofn.nFilterIndex = 1;
-
 	
-	GetCurrentDirectory(4096, LastPath);
+	GetCurrentDirectory(WAVE_MAX_LENGTH, WaveToLPWSTR(LastPath));
 	int32_t Ret = GetSaveFileName(&ofn);
 //	SetCurrentDirectory(CurrentPath);
 
+	char* Out = WaveToChar(WinPath);
+	strcpy(Path, Out);
+	*/
 	return Ret;
 }
 
@@ -72,8 +163,20 @@ void WaveResetToLastPath()
 	SetCurrentDirectory(LastPath);
 }
 
+void WaveSetPath(char* Path)
+{
+#ifdef UNICODE
+	SetCurrentDirectory(WaveToLPWSTR(Path));
+
+#else
+	printf("Path: %s\n", Path);
+	SetCurrentDirectory(Path);
+#endif 
+	
+}
+
 #elif __linux__
-int32_t WaveOpenFileDialog(char* Path, const char* FileExtensions)
+int32_t WaveOpenFileDialog(char* Path, int MultiSelect, unsigned short* Offset, const char* FileExtensions)
 {
 	const char ZenityPath[] = "/usr/bin/zenity";
   
@@ -83,7 +186,7 @@ int32_t WaveOpenFileDialog(char* Path, const char* FileExtensions)
 	if (!File)
 		return 0;
 
-	fgets(Path, 4096, File); 
+	fgets(Path, WAVE_MAX_LENGTH, File);
 
 	pclose(File);
 

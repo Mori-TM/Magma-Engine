@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#define CMA_BLOCK_SIZE 128
+#define CMA_BLOCK_SIZE 64
 #define CMA_MAX_GARBAGE_COUNT 4
 
 typedef enum
@@ -61,6 +61,7 @@ void CMA_Destroy(CMA_MemoryZone* Zone)
 	}
 	free(Zone->Mem);
 	Zone->Mem = NULL;
+	Zone->MemSize = 0;
 	Zone->Size = 0;
 	Zone->AllocateSize = 0;
 	Zone->GarbageCount = 0;
@@ -110,8 +111,8 @@ size_t CMA_Push(CMA_MemoryZone* Zone, void* Data)
 		memcpy(Zone->Mem[Zone->Size].Data, Data, Zone->MemSize);
 	}
 
-	Zone->Size++;
-	return Zone->Size - 1;
+	//changed
+	return Zone->Size++;
 }
 
 size_t CMA_GetSize(CMA_MemoryZone* Zone)

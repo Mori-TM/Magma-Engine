@@ -43,5 +43,6 @@ include_directories(/usr/local/include ${LUA_INCLUDE_DIR} libs/ImGui/src)
 add_executable(Magma ${SOURCE_FILES} ${HEADER_FILES})
 
 add_subdirectory(libs/ImGui)
+add_subdirectory(libs/Wave)
 
-target_link_libraries(Magma ${LUA_LIBRARIES})
+target_link_libraries(Magma libWave ${LUA_LIBRARIES})

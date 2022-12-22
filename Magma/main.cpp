@@ -29,13 +29,18 @@ extern "C"
 #include "../libs/ImGui/src/imgui_impl_sdl.cpp"
 #include "../libs/ImGui/src/imgui_impl_vulkan.h"
 
+#ifdef _WIN32
 #include <Wave/WaveMath.h>
 #include <Wave/WaveLoader.h>
 #include <Wave/WaveAudio.h>
 #include <Wave/WaveLayer.h>
 #include <Wave/WavePhysics.h>
+#endif
 
+#ifdef _WIN32
 #include <OpenVK/OpenVK.h>
+#endif
+
 
 #include "Helper.h"
 #include "Renderer/Renderer.h"

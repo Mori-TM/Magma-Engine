@@ -1,0 +1,6 @@
+[submodule "libs/ImGui"]
+	path = libs/ImGui
+	url = https://github.com/MolassesLover/ImGui.git
+[submodule "libs/Wave"]
+	path = libs/Wave
+	url = https://github.com/MolassesLover/Wave.git

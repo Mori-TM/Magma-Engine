@@ -1,12 +1,10 @@
-typedef struct
-{
-	vec3 Pos;
-	vec3 Color;
+typedef struct {
+    vec3 Pos;
+    vec3 Color;
 } DebugVertex;
 
-typedef struct
-{
-	mat4 PVM;
+typedef struct {
+    mat4 PVM;
 } DebugVertexPushConstant;
 
 uint32_t DebugPipelineThinLine;

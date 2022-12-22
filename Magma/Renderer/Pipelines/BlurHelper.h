@@ -1,8 +1,7 @@
-typedef struct
-{
-	uint32_t Horizontal;
-	float BlurScale;
-	float BlurStrength;
+typedef struct {
+    uint32_t Horizontal;
+    float BlurScale;
+    float BlurStrength;
 } BlurFragmentPushConstant;
 
 uint32_t BlurPipeline;

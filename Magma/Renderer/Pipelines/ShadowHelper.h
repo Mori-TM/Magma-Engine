@@ -1,17 +1,15 @@
-typedef struct
-{
-	mat4 PVM;
+typedef struct {
+    mat4 PVM;
 } ShadowVertexPushConstant;
 
-typedef struct
-{
-	float SplitDepth;
-	mat4 ProjectionView;
+typedef struct {
+    float SplitDepth;
+    mat4 ProjectionView;
 } Cascade;
 
 #define SHADOW_MAP_CASCADE_COUNT 3
-#define SHADOW_MAP_WIDTH 4096 * 3
-#define SHADOW_MAP_HEIGHT 4096
+#define SHADOW_MAP_WIDTH         4096 * 3
+#define SHADOW_MAP_HEIGHT        4096
 
 bool ShadowBackfaceCulling = true;
 uint32_t ShadowPipelineNoneCull;

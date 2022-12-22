@@ -1,7 +1,6 @@
-typedef struct
-{
-	vec2 Pos;
-	vec2 TexCoord;
+typedef struct {
+    vec2 Pos;
+    vec2 TexCoord;
 } QuadVertex;
 
 uint32_t SwapChain;

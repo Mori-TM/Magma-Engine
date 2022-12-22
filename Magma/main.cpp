@@ -45,8 +45,7 @@ extern "C"
 #include "Helper.h"
 #include "Renderer/Renderer.h"
 
-int32_t main(int32_t argc, char** argv)
-{
+int32_t main(int32_t argc, char **argv) {
 //	//C:/Users/Moritz Desktop/source/repos/Vulkan C99/Vulkan C99/Cube.dae
 ////	WaveLoadModel("C:/Users/Moritz Desktop/source/repos/Vulkan C99/Vulkan C99/Cube.dae", 0);
 //	uint32_t BeginTime = SDL_GetTicks();
@@ -57,16 +56,16 @@ int32_t main(int32_t argc, char** argv)
 //	printf("Vertices: %d\n", Data.VertexCount);
 //
 //	return 22;
-	
+
 //	uint32_t BeginTime = SDL_GetTicks();
 //	WaveModelData Data = WaveLoadModel("C:/Users/Moritz Desktop/source/repos/Vulkan C99/Vulkan C99/cessna.stl", 0);
 //	uint32_t EndTime = SDL_GetTicks();
 //	printf("Loading time: %d\n", EndTime - BeginTime);
 //	printf("Vertices: %d\n", Data.VertexCount);
-//	
+//
 //		return 22;
-	
-//	char* s1 = (char*)"1/2/3";  
+
+//	char* s1 = (char*)"1/2/3";
 //	char* s2 = WaveStrtok(s1, '/');
 //	char* s3 = WaveStrtok(s2, '/');
 //
@@ -74,47 +73,44 @@ int32_t main(int32_t argc, char** argv)
 //	return 0;
 
 #ifdef _WIN32
-	system("GLSLCompiler.bat");
+    system("GLSLCompiler.bat");
 #endif
 #ifdef __linux__
-	system("clear");
-	system("./GLSLCompiler.sh");
+    system("clear");
+    system("./GLSLCompiler.sh");
 #endif
-	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_TIMER);
-	Window = SDL_CreateWindow("Magma Engine v5 ImGui " IMGUI_VERSION, 0, 30, WindowWidth, WindowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN | SDL_WINDOW_MAXIMIZED);
-	SDL_SetWindowMinimumSize(Window, 800, 540);
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_TIMER);
+    Window = SDL_CreateWindow("Magma Engine v5 ImGui " IMGUI_VERSION, 0, 30, WindowWidth, WindowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN | SDL_WINDOW_MAXIMIZED);
+    SDL_SetWindowMinimumSize(Window, 800, 540);
 
 #ifdef _WIN32
-	SDL_SysWMinfo WmInfo;
-	SDL_VERSION(&WmInfo.version);
-	SDL_GetWindowWMInfo(Window, &WmInfo);
-	WaveHwnd = WmInfo.info.win.window;
-#endif	
+    SDL_SysWMinfo WmInfo;
+    SDL_VERSION(&WmInfo.version);
+    SDL_GetWindowWMInfo(Window, &WmInfo);
+    WaveHwnd = WmInfo.info.win.window;
+#endif
 
-	CreateRenderer();
+    CreateRenderer();
 
-	while (1)
-	{
-		while (SDL_PollEvent(&Event))
-		{
-			RendererEvent();
+    while (1) {
+        while (SDL_PollEvent(&Event)) {
+            RendererEvent();
 
-			if (Event.type == SDL_QUIT)
-			{
-				DestroyRenderer();
-				SDL_DestroyWindow(Window);
-				SDL_Quit();
-				printf("%f\n", WaveGetUsedMemory() * 0.000001);
-				return 1;
-			}
-		}			
+            if (Event.type == SDL_QUIT) {
+                DestroyRenderer();
+                SDL_DestroyWindow(Window);
+                SDL_Quit();
+                printf("%f\n", WaveGetUsedMemory() * 0.000001);
+                return 1;
+            }
+        }
 
-		RendererRender();
-	}
+        RendererRender();
+    }
 
-	DestroyRenderer();
-	SDL_DestroyWindow(Window);
-	SDL_Quit();
+    DestroyRenderer();
+    SDL_DestroyWindow(Window);
+    SDL_Quit();
 
-	return 0;
+    return 0;
 }

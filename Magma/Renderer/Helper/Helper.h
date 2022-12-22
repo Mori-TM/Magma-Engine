@@ -14,28 +14,26 @@ double ShadowRenderingTime = 0;
 double SceneRenderingTime = 0;
 double SwapChainRenderingTime = 0;
 
-const char** GetExtensions(uint32_t* ExtensionCount)
-{
-	SDL_Vulkan_GetInstanceExtensions(Window, ExtensionCount, NULL);
-	const char** Extensions = (const char**)malloc(*ExtensionCount * sizeof(char*));
-	SDL_Vulkan_GetInstanceExtensions(Window, ExtensionCount, Extensions);
-	return Extensions;
+const char ** GetExtensions(uint32_t *ExtensionCount) {
+    SDL_Vulkan_GetInstanceExtensions(Window, ExtensionCount, NULL);
+    const char **Extensions = (const char **)malloc(*ExtensionCount * sizeof(char *));
+    SDL_Vulkan_GetInstanceExtensions(Window, ExtensionCount, Extensions);
+    return Extensions;
 }
 
-VkSurfaceKHR GetSurface(VkInstance* Instance)
-{
-	VkSurfaceKHR Surface;
-	SDL_Vulkan_CreateSurface(Window, *Instance, &Surface);
-	return Surface;
+VkSurfaceKHR GetSurface(VkInstance *Instance) {
+    VkSurfaceKHR Surface;
+
+    SDL_Vulkan_CreateSurface(Window, *Instance, &Surface);
+    return Surface;
 }
 
-void GetWindowSize(uint32_t* Width, uint32_t* Height)
-{
-	SDL_GetWindowSize(Window, (int*)Width, (int*)Height);
+void GetWindowSize(uint32_t *Width, uint32_t *Height) {
+    SDL_GetWindowSize(Window, (int *)Width, (int *)Height);
 }
 
-VkDescriptorSet* GetDescriptorSet(uint32_t DescriptorSet)
-{
-	VkDescriptorSetInfo* DescriptorSetInfo = (VkDescriptorSetInfo*)CMA_GetAt(&VkRenderer.DescriptorSets, DescriptorSet);
-	return DescriptorSetInfo->DescriptorSets;
+VkDescriptorSet * GetDescriptorSet(uint32_t DescriptorSet) {
+    VkDescriptorSetInfo *DescriptorSetInfo = (VkDescriptorSetInfo *)CMA_GetAt(&VkRenderer.DescriptorSets, DescriptorSet);
+
+    return DescriptorSetInfo->DescriptorSets;
 }

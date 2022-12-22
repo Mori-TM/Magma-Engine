@@ -18,36 +18,34 @@ uint32_t SphereIndexBuffer;
 uint32_t BeanVertexBuffer;
 uint32_t BeanIndexBuffer;
 
-void CreateBuffers()
-{	
-	QuadVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(QuadVertices) * sizeof(QuadVertex), QuadVertices);
-	QuadIndexBuffer = OpenVkCreateIndexBuffer(ARRAY_SIZE(QuadIndices) * sizeof(uint32_t), QuadIndices);
+void CreateBuffers() {
+    QuadVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(QuadVertices) * sizeof(QuadVertex), QuadVertices);
+    QuadIndexBuffer = OpenVkCreateIndexBuffer(ARRAY_SIZE(QuadIndices) * sizeof(uint32_t), QuadIndices);
 
-	GridVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(GridVertices) * sizeof(DebugVertex), GridVertices);
-	DirectionVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(DirectionVertices) * sizeof(DebugVertex), DirectionVertices);
-	CameraVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(CameraVertices) * sizeof(DebugVertex), CameraVertices);
-	CameraIndexBuffer = OpenVkCreateIndexBuffer(ARRAY_SIZE(CameraIndices) * sizeof(uint32_t), CameraIndices);
-	
-	CubeVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(CubeVertices) * sizeof(SceneVertex), CubeVertices);
+    GridVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(GridVertices) * sizeof(DebugVertex), GridVertices);
+    DirectionVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(DirectionVertices) * sizeof(DebugVertex), DirectionVertices);
+    CameraVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(CameraVertices) * sizeof(DebugVertex), CameraVertices);
+    CameraIndexBuffer = OpenVkCreateIndexBuffer(ARRAY_SIZE(CameraIndices) * sizeof(uint32_t), CameraIndices);
 
-	PlaneVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(PlaneVertices) * sizeof(SceneVertex), PlaneVertices);
-	PlaneIndexBuffer = OpenVkCreateIndexBuffer(ARRAY_SIZE(PlaneIndices) * sizeof(uint32_t), PlaneIndices);
+    CubeVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(CubeVertices) * sizeof(SceneVertex), CubeVertices);
 
-	CreateSphere(24, 24);
-	
-	SphereVertexBuffer = OpenVkCreateVertexBuffer(SphereVertexCount * sizeof(SceneVertex), SphereVertices);
-	SphereIndexBuffer = OpenVkCreateIndexBuffer(SphereIndexCount * sizeof(uint32_t), SphereIndices);
+    PlaneVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(PlaneVertices) * sizeof(SceneVertex), PlaneVertices);
+    PlaneIndexBuffer = OpenVkCreateIndexBuffer(ARRAY_SIZE(PlaneIndices) * sizeof(uint32_t), PlaneIndices);
 
-	CreateBean(24, 24);
+    CreateSphere(24, 24);
 
-	BeanVertexBuffer = OpenVkCreateVertexBuffer(BeanVertexCount * sizeof(SceneVertex), BeanVertices);
-	BeanIndexBuffer = OpenVkCreateIndexBuffer(BeanIndexCount * sizeof(uint32_t), BeanIndices);
+    SphereVertexBuffer = OpenVkCreateVertexBuffer(SphereVertexCount * sizeof(SceneVertex), SphereVertices);
+    SphereIndexBuffer = OpenVkCreateIndexBuffer(SphereIndexCount * sizeof(uint32_t), SphereIndices);
+
+    CreateBean(24, 24);
+
+    BeanVertexBuffer = OpenVkCreateVertexBuffer(BeanVertexCount * sizeof(SceneVertex), BeanVertices);
+    BeanIndexBuffer = OpenVkCreateIndexBuffer(BeanIndexCount * sizeof(uint32_t), BeanIndices);
 }
 
-void DestroyBuffers()
-{
-	free(SphereVertices);
-	free(SphereIndices);
-	free(BeanVertices);
-	free(BeanIndices);
+void DestroyBuffers() {
+    free(SphereVertices);
+    free(SphereIndices);
+    free(BeanVertices);
+    free(BeanIndices);
 }

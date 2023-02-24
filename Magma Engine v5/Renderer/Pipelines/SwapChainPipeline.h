@@ -1,20 +1,35 @@
 void CreateSwapChainRenderPass()
 {
-	SwapChainRenderPass = OpenVkCreateRenderPass(1, false, false, 1, false);
+	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR };
+	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_DEFAULT };
+	uint32_t MsaaSamples[] = { 1 };
+	SwapChainRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, NULL, OpenVkFalse);
+
+//	uint32_t ColorFormats[] = { OPENVK_FORMAT_DEFAULT };
+//	SwapChainRenderPass = OpenVkCreateRenderPass(1, ColorFormats, false, 0, false, 1, false);
+}
+
+void CreateSwapChainLayout()
+{
+	OpenVkPipelineLayoutCreateInfo Layout;
+	Layout.PushConstantCount = 0;
+	Layout.PushConstantShaderTypes = NULL;
+	Layout.PushConstantOffsets = NULL;
+	Layout.PushConstantSizes = NULL;
+	Layout.DescriptorSetLayoutCount = 1;
+	Layout.DescriptorSetLayouts = &TextureDescriptorSetLayout;
+	SwapChainLayout = OpenVkCreatePipelineLayout(&Layout);
 }
 
 void CreateSwapChainPipeline()
 {
-	uint32_t ShaderAttributeFormats[] = { 2, 2 };
-	uint32_t ShaderAttributeOffsets[] = { 0, 8 };
-
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
-	GraphicsPipelineCreateInfo.VertexPath = "Data/Shader/SwapChainVertex.spv";
-	GraphicsPipelineCreateInfo.FragmentPath = "Data/Shader/SwapChainFragment.spv";
-	GraphicsPipelineCreateInfo.BindingStride = sizeof(QuadVertex);
-	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 2;
-	GraphicsPipelineCreateInfo.ShaderAttributeFormats = ShaderAttributeFormats;
-	GraphicsPipelineCreateInfo.ShaderAttributeOffsets = ShaderAttributeOffsets;
+	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/OffscreenVertex.spv");
+	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/SwapChainFragment.spv");
+	GraphicsPipelineCreateInfo.BindingStride = 0;
+	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 0;
+	GraphicsPipelineCreateInfo.ShaderAttributeFormats = NULL;
+	GraphicsPipelineCreateInfo.ShaderAttributeOffsets = NULL;
 	GraphicsPipelineCreateInfo.PrimitiveTopology = OPENVK_PRIMITIVE_TOPOLOGY_TRIANGLE;
 	GraphicsPipelineCreateInfo.x = 0;
 	GraphicsPipelineCreateInfo.y = 0;
@@ -28,12 +43,7 @@ void CreateSwapChainPipeline()
 	GraphicsPipelineCreateInfo.MsaaSamples = 1;
 	GraphicsPipelineCreateInfo.AlphaBlending = false;
 	GraphicsPipelineCreateInfo.ColorBlendAttachments = 1;
-	GraphicsPipelineCreateInfo.PushConstantCount = 0;
-	GraphicsPipelineCreateInfo.PushConstantShaderTypes = NULL;
-	GraphicsPipelineCreateInfo.PushConstantOffsets = NULL;
-	GraphicsPipelineCreateInfo.PushConstantSizes = NULL;
-	GraphicsPipelineCreateInfo.DescriptorSetLayoutCount = 1;
-	GraphicsPipelineCreateInfo.DescriptorSetLayouts = &TextureDescriptorSetLayout;
+	GraphicsPipelineCreateInfo.PipelineLayout = SwapChainLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = false;
 	GraphicsPipelineCreateInfo.RenderPass = SwapChainRenderPass;
 
@@ -56,9 +66,9 @@ void CreateSwapChainFramebuffer()
 void SwapChainDraw()
 {
 	OpenVkBeginRenderPassInfo BeginInfo;
-	BeginInfo.ClearColor[0] = 0.0;
-	BeginInfo.ClearColor[1] = 0.0;
-	BeginInfo.ClearColor[2] = 0.0;
+	BeginInfo.ClearColor[0] = 0.4;
+	BeginInfo.ClearColor[1] = 0.4;
+	BeginInfo.ClearColor[2] = 0.4;
 	BeginInfo.ClearColor[3] = 1.0;
 	BeginInfo.ClearColors = 1;
 	BeginInfo.ClearDepth = false;
@@ -70,26 +80,68 @@ void SwapChainDraw()
 	BeginInfo.Height = WindowHeight;
 	OpenVkBeginRenderPass(&BeginInfo);
 	{
-		OpenVkSetScissor(0, 0, WindowWidth, WindowHeight);
-		OpenVkSetViewport(0, 0, WindowWidth, WindowHeight);
-
-	//	OpenVkBindGraphicsPipeline(SwapChainPipeline);
+	//	OpenVkSetScissor(0, 0, WindowWidth, WindowHeight);
+	//	OpenVkSetViewport(0, 0, WindowWidth, WindowHeight);
 	//
-	//	OpenVkBindDescriptorSet(SwapChainPipeline, 0, SceneDescriptorSet);
-	//	OpenVkBindIndexBuffer(QuadVertexBuffer, QuadIndexBuffer);
-	//	OpenVkDrawIndices(ARRAY_SIZE(QuadIndices));
-		
+	//	OpenVkBindPipeline(SwapChainPipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
+	//	OpenVkBindDescriptorSet(SwapChainLayout, 0, SSRDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+	//	OpenVkDrawVertices(3);
+	
 	 	EngineDrawEditor();
 		ImGui::ShowDemoWindow();
-
+	
 		ImGui::Render();
-
+	
 		ImTextureID NonAlphaTextures[1] =
 		{
-			(ImTextureID*)&GetDescriptorSet(SceneDescriptorSet)[VkRenderer.CurrentFrame]
+			(ImTextureID*)&GetDescriptorSet(SSRDescriptorSet)[VkRenderer.CurrentFrame]
 		};
-
+	
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), VkRenderer.CommandBuffers[VkRenderer.ImageIndex], 1, NonAlphaTextures);
+		
+		OpenVkGUIBeginRender(WindowWidth, WindowHeight);
+		{
+			char String[2048];
+			sprintf(String, "FPS: %f\nMS: %f", FPS, MS);
+			OpenVkGUITextPos(String, ImGuiScenePosX + 20, ImGuiScenePosY + 20, 0, 0);
+			
+		//	OpenVkGUIBegin("OpenVk Window");
+		//	{
+		//		static OpenVkBool Selected = OpenVkTrue;
+		//		if (!OpenVkGUICheckbox("Rounding", &Selected))
+		//			OpenVkGUI.Rounding = 0.0;
+		//
+		//		static OpenVkBool Selected2 = OpenVkFalse;
+		//		OpenVkGUICheckbox("Check Box 2", &Selected2);
+		//
+		//		OpenVkGUIButton("Button");
+		//		OpenVkGUIText(String);				
+		//		OpenVkGUIButton("Button2");
+		//	//	static float Border = 13.2;
+		//	//	OpenVkGUISlider("Border Size", 0.0, 80.0, &Border);				
+		//	//	OpenVkGUI.Border = Border;
+		//
+		//		OpenVkGUISlider("Rounding", 0.0, 100.0, &OpenVkGUI.Rounding);
+		//		OpenVkGUISlider("Window Color", 0.0, 1.0, &OpenVkGUI.WindowColor);
+		//		OpenVkGUISlider("Color", 0.0, 1.0, &OpenVkGUI.Color);
+		//		OpenVkGUISlider("Color Selected", 0.0, 1.0, &OpenVkGUI.ColorSelected);
+		//		OpenVkGUISlider("Color Hovered", 0.0, 1.0, &OpenVkGUI.ColorHovered);
+		//		float Offset = OpenVkGUI.Offset;
+		//		OpenVkGUISlider("Offset Size", 0.0, 30.0, &Offset);
+		//		OpenVkGUI.Offset = Offset;
+		//
+		//		OpenVkGUIText("Some Text\nMultiline Text");
+		//	}
+		//	OpenVkGUIEnd();
+			
+		//	OpenVkGUIBegin("Another Window");
+		//	{
+		//
+		//	}
+		//	OpenVkGUIEnd();
+		}
+		OpenVkGUIEndRender();
+		
 	}
 	OpenVkEndRenderPass();
 }

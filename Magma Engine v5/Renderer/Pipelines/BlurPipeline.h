@@ -1,26 +1,39 @@
 void CreateBlurRenderPass()
 {
-	BlurColorAttachments[0] = OpenVkCreateColorImageAttachment(BLUR_PASS_SIZE, BLUR_PASS_SIZE, 1, true);
-	BlurColorAttachments[1] = OpenVkCreateColorImageAttachment(BLUR_PASS_SIZE, BLUR_PASS_SIZE, 1, true);
-	BlurRenderPass = OpenVkCreateRenderPass(1, false, false, 1, true);
+	BlurColorAttachments[0] = OpenVkCreateColorImageAttachment(BLUR_PASS_SIZE, BLUR_PASS_SIZE, 1, true, OPENVK_FORMAT_DEFAULT);
+	BlurColorAttachments[1] = OpenVkCreateColorImageAttachment(BLUR_PASS_SIZE, BLUR_PASS_SIZE, 1, true, OPENVK_FORMAT_DEFAULT);
+
+	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR };
+	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_DEFAULT };
+	uint32_t MsaaSamples[] = { 1 };
+	BlurRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, NULL, true);
 }
 
-void CreateBlurPipeline()
+void CreateBlurLayout()
 {
-	uint32_t ShaderAttributeFormats[] = { 2, 2 };
-	uint32_t ShaderAttributeOffsets[] = { 0, 8 };
-
 	uint32_t PushTypes[] = { OPENVK_SHADER_TYPE_FRAGMENT };
 	uint32_t PushOffsets[] = { 0 };
 	uint32_t PushSizes[] = { sizeof(BlurFragmentPushConstant) };
 
+	OpenVkPipelineLayoutCreateInfo Layout;
+	Layout.PushConstantCount = 1;
+	Layout.PushConstantShaderTypes = PushTypes;
+	Layout.PushConstantOffsets = PushOffsets;
+	Layout.PushConstantSizes = PushSizes;
+	Layout.DescriptorSetLayoutCount = 1;
+	Layout.DescriptorSetLayouts = &TextureDescriptorSetLayout;
+	BlurLayout = OpenVkCreatePipelineLayout(&Layout);
+}
+
+void CreateBlurPipeline()
+{
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
-	GraphicsPipelineCreateInfo.VertexPath = "Data/Shader/BlurVertex.spv";
-	GraphicsPipelineCreateInfo.FragmentPath = "Data/Shader/BlurFragment.spv";
-	GraphicsPipelineCreateInfo.BindingStride = sizeof(QuadVertex);
-	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 2;
-	GraphicsPipelineCreateInfo.ShaderAttributeFormats = ShaderAttributeFormats;
-	GraphicsPipelineCreateInfo.ShaderAttributeOffsets = ShaderAttributeOffsets;
+	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/OffscreenVertex.spv");
+	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/BlurFragment.spv");
+	GraphicsPipelineCreateInfo.BindingStride = 0;
+	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 0;
+	GraphicsPipelineCreateInfo.ShaderAttributeFormats = NULL;
+	GraphicsPipelineCreateInfo.ShaderAttributeOffsets = NULL;
 	GraphicsPipelineCreateInfo.PrimitiveTopology = OPENVK_PRIMITIVE_TOPOLOGY_TRIANGLE;
 	GraphicsPipelineCreateInfo.x = 0;
 	GraphicsPipelineCreateInfo.y = 0;
@@ -34,12 +47,7 @@ void CreateBlurPipeline()
 	GraphicsPipelineCreateInfo.MsaaSamples = 1;
 	GraphicsPipelineCreateInfo.AlphaBlending = true;
 	GraphicsPipelineCreateInfo.ColorBlendAttachments = 1;
-	GraphicsPipelineCreateInfo.PushConstantCount = 1;
-	GraphicsPipelineCreateInfo.PushConstantShaderTypes = PushTypes;
-	GraphicsPipelineCreateInfo.PushConstantOffsets = PushOffsets;
-	GraphicsPipelineCreateInfo.PushConstantSizes = PushSizes;
-	GraphicsPipelineCreateInfo.DescriptorSetLayoutCount = 1;
-	GraphicsPipelineCreateInfo.DescriptorSetLayouts = &TextureDescriptorSetLayout;
+	GraphicsPipelineCreateInfo.PipelineLayout = BlurLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = false;
 	GraphicsPipelineCreateInfo.RenderPass = BlurRenderPass;
 
@@ -83,6 +91,7 @@ void CreateBlurDescriptorSets()
 		DescriptorSetCreateInfo.Images = &BlurColorAttachments[i];
 		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
 		DescriptorSetCreateInfo.Bindings = Bindings;
+		DescriptorSetCreateInfo.DescriptorSet = NULL;
 
 		BlurDescriptorSets[i] = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}
@@ -110,22 +119,21 @@ uint32_t BlurDraw(uint32_t DescriptorSet, float BlurScale, float BlurStrength)
 		BeginInfo.Height = BLUR_PASS_SIZE;
 		OpenVkBeginRenderPass(&BeginInfo);
 		{
-			OpenVkBindGraphicsPipeline(BlurPipeline);
+			OpenVkBindPipeline(BlurPipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 			
 			if (i == 1)
 			{
-				OpenVkBindDescriptorSet(BlurPipeline, 0, BlurDescriptorSets[0]);
+				OpenVkBindDescriptorSet(BlurLayout, 0, BlurDescriptorSets[0], OPENVK_PIPELINE_TYPE_GRAPHICS);
 			}
 			else
-				OpenVkBindDescriptorSet(BlurPipeline, 0, DescriptorSet);
+				OpenVkBindDescriptorSet(BlurLayout, 0, DescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 			
 			BlurFragmentPc.Horizontal = i;
 			BlurFragmentPc.BlurScale = BlurScale;
 			BlurFragmentPc.BlurStrength = BlurStrength;
-			OpenVkPushConstant(BlurPipeline, OPENVK_SHADER_TYPE_FRAGMENT, 0, sizeof(BlurFragmentPushConstant), &BlurFragmentPc);
+			OpenVkPushConstant(BlurLayout, OPENVK_SHADER_TYPE_FRAGMENT, 0, sizeof(BlurFragmentPushConstant), &BlurFragmentPc);
 
-			OpenVkBindIndexBuffer(QuadVertexBuffer, QuadIndexBuffer);
-			OpenVkDrawIndices(ARRAY_SIZE(QuadIndices));
+			OpenVkDrawVertices(3);
 		}
 		OpenVkEndRenderPass();
 	}

@@ -1,6 +1,7 @@
 #include "Pipelines/DebugHelper.h"
 #include "Pipelines/ShadowHelper.h"
 #include "Pipelines/BlurHelper.h"
+#include "Pipelines/SSRHelper.h"
 #include "Pipelines/SceneHelper.h"
 #include "Pipelines/SwapChainHelper.h"
 
@@ -12,35 +13,50 @@
 #include "Helper/Sampler.h"
 #include "Helper/ImGuiHelper.h"
 
-#include "Editor/Helper.h"
-#include "Editor/Camera.h"
-#include "Editor/SceneManager.h"
-#include "Editor/AssetBrowser.h"
-#include "Editor/EntityManager.h"
-#include "Editor/Inspector.h"
-#include "Editor/ScriptEngine.h"
-#include "Editor/Editor.h"
+#include "../Editor/Helper.h"
+#include "../Editor/Camera.h"
+#include "../Editor/SceneManager.h"
+#include "../Editor/AssetBrowser.h"
+#include "../Editor/EntityManager.h"
+#include "../Editor/Inspector.h"
+#include "../Editor/ScriptEngine.h"
+#include "../Editor/Editor.h"
 
 #include "Pipelines/BlurPipeline.h"
 #include "Pipelines/DebugPipeline.h"
 #include "Pipelines/ShadowPipeline.h"
 #include "Pipelines/ScenePipeline.h"
+#include "Pipelines/SSRPipeline.h"
 #include "Pipelines/SwapChainPipeline.h"
 
 void CreateRenderPasses()
 {
 	CreateBlurRenderPass();
+//	exit(0);
 	CreateShadowRenderPass();
 	CreateSceneRenderPass();
+	CreateSSRRenderPass();
 	CreateSwapChainRenderPass();
+}
+
+void CreatePipelineLayouts()
+{
+	CreateBlurLayout();
+	CreateDebugLayout();
+	CreateShadowLayout();
+	CreateSceneLayout();
+	CreateSSRLayout();
+	CreateSwapChainLayout();
 }
 
 void CreateGraphicsPipelines()
 {
 	CreateBlurPipeline();
-	CreateDebugPipeline();
-	CreateShadowPipeline();
+	CreateDebugPipeline();	
+	CreateShadowPipeline();	
 	CreateScenePipeline();
+	CreateSSRPipeline();
+//	exit(0);
 	CreateSwapChainPipeline();
 }
 
@@ -49,6 +65,7 @@ void CreateFramebuffers()
 	CreateBlurFramebuffers();
 	CreateShadowFramebuffers();
 	CreateSceneFramebuffer();
+	CreateSSRFramebuffer();
 	CreateSwapChainFramebuffer();
 }
 
@@ -56,23 +73,35 @@ void CreateDescriptors()
 {
 	CreateDescriptorPool();
 	CreateBlurDescriptorSets();
+	CreateSSRDescriptorSet();
 	CreateSceneDescriptorSets();
+//	exit(0);
+//	exit(0);
 }
 
 void CreateRenderer()
 {
-	SwapChain = OpenVkCreateRenderer(true, GetExtensions, GetSurface, GetWindowSize);
+	OpenVkInitThreads();
+	SwapChain = OpenVkCreateRenderer(OPENVK_VULKAN | OPENVK_VALIDATION_LAYER, GetExtensions, GetSurface, GetWindowSize);
 
 	CreateRenderPasses();
+	/*
+	* 80, "C:/Windows/Fonts/RAGE.TTF"
+	* 30, "Data/Fonts/Roboto-Medium.TTF"
+	*/
+	OpenVkGUIInit(WindowWidth, WindowHeight, SwapChainRenderPass, 1, 80, "C:/Windows/Fonts/RAGE.TTF", GetMousePos);
 	CreateDescriptorSetLayout();
+	CreatePipelineLayouts();
 	CreateGraphicsPipelines();
+	
 	CreateFramebuffers();
 
 	CreateImageSampler();
 	CreateBuffers();
 
 	CreateSceneUniformBuffer();
-
+	CreateSSRUniformBuffer();
+	
 	CreateImGuiDescriptorPool();
 	CreateDescriptors();
 
@@ -80,8 +109,6 @@ void CreateRenderer()
 	InitImGui();
 	InitFpsCamera();
 	EngineInitEditor();
-
-	SceneFragmentUBO.LightDirection = Vec4(0.426, -0.876, -0.225, 0.0);
 }
 
 void DestroyRenderer()
@@ -90,13 +117,20 @@ void DestroyRenderer()
 	DestroyScene();
 	EngineDestroyEditor();
 	DestroyBuffers();
+	OpenVkGUIDestroy();
 	OpenVkDestroyRenderer();
+	OpenVkFreeThreads();
 }
 
 void RendererUpdate()
 {
 	//	if (!IsEditorActive)
 	UpdateFpsCamera(&CameraPos, &CameraDir, &CameraUp);
+
+	if (SDL_GetKeyboardState(NULL)[SDL_SCANCODE_C])
+		CameraFOV = CameraZoomFOV;
+	else
+		CameraFOV = CameraNormalFOV;
 
 	SceneFragmentUBO.CameraPosition.x = CameraPos.x;
 	SceneFragmentUBO.CameraPosition.y = CameraPos.y;
@@ -106,17 +140,19 @@ void RendererUpdate()
 
 	UpdateCascades();
 	SceneUpdateUniformBuffer();
+	SSRUpdateUniform();	
 }
 
 void RendererDraw()
 {
-	OpenVkBegineFrame();
+	BeginFrameTime = GetExecutionTimeOpenVkBool(OpenVkBeginFrame);
 	{
 		ShadowRenderingTime = GetExecutionTime(ShadowDraw);
 		SceneRenderingTime = GetExecutionTime(SceneDraw);
+		SSRRenderingTime = GetExecutionTime(SSRDraw);
 		SwapChainRenderingTime = GetExecutionTime(SwapChainDraw);
 	}
-	OpenVkEndFrame();
+	EndFrameTime = GetExecutionTimeOpenVkBool(OpenVkEndFrame);
 }
 
 void RendererResize()
@@ -125,12 +161,19 @@ void RendererResize()
 
 	CreateRenderPasses();
 	CreateFramebuffers();
+	OpenVkDestroyDescriptorPool(DescriptorPool);
 	CreateDescriptors();
 }
 
 void RendererEvent()
 {
 	ImGuiEvent();
+
+	if (ForceFullScreenEvent || (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_F11))
+	{
+		ForceFullScreenEvent = false;
+		SDL_SetWindowFullscreen(Window, (FullScreen = !FullScreen) ? SDL_WINDOW_FULLSCREEN_DESKTOP : false);
+	}
 
 	if (Event.window.event == SDL_WINDOWEVENT_RESIZED || ForceResizeEvent)
 	{
@@ -141,13 +184,10 @@ void RendererEvent()
 		RendererResize();
 	}
 
-	if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_F11)
-		SDL_SetWindowFullscreen(Window, (FullScreen = !FullScreen) ? SDL_WINDOW_FULLSCREEN_DESKTOP : false);
-
 	if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_F12)
 	{
 		char Path[MAX_CHAR_PATH_LENGTH];
-		if (WaveOpenFileDialog(Path, "All Audios\0*.wav\0"))
+		if (WaveOpenFileDialog(Path, false, NULL, "All Audios\0*.wav\0"))
 		{
 			WaveAudio Audio = WaveLoadAudio(Path);
 			WavePlayAudio(&Audio, 1);
@@ -163,7 +203,7 @@ void DeleteMeshTexture(uint32_t TextureImage, uint32_t TextureIndex)
 		SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, TextureIndex);
 		if (Image != NULL && Image->TextureImage != 0 && Image->TextureSampler != 0)
 		{
-			OpenVkDestroyTextureImage(Image->TextureImage);
+			OpenVkDestroyImage(Image->TextureImage);
 			OpenVkDestroySampler(Image->TextureSampler);
 			CMA_Pop(&SceneTextures, TextureIndex);
 		}
@@ -172,40 +212,60 @@ void DeleteMeshTexture(uint32_t TextureImage, uint32_t TextureIndex)
 
 void RendererRender()
 {
+
+	if (ImGuiTexturesToDelete.size() != 0)
+	{
+		OpenVkDeviceWaitIdle();
+
+		for (size_t i = 0; i < ImGuiTexturesToDelete.size(); i++)
+		{
+			OpenVkFreeDescriptorSet(ImGuiDescriptorPool, ImGuiTexturesToDelete[i].DescriptorSet);
+			OpenVkDestroyImage(ImGuiTexturesToDelete[i].Image);
+			OpenVkDestroySampler(ImGuiTexturesToDelete[i].Sampler);
+			
+		}
+
+		ImGuiTexturesToDelete.clear();
+	}	
+
 	if (DeleteTexture)
 	{
 		DeleteTexture = false;
 
-		OpenVkDestroyTextureImage(TextureToDelete);
+		OpenVkDestroyImage(TextureToDelete);
 		OpenVkDestroySampler(SamplerToDelete);
 
 		RendererResize();
 	}
-	if (DeleteMesh)
+	if (DeleteMesh || DeleteMeshWithTextures)
 	{
-		DeleteMesh = false;
-
 		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshToDelete);
-		if (Mesh != NULL && Mesh->Freeable)
+		if (Mesh != NULL)
 		{
 			for (uint32_t i = 0; i < Mesh->MeshCount; i++)
 			{
-				SceneTextureImage* Albedo = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].AlbedoIndex);
-				SceneTextureImage* Normal = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].NormalIndex);
-				SceneTextureImage* Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].MetallicIndex);
-				SceneTextureImage* Roughness = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].RoughnessIndex);
-				SceneTextureImage* Occlusion = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].OcclusionIndex);
+				if (DeleteMeshWithTextures)
+				{
+					SceneTextureImage* Albedo = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].Material.AlbedoIndex);
+					SceneTextureImage* Normal = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].Material.NormalIndex);
+					SceneTextureImage* Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].Material.MetallicIndex);
+					SceneTextureImage* Roughness = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].Material.RoughnessIndex);
+					SceneTextureImage* Occlusion = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].Material.OcclusionIndex);
 
-				DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].AlbedoIndex);
-				DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].NormalIndex);
-				DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].MetallicIndex);
-				DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].RoughnessIndex);
-				DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].OcclusionIndex);
+					DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].Material.AlbedoIndex);
+					DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].Material.NormalIndex);
+					DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].Material.MetallicIndex);
+					DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].Material.RoughnessIndex);
+					DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].Material.OcclusionIndex);
+				}				
 
-				if (Mesh->MeshData[i].Vertices != NULL)
-					OpenVkDestroyBuffer(Mesh->MeshData[i].VertexBuffer);
-				if (Mesh->MeshData[i].Indices != NULL)
-					OpenVkDestroyBuffer(Mesh->MeshData[i].IndexBuffer);
+				if (Mesh->Freeable)
+				{
+					if (Mesh->MeshData[i].Vertices != NULL)
+						OpenVkDestroyBuffer(Mesh->MeshData[i].VertexBuffer);
+					if (Mesh->MeshData[i].Indices != NULL)
+						OpenVkDestroyBuffer(Mesh->MeshData[i].IndexBuffer);
+				}				
 			}
 		}
 
@@ -215,6 +275,9 @@ void RendererRender()
 			if (CMA_GetAt(&SceneMeshes, i) != NULL)
 				SelectedMesh = i;
 
+		DeleteMesh = false;
+		DeleteMeshWithTextures = false;
+
 		RendererResize();
 	}
 	if (ReloadShaders)
@@ -223,20 +286,23 @@ void RendererRender()
 
 		system("GLSLCompiler.bat");
 
-		vkDeviceWaitIdle(VkRenderer.Device);
+		OpenVkDeviceWaitIdle();
 
 		for (uint32_t i = 0; i < VkRenderer.PipelineCount; i++)
 		{
-			vkDestroyPipelineLayout(VkRenderer.Device, VkRenderer.PipelineLayouts[i], NULL);
-			vkDestroyPipeline(VkRenderer.Device, VkRenderer.Pipelines[i], NULL);
+		//	vkDestroyPipelineLayout(VkRenderer.Device, VkRenderer.PipelineLayouts[i], NULL);
+		//	if (i != OpenVkGUI.Pipeline)
+				vkDestroyPipeline(VkRenderer.Device, VkRenderer.Pipelines[i], NULL);
 		}
 
 		VkRenderer.PipelineCount = 0;
-
+		
+		OpenVkGUIRecreatePipeline();
 		CreateGraphicsPipelines();
 		RendererResize();
 	}
 
 	GetDeltaTime();
-	OpenVkDrawFrame(RendererDraw, RendererResize, RendererUpdate);
+//	OpenVkDrawFrame(RendererDraw, RendererResize, RendererUpdate);
+	FrameTime = GetExecutionTimeOpenVkRender(OpenVkDrawFrame, RendererDraw, RendererResize, RendererUpdate);
 }

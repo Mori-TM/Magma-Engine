@@ -1,21 +1,37 @@
 void CreateShadowRenderPass()
 {
-	ShadowDepthAttachment = OpenVkCreateDepthImageAttachment(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, 1, true);
-	ShadowRenderPass = OpenVkCreateRenderPass(0, true, false, 1, true);
+	ShadowDepthAttachment = OpenVkCreateDepthImageAttachment(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, 1, true, OPENVK_FORMAT_DEFAULT);
+
+	uint32_t Attachments[] = { OPENVK_ATTACHMENT_DEPTH };
+	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_DEFAULT };
+	uint32_t MsaaSamples[] = { 1 };
+	ShadowRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, NULL, true);
 }
 
-void CreateShadowPipeline()
+void CreateShadowLayout()
 {
-	uint32_t ShaderAttributeFormats[] = { 3, 2 };
-	uint32_t ShaderAttributeOffsets[] = { 0, 12 };
-
 	uint32_t PushTypes[] = { OPENVK_SHADER_TYPE_VERTEX };
 	uint32_t PushOffsets[] = { 0 };
 	uint32_t PushSizes[] = { sizeof(ShadowVertexPushConstant) };
 
+	OpenVkPipelineLayoutCreateInfo Layout;
+	Layout.PushConstantCount = 1;
+	Layout.PushConstantShaderTypes = PushTypes;
+	Layout.PushConstantOffsets = PushOffsets;
+	Layout.PushConstantSizes = PushSizes;
+	Layout.DescriptorSetLayoutCount = 1;
+	Layout.DescriptorSetLayouts = &TextureDescriptorSetLayout;
+	ShadowLayout = OpenVkCreatePipelineLayout(&Layout);
+}
+
+void CreateShadowPipeline()
+{
+	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGB32F, OPENVK_FORMAT_RG32F };
+	uint32_t ShaderAttributeOffsets[] = { 0, 12 };
+
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
-	GraphicsPipelineCreateInfo.VertexPath = "Data/Shader/ShadowVertex.spv";
-	GraphicsPipelineCreateInfo.FragmentPath = "Data/Shader/ShadowFragment.spv";
+	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/ShadowVertex.spv");
+	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/ShadowFragment.spv");
 	GraphicsPipelineCreateInfo.BindingStride = sizeof(SceneVertex);
 	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 2;
 	GraphicsPipelineCreateInfo.ShaderAttributeFormats = ShaderAttributeFormats;
@@ -33,18 +49,14 @@ void CreateShadowPipeline()
 	GraphicsPipelineCreateInfo.MsaaSamples = 1;
 	GraphicsPipelineCreateInfo.AlphaBlending = false;
 	GraphicsPipelineCreateInfo.ColorBlendAttachments = 0;
-	GraphicsPipelineCreateInfo.PushConstantCount = 0;
-	GraphicsPipelineCreateInfo.PushConstantCount = 1;
-	GraphicsPipelineCreateInfo.PushConstantShaderTypes = PushTypes;
-	GraphicsPipelineCreateInfo.PushConstantOffsets = PushOffsets;
-	GraphicsPipelineCreateInfo.PushConstantSizes = PushSizes;
-	GraphicsPipelineCreateInfo.DescriptorSetLayoutCount = 1;
-	GraphicsPipelineCreateInfo.DescriptorSetLayouts = &TextureDescriptorSetLayout;
+	GraphicsPipelineCreateInfo.PipelineLayout = ShadowLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = true;
 	GraphicsPipelineCreateInfo.RenderPass = ShadowRenderPass;
 	ShadowPipelineBackCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_NONE;
+	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/ShadowVertex.spv");
+	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/ShadowFragment.spv");
 	ShadowPipelineNoneCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 }
 
@@ -71,8 +83,8 @@ void UpdateCascades()
 
 	float Range = MaxZ - MinZ;
 	float Ratio = MaxZ / MinZ;
-	
-	for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++) 
+
+	for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
 	{
 		float p = (i + 1) / (float)SHADOW_MAP_CASCADE_COUNT;
 		float Log = MinZ * powf(Ratio, p);
@@ -90,7 +102,7 @@ void UpdateCascades()
 	{
 		float SplitDist = CascadeSplits[i];
 
-		vec3 FrustumCorners[8] = 
+		vec3 FrustumCorners[8] =
 		{
 			{ -1.0, 1.0, -1.0 },
 			{ 1.0, 1.0, -1.0 },
@@ -102,7 +114,7 @@ void UpdateCascades()
 			{ -1.0, -1.0, 1.0 },
 		};
 
-		for (uint32_t j = 0; j < 8; j++) 
+		for (uint32_t j = 0; j < 8; j++)
 		{
 			vec4 m = Vec4(FrustumCorners[j].x, FrustumCorners[j].y, FrustumCorners[j].z, 1.0f);
 			vec4 InvCorner = MultiplyVec4Mat4P(&m, &InvCam);
@@ -111,8 +123,8 @@ void UpdateCascades()
 			FrustumCorners[j].y = InvCorner.y / InvCorner.w;
 			FrustumCorners[j].z = InvCorner.z / InvCorner.w;
 		}
-		
-		for (uint32_t j = 0; j < 4; j++) 
+
+		for (uint32_t j = 0; j < 4; j++)
 		{
 			vec3 Dist = Sub3(FrustumCorners[j + 4], FrustumCorners[j]);
 			FrustumCorners[j + 4] = Add3(FrustumCorners[j], Mul3(Dist, Vec3f(SplitDist)));
@@ -124,7 +136,7 @@ void UpdateCascades()
 		FrustumCenter = Div3(FrustumCenter, Vec3f(8.0));
 
 		float Radius = 0.0;
-		for (uint32_t j = 0; j < 8; j++) 
+		for (uint32_t j = 0; j < 8; j++)
 		{
 			float distance = Length3(Sub3(FrustumCorners[j], FrustumCenter));
 			Radius = MAX(Radius, distance);
@@ -137,7 +149,7 @@ void UpdateCascades()
 		mat4 Projection;
 		mat4 View;
 		OrthoMat4P(MinExtents.x, MaxExtents.x, MaxExtents.y, MinExtents.y, 0.0, MaxExtents.z - MinExtents.z, &Projection);
-		
+
 		vec3 LightDirection = { SceneFragmentUBO.LightDirection.x, SceneFragmentUBO.LightDirection.y, SceneFragmentUBO.LightDirection.z };
 		vec3 pp = Sub3(FrustumCenter, Mul3(LightDirection, Vec3f(-MinExtents.z)));
 		vec3 l = FrustumCenter;
@@ -151,8 +163,59 @@ void UpdateCascades()
 	}
 }
 
+void UpdateAnimation(uint32_t AnimationIndex)
+{
+	SceneAnimation* Animation = (SceneAnimation*)CMA_GetAt(&SceneAnimations, AnimationIndex);
+	if (Animation != NULL)
+	{
+		Md2::ModelData* Model = &Animation->MeshData;
+		SceneVertex* Vertices = Animation->Vertices;
+		//, SceneVertex* Vertices, uint32_t VertexBuffer;
+
+		Md2::Proccess ProcModel;
+		ProcModel.Model = Model;
+		ProcModel.Start(Animation->Start, Animation->End);
+		int j = 0;
+		for (int i = 0; i < Model->NumTriangles; i++)
+		{
+			ProcModel.Update(i);
+			Vertices[j].Pos.x = ProcModel.Vertex[0].P[0];
+			Vertices[j].Pos.y = ProcModel.Vertex[0].P[1];
+			Vertices[j].Pos.z = ProcModel.Vertex[0].P[2];
+			Vertices[j].TexCoord.x = ProcModel.TexCoord[0].S;
+			Vertices[j].TexCoord.y = ProcModel.TexCoord[0].T;
+			Vertices[j].Normal.x = ProcModel.Normal[0].P[0];
+			Vertices[j].Normal.y = ProcModel.Normal[0].P[1];
+			Vertices[j].Normal.z = ProcModel.Normal[0].P[2];
+
+			Vertices[j + 1].Pos.x = ProcModel.Vertex[2].P[0];
+			Vertices[j + 1].Pos.y = ProcModel.Vertex[2].P[1];
+			Vertices[j + 1].Pos.z = ProcModel.Vertex[2].P[2];
+			Vertices[j + 1].TexCoord.x = ProcModel.TexCoord[2].S;
+			Vertices[j + 1].TexCoord.y = ProcModel.TexCoord[2].T;
+			Vertices[j + 1].Normal.x = ProcModel.Normal[2].P[0];
+			Vertices[j + 1].Normal.y = ProcModel.Normal[2].P[1];
+			Vertices[j + 1].Normal.z = ProcModel.Normal[2].P[2];
+
+			Vertices[j + 2].Pos.x = ProcModel.Vertex[1].P[0];
+			Vertices[j + 2].Pos.y = ProcModel.Vertex[1].P[1];
+			Vertices[j + 2].Pos.z = ProcModel.Vertex[1].P[2];
+			Vertices[j + 2].TexCoord.x = ProcModel.TexCoord[1].S;
+			Vertices[j + 2].TexCoord.y = ProcModel.TexCoord[1].T;
+			Vertices[j + 2].Normal.x = ProcModel.Normal[1].P[0];
+			Vertices[j + 2].Normal.y = ProcModel.Normal[1].P[1];
+			Vertices[j + 2].Normal.z = ProcModel.Normal[1].P[2];
+			j += 3;
+		}
+		ProcModel.End(GetDeltaTime() * Animation->Speed);
+
+		OpenVkUpdateDynamicBuffer(Model->NumTriangles * 3 * sizeof(SceneVertex), Vertices, Animation->VertexBuffer);
+	}
+}
+
 void ShadowDraw()
 {
+
 	OpenVkBeginRenderPassInfo BeginInfo;
 	BeginInfo.ClearColor[0] = 0.01;
 	BeginInfo.ClearColor[1] = 0.01;
@@ -168,19 +231,18 @@ void ShadowDraw()
 	BeginInfo.Height = SHADOW_MAP_HEIGHT;
 	OpenVkBeginRenderPass(&BeginInfo);
 	{
-		OpenVkSetScissor(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
 
 		for (uint32_t j = 0; j < SHADOW_MAP_CASCADE_COUNT; j++)
 		{
 			uint32_t Offset = (SHADOW_MAP_HEIGHT * j);
-			
+			OpenVkSetScissor(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
 			OpenVkSetViewport(Offset, 0, SHADOW_MAP_HEIGHT, SHADOW_MAP_HEIGHT);
 
 			uint32_t Pipeline = ShadowPipelineNoneCull;
 			if (ShadowBackfaceCulling)
 				Pipeline = ShadowPipelineBackCull;
 
-			OpenVkBindGraphicsPipeline(Pipeline);
+			OpenVkBindPipeline(Pipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
 			mat4 Model;
 
@@ -195,7 +257,7 @@ void ShadowDraw()
 
 				ShadowVertexPc.PVM = MultiplyMat4P(&Cascades[j].ProjectionView, &Model);
 
-				OpenVkPushConstant(Pipeline, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(ShadowVertexPushConstant), &ShadowVertexPc);
+				OpenVkPushConstant(ShadowLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(ShadowVertexPushConstant), &ShadowVertexPc);
 
 				SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Entities[i].Material.MaterialIndex);
 				if (Material == NULL)
@@ -211,7 +273,7 @@ void ShadowDraw()
 				if (Image != NULL)
 					TextureDescriptorSet = Image->TextureDescriptorSet;
 
-				if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] && Entities[i].Mesh.MeshIndex != -1)
+				if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
 				{
 					SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
 					if (Mesh != NULL)
@@ -220,12 +282,12 @@ void ShadowDraw()
 						{
 							if (!Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
 							{
-								SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].AlbedoIndex);
+								SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.AlbedoIndex);
 								if (Image != NULL)
 									TextureDescriptorSet = Image->TextureDescriptorSet;
 							}
 
-							OpenVkBindDescriptorSet(Pipeline, 0, TextureDescriptorSet);
+							OpenVkBindDescriptorSet(ShadowLayout, 0, TextureDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
 							if (Mesh->MeshData[m].Indices == NULL)
 							{
@@ -240,9 +302,23 @@ void ShadowDraw()
 						}
 					}
 				}
+				if (Entities[i].UsedComponents[COMPONENT_TYPE_ANIMATION])
+				{
+					if (Entities[i].Animation.AnimationIndex != 0)
+					{
+						SceneAnimation* Animation = (SceneAnimation*)CMA_GetAt(&SceneAnimations, Entities[i].Animation.AnimationIndex);
+						if (Animation != NULL)
+						{
+							UpdateAnimation(Entities[i].Animation.AnimationIndex);
+							OpenVkBindDescriptorSet(ShadowLayout, 0, TextureDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							OpenVkBindDynamicVertexBuffer(Animation->VertexBuffer);
+							OpenVkDrawVertices(Animation->MeshData.NumTriangles * 3);
+						}
+					}
+				}
 			}
-		}
 
+		}
 	}
 	OpenVkEndRenderPass();
 }

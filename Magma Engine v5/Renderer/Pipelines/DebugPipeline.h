@@ -1,15 +1,27 @@
-void CreateDebugPipeline()
+void CreateDebugLayout()
 {
-	uint32_t ShaderAttributeFormats[] = { 3, 3 };
-	uint32_t ShaderAttributeOffsets[] = { 0, 12 };
-
 	uint32_t PushTypes[] = { OPENVK_SHADER_TYPE_VERTEX };
 	uint32_t PushOffsets[] = { 0 };
 	uint32_t PushSizes[] = { sizeof(DebugVertexPushConstant) };
 
+	OpenVkPipelineLayoutCreateInfo Layout;
+	Layout.PushConstantCount = 1;
+	Layout.PushConstantShaderTypes = PushTypes;
+	Layout.PushConstantOffsets = PushOffsets;
+	Layout.PushConstantSizes = PushSizes;
+	Layout.DescriptorSetLayoutCount = 0;
+	Layout.DescriptorSetLayouts = NULL;
+	DebugLayout = OpenVkCreatePipelineLayout(&Layout);
+}
+
+void CreateDebugPipeline()
+{
+	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGB32F, OPENVK_FORMAT_RGB32F };
+	uint32_t ShaderAttributeOffsets[] = { 0, 12 };
+
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
-	GraphicsPipelineCreateInfo.VertexPath = "Data/Shader/DebugVertex.spv";
-	GraphicsPipelineCreateInfo.FragmentPath = "Data/Shader/DebugFragment.spv";
+	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/DebugVertex.spv");
+	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/DebugFragment.spv");
 	GraphicsPipelineCreateInfo.BindingStride = sizeof(DebugVertex);
 	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 2;
 	GraphicsPipelineCreateInfo.ShaderAttributeFormats = ShaderAttributeFormats;
@@ -26,19 +38,16 @@ void CreateDebugPipeline()
 	GraphicsPipelineCreateInfo.FrontFace = OPENVK_FRONT_FACE_COUNTER_CLOCK_WISE;
 	GraphicsPipelineCreateInfo.MsaaSamples = MsaaSamples;
 	GraphicsPipelineCreateInfo.AlphaBlending = true;
-	GraphicsPipelineCreateInfo.ColorBlendAttachments = 1;
-	GraphicsPipelineCreateInfo.PushConstantCount = 1;
-	GraphicsPipelineCreateInfo.PushConstantShaderTypes = PushTypes;
-	GraphicsPipelineCreateInfo.PushConstantOffsets = PushOffsets;
-	GraphicsPipelineCreateInfo.PushConstantSizes = PushSizes;
-	GraphicsPipelineCreateInfo.DescriptorSetLayoutCount = 0;
-	GraphicsPipelineCreateInfo.DescriptorSetLayouts = NULL;
+	GraphicsPipelineCreateInfo.ColorBlendAttachments = 4;
+	GraphicsPipelineCreateInfo.PipelineLayout = DebugLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = true;
 	GraphicsPipelineCreateInfo.RenderPass = SceneRenderPass;
 
 	DebugPipelineThinLine = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 	
 	GraphicsPipelineCreateInfo.LineWidth = 3.0;
+	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/DebugVertex.spv");
+	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/DebugFragment.spv");
 	DebugPipelineFatLine = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 }
 
@@ -47,14 +56,14 @@ void DebugDraw()
 	mat4 PV = MultiplyMat4P(&SceneVertexUBO.Projection, &SceneVertexUBO.View);
 	DebugVertexPc.PVM = PV;
 	
-	OpenVkBindGraphicsPipeline(DebugPipelineFatLine);
-	OpenVkPushConstant(DebugPipelineFatLine, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(DebugVertexPushConstant), &DebugVertexPc);
+	OpenVkBindPipeline(DebugPipelineFatLine, OPENVK_PIPELINE_TYPE_GRAPHICS);
+	OpenVkPushConstant(DebugLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(DebugVertexPushConstant), &DebugVertexPc);
 
 	OpenVkBindVertexBuffer(DirectionVertexBuffer);
 	OpenVkDrawVertices(ARRAY_SIZE(DirectionVertices));
 	
-	OpenVkBindGraphicsPipeline(DebugPipelineThinLine);
-	OpenVkPushConstant(DebugPipelineThinLine, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(DebugVertexPushConstant), &DebugVertexPc);
+	OpenVkBindPipeline(DebugPipelineThinLine, OPENVK_PIPELINE_TYPE_GRAPHICS);
+	OpenVkPushConstant(DebugLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(DebugVertexPushConstant), &DebugVertexPc);
 	
 	OpenVkBindVertexBuffer(GridVertexBuffer);
 	OpenVkDrawVertices(ARRAY_SIZE(GridVertices));
@@ -72,7 +81,7 @@ void DebugDraw()
 			Model = TranslateMat4P(&Model, &Entities[i].Translate);
 			DebugVertexPc.PVM = MultiplyMat4P(&PV, &Model);
 
-			OpenVkPushConstant(DebugPipelineThinLine, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(DebugVertexPushConstant), &DebugVertexPc);
+			OpenVkPushConstant(DebugLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(DebugVertexPushConstant), &DebugVertexPc);
 			OpenVkDrawIndices(ARRAY_SIZE(CameraIndices));
 		}
 	}

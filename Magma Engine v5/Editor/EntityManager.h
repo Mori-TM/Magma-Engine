@@ -19,11 +19,18 @@ void ResetEntityCamera(EntityInfo* Entity)
 	Entity->Camera.FarPlane = 1000.0;
 }
 
+void ResetEntityAnimation(EntityInfo* Entity)
+{
+	strcpy(Entity->Animation.Name, "None");
+	Entity->Animation.AnimationIndex = 0;
+}
+
 void AddEntity(EntityInfo* Entity)
 {
 	ResetEntityMesh(Entity);
 	ResetEntityMaterial(Entity);
 	ResetEntityCamera(Entity);
+	ResetEntityAnimation(Entity);
 	
 	Entity->Translate = Vec3f(0.0);
 	Entity->Rotate = Vec3f(0.0);
@@ -95,6 +102,28 @@ void EditorEntities()
 					Entity.UsedComponents[i] = false;
 
 				Entity.UsedComponents[COMPONENT_TYPE_CAMERA] = true;
+
+				AddEntity(&Entity);
+			}
+
+			if (ImGui::Selectable("Add Audio Entity"))
+			{
+				EntityInfo Entity;
+				for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
+					Entity.UsedComponents[i] = false;
+
+				Entity.UsedComponents[COMPONENT_TYPE_AUDIO] = true;
+
+				AddEntity(&Entity);
+			}
+
+			if (ImGui::Selectable("Add Animation Entity"))
+			{
+				EntityInfo Entity;
+				for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
+					Entity.UsedComponents[i] = false;
+
+				Entity.UsedComponents[COMPONENT_TYPE_ANIMATION] = true;
 
 				AddEntity(&Entity);
 			}

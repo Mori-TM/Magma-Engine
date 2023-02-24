@@ -26,10 +26,16 @@ typedef struct
 
 typedef struct
 {
-	float CascadeSplits[4];
+	float CascadeSplits[4];//dont't change!
+	float CascadeRange[4];
+	float CascadeScale[4];
+	float CascadeBias[4];
 	mat4 CascadeProjectionView[SHADOW_MAP_CASCADE_COUNT];
 	vec4 LightDirection;
 	vec4 CameraPosition;
+	mat4 View;
+	float Gamma;
+	float Exposure;
 } SceneFragmentUniformBufferObject;
 
 typedef struct
@@ -37,6 +43,9 @@ typedef struct
 	char Name[MAX_CHAR_NAME_LENGTH];
 	char Path[MAX_CHAR_PATH_LENGTH];
 	bool ShowInAssetBrowser;
+	int32_t Width;
+	int32_t Height;
+	int32_t Components;
 	uint32_t TextureImage;
 	uint32_t TextureSampler;
 	uint32_t TextureDescriptorSet;
@@ -59,17 +68,20 @@ typedef struct
 
 typedef struct
 {
-	//use the SceneMaterial struct
-	uint32_t AlbedoIndex;
-	uint32_t NormalIndex;
-	uint32_t MetallicIndex;
-	uint32_t RoughnessIndex;
-	uint32_t OcclusionIndex;
+	char Name[MAX_CHAR_NAME_LENGTH];
+	char Path[MAX_CHAR_PATH_LENGTH];
+	uint32_t Start;
+	uint32_t End;
+	float Speed;
+	Md2::ModelData MeshData;
 
-	vec4 Color;
-	float Metallic;
-	float Roughness;
-	float Occlusion;
+	SceneVertex* Vertices;
+	uint32_t VertexBuffer;
+} SceneAnimation;
+
+typedef struct
+{
+	SceneMaterial Material;
 
 	uint32_t VertexCount;
 	SceneVertex* Vertices;
@@ -96,6 +108,9 @@ typedef struct
 	char Script[MAX_CHAR_SCRIPT_LENGTH];
 } SceneScript;
 
+uint32_t ImGuiScenePosX = 0;
+uint32_t ImGuiScenePosY = 0;
+
 uint32_t ImGuiSceneWidth = 1600;
 uint32_t ImGuiSceneHeight = 900;
 
@@ -103,19 +118,27 @@ uint32_t SceneWidth = 1600;
 uint32_t SceneHeight = 900;
 
 bool SceneBackfaceCulling = true;
+uint32_t SceneLayout;
 uint32_t ScenePipelineBackCull;
 uint32_t ScenePipelineNoneCull;
 uint32_t SceneRenderPass;
 uint32_t SceneFramebuffer;
 uint32_t SceneMsaaAttachment;
 uint32_t SceneDepthAttachment;
-uint32_t SceneColorAttachment;
+
+uint32_t SceneLightPassAttachment;
+uint32_t SceneDepthPositionAttachment;
+uint32_t SceneNormalMapAttachment;
+uint32_t ScenePBRMapAttachment;
+
 uint32_t SceneDescriptorSet;
+
 uint32_t SceneShadowMapDescriptorSet;
 
 CMA_MemoryZone SceneTextures;
 CMA_MemoryZone SceneMeshes;
 CMA_MemoryZone SceneMaterials;
+CMA_MemoryZone SceneAnimations;
 
 uint32_t SceneScriptCount = 0;
 SceneScript* SceneScripts = NULL;
@@ -131,15 +154,56 @@ SceneFragmentPushConstant SceneFragmentPc;
 SceneVertexUniformBufferObject SceneVertexUBO;
 SceneFragmentUniformBufferObject SceneFragmentUBO;
 
-uint32_t LoadTexture(char* Path, uint32_t* TextureImage, uint32_t* TextureSampler);
+uint32_t LoadTexture(char* Path, SceneTextureImage* Image);
+void SetDefaultMaterial(SceneMaterial* Material, const char* Name);
+void ResetSceneSettings();
+void AddMaterial(const char* Name);
+uint32_t AddTexture(char* Path, bool ShowInAssetBrowser);
 
 void InitScene()
 {
+	/*
+	* Just call AddTexture, AddMaterial and so on
+	*/
+
+	ResetSceneSettings();
+	/*
+	AddTexture((char*)"Data/Textures/Default.png", false);
+	AddMaterial("None");
+
+	SceneMeshes = CMA_Create(sizeof(SceneMesh));
+	SceneMesh Mesh;
+	Mesh.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
+	Mesh.Freeable = false;
+	strcpy(Mesh.Name, "None");
+	strcpy(Mesh.Path, "None");
+	Mesh.MeshCount = 0;
+
+	SetDefaultMaterial(&Mesh.MeshData[0].Material, "MESH");
+	Mesh.MeshData[0].VertexCount = 0;
+	Mesh.MeshData[0].Vertices = NULL;
+	Mesh.MeshData[0].VertexBuffer = 0;
+	Mesh.MeshData[0].IndexCount = 0;
+	Mesh.MeshData[0].Indices = NULL;
+	Mesh.MeshData[0].IndexBuffer = 0;
+	CMA_Push(&SceneMeshes, &Mesh);
+
+	SceneAnimations = CMA_Create(sizeof(SceneAnimation));
+	SceneAnimation Animation;
+	Animation.Start = 0;
+	Animation.End = 1;
+	Animation.Speed = 25.0;
+	Animation.MeshData.NumFrames = 1;
+	Animation.Vertices = NULL;
+	Animation.VertexBuffer = 0;
+	CMA_Push(&SceneAnimations, &Animation);
+	*/
+	
 	//Texture
 	SceneTextures = CMA_Create(sizeof(SceneTextureImage));
 	SceneTextureImage Image;
 	Image.ShowInAssetBrowser = false;
-	Image.TextureDescriptorSet = LoadTexture((char*)"Data/Textures/Default.png", &Image.TextureImage, &Image.TextureSampler);
+	Image.TextureDescriptorSet = LoadTexture((char*)"Data/Textures/Default.png", &Image);
 	strcpy(Image.Name, "None");
 	strcpy(Image.Path, "None");
 	CMA_Push(&SceneTextures, &Image);
@@ -167,17 +231,7 @@ void InitScene()
 	strcpy(Mesh.Path, "None");
 	Mesh.MeshCount = 0;
 	
-	Mesh.MeshData[0].Color = Vec4f(1.0);
-	Mesh.MeshData[0].Metallic = 0.0;
-	Mesh.MeshData[0].Roughness = 1.0;
-	Mesh.MeshData[0].Occlusion = 1.0;
-	
-	Mesh.MeshData[0].AlbedoIndex = 0;
-	Mesh.MeshData[0].NormalIndex = 0;
-	Mesh.MeshData[0].MetallicIndex = 0;
-	Mesh.MeshData[0].RoughnessIndex = 0;
-	Mesh.MeshData[0].OcclusionIndex = 0;
-
+	SetDefaultMaterial(&Mesh.MeshData[0].Material, "MESH");
 	Mesh.MeshData[0].VertexCount = 0;
 	Mesh.MeshData[0].Vertices = NULL;
 	Mesh.MeshData[0].VertexBuffer = 0;
@@ -185,6 +239,16 @@ void InitScene()
 	Mesh.MeshData[0].Indices = NULL;
 	Mesh.MeshData[0].IndexBuffer = 0;
 	CMA_Push(&SceneMeshes, &Mesh);
+
+	SceneAnimations = CMA_Create(sizeof(SceneAnimation));
+	SceneAnimation Animation;
+	Animation.Start = 0;
+	Animation.End = 1;
+	Animation.Speed = 25.0;
+	Animation.MeshData.NumFrames = 1;
+	Animation.Vertices = NULL;
+	Animation.VertexBuffer = 0;
+	CMA_Push(&SceneAnimations, &Animation);
 }
 
 void DestroyScene()
@@ -192,5 +256,6 @@ void DestroyScene()
 	CMA_Destroy(&SceneTextures);
 	CMA_Destroy(&SceneMaterials);
 	CMA_Destroy(&SceneMeshes);
+	CMA_Destroy(&SceneAnimations);
 	free(SceneScripts);
 }

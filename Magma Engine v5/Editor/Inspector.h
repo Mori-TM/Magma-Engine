@@ -99,17 +99,66 @@ void EditorEntityInspector()
 					ImGui::PopStyleColor();
 				}
 			}
+
+			if(Entities[SelectedEntity].UsedComponents[COMPONENT_TYPE_ANIMATION] == true)
+			{
+				if (ImGui::CollapsingHeader("ANIMATION"))
+				{
+					SceneAnimation* Animation = (SceneAnimation*)CMA_GetAt(&SceneAnimations, Entities[SelectedEntity].Animation.AnimationIndex);
+					if (Animation != NULL)
+					{
+						if (ImGui::BeginCombo("Animation", Animation->Name))
+						{
+							for (uint32_t i = 0; i < SceneAnimations.Size; i++)
+							{
+								Animation = (SceneAnimation*)CMA_GetAt(&SceneAnimations, i);
+								if (Animation != NULL)
+								{
+									if (ImGui::Button(Animation->Name))
+									{
+										Entities[SelectedEntity].Animation.AnimationIndex = i;
+										strcpy(Entities[SelectedEntity].Animation.Name, Animation->Name);
+										Animation->End = Animation->MeshData.NumFrames - 1;//maybe -1?
+									}
+								}
+							}
+							ImGui::EndCombo();
+						}
+
+						ImGui::DragInt("Start", (int*)&Animation->Start, 1.0, 0, Animation->MeshData.NumFrames - 1);
+						ImGui::DragInt("End", (int*)&Animation->End, 1.0, 1, Animation->MeshData.NumFrames);
+						ImGui::DragFloat("Speed", &Animation->Speed, 0.1, 0.1, 100.0);
+					}
+
+					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+					if (ImGui::Button("Remove Camera Component"))
+					{
+						Entities[SelectedEntity].UsedComponents[COMPONENT_TYPE_CAMERA] = false;
+					}
+					ImGui::PopStyleColor();
+				//	ImGui::DragFloat("Field of View", &Entities[SelectedEntity].Camera.FOV, 0.1, 0.01, 179.0);
+				//	ImGui::DragFloat("Near Plane", &Entities[SelectedEntity].Camera.NearPlane, 0.1, 0.01, 1000.0);
+				//	ImGui::DragFloat("Far Plane", &Entities[SelectedEntity].Camera.FarPlane, 0.1, 0.01, 10000.0);
+				//
+				//	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+				//	if (ImGui::Button("Remove Camera Component"))
+				//	{
+				//		Entities[SelectedEntity].UsedComponents[COMPONENT_TYPE_CAMERA] = false;
+				//	}
+				//	ImGui::PopStyleColor();
+				}
+			}
 	
 			if (ImGui::BeginPopupContextWindow("Entity Inspector Pop Up"))
-			{
+			{				
 				ImGui::Text("Components");
-				const char* Components[] = { "Mesh", "Material", "Camera" };
+				const char* Components[] = { "Mesh", "Material", "Camera", "Audio", "Animation" };
 				for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
 				{
 					if (ImGui::Button(Components[i]))
 						Entities[SelectedEntity].UsedComponents[i] = true;
 				}
-
+			
 				ImGui::NewLine();
 
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 0, 255));
@@ -128,14 +177,14 @@ void EditorEntityInspector()
 				{
 					for (uint32_t i = SelectedEntity; i < EntityCount - 1; i++)
 						Entities[i] = Entities[i + 1];
-
+			
 					Entities = (EntityInfo*)realloc(Entities, (EntityCount - 1) * sizeof(EntityInfo));
-
+			
 					EntityCount--;
 					SelectedEntity = EntityCount - 1;
 				}
 				ImGui::PopStyleColor();
-
+				
 				ImGui::EndPopup();
 			}
 		}
@@ -165,6 +214,7 @@ void EditorTextureCombo(const char* Name, const char* ID, uint32_t* TextureIndex
 		}
 		ImGui::EndCombo();
 	}
+	ImGui::PopID();
 }
 
 void EditorMaterialInspector()
@@ -176,19 +226,20 @@ void EditorMaterialInspector()
 			SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, SelectedMaterial);
 			if (Material != NULL)
 			{
+				ImGui::PushID(Material);
 				ImGui::InputText("Name", Material->Name, MAX_CHAR_NAME_LENGTH);
 				ImGui::ColorPicker4("Color", (float*)&Material->Color, ImGuiColorEditFlags_AlphaBar);
 
 				EditorTextureCombo("Albedo", "A-Mat", & Material->AlbedoIndex);
 				EditorTextureCombo("Normal", "N-Mat", &Material->NormalIndex);
 				EditorTextureCombo("Metallic", "M-Mat", &Material->MetallicIndex);
-				ImGui::PushID("MS-Mat");
+			//	ImGui::PushID("MS-Mat");
 				ImGui::SliderFloat("Metallic Strength", &Material->Metallic, 0.0, 1.0);
 				EditorTextureCombo("Roughness", "R-Mat", &Material->RoughnessIndex);
-				ImGui::PushID("RS-Mat");
+			//	ImGui::PushID("RS-Mat");
 				ImGui::SliderFloat("Roughness Strength", &Material->Roughness, 0.0, 1.0);
 				EditorTextureCombo("Occlusion", "O-Mat", &Material->OcclusionIndex);
-				ImGui::PushID("OS-Mat");
+			//	ImGui::PushID("OS-Mat");
 				ImGui::SliderFloat("Occlusion Strength", &Material->Occlusion, 0.0, 1.0);
 
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
@@ -206,6 +257,7 @@ void EditorMaterialInspector()
 				}
 
 				ImGui::PopStyleColor();
+				ImGui::PopID();
 			}			
 		}
 	}
@@ -225,9 +277,16 @@ void EditorTextureInspector()
 				ImGui::Text(Image->Path);
 				ImGui::InputText("Name", Image->Name, MAX_CHAR_NAME_LENGTH);
 				ImVec2 Size = ImGui::GetWindowSize();
-				Size.x -= 20;
-				Size.y = Size.x;
-				ImGui::Image(&GetDescriptorSet(Image->TextureDescriptorSet)[0], Size);
+				Size.x -= 30;
+				Size.y = Size.x * ((float)Image->Height / (float)Image->Width);
+				ImGui::Image(&GetDescriptorSet(Image->TextureDescriptorSet)[0], Size);								
+				ImGui::Text("Width: %d", Image->Width);
+				ImGui::Text("Height: %d", Image->Height);
+				ImGui::Text("Aspect: %f", ((float)Image->Width / (float)Image->Height));
+				if (Image->Components == 3)
+					ImGui::Text("RGB");
+				else if (Image->Components == 4)
+					ImGui::Text("RGBA");
 
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 				if (ImGui::Button("Delete Texture"))
@@ -280,48 +339,42 @@ void EditorMeshInspector()
 				ImGui::Text(Mesh->Path);
 				ImGui::InputText("Name", Mesh->Name, MAX_CHAR_NAME_LENGTH);
 
-				ImGui::Text("Sub Meshes");
-				for (uint32_t i = 0; i < Mesh->MeshCount; i++)
+				char MeshName[128];
+				if (ImGui::CollapsingHeader("SUB MESHES"))
 				{
-					ImGui::Text("\tMesh %d", i);
+					for (uint32_t i = 0; i < Mesh->MeshCount; i++)
+					{
+						sprintf(MeshName, "%d\t%s", i, Mesh->MeshData[i].Material.Name);
 
-					ImGui::SetCursorPosX(66);
-					EditorTextureCombo("Albedo", "A-SMat", &Mesh->MeshData[i].AlbedoIndex);
-					ImGui::SetCursorPosX(66);
-					EditorTextureCombo("Normal", "N-SMat", &Mesh->MeshData[i].NormalIndex);
-					ImGui::SetCursorPosX(66);
-					EditorTextureCombo("Metallic", "M-SMat", &Mesh->MeshData[i].MetallicIndex);
-					ImGui::SetCursorPosX(66);
-					ImGui::PushID("MS-SMat");
-					ImGui::SliderFloat("Metallic Strength", &Mesh->MeshData[i].Metallic, 0.0, 1.0);
-					ImGui::SetCursorPosX(66);
-					EditorTextureCombo("Roughness", "R-SMat", &Mesh->MeshData[i].RoughnessIndex);
-					ImGui::SetCursorPosX(66);
-					ImGui::PushID("RS-SMat");
-					ImGui::SliderFloat("Roughness Strength", &Mesh->MeshData[i].Roughness, 0.0, 1.0);
-					ImGui::SetCursorPosX(66);
-					EditorTextureCombo("Occlusion", "O-SMat", &Mesh->MeshData[i].OcclusionIndex);
-					ImGui::SetCursorPosX(66);
-					ImGui::PushID("OS-SMat");
-					ImGui::SliderFloat("Occlusion Strength", &Mesh->MeshData[i].Occlusion, 0.0, 1.0);
-					
-				//	ImGui::SetCursorPosX(66);
-				//	EditorTextureCombo("Albedo", &Mesh->MeshData[i].AlbedoIndex);
-				//	ImGui::SetCursorPosX(66);
-				//	EditorTextureCombo("Normal", &Mesh->MeshData[i].NormalIndex);
-				//	ImGui::SetCursorPosX(66);
-				//	EditorTextureCombo("Metallic", &Mesh->MeshData[i].MetallicIndex);
-				//	ImGui::SetCursorPosX(66);
-				//	ImGui::SliderFloat("Metallic Strength", &Mesh->MeshData[i].Metallic, 0.0, 1.0);
-				//	ImGui::SetCursorPosX(66);
-				//	EditorTextureCombo("Roughness", &Mesh->MeshData[i].RoughnessIndex);
-				//	ImGui::SetCursorPosX(66);
-				//	ImGui::SliderFloat("Roughness Strength", &Mesh->MeshData[i].Roughness, 0.0, 1.0);
-				//	ImGui::SetCursorPosX(66);
-				//	EditorTextureCombo("Occlusion", &Mesh->MeshData[i].OcclusionIndex);
-				//	ImGui::SetCursorPosX(66);
-				//	ImGui::SliderFloat("Occlusion Strength", &Mesh->MeshData[i].Occlusion, 0.0, 1.0);
-				}
+						ImGui::SetCursorPosX(33);
+						if (ImGui::CollapsingHeader(MeshName))
+						{
+							ImGui::PushID(&Mesh->MeshData[i].Material);
+							ImGui::SetCursorPosX(66);
+							ImGui::ColorEdit4("Color", (float*)&Mesh->MeshData[i].Material.Color, ImGuiColorEditFlags_AlphaBar);
+							ImGui::SetCursorPosX(66);
+							EditorTextureCombo("Albedo", "A-SMat", &Mesh->MeshData[i].Material.AlbedoIndex);
+							ImGui::SetCursorPosX(66);
+							EditorTextureCombo("Normal", "N-SMat", &Mesh->MeshData[i].Material.NormalIndex);
+							ImGui::SetCursorPosX(66);
+							EditorTextureCombo("Metallic", "M-SMat", &Mesh->MeshData[i].Material.MetallicIndex);
+							ImGui::SetCursorPosX(66);
+						//	ImGui::PushID("MS-SMat");
+							ImGui::SliderFloat("Metallic Strength", &Mesh->MeshData[i].Material.Metallic, 0.0, 1.0);
+							ImGui::SetCursorPosX(66);
+							EditorTextureCombo("Roughness", "R-SMat", &Mesh->MeshData[i].Material.RoughnessIndex);
+							ImGui::SetCursorPosX(66);
+						//	ImGui::PushID("RS-SMat");
+							ImGui::SliderFloat("Roughness Strength", &Mesh->MeshData[i].Material.Roughness, 0.0, 1.0);
+							ImGui::SetCursorPosX(66);
+							EditorTextureCombo("Occlusion", "O-SMat", &Mesh->MeshData[i].Material.OcclusionIndex);
+							ImGui::SetCursorPosX(66);
+						//	ImGui::PushID("OS-SMat");
+							ImGui::SliderFloat("Occlusion Strength", &Mesh->MeshData[i].Material.Occlusion, 0.0, 1.0);
+							ImGui::PopID();
+						}						
+					}
+				}				
 			}			
 
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
@@ -333,6 +386,16 @@ void EditorMeshInspector()
 
 				MeshToDelete = SelectedMesh;
 				DeleteMesh = true;
+			}
+
+			if (ImGui::Button("Delete Mesh with Textures"))
+			{
+				for (uint32_t i = 0; i < EntityCount; i++)
+					if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] && Entities[i].Mesh.MeshIndex == SelectedMesh)
+						ResetEntityMesh(&Entities[i]);
+
+				MeshToDelete = SelectedMesh;
+				DeleteMeshWithTextures = true;
 			}
 
 			ImGui::PopStyleColor();
@@ -376,11 +439,11 @@ void EditorScriptInspector()
 			if (ImGui::Button("Open"))
 			{
 				char Path[MAX_CHAR_PATH_LENGTH];
-				if (WaveOpenFileDialog(Path, "lua\0*.lua\0"))
+				if (WaveOpenFileDialog(Path, false, NULL, "lua\0*.lua\0"))
 				{
 					strcpy(SceneScripts[SelectedScript].Path, Path);
-					size_t Size;
-					strcpy(SceneScripts[SelectedScript].Script, OpenVkReadFileData(Path, &Size));
+					OpenVkFile File = OpenVkReadFile(Path);
+					strcpy(SceneScripts[SelectedScript].Script, File.Data);
 					WaveResetToLastPath();
 				}
 			}
@@ -548,5 +611,5 @@ void EditorInspector()
 	EditorMeshInspector();
 	EditorMaterialInspector();
 	EditorScriptInspector();
-	EditorVSInspector();
+//	EditorVSInspector();
 }

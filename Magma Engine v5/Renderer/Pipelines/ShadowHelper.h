@@ -10,10 +10,15 @@ typedef struct
 } Cascade;
 
 #define SHADOW_MAP_CASCADE_COUNT 3
-#define SHADOW_MAP_WIDTH 4096 * 3
-#define SHADOW_MAP_HEIGHT 4096
+//#define SHADOW_MAP_WIDTH 2048 * SHADOW_MAP_CASCADE_COUNT
+//#define SHADOW_MAP_HEIGHT 2048
+
+uint32_t SHADOW_MAP_WIDTH = 2048 * SHADOW_MAP_CASCADE_COUNT;
+uint32_t SHADOW_MAP_HEIGHT = 2048;
+int32_t ShadowMapSizeTmp = 2048;
 
 bool ShadowBackfaceCulling = true;
+uint32_t ShadowLayout;
 uint32_t ShadowPipelineNoneCull;
 uint32_t ShadowPipelineBackCull;
 uint32_t ShadowRenderPass;

@@ -1,38 +1,61 @@
 void CreateSceneRenderPass()
 {
-	SceneMsaaAttachment = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, MsaaSamples, false);
-	SceneDepthAttachment = OpenVkCreateDepthImageAttachment(SceneWidth, SceneHeight, MsaaSamples, false);
-	SceneColorAttachment = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true);
-	SceneRenderPass = OpenVkCreateRenderPass(1, true, true, MsaaSamples, true);
+//	SceneMsaaAttachment = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, MsaaSamples, false, OPENVK_FORMAT_DEFAULT);	
+	SceneDepthPositionAttachment = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, MsaaSamples, true, OPENVK_FORMAT_RGBA16F);
+	SceneNormalMapAttachment = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, MsaaSamples, true, OPENVK_FORMAT_RGBA16F);
+	ScenePBRMapAttachment = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, MsaaSamples, true, OPENVK_FORMAT_RGBA16F);
+	SceneLightPassAttachment = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, MsaaSamples, true, OPENVK_FORMAT_RGBA);
+	SceneDepthAttachment = OpenVkCreateDepthImageAttachment(SceneWidth, SceneHeight, MsaaSamples, false, OPENVK_FORMAT_DEFAULT);
+//	exit(0);
+//	uint32_t ColorFormats[] = { OPENVK_FORMAT_DEFAULT };
+//	SceneRenderPass = OpenVkCreateRenderPass(4, ColorFormats, true, OPENVK_FORMAT_DEFAULT, true, MsaaSamples, true);
+
+	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_DEPTH };
+	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_RGBA16F, OPENVK_FORMAT_RGBA16F, OPENVK_FORMAT_RGBA16F, OPENVK_FORMAT_RGBA, OPENVK_FORMAT_DEFAULT };
+	uint32_t MsaaSamplesAttachments[] = { MsaaSamples, MsaaSamples, MsaaSamples, MsaaSamples, MsaaSamples };
+	SceneRenderPass = OpenVkCreateRenderPass(5, Attachments, AttachmentFormats, MsaaSamplesAttachments, NULL, true);
 }
 
 #define RIGID_BODY_COUNT 3
 WaveRigidBody RigidBodys[RIGID_BODY_COUNT];
 
-void CreateScenePipeline()
+void CreateSceneLayout()
 {
-	uint32_t ShaderAttributeFormats[] = { 3, 2, 3 };
-	uint32_t ShaderAttributeOffsets[] = { 0, 12, 20 };
-
-	uint32_t DescriptorSetLayouts[] = 
-	{ 
-		TextureDescriptorSetLayout, 
+	uint32_t DescriptorSetLayouts[] =
+	{
+//		SceneDescriptorSetLayout,
 		TextureDescriptorSetLayout,
 		TextureDescriptorSetLayout,
 		TextureDescriptorSetLayout,
 		TextureDescriptorSetLayout,
-		ShadowMapDescriptorSetLayout, 
-		FragmentUniformDescriptorSetLayout, 
-		VertexUniformDescriptorSetLayout 
+		TextureDescriptorSetLayout,
+		ShadowMapDescriptorSetLayout,
+		FragmentUniformDescriptorSetLayout,
+		VertexUniformDescriptorSetLayout
 	};
 
 	uint32_t PushTypes[] = { OPENVK_SHADER_TYPE_VERTEX, OPENVK_SHADER_TYPE_FRAGMENT };
 	uint32_t PushOffsets[] = { 0, 64 };
 	uint32_t PushSizes[] = { sizeof(SceneVertexPushConstant), sizeof(SceneFragmentPushConstant) };
 
+	OpenVkPipelineLayoutCreateInfo Layout;
+	Layout.PushConstantCount = 2;
+	Layout.PushConstantShaderTypes = PushTypes;
+	Layout.PushConstantOffsets = PushOffsets;
+	Layout.PushConstantSizes = PushSizes;
+	Layout.DescriptorSetLayoutCount = ARRAY_SIZE(DescriptorSetLayouts);
+	Layout.DescriptorSetLayouts = DescriptorSetLayouts;
+	SceneLayout = OpenVkCreatePipelineLayout(&Layout);
+}
+
+void CreateScenePipeline()
+{
+	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGB32F, OPENVK_FORMAT_RG32F, OPENVK_FORMAT_RGB32F };
+	uint32_t ShaderAttributeOffsets[] = { 0, 12, 20 };
+
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
-	GraphicsPipelineCreateInfo.VertexPath = "Data/Shader/SceneVertex.spv";
-	GraphicsPipelineCreateInfo.FragmentPath = "Data/Shader/SceneFragment.spv";
+	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/SceneVertex.spv");
+	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/SceneFragment.spv");
 	GraphicsPipelineCreateInfo.BindingStride = sizeof(SceneVertex);
 	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 3;
 	GraphicsPipelineCreateInfo.ShaderAttributeFormats = ShaderAttributeFormats;
@@ -49,17 +72,14 @@ void CreateScenePipeline()
 	GraphicsPipelineCreateInfo.FrontFace = OPENVK_FRONT_FACE_COUNTER_CLOCK_WISE;
 	GraphicsPipelineCreateInfo.MsaaSamples = MsaaSamples;
 	GraphicsPipelineCreateInfo.AlphaBlending = true;
-	GraphicsPipelineCreateInfo.ColorBlendAttachments = 1;	
-	GraphicsPipelineCreateInfo.PushConstantCount = 2;
-	GraphicsPipelineCreateInfo.PushConstantShaderTypes = PushTypes;
-	GraphicsPipelineCreateInfo.PushConstantOffsets = PushOffsets;
-	GraphicsPipelineCreateInfo.PushConstantSizes = PushSizes;
-	GraphicsPipelineCreateInfo.DescriptorSetLayoutCount = ARRAY_SIZE(DescriptorSetLayouts);
-	GraphicsPipelineCreateInfo.DescriptorSetLayouts = DescriptorSetLayouts;
+	GraphicsPipelineCreateInfo.ColorBlendAttachments = 4;	
+	GraphicsPipelineCreateInfo.PipelineLayout = SceneLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = true;
 	GraphicsPipelineCreateInfo.RenderPass = SceneRenderPass;
 	ScenePipelineBackCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 
+	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/SceneVertex.spv");
+	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/SceneFragment.spv");
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_NONE;
 	ScenePipelineNoneCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 
@@ -93,7 +113,8 @@ void CreateScenePipeline()
 
 void CreateSceneFramebuffer()
 {
-	uint32_t Attachments[] = { SceneMsaaAttachment, SceneDepthAttachment, SceneColorAttachment };
+//	uint32_t Attachments[] = { SceneMsaaAttachment, SceneDepthAttachment, SceneColorAttachment };
+	uint32_t Attachments[] = { SceneDepthPositionAttachment, SceneNormalMapAttachment, ScenePBRMapAttachment, SceneLightPassAttachment, SceneDepthAttachment };
 
 	OpenVkFramebufferCreateInfo FramebufferCreateInfo;
 	FramebufferCreateInfo.AttachmentCount = ARRAY_SIZE(Attachments);
@@ -134,6 +155,7 @@ void CreateSceneDescriptorSets()
 			DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
 			DescriptorSetCreateInfo.Bindings = Bindings;
 			DescriptorSetCreateInfo.Images = &Image->TextureImage;
+			DescriptorSetCreateInfo.DescriptorSet = NULL;
 
 			Image->TextureDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 		}		
@@ -152,9 +174,10 @@ void CreateSceneDescriptorSets()
 		DescriptorSetCreateInfo.DescriptorWriteCount = 1;
 		DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
 		DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
-		DescriptorSetCreateInfo.UniformBuffers = UniformBuffers;
-		DescriptorSetCreateInfo.UniformBufferSizes = UniformSizes;
+		DescriptorSetCreateInfo.Buffers = UniformBuffers;
+		DescriptorSetCreateInfo.BufferSizes = UniformSizes;
 		DescriptorSetCreateInfo.Bindings = Bindings;
+		DescriptorSetCreateInfo.DescriptorSet = NULL;
 
 		SceneVertexUniformDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}
@@ -172,34 +195,104 @@ void CreateSceneDescriptorSets()
 		DescriptorSetCreateInfo.DescriptorWriteCount = 1;
 		DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
 		DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
-		DescriptorSetCreateInfo.UniformBuffers = UniformBuffers;
-		DescriptorSetCreateInfo.UniformBufferSizes = UniformSizes;
+		DescriptorSetCreateInfo.Buffers = UniformBuffers;
+		DescriptorSetCreateInfo.BufferSizes = UniformSizes;
 		DescriptorSetCreateInfo.Bindings = Bindings;
+		DescriptorSetCreateInfo.DescriptorSet = NULL;
 
 		SceneFragmentUniformDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}
 	
+	
+
+//	for (uint32_t i = 0; i < 4; i++)
+	
 	{
-		uint32_t DescriptorCounts[] = { 1 };
-		uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
-		uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_ATTACHMENT };
-		uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT };
-		uint32_t Bindings[] = { 0 };
+		/*
+		uint32_t Attachments[] = { SceneLightPassAttachment, SceneDepthPositionAttachment, SceneNormalMapAttachment, ScenePBRMapAttachment };
+
+		uint32_t DescriptorCounts[] = { 1, 1, 1, 1 };
+		uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
+		uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT };
+		uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT };
+		uint32_t Bindings[] = { 0, 1, 2, 3 };
+		uint32_t Sampler[] = { ImageSampler, ImageSampler, ImageSampler, ImageSampler };
 
 		OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
-		DescriptorSetCreateInfo.DescriptorSetLayout = TextureDescriptorSetLayout;
+		DescriptorSetCreateInfo.DescriptorSetLayout = SceneDescriptorSetLayout;
 		DescriptorSetCreateInfo.DescriptorPool = DescriptorPool;
-		DescriptorSetCreateInfo.DescriptorWriteCount = 1;
+		DescriptorSetCreateInfo.DescriptorWriteCount = 4;
 		DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
 		DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
-		DescriptorSetCreateInfo.Sampler = &ImageSampler;
+		DescriptorSetCreateInfo.Sampler = Sampler;
 		DescriptorSetCreateInfo.ImageTypes = ImageTypes;
-		DescriptorSetCreateInfo.Images = &SceneColorAttachment;
+		DescriptorSetCreateInfo.Images = Attachments;
 		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
 		DescriptorSetCreateInfo.Bindings = Bindings;
-
+		DescriptorSetCreateInfo.DescriptorSet = NULL;
+		
 		SceneDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
+		*/
+
+		{
+			uint32_t Attachments[] = { SceneDepthPositionAttachment, SceneNormalMapAttachment, ScenePBRMapAttachment, SceneLightPassAttachment };
+			
+			VkDescriptorSetInfo DescriptorSetInfo;
+
+			VkDescriptorSetLayout DescriptorSetLayouts[MAX_FRAMES_IN_FLIGHT];
+			for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+				DescriptorSetLayouts[i] = VkRenderer.DescriptorSetLayouts[SceneDescriptorSetLayout];
+
+			VkDescriptorSetAllocateInfo AllocateInfo;
+
+			VkDescriptorPoolInfo* DescriptorPoolPTR = (VkDescriptorPoolInfo*)CMA_GetAt(&VkRenderer.DescriptorPools, DescriptorPool);
+			if (DescriptorPoolPTR == NULL)
+				OpenVkRuntimeError("Failed to find descriptor pool");
+
+			AllocateInfo = VkAllocateDescriptorSets(DescriptorPoolPTR->DescriptorPool, MAX_FRAMES_IN_FLIGHT, DescriptorSetLayouts);
+
+			if (vkAllocateDescriptorSets(VkRenderer.Device, &AllocateInfo, DescriptorSetInfo.DescriptorSets) != VK_SUCCESS)
+				OpenVkRuntimeError("Failed to Allocate Descriptor Set");
+
+			uint32_t DescriptorSetPTR = CMA_Push(&VkRenderer.DescriptorSets, &DescriptorSetInfo);
+			CMA_Push(&DescriptorPoolPTR->DescriptorSets, &DescriptorSetPTR);
+			SceneDescriptorSet = DescriptorSetPTR;
+
+			VkWriteDescriptorSet* DescriptorWrites = (VkWriteDescriptorSet*)OpenVkMalloc(4 * sizeof(VkWriteDescriptorSet));
+			VkDescriptorImageInfo* DescriptorImageInfos = (VkDescriptorImageInfo*)OpenVkMalloc(4 * sizeof(VkDescriptorImageInfo));
+
+			for (uint32_t j = 0; j < MAX_FRAMES_IN_FLIGHT; j++)
+			{
+				for (uint32_t i = 0; i < 4; i++)
+				{
+					VkSampler* ImageSamplerP = (VkSampler*)CMA_GetAt(&VkRenderer.Sampler, ImageSampler);
+					VkImageInfo* TextureImage = (VkImageInfo*)CMA_GetAt(&VkRenderer.ImageAttachments, Attachments[i]);
+
+					
+					DescriptorImageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+					DescriptorImageInfos[i].sampler = *ImageSamplerP;
+					DescriptorImageInfos[i].imageView = TextureImage->ImageView;
+
+					DescriptorWrites[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+					DescriptorWrites[i].pNext = NULL;
+					DescriptorWrites[i].dstSet = DescriptorSetInfo.DescriptorSets[j];
+					DescriptorWrites[i].dstBinding = i;
+					DescriptorWrites[i].dstArrayElement = 0;
+					DescriptorWrites[i].descriptorCount = 1;
+					DescriptorWrites[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+					DescriptorWrites[i].pImageInfo = &DescriptorImageInfos[i];
+					DescriptorWrites[i].pBufferInfo = NULL;
+					DescriptorWrites[i].pTexelBufferView = NULL;
+
+				//	DescriptorWrites[i] = VkDescriptorSetWrite(DescriptorSetInfo.DescriptorSets[j], i, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, &DescriptorImageInfos, NULL, NULL);
+				}
+			//	DescriptorWrites[j].dstSet
+				vkUpdateDescriptorSets(VkRenderer.Device, 4, DescriptorWrites, 0, NULL);
+			}
+		}
+
 	}
+	
 
 	{
 		uint32_t DescriptorCounts[] = { 1 };
@@ -219,6 +312,7 @@ void CreateSceneDescriptorSets()
 		DescriptorSetCreateInfo.Images = &ShadowDepthAttachment;
 		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
 		DescriptorSetCreateInfo.Bindings = Bindings;
+		DescriptorSetCreateInfo.DescriptorSet = NULL;
 
 		SceneShadowMapDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}
@@ -255,9 +349,21 @@ void SceneUpdateUniformBuffer()
 		SceneFragmentUBO.CascadeSplits[i] = Cascades[i].SplitDepth;
 		SceneFragmentUBO.CascadeProjectionView[i] = Cascades[i].ProjectionView;
 	}
+	SceneFragmentUBO.View = SceneVertexUBO.View;
 
-	OpenVkUpdateUniformBuffer(sizeof(SceneVertexUniformBufferObject), &SceneVertexUBO, SceneVertexUniformBuffer);
-	OpenVkUpdateUniformBuffer(sizeof(SceneFragmentUniformBufferObject), &SceneFragmentUBO, SceneFragmentUniformBuffer);
+	OpenVkUpdateBuffer(sizeof(SceneVertexUniformBufferObject), &SceneVertexUBO, SceneVertexUniformBuffer);
+	OpenVkUpdateBuffer(sizeof(SceneFragmentUniformBufferObject), &SceneFragmentUBO, SceneFragmentUniformBuffer);
+}
+
+int EntityDistCompareFunc(const void* a, const void* b)
+{
+	EntityInfo* A = (EntityInfo*)a;
+	EntityInfo* B = (EntityInfo*)b;
+
+	float DistA = GetDistanceVec3P(&CameraPos, &A->Translate);
+	float DistB = GetDistanceVec3P(&CameraPos, &B->Translate);
+
+	return DistB - DistA;
 }
 
 void SceneDraw()
@@ -267,7 +373,7 @@ void SceneDraw()
 	BeginInfo.ClearColor[1] = ClearColor.y;
 	BeginInfo.ClearColor[2] = ClearColor.z;
 	BeginInfo.ClearColor[3] = 1.0;
-	BeginInfo.ClearColors = 1;
+	BeginInfo.ClearColors = 4;
 	BeginInfo.ClearDepth = true;
 	BeginInfo.RenderPass = SceneRenderPass;
 	BeginInfo.Framebuffer = SceneFramebuffer;
@@ -288,7 +394,7 @@ void SceneDraw()
 		if (SceneBackfaceCulling)
 			Pipeline = ScenePipelineBackCull;
 
-		OpenVkBindGraphicsPipeline(Pipeline);
+		OpenVkBindPipeline(Pipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 /*
 		OpenVkBindDescriptorSet(Pipeline, 1, SceneShadowMapDescriptorSet);
 		OpenVkBindDescriptorSet(Pipeline, 2, SceneVertexUniformDescriptorSet);
@@ -322,14 +428,42 @@ void SceneDraw()
 		}
 */		
 		
-		OpenVkBindDescriptorSet(Pipeline, 5, SceneShadowMapDescriptorSet);
-		OpenVkBindDescriptorSet(Pipeline, 6, SceneFragmentUniformDescriptorSet);
-		OpenVkBindDescriptorSet(Pipeline, 7, SceneVertexUniformDescriptorSet);		
+		OpenVkBindDescriptorSet(SceneLayout, 5, SceneShadowMapDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+		OpenVkBindDescriptorSet(SceneLayout, 6, SceneFragmentUniformDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+		OpenVkBindDescriptorSet(SceneLayout, 7, SceneVertexUniformDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 		
+	//	LoadMat4IdentityP(&SceneVertexPc.Model);
+	//	SceneVertexPc.Model = RotateXMat4P(&SceneVertexPc.Model, ToRadians(-90));
+	//	SceneFragmentPc.Metallic = 0.0;
+	//	SceneFragmentPc.Occlusion = 1.0;
+	//	SceneFragmentPc.Roughness = 1.0;
+	//	
+	//	SceneFragmentPc.Color = Vec4f(1.0);
+	//
+	//	OpenVkPushConstant(SceneLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(SceneVertexPushConstant), &SceneVertexPc);
+	//	OpenVkPushConstant(SceneLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(SceneFragmentPushConstant), &SceneFragmentPc);
+	//
+	//	uint32_t AlbedoDescriptorSet = 0;
+	//	uint32_t NormalDescriptorSet = 0;
+	//	uint32_t MetallicDescriptorSet = 0;
+	//	uint32_t RoughnessDescriptorSet = 0;
+	//	uint32_t OcclusionDescriptorSet = 0;
+	//
+	//	OpenVkBindDescriptorSet(SceneLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+	//	OpenVkBindDescriptorSet(SceneLayout, 1, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+	//	OpenVkBindDescriptorSet(SceneLayout, 2, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+	//	OpenVkBindDescriptorSet(SceneLayout, 3, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+	//	OpenVkBindDescriptorSet(SceneLayout, 4, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+
+	//	OpenVkBindDynamicVertexBuffer(ModelVertexBuffer);
+	//	OpenVkDrawVertices(Model.NumTriangles * 3);
+
+	//	qsort(Entities, EntityCount, sizeof(EntityInfo), EntityDistCompareFunc);
 
 		for (uint32_t i = 0; i < EntityCount; i++)
 		{
-			if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] && Entities[i].Mesh.MeshIndex != -1)
+			if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] ||
+				Entities[i].UsedComponents[COMPONENT_TYPE_ANIMATION])
 			{
 				LoadMat4IdentityP(&SceneVertexPc.Model);
 				SceneVertexPc.Model = ScaleMat4P(&SceneVertexPc.Model, &Entities[i].Scale);
@@ -394,54 +528,76 @@ void SceneDraw()
 				}
 					
 
-				OpenVkPushConstant(Pipeline, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(SceneVertexPushConstant), &SceneVertexPc);
-				OpenVkPushConstant(Pipeline, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(SceneFragmentPushConstant), &SceneFragmentPc);
+				OpenVkPushConstant(SceneLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(SceneVertexPushConstant), &SceneVertexPc);
+				OpenVkPushConstant(SceneLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(SceneFragmentPushConstant), &SceneFragmentPc);
 				
-				SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
-				if (Mesh != NULL)
+				if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
 				{
-					for (uint32_t m = 0; m < Mesh->MeshCount; m++)
+					SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
+					if (Mesh != NULL)
 					{
-						if (!Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
+						for (uint32_t m = 0; m < Mesh->MeshCount; m++)
 						{
-							SceneFragmentPc.Color = Mesh->MeshData[m].Color;
-							//set to mesh
-							SceneFragmentPc.Metallic = Mesh->MeshData[m].Metallic;
-							SceneFragmentPc.Roughness = Mesh->MeshData[m].Roughness;
-							SceneFragmentPc.Occlusion = Mesh->MeshData[m].Occlusion;
-							OpenVkPushConstant(Pipeline, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(SceneFragmentPushConstant), &SceneFragmentPc);
-														
-							Albedo = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].AlbedoIndex);
-							Normal = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].NormalIndex);
-							Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].MetallicIndex);
-							Roughness = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].RoughnessIndex);
-							Occlusion = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].OcclusionIndex);
+							if (!Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
+							{
+								SceneFragmentPc.Color = Mesh->MeshData[m].Material.Color;
+								//set to mesh
+								SceneFragmentPc.Metallic = Mesh->MeshData[m].Material.Metallic;
+								SceneFragmentPc.Roughness = Mesh->MeshData[m].Material.Roughness;
+								SceneFragmentPc.Occlusion = Mesh->MeshData[m].Material.Occlusion;
+								OpenVkPushConstant(SceneLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(SceneFragmentPushConstant), &SceneFragmentPc);
 
-							if (Albedo != NULL) AlbedoDescriptorSet = Albedo->TextureDescriptorSet;
-							if (Normal != NULL) NormalDescriptorSet = Normal->TextureDescriptorSet;
-							if (Metallic != NULL) MetallicDescriptorSet = Metallic->TextureDescriptorSet;
-							if (Roughness != NULL) RoughnessDescriptorSet = Roughness->TextureDescriptorSet;
-							if (Occlusion != NULL) OcclusionDescriptorSet = Occlusion->TextureDescriptorSet;
-						}
+								Albedo = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.AlbedoIndex);
+								Normal = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.NormalIndex);
+								Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.MetallicIndex);
+								Roughness = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.RoughnessIndex);
+								Occlusion = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.OcclusionIndex);
 
-						OpenVkBindDescriptorSet(Pipeline, 0, AlbedoDescriptorSet);
-						OpenVkBindDescriptorSet(Pipeline, 1, NormalDescriptorSet);
-						OpenVkBindDescriptorSet(Pipeline, 2, MetallicDescriptorSet);
-						OpenVkBindDescriptorSet(Pipeline, 3, RoughnessDescriptorSet);
-						OpenVkBindDescriptorSet(Pipeline, 4, OcclusionDescriptorSet);
+								if (Albedo != NULL) AlbedoDescriptorSet = Albedo->TextureDescriptorSet;
+								if (Normal != NULL) NormalDescriptorSet = Normal->TextureDescriptorSet;
+								if (Metallic != NULL) MetallicDescriptorSet = Metallic->TextureDescriptorSet;
+								if (Roughness != NULL) RoughnessDescriptorSet = Roughness->TextureDescriptorSet;
+								if (Occlusion != NULL) OcclusionDescriptorSet = Occlusion->TextureDescriptorSet;
+							}
 
-						if (Mesh->MeshData[m].Indices == NULL)
-						{
-							OpenVkBindVertexBuffer(Mesh->MeshData[m].VertexBuffer);
-							OpenVkDrawVertices(Mesh->MeshData[m].VertexCount);
-						}
-						else
-						{
-							OpenVkBindIndexBuffer(Mesh->MeshData[m].VertexBuffer, Mesh->MeshData[m].IndexBuffer);
-							OpenVkDrawIndices(Mesh->MeshData[m].IndexCount);
+							OpenVkBindDescriptorSet(SceneLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							OpenVkBindDescriptorSet(SceneLayout, 1, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							OpenVkBindDescriptorSet(SceneLayout, 2, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							OpenVkBindDescriptorSet(SceneLayout, 3, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							OpenVkBindDescriptorSet(SceneLayout, 4, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+
+							if (Mesh->MeshData[m].Indices == NULL)
+							{
+								OpenVkBindVertexBuffer(Mesh->MeshData[m].VertexBuffer);
+								OpenVkDrawVertices(Mesh->MeshData[m].VertexCount);
+							}
+							else
+							{
+								OpenVkBindIndexBuffer(Mesh->MeshData[m].VertexBuffer, Mesh->MeshData[m].IndexBuffer);
+								OpenVkDrawIndices(Mesh->MeshData[m].IndexCount);
+							}
 						}
 					}
-				}				
+				}
+				else
+				{
+					if (Entities[i].Animation.AnimationIndex != 0)
+					{
+						SceneAnimation* Animation = (SceneAnimation*)CMA_GetAt(&SceneAnimations, Entities[i].Animation.AnimationIndex);
+						if (Animation != NULL)
+						{
+							OpenVkBindDescriptorSet(SceneLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							OpenVkBindDescriptorSet(SceneLayout, 1, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							OpenVkBindDescriptorSet(SceneLayout, 2, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							OpenVkBindDescriptorSet(SceneLayout, 3, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							OpenVkBindDescriptorSet(SceneLayout, 4, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+
+						//	UpdateAnimation(Entities[i].Animation.AnimationIndex);
+							OpenVkBindDynamicVertexBuffer(Animation->VertexBuffer);
+							OpenVkDrawVertices(Animation->MeshData.NumTriangles * 3);
+						}
+					}					
+				}
 			}						
 		}
 	}

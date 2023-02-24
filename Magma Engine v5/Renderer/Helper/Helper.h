@@ -1,4 +1,6 @@
 float CameraFOV = 75.0;
+const float CameraZoomFOV = 10.0;
+const float CameraNormalFOV = 75.0;
 float CameraNearZ = 0.01;
 float CameraFarZ = 1000.0;
 vec3 CameraPos = { 0.0, 2.0, 5.0 };
@@ -7,12 +9,17 @@ vec3 CameraUp = { 0.0, 1.0, 0.0 };
 vec3 ClearColor = { 0.15, 0.3, 0.7 };
 bool ForceResizeEvent = false;
 bool FullScreen = false;
+bool ForceFullScreenEvent = false;
 
-const uint32_t MsaaSamples = 4;
+uint32_t MsaaSamples = 4;
 
 double ShadowRenderingTime = 0;
 double SceneRenderingTime = 0;
 double SwapChainRenderingTime = 0;
+double SSRRenderingTime = 0;
+double BeginFrameTime = 0;
+double EndFrameTime = 0;
+double FrameTime = 0;
 
 const char** GetExtensions(uint32_t* ExtensionCount)
 {
@@ -34,8 +41,7 @@ void GetWindowSize(uint32_t* Width, uint32_t* Height)
 	SDL_GetWindowSize(Window, (int*)Width, (int*)Height);
 }
 
-VkDescriptorSet* GetDescriptorSet(uint32_t DescriptorSet)
+uint32_t GetMousePos(int32_t* x, int32_t* y)
 {
-	VkDescriptorSetInfo* DescriptorSetInfo = (VkDescriptorSetInfo*)CMA_GetAt(&VkRenderer.DescriptorSets, DescriptorSet);
-	return DescriptorSetInfo->DescriptorSets;
+	return SDL_GetMouseState(x, y);
 }

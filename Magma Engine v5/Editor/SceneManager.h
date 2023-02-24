@@ -27,6 +27,8 @@ void EditorDrawScene()
 	}
 	ImGui::End();	
 	
+	
+
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0, 0.0));
 	ImGui::Begin("Scene");
 	{
@@ -37,10 +39,13 @@ void EditorDrawScene()
 			if (SceneWidth != WindowSize.x || SceneHeight != WindowSize.y)
 				ForceResizeEvent = true;
 
+			ImGuiScenePosX = ImGui::GetWindowPos().x;
+			ImGuiScenePosY = ImGui::GetWindowPos().y;
+
 			ImGuiSceneWidth = WindowSize.x;
 			ImGuiSceneHeight = WindowSize.y;
 
-			ImGui::Image(&GetDescriptorSet(SceneDescriptorSet)[VkRenderer.CurrentFrame], WindowSize);
+			ImGui::Image(&GetDescriptorSet(SSRDescriptorSet)[VkRenderer.CurrentFrame], WindowSize);
 		}
 		ImGui::EndChild();
 

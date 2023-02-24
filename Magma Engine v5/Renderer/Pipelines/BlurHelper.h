@@ -5,6 +5,7 @@ typedef struct
 	float BlurStrength;
 } BlurFragmentPushConstant;
 
+uint32_t BlurLayout;
 uint32_t BlurPipeline;
 uint32_t BlurRenderPass;
 uint32_t BlurColorAttachments[2];

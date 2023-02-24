@@ -1,10 +1,12 @@
-#define COMPONENT_COUNT 3
+#define COMPONENT_COUNT 5
 
 typedef enum
 {
 	COMPONENT_TYPE_MESH = 0,
 	COMPONENT_TYPE_MATERIAL = 1,
-	COMPONENT_TYPE_CAMERA = 2
+	COMPONENT_TYPE_CAMERA = 2,
+	COMPONENT_TYPE_AUDIO = 3,
+	COMPONENT_TYPE_ANIMATION = 4,
 } ComponentTypes;
 
 typedef struct
@@ -28,6 +30,19 @@ typedef struct
 	float FarPlane;
 } CameraComponent;
 
+typedef struct  
+{
+	char Name[MAX_CHAR_NAME_LENGTH];
+	SoLoud::Wav Audio;
+	SoLoud::handle Handle;
+} AudioComponent;
+
+typedef struct
+{
+	char Name[MAX_CHAR_NAME_LENGTH];
+	uint32_t AnimationIndex;
+} AnimationComponent;
+
 typedef struct
 {
 	char Name[MAX_CHAR_NAME_LENGTH];
@@ -40,12 +55,16 @@ typedef struct
 	MeshComponent Mesh;
 	MaterialComponent Material;
 	CameraComponent Camera;
+	AudioComponent Audio;
+	AnimationComponent Animation;
 } EntityInfo;
 
 uint32_t SelectedEntity = 0;
 uint32_t SelectedTexture = 0;
 uint32_t SelectedMaterial = 0;
 uint32_t SelectedMesh = 0;
+uint32_t SelectedAudio = 0;
+uint32_t SelectedAnimation = 0;
 uint32_t SelectedScript = 0;
 
 uint32_t EntityCount = 0;
@@ -58,6 +77,7 @@ bool ReloadShaders = false;
 
 uint32_t MeshToDelete = 0;
 bool DeleteMesh = false;
+bool DeleteMeshWithTextures = false;
 
 uint32_t TextureToDelete = 0;
 uint32_t SamplerToDelete = 0;
@@ -78,15 +98,34 @@ char* GetFileNameFromPath(char* Path)
 	return FileName;
 }
 
-bool ImGuiIconButton(const char* Icon, const char* ID, bool Large, const ImVec2& Size = ImVec2(0, 0))
+char* GetFileExtension(char* Path)
+{
+	uint32_t i;
+	for (i = strlen(Path) - 1; i > 0; i--)
+		if (Path[i] == '.') break;
+	char* Extension = Path + i + 1;
+	return Extension;
+}
+
+typedef enum
+{
+	ICON_BUTTON_TYPE_LARGE = 0x0,
+	ICON_BUTTON_TYPE_SMALL = 0x1,
+	ICON_BUTTON_TYPE_EXT = 0x2,
+} IconButtonTypes;
+
+bool ImGuiIconButton(const char* Icon, const char* ID, uint32_t IconType, const ImVec2& Size = ImVec2(0, 0))
 {
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
-	if (Large)
+	if (IconType == ICON_BUTTON_TYPE_LARGE)
 		ImGui::PushFont(IconFontLarge);
-	else
+	else if (IconType == ICON_BUTTON_TYPE_SMALL)
 		ImGui::PushFont(IconFontSmall);
+	else if (IconType == ICON_BUTTON_TYPE_EXT)
+		ImGui::PushFont(IconFontExt);
 	ImGui::PushID(ID);
 	bool Value = ImGui::Button(Icon, Size);
+	ImGui::PopID();
 	ImGui::PopFont();
 	ImGui::PopStyleColor();
 
@@ -113,4 +152,31 @@ void CheckForSameNames(CMA_MemoryZone* MemZone, const char* NameToSearch, char* 
 		sprintf(NewName, "%s (%d)", NameToSearch, Count);
 	else
 		strcpy(NewName, NameToSearch);
+}
+
+void ResetSceneSettings()
+{
+	for (uint32_t i = 0; i < 4; i++)
+	{
+		SceneFragmentUBO.CascadeRange[i] = 2;
+		SceneFragmentUBO.CascadeScale[i] = 0.6;
+		SceneFragmentUBO.CascadeBias[i] = 0.0009;
+	}
+	SceneFragmentUBO.CascadeBias[0] = 0.002;
+	SceneFragmentUBO.CascadeScale[0] = 1.0;
+
+	CascadeSplitLambda = 0.95;
+	CascadeNearClip = 0.5;
+	CascadeFarClip = 48.0;
+
+	SceneFragmentUBO.Gamma = 1.3;
+	SceneFragmentUBO.Exposure = 4.0;
+
+	ClearColor = Vec3(0.15, 0.3, 0.7);
+	SceneFragmentUBO.LightDirection = Vec4(0.426, -0.876, -0.225, 0.0);
+	SceneBackfaceCulling = true;
+	ShadowBackfaceCulling = true;
+	SHADOW_MAP_HEIGHT = ShadowMapSizeTmp;
+	SHADOW_MAP_WIDTH = SHADOW_MAP_HEIGHT * SHADOW_MAP_CASCADE_COUNT;
+	ReloadShaders = true;
 }

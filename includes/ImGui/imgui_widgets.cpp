@@ -1089,6 +1089,60 @@ bool ImGui::ImageButton(ImTextureID user_texture_id, const ImVec2& size, const I
     return ImageButtonEx(id, user_texture_id, size, uv0, uv1, padding, bg_col, tint_col);
 }
 
+bool ImGuiImageButtonExt(ImTextureID texture_id, const ImVec2& size, const ImVec2& Scale, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1))
+{
+    ImGuiContext& g = *GImGui;
+    ImGuiWindow* window = g.CurrentWindow;
+    if (window->SkipItems)
+        return false;
+
+    // Default to using texture ID as ID. User can still push string/integer prefixes.
+    ImGui::PushID((void*)(intptr_t)texture_id);
+    const ImGuiID id = window->GetID("#image");
+    ImGui::PopID();
+
+    const ImVec2 padding(0, 0);
+
+    float AspectWidth = Scale.x / Scale.y;
+    float AspectHeight = Scale.y / Scale.x;
+    float Width = size.x * AspectWidth;
+    float Height = size.y * AspectHeight;
+    //    float OffsetMin = bb.Min.x + 
+//
+//    ImVec2 Min(window->DC.CursorPos.x, window->DC.CursorPos.y);
+//    ImVec2 Max(window->DC.CursorPos.x + size.x, window->DC.CursorPos.y + size.y);
+//    Max.x = Min.x + Width;
+//    ImRect Rect(Min, Max);
+//    ImGui::ItemSize(Rect);
+
+    ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size);
+    ImGui::ItemSize(bb);
+    if (!ImGui::ItemAdd(bb, id))
+        return false;
+
+    bool hovered, held;
+    bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held);
+
+    // Render
+    const ImU32 col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+    ImGui::RenderNavHighlight(bb, id);
+    ImGui::RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, g.Style.FrameRounding));
+    if (Scale.y > Scale.x)
+    {
+        bb.Min.x += (size.x / 2) - (Width / 2);
+        bb.Max.x = bb.Min.x + Width;
+    }
+    else
+    {
+        bb.Min.y += (size.y / 2) - (Height / 2);
+        bb.Max.y = bb.Min.y + Height;
+    }
+    
+    window->DrawList->AddImage(texture_id, bb.Min, bb.Max, uv0, uv1, ImGui::GetColorU32(ImVec4(1, 1, 1, 1)));
+
+    return pressed;
+}
+
 bool ImGui::Checkbox(const char* label, bool* v)
 {
     ImGuiWindow* window = GetCurrentWindow();

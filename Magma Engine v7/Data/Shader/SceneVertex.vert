@@ -28,7 +28,7 @@ void main()
 
 	gl_Position = UBO.Projection * PosRelToCam;
 
-	FragNormal = mat3(transpose(inverse(PushConst.Model))) * InNormal;
+	FragNormal = normalize(mat3(transpose(inverse(PushConst.Model))) * InNormal);
 	FragTexCoord = InTexCoord;
 
 	FragPosRelToCam = PosRelToCam;

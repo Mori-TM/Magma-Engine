@@ -88,7 +88,7 @@ void SwapChainDraw()
 	//	OpenVkDrawVertices(3);
 	
 	 	EngineDrawEditor();
-		ImGui::ShowDemoWindow();
+	//	ImGui::ShowDemoWindow();
 	
 		ImGui::Render();
 	

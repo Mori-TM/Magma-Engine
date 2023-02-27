@@ -131,21 +131,11 @@ void EditorEntityInspector()
 					}
 
 					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-					if (ImGui::Button("Remove Camera Component"))
+					if (ImGui::Button("Remove Animation Component"))
 					{
-						Entities[SelectedEntity].UsedComponents[COMPONENT_TYPE_CAMERA] = false;
+						Entities[SelectedEntity].UsedComponents[COMPONENT_TYPE_ANIMATION] = false;
 					}
 					ImGui::PopStyleColor();
-				//	ImGui::DragFloat("Field of View", &Entities[SelectedEntity].Camera.FOV, 0.1, 0.01, 179.0);
-				//	ImGui::DragFloat("Near Plane", &Entities[SelectedEntity].Camera.NearPlane, 0.1, 0.01, 1000.0);
-				//	ImGui::DragFloat("Far Plane", &Entities[SelectedEntity].Camera.FarPlane, 0.1, 0.01, 10000.0);
-				//
-				//	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-				//	if (ImGui::Button("Remove Camera Component"))
-				//	{
-				//		Entities[SelectedEntity].UsedComponents[COMPONENT_TYPE_CAMERA] = false;
-				//	}
-				//	ImGui::PopStyleColor();
 				}
 			}
 	
@@ -217,6 +207,19 @@ void EditorTextureCombo(const char* Name, const char* ID, uint32_t* TextureIndex
 	ImGui::PopID();
 }
 
+void MaterialEditor(SceneMaterial* Material, float Offset)
+{
+	ImGui::SetCursorPosX(Offset); ImGui::ColorPicker4("Color", (float*)&Material->Color, ImGuiColorEditFlags_AlphaBar);
+	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Albedo", "A-Mat", &Material->AlbedoIndex);
+	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Normal", "N-Mat", &Material->NormalIndex);
+	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Metallic", "M-Mat", &Material->MetallicIndex);
+	ImGui::SetCursorPosX(Offset); ImGui::SliderFloat("Metallic Strength", &Material->Metallic, 0.0, 1.0);
+	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Roughness", "R-Mat", &Material->RoughnessIndex);
+	ImGui::SetCursorPosX(Offset); ImGui::SliderFloat("Roughness Strength", &Material->Roughness, 0.0, 1.0);
+	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Occlusion", "O-Mat", &Material->OcclusionIndex);
+	ImGui::SetCursorPosX(Offset); ImGui::SliderFloat("Occlusion Strength", &Material->Occlusion, 0.0, 1.0);
+}
+
 void EditorMaterialInspector()
 {
 	ImGui::Begin("Material Inspector");
@@ -228,19 +231,7 @@ void EditorMaterialInspector()
 			{
 				ImGui::PushID(Material);
 				ImGui::InputText("Name", Material->Name, MAX_CHAR_NAME_LENGTH);
-				ImGui::ColorPicker4("Color", (float*)&Material->Color, ImGuiColorEditFlags_AlphaBar);
-
-				EditorTextureCombo("Albedo", "A-Mat", & Material->AlbedoIndex);
-				EditorTextureCombo("Normal", "N-Mat", &Material->NormalIndex);
-				EditorTextureCombo("Metallic", "M-Mat", &Material->MetallicIndex);
-			//	ImGui::PushID("MS-Mat");
-				ImGui::SliderFloat("Metallic Strength", &Material->Metallic, 0.0, 1.0);
-				EditorTextureCombo("Roughness", "R-Mat", &Material->RoughnessIndex);
-			//	ImGui::PushID("RS-Mat");
-				ImGui::SliderFloat("Roughness Strength", &Material->Roughness, 0.0, 1.0);
-				EditorTextureCombo("Occlusion", "O-Mat", &Material->OcclusionIndex);
-			//	ImGui::PushID("OS-Mat");
-				ImGui::SliderFloat("Occlusion Strength", &Material->Occlusion, 0.0, 1.0);
+				MaterialEditor(Material, ImGui::GetCursorPosX());
 
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 				if (ImGui::Button("Delete Material"))
@@ -350,27 +341,7 @@ void EditorMeshInspector()
 						if (ImGui::CollapsingHeader(MeshName))
 						{
 							ImGui::PushID(&Mesh->MeshData[i].Material);
-							ImGui::SetCursorPosX(66);
-							ImGui::ColorEdit4("Color", (float*)&Mesh->MeshData[i].Material.Color, ImGuiColorEditFlags_AlphaBar);
-							ImGui::SetCursorPosX(66);
-							EditorTextureCombo("Albedo", "A-SMat", &Mesh->MeshData[i].Material.AlbedoIndex);
-							ImGui::SetCursorPosX(66);
-							EditorTextureCombo("Normal", "N-SMat", &Mesh->MeshData[i].Material.NormalIndex);
-							ImGui::SetCursorPosX(66);
-							EditorTextureCombo("Metallic", "M-SMat", &Mesh->MeshData[i].Material.MetallicIndex);
-							ImGui::SetCursorPosX(66);
-						//	ImGui::PushID("MS-SMat");
-							ImGui::SliderFloat("Metallic Strength", &Mesh->MeshData[i].Material.Metallic, 0.0, 1.0);
-							ImGui::SetCursorPosX(66);
-							EditorTextureCombo("Roughness", "R-SMat", &Mesh->MeshData[i].Material.RoughnessIndex);
-							ImGui::SetCursorPosX(66);
-						//	ImGui::PushID("RS-SMat");
-							ImGui::SliderFloat("Roughness Strength", &Mesh->MeshData[i].Material.Roughness, 0.0, 1.0);
-							ImGui::SetCursorPosX(66);
-							EditorTextureCombo("Occlusion", "O-SMat", &Mesh->MeshData[i].Material.OcclusionIndex);
-							ImGui::SetCursorPosX(66);
-						//	ImGui::PushID("OS-SMat");
-							ImGui::SliderFloat("Occlusion Strength", &Mesh->MeshData[i].Material.Occlusion, 0.0, 1.0);
+							MaterialEditor(&Mesh->MeshData[i].Material, 66);
 							ImGui::PopID();
 						}						
 					}
@@ -415,51 +386,17 @@ void EditorScriptInspector()
 			
 			if (ImGui::Button("Save"))
 			{
-				if (strcmp(SceneScripts[SelectedScript].Path, "None") == 0)
-				{
-					char Path[MAX_CHAR_PATH_LENGTH];
-					if (WaveSaveFileDialog(Path, "lua\0*.lua\0"))
-					{
-						strcpy(SceneScripts[SelectedScript].Path, Path);
-						FILE* File = fopen(SceneScripts[SelectedScript].Path, "wb");
-						fwrite(SceneScripts[SelectedScript].Script, 1, strlen(SceneScripts[SelectedScript].Script), File);
-						fclose(File);
-						WaveResetToLastPath();
-					}
-				}
+				if (strcmp(SceneScripts[SelectedScript].Path, "None") == 0 || strlen(SceneScripts[SelectedScript].Path) == 0)
+					ifd::FileDialog::Instance().Save("SaveScript", "Save Script", "All Scripts (*.lua;*.txt){.lua,.txt},.*");				
 				else
-				{
-					FILE* File = fopen(SceneScripts[SelectedScript].Path, "wb");
-					fwrite(SceneScripts[SelectedScript].Script, 1, strlen(SceneScripts[SelectedScript].Script), File);
-					fclose(File);
-				}
-									
+					SaveScript(NULL);									
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("Open"))
-			{
-				char Path[MAX_CHAR_PATH_LENGTH];
-				if (WaveOpenFileDialog(Path, false, NULL, "lua\0*.lua\0"))
-				{
-					strcpy(SceneScripts[SelectedScript].Path, Path);
-					OpenVkFile File = OpenVkReadFile(Path);
-					strcpy(SceneScripts[SelectedScript].Script, File.Data);
-					WaveResetToLastPath();
-				}
-			}
+				ifd::FileDialog::Instance().Open("LoadScript", "Open Script", "All Scripts (*.lua;*.txt){.lua,.txt},.*", false);
 			ImGui::SameLine();
 			if (ImGui::Button("Save As"))
-			{
-				char Path[MAX_CHAR_PATH_LENGTH];
-				if (WaveSaveFileDialog(Path, "lua\0*.lua\0"))
-				{
-					strcpy(SceneScripts[SelectedScript].Path, Path);
-					FILE* File = fopen(SceneScripts[SelectedScript].Path, "wb");
-					fwrite(SceneScripts[SelectedScript].Script, 1, strlen(SceneScripts[SelectedScript].Script), File);
-					fclose(File);
-					WaveResetToLastPath();
-				}
-			}
+				ifd::FileDialog::Instance().Save("SaveScript", "Save Script", "All Scripts (*.lua;*.txt){.lua,.txt},.*");
 
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
 			ImVec2 Size = ImGui::GetWindowSize();
@@ -495,6 +432,9 @@ void EditorVSInspector()
 		static bool opt_enable_grid = true;
 		static bool opt_enable_context_menu = true;
 		static bool adding_line = false;
+
+		ImGui::Text("Used Size: %lu", points.Size);
+		ImGui::Text("Allocated Size: %lu", points.AllocateSize);
 
 		ImGui::Checkbox("Enable grid", &opt_enable_grid);
 		ImGui::Checkbox("Enable context menu", &opt_enable_context_menu);

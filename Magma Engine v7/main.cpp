@@ -32,6 +32,8 @@ extern "C"
 #include <soloud/soloud.h>
 #include <soloud/soloud_wav.h>
 
+#include <MojoAL/mojoal.c>
+
 #define WAVE_NO_MULTI_THREDED_LOADING
 #include <Wave/WaveMath.h>
 #include <Wave/WaveMesh.h>

@@ -174,10 +174,9 @@ void EditorDrawMainMenuBar()
 	}
 }
 
-void ImGuiSetPosPaddingX(float Pos)
+inline void ImGuiSetPosPaddingX(float Pos)
 {
-	ImGuiContext& g = *GImGui;
-	ImGui::SetCursorPosX(Pos - g.Style.FramePadding.x);	
+	ImGui::SetCursorPosX(Pos - GImGui->Style.FramePadding.x);
 }
 
 void EngineDrawEditor()
@@ -194,34 +193,52 @@ void EngineDrawEditor()
 	EditorInspector();
 	EditorAssetBrowser();
 
+	//Make this code block shorter/ more readable
 	if (ifd::FileDialog::Instance().IsDone("LoadDefaultModel")) 
 	{
 		if (ifd::FileDialog::Instance().HasResult())
-			LoadModel(0, ifd::FileDialog::Instance().GetResult().u8string().c_str());
+			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
+				LoadModel(0, ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
 		ifd::FileDialog::Instance().Close();
 	}
 	if (ifd::FileDialog::Instance().IsDone("LoadSmoothModel"))
 	{
 		if (ifd::FileDialog::Instance().HasResult())
-			LoadModel(WAVE_GEN_SMOOTH_NORMALS, ifd::FileDialog::Instance().GetResult().u8string().c_str());
+			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
+				LoadModel(WAVE_GEN_SMOOTH_NORMALS, ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
 		ifd::FileDialog::Instance().Close();
 	}
 	if (ifd::FileDialog::Instance().IsDone("LoadFlatModel"))
 	{
 		if (ifd::FileDialog::Instance().HasResult())
-			LoadModel(WAVE_FORCE_GEN_NORMALS, ifd::FileDialog::Instance().GetResult().u8string().c_str());
+			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
+				LoadModel(WAVE_FORCE_GEN_NORMALS, ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
 		ifd::FileDialog::Instance().Close();
 	}
 	if (ifd::FileDialog::Instance().IsDone("LoadTexture"))
 	{
 		if (ifd::FileDialog::Instance().HasResult())
-			AddTexture((char*)ifd::FileDialog::Instance().GetResult().u8string().c_str(), true);
+			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
+				AddTexture((char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str(), true);
 		ifd::FileDialog::Instance().Close();
 	}
 	if (ifd::FileDialog::Instance().IsDone("LoadAnimation"))
 	{
 		if (ifd::FileDialog::Instance().HasResult())
-			AddAnimation((char*)ifd::FileDialog::Instance().GetResult().u8string().c_str(), 1024, 1024);
+			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
+				AddAnimation((char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str(), 1024, 1024);
+		ifd::FileDialog::Instance().Close();
+	}
+	if (ifd::FileDialog::Instance().IsDone("LoadScript"))
+	{
+		if (ifd::FileDialog::Instance().HasResult())
+			AddScript(ifd::FileDialog::Instance().GetResult().u8string().c_str());
+		ifd::FileDialog::Instance().Close();
+	}
+	if (ifd::FileDialog::Instance().IsDone("SaveScript"))
+	{
+		if (ifd::FileDialog::Instance().HasResult())
+			SaveScript(ifd::FileDialog::Instance().GetResult().u8string().c_str());
 		ifd::FileDialog::Instance().Close();
 	}
 	
@@ -371,7 +388,16 @@ void EngineDrawEditor()
 			ImGui::EndCombo();
 		}
 		*/
-		ImGui::Checkbox("Scene Backface Culling", &SceneBackfaceCulling);
+	//	ImGui::Checkbox("Scene Backface Culling", &SceneBackfaceCulling);
+
+		const char* CullingOptions[] = { "No Culling", "Back Face Culling", "Front Face Culling" };
+		if (ImGui::BeginCombo("Scene Face Culling", CullingOptions[SceneCullMode]))
+		{
+			for (uint32_t i = 0; i < 3; i++)
+				if (ImGui::Button(CullingOptions[i]))
+					SceneCullMode = i;
+			ImGui::EndCombo();
+		}
 
 		if (ImGui::Button("Reload Shaders"))
 			ReloadShaders = true;
@@ -379,21 +405,23 @@ void EngineDrawEditor()
 		ImGui::Separator();
 		if (ImGui::CollapsingHeader("Shadow Settings"))
 		{			
+			ImGuiSetPosPaddingX(33); ImGui::SliderFloat("Split lambda", &CascadeSplitLambda, 0.001, 1.0);
+			ImGuiSetPosPaddingX(33); ImGui::SliderFloat("Near Clip", &CascadeNearClip, 0.0001, 2.0);
+			ImGuiSetPosPaddingX(33); ImGui::SliderFloat("Far Clip", &CascadeFarClip, 10.0, 1000.0);
+			ImGuiSetPosPaddingX(33); ImGui::DragInt("Shadow Resolution", &ShadowMapSizeTmp, 8.0, 128, 8192);
 			ImGuiSetPosPaddingX(33);
-			ImGui::SliderFloat("Split lambda", &CascadeSplitLambda, 0.001, 1.0);
-			ImGuiSetPosPaddingX(33);
-			ImGui::SliderFloat("Near Clip", &CascadeNearClip, 0.0001, 2.0);
-			ImGuiSetPosPaddingX(33);
-			ImGui::SliderFloat("Far Clip", &CascadeFarClip, 10.0, 1000.0);
-			ImGuiSetPosPaddingX(33);
-			ImGui::DragInt("Shadow Resolution", &ShadowMapSizeTmp, 8.0, 128, 8192);
-			ImGuiSetPosPaddingX(33);			
-			ImGui::Checkbox("Shadow Backface Culling", &ShadowBackfaceCulling);
+			if (ImGui::BeginCombo("Shadow Face Culling", CullingOptions[ShadowCullMode]))
+			{
+				for (uint32_t i = 0; i < 3; i++)
+					if (ImGui::Button(CullingOptions[i]))
+						ShadowCullMode = i;
+				ImGui::EndCombo();
+			}
 			ImGuiSetPosPaddingX(33);
 			if (ImGui::Button("Apply"))
 			{
-				SHADOW_MAP_HEIGHT = ShadowMapSizeTmp;
-				SHADOW_MAP_WIDTH = SHADOW_MAP_HEIGHT * SHADOW_MAP_CASCADE_COUNT;
+				ShadowMapHeight = ShadowMapSizeTmp;
+				ShadowMapWidth = ShadowMapHeight * SHADOW_MAP_CASCADE_COUNT;
 				ReloadShaders = true;
 			}
 
@@ -406,16 +434,11 @@ void EngineDrawEditor()
 				if (ImGui::CollapsingHeader(Name))
 				{
 					int32_t Range = SceneFragmentUBO.CascadeRange[i];
-					ImGuiSetPosPaddingX(66);
-					ImGui::SliderInt("Range", &Range, 0.0, 8.0);
+					ImGuiSetPosPaddingX(66); ImGui::SliderInt("Range", &Range, 0.0, 8.0);
+					ImGuiSetPosPaddingX(66); ImGui::SliderFloat("Scale", &SceneFragmentUBO.CascadeScale[i], 0.1, 6.0);
+					ImGuiSetPosPaddingX(66); ImGui::DragFloat("Bias", &SceneFragmentUBO.CascadeBias[i], 0.000001, 0.000001, 0.9, "%.6f");
+					ImGuiSetPosPaddingX(66); ImGui::DragFloat("Split Depth", &Cascades[i].SplitDepth, 0.01, -1000.0, 1000.0);
 					SceneFragmentUBO.CascadeRange[i] = Range;
-
-					ImGuiSetPosPaddingX(66);
-					ImGui::SliderFloat("Scale", &SceneFragmentUBO.CascadeScale[i], 0.1, 6.0);
-					ImGuiSetPosPaddingX(66);
-					ImGui::DragFloat("Bias", &SceneFragmentUBO.CascadeBias[i], 0.000001, 0.000001, 0.9, "%.6f");
-					ImGuiSetPosPaddingX(66);
-					ImGui::DragFloat("Split Depth", &Cascades[i].SplitDepth, 0.01, -1000.0, 1000.0);
 				}
 				ImGui::PopID();
 			}

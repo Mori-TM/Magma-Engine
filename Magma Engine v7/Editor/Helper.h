@@ -174,9 +174,9 @@ void ResetSceneSettings()
 
 	ClearColor = Vec3(0.15, 0.3, 0.7);
 	SceneFragmentUBO.LightDirection = Vec4(0.426, -0.876, -0.225, 0.0);
-	SceneBackfaceCulling = true;
-	ShadowBackfaceCulling = true;
-	SHADOW_MAP_HEIGHT = ShadowMapSizeTmp;
-	SHADOW_MAP_WIDTH = SHADOW_MAP_HEIGHT * SHADOW_MAP_CASCADE_COUNT;
+	SceneCullMode = CULL_MODE_BACK;
+	ShadowCullMode = CULL_MODE_FRONT;
+	ShadowMapHeight = ShadowMapSizeTmp;
+	ShadowMapWidth = ShadowMapHeight * SHADOW_MAP_CASCADE_COUNT;
 	ReloadShaders = true;
 }

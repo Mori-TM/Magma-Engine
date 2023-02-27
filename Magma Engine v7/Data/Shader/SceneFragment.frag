@@ -3,14 +3,16 @@
 
 #define SHADOW_MAP_CASCADE_COUNT 3
 
-layout(location = 0) out vec4 OutColor;
+layout(location = 0) out vec4 OutDepthPosition;
+layout(location = 1) out vec4 OutNormalMap;
+layout(location = 2) out vec4 OutPBRMap;
+layout(location = 3) out vec4 OutLightPass;
 
 layout(location = 0) in vec3 FragNormal;
 layout(location = 1) in vec2 FragTexCoord;
 layout(location = 2) in vec4 FragPosRelToCam;
 layout(location = 3) in vec4 FragWorldPos;
 
-#define SHADOW_MAP_SIZE 4096
 layout(set = 0, binding = 0) uniform sampler2D AlbedoMap;
 layout(set = 1, binding = 0) uniform sampler2D NormalMap;
 layout(set = 2, binding = 0) uniform sampler2D MetallicMap;
@@ -29,9 +31,15 @@ layout(push_constant) uniform PushConstants
 layout(set = 6, binding = 0) uniform UniformBufferObject
 {
 	vec4 CascadeSplits;
+	vec4 CascadeRange;
+	vec4 CascadeScale;
+	vec4 CascadeBias;
 	mat4 CascadeProjectionView[SHADOW_MAP_CASCADE_COUNT];
 	vec4 LightDirection;
 	vec4 CameraPosition;
+	mat4 View;
+	float Gamma;
+	float Exposure;
 } UBO;
 
 //#define Ambient 0.6
@@ -48,13 +56,7 @@ float TextureProjection(vec4 ShadowCoord, vec2 Offset, uint CascadeIndex, float 
 {
 	float Shadow = 0.0;
 	
-	float Bias = 0.0;
-	if (CascadeIndex == 0) 
-		Bias = 0.002;
-	else if (CascadeIndex == 1)
-		Bias = 0.00085;
-	else
-		Bias = 0.0008;
+	float Bias = UBO.CascadeBias[CascadeIndex];
 
 	if (ShadowCoord.z > -1.0 && ShadowCoord.z < 1.0) 
 	{
@@ -70,7 +72,7 @@ float TextureProjection(vec4 ShadowCoord, vec2 Offset, uint CascadeIndex, float 
 
 float FilterPCF(vec4 ShadowCoord, int Range, float Scale, uint CascadeIndex, float Ambient)
 {
-	ivec2 TextureDimension = ivec2(SHADOW_MAP_SIZE);
+	ivec2 TextureDimension = textureSize(ShadowMap, 0).yy;
 
 	float DX = Scale / float(TextureDimension.x);
 	float DY = Scale / float(TextureDimension.y);
@@ -107,7 +109,7 @@ vec3 GetNormalFromMap()
 	vec2 st1 = dFdx(FragTexCoord);
 	vec2 st2 = dFdy(FragTexCoord);
 
-	vec3 N = normalize(FragNormal);
+	vec3 N = FragNormal;
 	vec3 T = normalize(Q1*st2.t - Q2*st1.t);
 	vec3 B = -normalize(cross(N, T));
 	mat3 TBN = mat3(T, B, N);
@@ -164,21 +166,27 @@ float GetShadow(float Ambient)
 			 
 	vec4 ShadowCoord = (BiasMat * UBO.CascadeProjectionView[CascadeIndex]) * FragWorldPos;	
 
-	ShadowCoord.x /= 3;
-	ShadowCoord.x += (1.0 / 3) * float(CascadeIndex); 
+		ShadowCoord.x /= SHADOW_MAP_CASCADE_COUNT;
+		ShadowCoord.x += (1.0 / SHADOW_MAP_CASCADE_COUNT) * float(CascadeIndex); 
 //	ShadowCoord.x *= 2;
 	
-//	ShadowCoord.x += (float(SHADOW_MAP_WIDTH) * float(CascadeIndex));
+//	ShadowCoord.x += (float(ShadowMapWidth) * float(CascadeIndex));
 //	ShadowCoord.s = float(CascadeIndex + 1);
 
 	float Shadow = 0.0;
-	if (CascadeIndex == 2)
+	if (UBO.CascadeRange[CascadeIndex] > 0.1)
+		Shadow = FilterPCF(ShadowCoord / ShadowCoord.w, int(UBO.CascadeRange[CascadeIndex]), UBO.CascadeScale[CascadeIndex], CascadeIndex, Ambient);
+	else
 		Shadow = TextureProjection(ShadowCoord / ShadowCoord.w, vec2(0.0), CascadeIndex, Ambient);
+	/*
+	if (CascadeIndex == 2)
+	//	Shadow = TextureProjection(ShadowCoord / ShadowCoord.w, vec2(0.0), CascadeIndex, Ambient);
+		Shadow = FilterPCF(ShadowCoord / ShadowCoord.w, 2, 0.6, CascadeIndex, Ambient);
 	else if (CascadeIndex == 1)
 		Shadow = FilterPCF(ShadowCoord / ShadowCoord.w, 2, 0.6, CascadeIndex, Ambient);
 	else
 		Shadow = FilterPCF(ShadowCoord / ShadowCoord.w, 2, 1.0, CascadeIndex, Ambient);
-	
+	*/
 //	Shadow = TextureProjection(ShadowCoord / ShadowCoord.w, vec2(0.0), CascadeIndex, Ambient);
 
 //	float Shadow = FilterPCF(ShadowCoord / ShadowCoord.w, CascadeIndex, Ambient);
@@ -189,13 +197,23 @@ float GetShadow(float Ambient)
 
 vec3 Uncharted2Tonemap(vec3 x)
 {
-	float A = 0.15;
-	float B = 0.50;
-	float C = 0.10;
-	float D = 0.20;
-	float E = 0.02;
-	float F = 0.30;
+	const float A = 0.15;
+	const float B = 0.50;
+	const float C = 0.10;
+	const float D = 0.20;
+	const float E = 0.02;
+	const float F = 0.30;
 	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
+}
+
+vec3 AcesTonemap(vec3 x) 
+{
+  const float a = 2.51;
+  const float b = 0.03;
+  const float c = 2.43;
+  const float d = 0.59;
+  const float e = 0.14;
+  return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
 }
 
 void main() 
@@ -228,7 +246,7 @@ void main()
 		discard;
 	*/
 
-	vec3 N = normalize(Normal);
+	vec3 N = Normal;
 					//Upload Camera Pos
 	vec3 V = normalize(UBO.CameraPosition.xyz - FragWorldPos.xyz);
 
@@ -236,10 +254,10 @@ void main()
 	F0 = mix(F0, Albedo, Metallic);
 	vec3 Lo = vec3(0.0);
 
-	vec3 L = normalize(-UBO.LightDirection.xyz);
+	vec3 L = -UBO.LightDirection.xyz;
 	vec3 H = normalize(V + L);
 
-	vec3 LightColor = vec3(25.0);
+	vec3 LightColor = vec3(12.0);
 	vec3 Diffuse = vec3(max(dot(N, L), 0.0)) * LightColor;
 	float distance = length(-UBO.LightDirection.xyz);
 	float attenuation = 1.0 / (distance * distance);
@@ -269,8 +287,14 @@ void main()
 //	OutColor.rgb = (Ambient + (Ambient - Shadow)) * Albedo + (Lo * (1.0 - Shadow));
 		//	OutColor.rgb = Albedo + (Lo * (Ambient + (Ambient - Shadow)));
 //	OutColor.rgb = vec3(Ambient + (Ambient - Shadow));
-			OutColor.rgb = Ambient * Albedo + ((Ambient - Shadow) * Lo);
-		//	OutColor.rgb = (Ambient + (Ambient - Shadow) * Diffuse) * Albedo;
+	
+	
+	//OutColor.rgb = Lo;
+			OutLightPass.rgb = Ambient * Albedo + ((Ambient - Shadow) * Lo);
+	
+	
+	
+	//	OutColor.rgb = (Ambient + (Ambient - Shadow) * Diffuse) * Albedo;
 		//	OutColor.rgb = (Ambient - Shadow) * Albedo + Lo;
 //	OutColor.rgb = vec3(Ambient);
 //	OutColor.rgb = Ambient * Albedo + Lo;
@@ -292,12 +316,12 @@ void main()
 									//2.2
 //	OutColor.rgb = pow(OutColor.rgb, vec3(1.0/2.2)); 
 
-	float Exposure = 4.0;
-	float Gamma = 1.3;//1.3
-	OutColor.rgb = Uncharted2Tonemap(OutColor.rgb * Exposure);
-	OutColor.rgb = OutColor.rgb * (1.0f / Uncharted2Tonemap(vec3(11.2f)));	
+	float Exposure = UBO.Exposure;
+	float Gamma = UBO.Gamma;//1.3
+	OutLightPass.rgb = Uncharted2Tonemap(OutLightPass.rgb * Exposure);
+	OutLightPass.rgb = OutLightPass.rgb * (1.0f / Uncharted2Tonemap(vec3(11.2f)));	
 	// Gamma correction
-	OutColor.rgb = pow(OutColor.rgb, vec3(1.0f / Gamma));
+	OutLightPass.rgb = pow(OutLightPass.rgb, vec3(1.0f / Gamma));
 
 //	vec3 mapped = OutColor.rgb / (OutColor.rgb + vec3(1.0));
 //	vec3 mapped = vec3(1.0) - exp(-OutColor.rgb * 1.65);
@@ -305,7 +329,16 @@ void main()
   // gamma correction 
 //    mapped = pow(mapped, vec3(1.0 / gamma));
 
-	OutColor.a = AlbedoTexture.a * Color.a;
+	OutLightPass.a = AlbedoTexture.a * Color.a;
+//	OutLightPass = vec4(Albedo, 1.0);
+	OutNormalMap = vec4((Normal).xyz * mat3((UBO.View)), Roughness);
+//	OutNormalMap = vec4(vec4(Normal, 0.0).xyz, Roughness);
+
+	OutDepthPosition = vec4(FragPosRelToCam.xyz, gl_FragCoord.z);
+//	OutDepthPosition = vec4(gl_FragCoord.z);
+//	OutDepthPosition = vec4(FragWorldPos);
+	
+	OutPBRMap = vec4(Metallic, Roughness, 1.0, 1.0);
 
 	if (AlbedoTexture.a < 0.9)
 		discard;
@@ -317,7 +350,8 @@ void main()
   
 //    OutColor.rgb = mapped;
 
-//	OutColor.a = texture(AlbedoTexture, FragTexCoord).a;
+//	OutColor.xyz = abs(FragNormal);
+
 	/*
 	switch(CascadeIndex) 
 	{

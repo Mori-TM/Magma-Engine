@@ -26,7 +26,7 @@ typedef struct
 
 typedef struct
 {
-	float CascadeSplits[4];//dont't change!
+	float CascadeSplits[4];//dont't change[4] to other number!
 	float CascadeRange[4];
 	float CascadeScale[4];
 	float CascadeBias[4];
@@ -117,10 +117,11 @@ uint32_t ImGuiSceneHeight = 900;
 uint32_t SceneWidth = 1600;
 uint32_t SceneHeight = 900;
 
-bool SceneBackfaceCulling = true;
+uint32_t SceneCullMode = CULL_MODE_BACK;
 uint32_t SceneLayout;
-uint32_t ScenePipelineBackCull;
 uint32_t ScenePipelineNoneCull;
+uint32_t ScenePipelineBackCull;
+uint32_t ScenePipelineFrontCull;
 uint32_t SceneRenderPass;
 uint32_t SceneFramebuffer;
 uint32_t SceneMsaaAttachment;
@@ -162,10 +163,6 @@ uint32_t AddTexture(char* Path, bool ShowInAssetBrowser);
 
 void InitScene()
 {
-	/*
-	* Just call AddTexture, AddMaterial and so on
-	*/
-
 	ResetSceneSettings();
 	/*
 	AddTexture((char*)"Data/Textures/Default.png", false);

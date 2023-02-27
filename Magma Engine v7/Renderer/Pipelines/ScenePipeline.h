@@ -68,7 +68,7 @@ void CreateScenePipeline()
 	GraphicsPipelineCreateInfo.DepthClamp = false;
 	GraphicsPipelineCreateInfo.PolygonMode = OPENVK_POLYGON_MODE_FILL;
 	GraphicsPipelineCreateInfo.LineWidth = 3.0;
-	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_BACK;
+	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_NONE;
 	GraphicsPipelineCreateInfo.FrontFace = OPENVK_FRONT_FACE_COUNTER_CLOCK_WISE;
 	GraphicsPipelineCreateInfo.MsaaSamples = MsaaSamples;
 	GraphicsPipelineCreateInfo.AlphaBlending = true;
@@ -76,12 +76,17 @@ void CreateScenePipeline()
 	GraphicsPipelineCreateInfo.PipelineLayout = SceneLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = true;
 	GraphicsPipelineCreateInfo.RenderPass = SceneRenderPass;
+	ScenePipelineNoneCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
+
+	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/SceneVertex.spv");
+	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/SceneFragment.spv");
+	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_BACK;
 	ScenePipelineBackCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 
 	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/SceneVertex.spv");
 	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/SceneFragment.spv");
-	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_NONE;
-	ScenePipelineNoneCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
+	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_FRONT;
+	ScenePipelineFrontCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 
 	for (uint32_t i = 0; i < RIGID_BODY_COUNT; i++)
 	{
@@ -391,8 +396,17 @@ void SceneDraw()
 			DebugDraw();
 		
 		uint32_t Pipeline = ScenePipelineNoneCull;
-		if (SceneBackfaceCulling)
+		switch (SceneCullMode)
+		{
+		case CULL_MODE_BACK:
 			Pipeline = ScenePipelineBackCull;
+			break;
+		case CULL_MODE_FRONT:
+			Pipeline = ScenePipelineFrontCull;
+			break;
+		default:
+			break;
+		}
 
 		OpenVkBindPipeline(Pipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 /*

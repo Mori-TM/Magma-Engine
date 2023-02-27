@@ -1,6 +1,6 @@
 void CreateShadowRenderPass()
 {
-	ShadowDepthAttachment = OpenVkCreateDepthImageAttachment(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, 1, true, OPENVK_FORMAT_DEFAULT);
+	ShadowDepthAttachment = OpenVkCreateDepthImageAttachment(ShadowMapWidth, ShadowMapHeight, 1, true, OPENVK_FORMAT_DEFAULT);
 
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_DEPTH };
 	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_DEFAULT };
@@ -39,12 +39,12 @@ void CreateShadowPipeline()
 	GraphicsPipelineCreateInfo.PrimitiveTopology = OPENVK_PRIMITIVE_TOPOLOGY_TRIANGLE;
 	GraphicsPipelineCreateInfo.x = 0;
 	GraphicsPipelineCreateInfo.y = 0;
-	GraphicsPipelineCreateInfo.Width = SHADOW_MAP_WIDTH;
-	GraphicsPipelineCreateInfo.Height = SHADOW_MAP_HEIGHT;
+	GraphicsPipelineCreateInfo.Width = ShadowMapWidth;
+	GraphicsPipelineCreateInfo.Height = ShadowMapHeight;
 	GraphicsPipelineCreateInfo.DepthClamp = true;
 	GraphicsPipelineCreateInfo.PolygonMode = OPENVK_POLYGON_MODE_FILL;
 	GraphicsPipelineCreateInfo.LineWidth = 3.0;
-	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_BACK;
+	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_NONE;
 	GraphicsPipelineCreateInfo.FrontFace = OPENVK_FRONT_FACE_COUNTER_CLOCK_WISE;
 	GraphicsPipelineCreateInfo.MsaaSamples = 1;
 	GraphicsPipelineCreateInfo.AlphaBlending = false;
@@ -52,12 +52,17 @@ void CreateShadowPipeline()
 	GraphicsPipelineCreateInfo.PipelineLayout = ShadowLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = true;
 	GraphicsPipelineCreateInfo.RenderPass = ShadowRenderPass;
-	ShadowPipelineBackCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
+	ShadowPipelineNoneCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 
-	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_NONE;
+	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_BACK;
 	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/ShadowVertex.spv");
 	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/ShadowFragment.spv");
-	ShadowPipelineNoneCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
+	ShadowPipelineBackCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
+
+	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_FRONT;
+	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/ShadowVertex.spv");
+	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/ShadowFragment.spv");
+	ShadowPipelineFrontCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 }
 
 void CreateShadowFramebuffers()
@@ -68,8 +73,8 @@ void CreateShadowFramebuffers()
 	FramebufferCreateInfo.AttachmentCount = ARRAY_SIZE(Attachments);
 	FramebufferCreateInfo.Attachments = Attachments;
 	FramebufferCreateInfo.RenderPass = ShadowRenderPass;
-	FramebufferCreateInfo.Width = SHADOW_MAP_WIDTH;
-	FramebufferCreateInfo.Height = SHADOW_MAP_HEIGHT;
+	FramebufferCreateInfo.Width = ShadowMapWidth;
+	FramebufferCreateInfo.Height = ShadowMapHeight;
 	ShadowFramebuffer = OpenVkCreateFramebuffer(&FramebufferCreateInfo);
 }
 
@@ -227,20 +232,29 @@ void ShadowDraw()
 	BeginInfo.Framebuffer = ShadowFramebuffer;
 	BeginInfo.x = 0;
 	BeginInfo.y = 0;
-	BeginInfo.Width = SHADOW_MAP_WIDTH;
-	BeginInfo.Height = SHADOW_MAP_HEIGHT;
+	BeginInfo.Width = ShadowMapWidth;
+	BeginInfo.Height = ShadowMapHeight;
 	OpenVkBeginRenderPass(&BeginInfo);
 	{
 
 		for (uint32_t j = 0; j < SHADOW_MAP_CASCADE_COUNT; j++)
 		{
-			uint32_t Offset = (SHADOW_MAP_HEIGHT * j);
-			OpenVkSetScissor(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
-			OpenVkSetViewport(Offset, 0, SHADOW_MAP_HEIGHT, SHADOW_MAP_HEIGHT);
+			uint32_t Offset = (ShadowMapHeight * j);
+			OpenVkSetScissor(0, 0, ShadowMapWidth, ShadowMapHeight);
+			OpenVkSetViewport(Offset, 0, ShadowMapHeight, ShadowMapHeight);
 
 			uint32_t Pipeline = ShadowPipelineNoneCull;
-			if (ShadowBackfaceCulling)
+			switch (ShadowCullMode)
+			{
+			case CULL_MODE_BACK:
 				Pipeline = ShadowPipelineBackCull;
+				break;
+			case CULL_MODE_FRONT:
+				Pipeline = ShadowPipelineFrontCull;
+				break;
+			default:
+				break;
+			}
 
 			OpenVkBindPipeline(Pipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 

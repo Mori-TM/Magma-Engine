@@ -18,6 +18,13 @@ typedef uint32_t bool;
 #define PI 3.141592653589793238
 #define PI2 6.28318530718
 
+typedef enum
+{
+	CULL_MODE_NONE = 0x0,
+	CULL_MODE_BACK = 0x1,
+	CULL_MODE_FRONT = 0x2,
+} CullModes;
+
 SDL_Window* Window;
 SDL_Event Event;
 

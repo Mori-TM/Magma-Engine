@@ -137,7 +137,7 @@ int32_t GetWindowSize(lua_State* LuaState)
 	return 2;
 }
 
-bool WindowWasFocused = false;
+bool WindowWasFocused = true;
 
 void LuaReloadFiles()
 {
@@ -174,14 +174,6 @@ void UpdateLuaScripts()
 
 						}
 				}
-				
-				/*
-				lua_getglobal(LuaState, "a");
-				if (lua_isnumber(LuaState, -1))
-				{
-					printf("Number: %f\n", lua_tonumber(LuaState, -1));
-				}
-				*/
 
 				lua_pushcfunction(LuaState, GetEntity);
 				lua_setglobal(LuaState, "GetEntity");
@@ -209,22 +201,27 @@ void UpdateLuaScripts()
 		
 		LuaOnStart = false;
 	}
-	/*
-	const Uint8* State = SDL_GetKeyboardState(NULL);
-	int32_t Key = 0;
-	for (uint32_t i = 0; i < SDL_NUM_SCANCODES; i++)
-	{
-		if (State[i])
-		{
-			Key = SDL_GetKeyFromScancode((SDL_Scancode)i);
-			printf("%d\n", Key);
-			break;
-		}
-	}
-	*/
 }
 
 void DeInitLua()
 {
 	lua_close(LuaState);
+}
+
+void AddScript(const char* Path)
+{
+	strcpy(SceneScripts[SelectedScript].Path, Path);
+	OpenVkFile File = OpenVkReadFile(Path);
+	strcpy(SceneScripts[SelectedScript].Script, File.Data);
+	free(File.Data);
+}
+
+void SaveScript(const char* Path)
+{
+	if (Path != NULL)
+		strcpy(SceneScripts[SelectedScript].Path, Path);
+
+	FILE* File = fopen(SceneScripts[SelectedScript].Path, "wb");
+	fwrite(SceneScripts[SelectedScript].Script, 1, strlen(SceneScripts[SelectedScript].Script), File);
+	fclose(File);
 }

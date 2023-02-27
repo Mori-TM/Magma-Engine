@@ -26,7 +26,9 @@ typedef struct
 	size_t AllocateSize;
 	size_t MemSize;
 	CMA_Memory* Mem;
-	size_t GarbageCount;
+	size_t PopCount;
+	size_t PushCountNew;
+	size_t PushCountReused;
 } CMA_MemoryZone;
 
 void ICMA_Resize(size_t Start, CMA_MemoryZone* Zone)
@@ -46,7 +48,9 @@ CMA_MemoryZone CMA_Create(size_t Size)
 	Zone.MemSize = Size;
 	Zone.Mem = (CMA_Memory*)malloc(CMA_BLOCK_SIZE * sizeof(CMA_Memory));
 	ICMA_Resize(0, &Zone);
-	Zone.GarbageCount = 0;
+	Zone.PopCount = 0;
+	Zone.PushCountNew = 0;
+	Zone.PushCountReused = 0;
 	return Zone;
 }
 
@@ -64,20 +68,13 @@ void CMA_Destroy(CMA_MemoryZone* Zone)
 	Zone->MemSize = 0;
 	Zone->Size = 0;
 	Zone->AllocateSize = 0;
-	Zone->GarbageCount = 0;
+	Zone->PopCount = 0;
+	Zone->PushCountNew = 0;
+	Zone->PushCountReused = 0;
 }
 
 size_t CMA_Push(CMA_MemoryZone* Zone, void* Data)
 {
-	if (Zone->Size >= Zone->AllocateSize)
-	{
-	//	printf("wtf\n");
-		Zone->Mem = (CMA_Memory*)realloc(Zone->Mem, (Zone->AllocateSize + CMA_BLOCK_SIZE) * sizeof(CMA_Memory));
-		Zone->AllocateSize += CMA_BLOCK_SIZE;
-		ICMA_Resize(Zone->AllocateSize - CMA_BLOCK_SIZE, Zone);
-	}
-
-
 	for (size_t i = 0; i < Zone->Size; i++)
 	{
 		if (Zone->Mem[i].State & ICMA_DATA_STATE_UNUSED &&
@@ -85,16 +82,28 @@ size_t CMA_Push(CMA_MemoryZone* Zone, void* Data)
 		{
 			Zone->Mem[i].State = ICMA_DATA_STATE_USED | ICMA_DATA_STATE_ALLOCATED;
 			memcpy(Zone->Mem[i].Data, Data, Zone->MemSize);
+			Zone->PushCountReused++;
 			return i;
 		}
 		else if (Zone->Mem[i].State & ICMA_DATA_STATE_UNUSED &&
-			Zone->Mem[i].State & ICMA_DATA_STATE_UNALLOCATED)
+				 Zone->Mem[i].State & ICMA_DATA_STATE_UNALLOCATED)
 		{
 			Zone->Mem[i].State = ICMA_DATA_STATE_USED | ICMA_DATA_STATE_ALLOCATED;
 			Zone->Mem[i].Data = malloc(Zone->MemSize);
 			memcpy(Zone->Mem[i].Data, Data, Zone->MemSize);
+			Zone->PushCountReused++;
 			return i;
 		}
+	}
+
+	if (Zone->Size >= Zone->AllocateSize)
+	{
+	//	printf("CMA: Resized memory zone\n");
+		Zone->Mem = (CMA_Memory*)realloc(Zone->Mem, (Zone->AllocateSize + CMA_BLOCK_SIZE) * sizeof(CMA_Memory));
+		if (Zone->Mem == NULL)
+			printf("CMA Error: Failed to resize memory zone\n");
+		Zone->AllocateSize += CMA_BLOCK_SIZE;
+		ICMA_Resize(Zone->AllocateSize - CMA_BLOCK_SIZE, Zone);
 	}
 
 	if (Zone->Mem[Zone->Size].State & ICMA_DATA_STATE_UNUSED &&
@@ -102,16 +111,17 @@ size_t CMA_Push(CMA_MemoryZone* Zone, void* Data)
 	{
 		Zone->Mem[Zone->Size].State = ICMA_DATA_STATE_USED | ICMA_DATA_STATE_ALLOCATED;
 		memcpy(Zone->Mem[Zone->Size].Data, Data, Zone->MemSize);
+		Zone->PushCountNew++;
 	}
 	else if (Zone->Mem[Zone->Size].State & ICMA_DATA_STATE_UNUSED &&
-		Zone->Mem[Zone->Size].State & ICMA_DATA_STATE_UNALLOCATED)
+			 Zone->Mem[Zone->Size].State & ICMA_DATA_STATE_UNALLOCATED)
 	{
 		Zone->Mem[Zone->Size].State = ICMA_DATA_STATE_USED | ICMA_DATA_STATE_ALLOCATED;
 		Zone->Mem[Zone->Size].Data = malloc(Zone->MemSize);
 		memcpy(Zone->Mem[Zone->Size].Data, Data, Zone->MemSize);
+		Zone->PushCountNew++;
 	}
 
-	//changed
 	return Zone->Size++;
 }
 
@@ -131,7 +141,73 @@ void* CMA_GetAt(CMA_MemoryZone* Zone, size_t Index)
 void CMA_Pop(CMA_MemoryZone* Zone, size_t Index)
 {
 	Zone->Mem[Index].State = ICMA_DATA_STATE_UNUSED | ICMA_DATA_STATE_ALLOCATED;
+	/*
+	if (Zone->PopCount >= CMA_MAX_GARBAGE_COUNT)
+	{
+		char ReduceSize = 1;
+		for (size_t i = Zone->Size - 1; i > 0; i--)
+		{
+		//	if (i <= CMA_BLOCK_SIZE)
+		//		break;
 
+			if (Zone->Mem[i].State & ICMA_DATA_STATE_USED)
+				ReduceSize = 0;
+
+			if (Zone->Mem[i].State & ICMA_DATA_STATE_UNUSED &&
+				Zone->Mem[i].State & ICMA_DATA_STATE_ALLOCATED)
+			{
+				printf("CMA: Freed poped memory\n");
+				free(Zone->Mem[i].Data);
+				Zone->Mem[i].Data = NULL;
+				Zone->Mem[i].State = ICMA_DATA_STATE_UNUSED | ICMA_DATA_STATE_UNALLOCATED;
+			}
+
+			if (ReduceSize)
+				Zone->Size--;
+		}
+
+		Zone->PopCount = 0;
+
+	//	if (Zone->PopCount > 0)
+	//		Zone->PopCount--;
+	//	if (Zone->PushCountNew > 0)
+	//		Zone->PushCountNew--;
+		
+	//	Zone->PushCountReused = 0;
+		if (Zone->AllocateSize > CMA_BLOCK_SIZE && Zone->AllocateSize != Zone->Size)
+		{
+			Zone->AllocateSize = Zone->Size;
+			Zone->Mem = (CMA_Memory*)realloc(Zone->Mem, Zone->AllocateSize * sizeof(CMA_Memory));
+			printf("CMA: Resized poped memory zone\n");
+		}
+	}
+	*/
+
+	
+
+	if (Zone->PopCount >= CMA_MAX_GARBAGE_COUNT)
+	{
+		Zone->PopCount = 0;
+
+		for (size_t i = Zone->Size - 1; i > 0; i--)
+		{
+			if (Zone->Mem[i].State & ICMA_DATA_STATE_USED)
+				break;
+
+			free(Zone->Mem[i].Data);
+			Zone->Mem[i].Data = NULL;
+			Zone->Mem[i].State = ICMA_DATA_STATE_UNUSED | ICMA_DATA_STATE_UNALLOCATED;
+			Zone->Size--;
+		}
+
+		if (Zone->AllocateSize != Zone->Size)
+		{
+			Zone->AllocateSize = Zone->Size;
+			Zone->Mem = (CMA_Memory*)realloc(Zone->Mem, Zone->AllocateSize * sizeof(CMA_Memory));
+		}
+	}
+
+	/*
 	for (size_t i = Zone->Size - 1; i > 0; i--)
 	{
 		if (Zone->Mem[i].State & ICMA_DATA_STATE_USED)
@@ -143,17 +219,18 @@ void CMA_Pop(CMA_MemoryZone* Zone, size_t Index)
 		Zone->Size--;
 	}
 
-	if (Zone->GarbageCount >= CMA_MAX_GARBAGE_COUNT)
+	if (Zone->PopCount >= CMA_MAX_GARBAGE_COUNT)
 	{
-		Zone->GarbageCount = 0;
+		Zone->PopCount = 0;
 		if (Zone->AllocateSize != Zone->Size)
 		{
 			Zone->AllocateSize = Zone->Size;
 			Zone->Mem = (CMA_Memory*)realloc(Zone->Mem, Zone->AllocateSize * sizeof(CMA_Memory));
 		}		
 	}
+	*/
 
-	Zone->GarbageCount++;
+	Zone->PopCount++;
 }
 
 uint32_t CMA_Compare(CMA_MemoryZone* Zone0, size_t Index0, CMA_MemoryZone* Zone1, size_t Index1)

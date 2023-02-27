@@ -15,11 +15,11 @@
 
 #include "../Editor/Helper.h"
 #include "../Editor/Camera.h"
+#include "../Editor/ScriptEngine.h"
 #include "../Editor/SceneManager.h"
 #include "../Editor/AssetBrowser.h"
 #include "../Editor/EntityManager.h"
 #include "../Editor/Inspector.h"
-#include "../Editor/ScriptEngine.h"
 #include "../Editor/Editor.h"
 
 #include "Pipelines/BlurPipeline.h"

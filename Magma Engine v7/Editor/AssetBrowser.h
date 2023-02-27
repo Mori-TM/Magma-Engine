@@ -450,17 +450,17 @@ void EditorAssetBrowser()
 
 				if (ImGui::BeginMenu("Load Model"))
 				{
-					if (ImGui::MenuItem("Default")) ifd::FileDialog::Instance().Open("LoadDefaultModel", "Open Model", "All Models (*.obj;*.stl;*.gltf){.obj,.stl,.gltf},.*");
-					if (ImGui::MenuItem("Gen Smooth Normals")) ifd::FileDialog::Instance().Open("LoadSmoothModel", "Open Model", "All Models (*.obj;*.stl;*.gltf){.obj,.stl,.gltf},.*");
-					if (ImGui::MenuItem("Gen Flat Normals")) ifd::FileDialog::Instance().Open("LoadFlatModel", "Open Model", "All Models (*.obj;*.stl;*.gltf){.obj,.stl,.gltf},.*");
+					if (ImGui::MenuItem("Default")) ifd::FileDialog::Instance().Open("LoadDefaultModel", "Open Model", "All Models (*.obj;*.stl;*.gltf){.obj,.stl,.gltf},.*", true);
+					if (ImGui::MenuItem("Gen Smooth Normals")) ifd::FileDialog::Instance().Open("LoadSmoothModel", "Open Model", "All Models (*.obj;*.stl;*.gltf){.obj,.stl,.gltf},.*", true);
+					if (ImGui::MenuItem("Gen Flat Normals")) ifd::FileDialog::Instance().Open("LoadFlatModel", "Open Model", "All Models (*.obj;*.stl;*.gltf){.obj,.stl,.gltf},.*", true);
 					ImGui::EndMenu();
 				}
 
 				if (ImGui::Selectable("Load Texture"))
-					ifd::FileDialog::Instance().Open("LoadTexture", "Load Texture", "Image file (*.png;*.jpg;*.tga;*.jpeg;*.hdr;*.psd;*.bmp){.png,.jpg,.tga,.jpeg,.hdr,.psd,.bmp},.*");
+					ifd::FileDialog::Instance().Open("LoadTexture", "Load Texture", "Image file (*.png;*.jpg;*.tga;*.jpeg;*.hdr;*.psd;*.bmp){.png,.jpg,.tga,.jpeg,.hdr,.psd,.bmp},.*", true);
 
 				if (ImGui::Selectable("Load Animation"))
-					ifd::FileDialog::Instance().Open("LoadAnimation", "Load Animation", "Quake Models (*.md2;*.bin){.md2,.bin},.*");
+					ifd::FileDialog::Instance().Open("LoadAnimation", "Load Animation", "Quake Models (*.md2;*.bin){.md2,.bin},.*", true);
 			}
 			ImGui::EndPopup();
 		}

@@ -46,6 +46,7 @@ typedef struct
 	int32_t Width;
 	int32_t Height;
 	int32_t Components;
+	int32_t MipLevels;
 	uint32_t TextureImage;
 	uint32_t TextureSampler;
 	uint32_t TextureDescriptorSet;
@@ -79,6 +80,15 @@ typedef struct
 	uint32_t VertexBuffer;
 } SceneAnimation;
 
+typedef enum
+{
+	RENDER_TYPE_DEFAULT = 0,
+	RENDER_TYPE_SHADOW_0 = 1,
+	RENDER_TYPE_SHADOW_1 = 2,
+	RENDER_TYPE_SHADOW_2 = 3,
+	RENDER_TYPE_SHADOW_3 = 4,
+} RenderTypes;
+
 typedef struct
 {
 	SceneMaterial Material;
@@ -90,6 +100,9 @@ typedef struct
 	uint32_t IndexCount;
 	uint32_t* Indices;
 	uint32_t IndexBuffer;
+
+	AABBData AABB;
+	bool Render[5];
 } SceneMeshData;
 
 typedef struct
@@ -116,6 +129,8 @@ uint32_t ImGuiSceneHeight = 900;
 
 uint32_t SceneWidth = 1600;
 uint32_t SceneHeight = 900;
+
+uint32_t SceneScaling = 100;
 
 uint32_t SceneCullMode = CULL_MODE_BACK;
 uint32_t SceneLayout;
@@ -161,6 +176,8 @@ void ResetSceneSettings();
 void AddMaterial(const char* Name);
 uint32_t AddTexture(char* Path, bool ShowInAssetBrowser);
 
+bool LoadTextureCompressed = false;
+
 void InitScene()
 {
 	ResetSceneSettings();
@@ -195,6 +212,12 @@ void InitScene()
 	Animation.VertexBuffer = 0;
 	CMA_Push(&SceneAnimations, &Animation);
 	*/
+
+	constexpr int x = 1024;
+	constexpr int y = 1024;
+	constexpr int ss = (x / 4) * (y / 4) * 8;
+	constexpr int su = x * y * 4;
+	constexpr int sc = (x * y * 4) / 8;
 	
 	//Texture
 	SceneTextures = CMA_Create(sizeof(SceneTextureImage));
@@ -204,6 +227,14 @@ void InitScene()
 	strcpy(Image.Name, "None");
 	strcpy(Image.Path, "None");
 	CMA_Push(&SceneTextures, &Image);
+
+	LoadTextureCompressed = true;
+	Image.ShowInAssetBrowser = true;
+	Image.TextureDescriptorSet = LoadTexture((char*)"Data/Textures/OrangeTex.png", &Image);
+	strcpy(Image.Name, "UvGrid");
+	strcpy(Image.Path, "None");
+	CMA_Push(&SceneTextures, &Image);
+
 	//Material
 	SceneMaterials = CMA_Create(sizeof(SceneMaterial));
 	SceneMaterial Material;

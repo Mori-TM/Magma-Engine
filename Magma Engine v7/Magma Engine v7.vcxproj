@@ -143,20 +143,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor\AssetBrowser.h" />
-    <ClInclude Include="Editor\AudioEngine.h" />
-    <ClInclude Include="Editor\Camera.h" />
     <ClInclude Include="Editor\Editor.h" />
     <ClInclude Include="Editor\EntityManager.h" />
-    <ClInclude Include="Editor\Helper.h" />
     <ClInclude Include="Editor\Inspector.h" />
     <ClInclude Include="Editor\SceneManager.h" />
-    <ClInclude Include="Editor\ScriptEngine.h" />
+    <ClInclude Include="Engine\AudioEngine.h" />
+    <ClInclude Include="Engine\Engine.h" />
+    <ClInclude Include="Engine\FpsCamera.h" />
+    <ClInclude Include="Engine\FrustumCulling.h" />
+    <ClInclude Include="Engine\ImageCompression.h" />
+    <ClInclude Include="Engine\ScriptEngine.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="Renderer\Helper\Buffers.h" />
     <ClInclude Include="Renderer\Helper\DescriptorPool.h" />
     <ClInclude Include="Renderer\Helper\DescriptorSetLayouts.h" />
-    <ClInclude Include="Renderer\Helper\Helper.h" />
-    <ClInclude Include="Renderer\Helper\ImGuiHelper.h" />
+    <ClInclude Include="Renderer\Helper\RendererHelper.h" />
+    <ClInclude Include="Renderer\Helper\GUI.h" />
     <ClInclude Include="Renderer\Helper\Meshes.h" />
     <ClInclude Include="Renderer\Helper\Sampler.h" />
     <ClInclude Include="Renderer\Pipelines\BlurHelper.h" />

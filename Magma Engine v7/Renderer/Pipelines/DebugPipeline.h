@@ -53,7 +53,9 @@ void CreateDebugPipeline()
 
 void DebugDraw()
 {
+	Mutex.lock();
 	mat4 PV = MultiplyMat4P(&SceneVertexUBO.Projection, &SceneVertexUBO.View);
+	Mutex.unlock();
 	DebugVertexPc.PVM = PV;
 	
 	OpenVkBindPipeline(DebugPipelineFatLine, OPENVK_PIPELINE_TYPE_GRAPHICS);

@@ -15,9 +15,11 @@ void SetDefaultMaterial(SceneMaterial* Material, const char* Name)
 
 void AddMesh(const char* Name, SceneMesh* MeshInfo)
 {
+	Mutex.lock();
 	CheckForSameNames(&SceneMeshes, Name, MeshInfo->Name);
 
 	SelectedMesh = CMA_Push(&SceneMeshes, MeshInfo);
+	Mutex.unlock();
 	ImGui::SetWindowFocus("Mesh Inspector");
 }
 
@@ -32,18 +34,79 @@ void AddMaterial(const char* Name)
 	ImGui::SetWindowFocus("Material Inspector");
 }
 
+
 uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 {
+//	LoadTextureCompressed = true;
+
 	printf("%s\n", Path);
 	OpenVkDeviceWaitIdle();
 
 	unsigned char* Pixels = NULL;
 	Image->Components = OPENVK_FORMAT_RGBA;
 	
+	
+
 	if (OpenVkLoadTexture(Path, false, &Pixels, &Image->Width, &Image->Height, OPENVK_FORMAT_RGBA) == OpenVkTrue)
 	{
-		Image->TextureImage = OpenVkCreateTextureImage(Pixels, Image->Width, Image->Height, OPENVK_FORMAT_RGBA);
-		OpenVkFree(Pixels);
+		if (Image->Width % 4 != 0 ||
+			Image->Height % 4 != 0)
+			LoadTextureCompressed = false;
+
+		if (LoadTextureCompressed)
+		{
+			/*
+			int32_t Size = Image->Width * Image->Height;
+
+			void* Block = malloc(Size);
+
+			bc7enc_compress_block_init();
+			bc7enc_compress_block_params Para;
+			Para.m_max_partitions_mode = BC7ENC_MAX_PARTITIONS1 / 2;
+			Para.m_mode_partition_estimation_filterbank = 1;
+			Para.m_perceptual = 0;
+			Para.m_try_least_squares = 0;//
+			Para.m_uber_level = BC7ENC_MAX_UBER_LEVEL / 2;
+			Para.m_use_mode7_for_alpha = 1;
+			Para.m_weights[0] = 1;
+			Para.m_weights[1] = 1;
+			Para.m_weights[2] = 1;
+			Para.m_weights[3] = 1;
+			bc7enc_compress_block_params_init(&Para);
+			int i = bc7enc_compress_block(Block, Pixels, &Para);
+
+			Image->TextureImage = OpenVkCreateTextureImage((unsigned char*)Block, Image->Width, Image->Height, OPENVK_FORMAT_BC7_RGBA);
+			OpenVkFree(Pixels);
+			OpenVkFree(Block);
+			*/
+
+		//	int32_t Size = (Image->Width / 4) * (Image->Height / 4) * 8;
+
+		//	unsigned char* Block = (unsigned char*)malloc(Size);
+
+		//	stb_compress_dxt_block(Block, Pixels, 1, STB_DXT_HIGHQUAL);
+
+			Image->Components = OPENVK_FORMAT_BC4_RGBA;
+
+			size_t BlockSize = 0;
+			unsigned char* Block;
+			compress_image(Pixels, Image->Width, Image->Height, &Block, &BlockSize, Image->Components);
+
+			
+			Image->TextureImage = OpenVkCreateTextureImage((unsigned char*)Block, Image->Width, Image->Height, Image->Components);
+			Image->MipLevels = VkRenderer.MipLevels;
+			OpenVkFree(Pixels);
+			OpenVkFree(Block);
+			printf("Its compressed\n");
+		}
+		else
+		{
+			Image->TextureImage = OpenVkCreateTextureImage(Pixels, Image->Width, Image->Height, OPENVK_FORMAT_RGBA);
+			Image->MipLevels = VkRenderer.MipLevels;
+			OpenVkFree(Pixels);
+		}
+
+		
 		if (Image->TextureImage == OPENVK_ERROR)
 			goto Error;
 
@@ -84,6 +147,8 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 	DescriptorSetCreateInfo.Bindings = Bindings;
 	DescriptorSetCreateInfo.Images = &Image->TextureImage;
 	DescriptorSetCreateInfo.DescriptorSet = NULL;
+
+	LoadTextureCompressed = false;
 
 	return OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 }
@@ -152,6 +217,25 @@ void AddScript()
 	SceneScriptCount++;
 }
 
+void GenerateAABB(SceneMeshData* Mesh)
+{
+	SceneVertex* Data = &Mesh->Vertices[0];
+	Mesh->AABB.Min = Vec3f(FLT_MAX);
+	Mesh->AABB.Max = Vec3f(-FLT_MAX);
+
+	for (uint32_t i = 0; i < Mesh->VertexCount; i++)
+	{
+		Data = &Mesh->Vertices[i];
+		Mesh->AABB.Max.x = MAX(Mesh->AABB.Max.x, Data->Pos.x);
+		Mesh->AABB.Max.y = MAX(Mesh->AABB.Max.y, Data->Pos.y);
+		Mesh->AABB.Max.z = MAX(Mesh->AABB.Max.z, Data->Pos.z);
+
+		Mesh->AABB.Min.x = MIN(Mesh->AABB.Min.x, Data->Pos.x);
+		Mesh->AABB.Min.y = MIN(Mesh->AABB.Min.y, Data->Pos.y);
+		Mesh->AABB.Min.z = MIN(Mesh->AABB.Min.z, Data->Pos.z);
+	}
+}
+
 bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshInfo)
 {
 	MeshInfo->Freeable = true;
@@ -163,6 +247,7 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 	{
 		WaveMeshData* WaveMesh = &ModelData->Meshes[i];
 		SceneMeshData* SceneMesh = &MeshInfo->MeshData[i];
+		memset(&SceneMesh->Render, 1, ARRAY_SIZE(SceneMesh->Render) * sizeof(bool));
 
 		SetDefaultMaterial(&SceneMesh->Material, "MESH");
 		if (strcmp(ModelData->Materials[i].MaterialName, WaveEmptyMaterial.MaterialName) != 0)
@@ -225,6 +310,8 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 		SceneMesh->IndexBuffer = OpenVkCreateIndexBuffer(SceneMesh->IndexCount * sizeof(uint32_t), SceneMesh->Indices);
 		if (SceneMesh->IndexBuffer == OPENVK_ERROR)
 			return false;
+
+		GenerateAABB(&MeshInfo->MeshData[i]);
 	}
 }
 
@@ -306,6 +393,7 @@ void EditorAssetBrowser()
 			}
 		}
 
+		Mutex.lock();
 		for (uint32_t i = 1; i < SceneMeshes.Size; i++)
 		{
 			SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, i);
@@ -320,6 +408,7 @@ void EditorAssetBrowser()
 				ImGui::NextColumn();
 			}
 		}
+		Mutex.unlock();
 
 		for (uint32_t i = 1; i < SceneAnimations.Size; i++)
 		{
@@ -350,121 +439,127 @@ void EditorAssetBrowser()
 
 		ImGui::Columns(1);
 
-		//	ImGui::BeginChild("Asset Pop Up Child");
+		if (ImGui::BeginPopupContextWindow("Asset Pop Up"))
 		{
-			if (ImGui::BeginPopupContextWindow("Asset Pop Up"))
+
+			if (ImGui::Selectable("Add Script"))
 			{
-				if (ImGui::Selectable("Add Script"))
-				{
-					AddScript();
-				}
-
-				if (ImGui::Selectable("Add Material"))
-				{
-					AddMaterial("Material");
-				}
-
-				if (ImGui::Selectable("Add Plane"))
-				{
-					SceneMesh MeshInfo;
-
-					MeshInfo.Freeable = false;
-					strcpy(MeshInfo.Path, "Plane");
-					MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
-					MeshInfo.MeshCount = 1;
-
-					SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
-					MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(PlaneVertices);
-					MeshInfo.MeshData[0].Vertices = (SceneVertex*)&PlaneVertices;
-					MeshInfo.MeshData[0].VertexBuffer = PlaneVertexBuffer;
-
-					MeshInfo.MeshData[0].IndexCount = ARRAY_SIZE(PlaneIndices);
-					MeshInfo.MeshData[0].Indices = (uint32_t*)&PlaneIndices;
-					MeshInfo.MeshData[0].IndexBuffer = PlaneIndexBuffer;
-
-					AddMesh("Plane", &MeshInfo);
-				}
-
-				if (ImGui::Selectable("Add Cube"))
-				{
-					SceneMesh MeshInfo;
-
-					MeshInfo.Freeable = false;
-					strcpy(MeshInfo.Path, "Cube");
-					MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
-					MeshInfo.MeshCount = 1;
-
-					SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
-					MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(CubeVertices);
-					MeshInfo.MeshData[0].Vertices = (SceneVertex*)&CubeVertices;
-					MeshInfo.MeshData[0].VertexBuffer = CubeVertexBuffer;
-
-					MeshInfo.MeshData[0].IndexCount = 0;
-					MeshInfo.MeshData[0].Indices = NULL;
-					MeshInfo.MeshData[0].IndexBuffer = 0;
-
-					AddMesh("Cube", &MeshInfo);
-				}
-
-				if (ImGui::Selectable("Add Sphere"))
-				{
-					SceneMesh MeshInfo;
-
-					MeshInfo.Freeable = false;
-					strcpy(MeshInfo.Path, "Sphere");
-					MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
-					MeshInfo.MeshCount = 1;
-
-					SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
-					MeshInfo.MeshData[0].VertexCount = SphereVertexCount;
-					MeshInfo.MeshData[0].Vertices = SphereVertices;
-					MeshInfo.MeshData[0].VertexBuffer = SphereVertexBuffer;
-
-					MeshInfo.MeshData[0].IndexCount = SphereIndexCount;
-					MeshInfo.MeshData[0].Indices = SphereIndices;
-					MeshInfo.MeshData[0].IndexBuffer = SphereIndexBuffer;
-
-					AddMesh("Sphere", &MeshInfo);
-				}
-
-				if (ImGui::Selectable("Add Bean"))
-				{
-					SceneMesh MeshInfo;
-
-					MeshInfo.Freeable = false;
-					strcpy(MeshInfo.Path, "Bean");
-					MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
-					MeshInfo.MeshCount = 1;
-
-					SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
-					MeshInfo.MeshData[0].VertexCount = BeanVertexCount;
-					MeshInfo.MeshData[0].Vertices = BeanVertices;
-					MeshInfo.MeshData[0].VertexBuffer = BeanVertexBuffer;
-
-					MeshInfo.MeshData[0].IndexCount = BeanIndexCount;
-					MeshInfo.MeshData[0].Indices = BeanIndices;
-					MeshInfo.MeshData[0].IndexBuffer = BeanIndexBuffer;
-
-					AddMesh("Bean", &MeshInfo);
-				}
-
-				if (ImGui::BeginMenu("Load Model"))
-				{
-					if (ImGui::MenuItem("Default")) ifd::FileDialog::Instance().Open("LoadDefaultModel", "Open Model", "All Models (*.obj;*.stl;*.gltf){.obj,.stl,.gltf},.*", true);
-					if (ImGui::MenuItem("Gen Smooth Normals")) ifd::FileDialog::Instance().Open("LoadSmoothModel", "Open Model", "All Models (*.obj;*.stl;*.gltf){.obj,.stl,.gltf},.*", true);
-					if (ImGui::MenuItem("Gen Flat Normals")) ifd::FileDialog::Instance().Open("LoadFlatModel", "Open Model", "All Models (*.obj;*.stl;*.gltf){.obj,.stl,.gltf},.*", true);
-					ImGui::EndMenu();
-				}
-
-				if (ImGui::Selectable("Load Texture"))
-					ifd::FileDialog::Instance().Open("LoadTexture", "Load Texture", "Image file (*.png;*.jpg;*.tga;*.jpeg;*.hdr;*.psd;*.bmp){.png,.jpg,.tga,.jpeg,.hdr,.psd,.bmp},.*", true);
-
-				if (ImGui::Selectable("Load Animation"))
-					ifd::FileDialog::Instance().Open("LoadAnimation", "Load Animation", "Quake Models (*.md2;*.bin){.md2,.bin},.*", true);
+				AddScript();
 			}
+
+			if (ImGui::Selectable("Add Material"))
+			{
+				AddMaterial("Material");
+			}
+
+			if (ImGui::Selectable("Add Plane"))
+			{
+				SceneMesh MeshInfo;
+
+				MeshInfo.Freeable = false;
+				strcpy(MeshInfo.Path, "Plane");
+				MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
+				MeshInfo.MeshCount = 1;
+
+				SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
+				MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(PlaneVertices);
+				MeshInfo.MeshData[0].Vertices = (SceneVertex*)&PlaneVertices;
+				MeshInfo.MeshData[0].VertexBuffer = PlaneVertexBuffer;
+
+				MeshInfo.MeshData[0].IndexCount = ARRAY_SIZE(PlaneIndices);
+				MeshInfo.MeshData[0].Indices = (uint32_t*)&PlaneIndices;
+				MeshInfo.MeshData[0].IndexBuffer = PlaneIndexBuffer;
+				memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
+				GenerateAABB(&MeshInfo.MeshData[0]);
+
+				AddMesh("Plane", &MeshInfo);
+			}
+
+			if (ImGui::Selectable("Add Cube"))
+			{
+				SceneMesh MeshInfo;
+
+				MeshInfo.Freeable = false;
+				strcpy(MeshInfo.Path, "Cube");
+				MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
+				MeshInfo.MeshCount = 1;
+
+				SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
+				MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(CubeVertices);
+				MeshInfo.MeshData[0].Vertices = (SceneVertex*)&CubeVertices;
+				MeshInfo.MeshData[0].VertexBuffer = CubeVertexBuffer;
+
+				MeshInfo.MeshData[0].IndexCount = 0;
+				MeshInfo.MeshData[0].Indices = NULL;
+				MeshInfo.MeshData[0].IndexBuffer = 0;
+				memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
+				GenerateAABB(&MeshInfo.MeshData[0]);
+
+				AddMesh("Cube", &MeshInfo);
+			}
+
+			if (ImGui::Selectable("Add Sphere"))
+			{
+				SceneMesh MeshInfo;
+
+				MeshInfo.Freeable = false;
+				strcpy(MeshInfo.Path, "Sphere");
+				MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
+				MeshInfo.MeshCount = 1;
+
+				SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
+				MeshInfo.MeshData[0].VertexCount = SphereVertexCount;
+				MeshInfo.MeshData[0].Vertices = SphereVertices;
+				MeshInfo.MeshData[0].VertexBuffer = SphereVertexBuffer;
+
+				MeshInfo.MeshData[0].IndexCount = SphereIndexCount;
+				MeshInfo.MeshData[0].Indices = SphereIndices;
+				MeshInfo.MeshData[0].IndexBuffer = SphereIndexBuffer;
+				memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
+				GenerateAABB(&MeshInfo.MeshData[0]);
+
+				AddMesh("Sphere", &MeshInfo);
+			}
+
+			if (ImGui::Selectable("Add Bean"))
+			{
+				SceneMesh MeshInfo;
+
+				MeshInfo.Freeable = false;
+				strcpy(MeshInfo.Path, "Bean");
+				MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
+				MeshInfo.MeshCount = 1;
+
+				SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
+				MeshInfo.MeshData[0].VertexCount = BeanVertexCount;
+				MeshInfo.MeshData[0].Vertices = BeanVertices;
+				MeshInfo.MeshData[0].VertexBuffer = BeanVertexBuffer;
+
+				MeshInfo.MeshData[0].IndexCount = BeanIndexCount;
+				MeshInfo.MeshData[0].Indices = BeanIndices;
+				MeshInfo.MeshData[0].IndexBuffer = BeanIndexBuffer;
+				memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
+				GenerateAABB(&MeshInfo.MeshData[0]);
+					
+				AddMesh("Bean", &MeshInfo);
+			}
+
+			if (ImGui::BeginMenu("Load Model"))
+			{
+				if (ImGui::MenuItem("Default")) ifd::FileDialog::Instance().Open("LoadDefaultModel", "Open Model", "All Models (*.obj;*.stl;*.gltf){.obj,.stl,.gltf},.*", true);
+				if (ImGui::MenuItem("Gen Smooth Normals")) ifd::FileDialog::Instance().Open("LoadSmoothModel", "Open Model", "All Models (*.obj;*.stl;*.gltf){.obj,.stl,.gltf},.*", true);
+				if (ImGui::MenuItem("Gen Flat Normals")) ifd::FileDialog::Instance().Open("LoadFlatModel", "Open Model", "All Models (*.obj;*.stl;*.gltf){.obj,.stl,.gltf},.*", true);
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::Selectable("Load Texture"))
+				ifd::FileDialog::Instance().Open("LoadTexture", "Load Texture", "Image file (*.png;*.jpg;*.tga;*.jpeg;*.hdr;*.psd;*.bmp){.png,.jpg,.tga,.jpeg,.hdr,.psd,.bmp},.*", true);
+
+			if (ImGui::Selectable("Load Animation"))
+				ifd::FileDialog::Instance().Open("LoadAnimation", "Load Animation", "Quake Models (*.md2;*.bin){.md2,.bin},.*", true);
+
 			ImGui::EndPopup();
-		}
-		//	ImGui::EndChild();
+		}			
 	}
 	ImGui::End();
 }

@@ -2,6 +2,7 @@ void EditorEntityInspector()
 {
 	ImGui::Begin("Entity Inspector");
 	{
+		Mutex.lock();
 		if (EntityCount > 0)
 		{
 			ImGui::InputText("Name", Entities[SelectedEntity].Name, 2048);
@@ -178,6 +179,7 @@ void EditorEntityInspector()
 				ImGui::EndPopup();
 			}
 		}
+		Mutex.unlock();
 	}
 	ImGui::End();
 }
@@ -236,10 +238,11 @@ void EditorMaterialInspector()
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 				if (ImGui::Button("Delete Material"))
 				{
+					Mutex.lock();
 					for (uint32_t i = 0; i < EntityCount; i++)
 						if (Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL] && Entities[i].Material.MaterialIndex == SelectedMaterial)
 							ResetEntityMaterial(&Entities[i]);
-
+					Mutex.unlock();
 					CMA_Pop(&SceneMaterials, SelectedMaterial);
 
 					for (uint32_t i = 1; i < SceneMaterials.Size; i++)
@@ -259,7 +262,7 @@ void EditorTextureInspector()
 {
 	ImGui::Begin("Texture Inspector");
 	{
-		if (SceneTextures.Size > 1)
+		if (SceneTextures.Size > 1 && SelectedTexture != 0)
 		{
 			SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, SelectedTexture);
 			// && Image->ShowInAssetBrowser
@@ -268,16 +271,38 @@ void EditorTextureInspector()
 				ImGui::Text(Image->Path);
 				ImGui::InputText("Name", Image->Name, MAX_CHAR_NAME_LENGTH);
 				ImVec2 Size = ImGui::GetWindowSize();
-				Size.x -= 30;
+				Size.x -= 45;
 				Size.y = Size.x * ((float)Image->Height / (float)Image->Width);
 				ImGui::Image(&GetDescriptorSet(Image->TextureDescriptorSet)[0], Size);								
 				ImGui::Text("Width: %d", Image->Width);
 				ImGui::Text("Height: %d", Image->Height);
 				ImGui::Text("Aspect: %f", ((float)Image->Width / (float)Image->Height));
-				if (Image->Components == 3)
-					ImGui::Text("RGB");
-				else if (Image->Components == 4)
-					ImGui::Text("RGBA");
+				ImGui::Text("Mip Levels: %d", Image->MipLevels);
+
+				switch (Image->Components)
+				{
+				case OPENVK_FORMAT_RGB:
+					ImGui::Text("Format: RGB");
+					break;
+				case OPENVK_FORMAT_RGBA:
+					ImGui::Text("Format: RGBA");
+					break;
+				case OPENVK_FORMAT_BC1_RGB:
+					ImGui::Text("Format: BC1/DXT1 RGB");
+					break;
+				case OPENVK_FORMAT_BC1_RGBA:
+					ImGui::Text("Format: BC1/DXT1 RGBA");
+					break;
+				case OPENVK_FORMAT_BC4_RGBA:
+					ImGui::Text("Format: BC4 RGBA");
+					break;
+				case OPENVK_FORMAT_BC7_RGBA:
+					ImGui::Text("Format: BC7 RGBA");
+					break;
+
+				default:
+					break;
+				}
 
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 				if (ImGui::Button("Delete Texture"))
@@ -343,7 +368,7 @@ void EditorMeshInspector()
 							ImGui::PushID(&Mesh->MeshData[i].Material);
 							MaterialEditor(&Mesh->MeshData[i].Material, 66);
 							ImGui::PopID();
-						}						
+						}											
 					}
 				}				
 			}			
@@ -351,9 +376,11 @@ void EditorMeshInspector()
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 			if (ImGui::Button("Delete Mesh"))
 			{
+				Mutex.lock();
 				for (uint32_t i = 0; i < EntityCount; i++)
 					if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] && Entities[i].Mesh.MeshIndex == SelectedMesh)
 						ResetEntityMesh(&Entities[i]);
+				Mutex.unlock();
 
 				MeshToDelete = SelectedMesh;
 				DeleteMesh = true;
@@ -361,9 +388,11 @@ void EditorMeshInspector()
 
 			if (ImGui::Button("Delete Mesh with Textures"))
 			{
+				Mutex.lock();
 				for (uint32_t i = 0; i < EntityCount; i++)
 					if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] && Entities[i].Mesh.MeshIndex == SelectedMesh)
 						ResetEntityMesh(&Entities[i]);
+				Mutex.unlock();
 
 				MeshToDelete = SelectedMesh;
 				DeleteMeshWithTextures = true;
@@ -400,7 +429,7 @@ void EditorScriptInspector()
 
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
 			ImVec2 Size = ImGui::GetWindowSize();
-			ImGui::InputTextMultiline("Code", SceneScripts[SelectedScript].Script, MAX_CHAR_SCRIPT_LENGTH, ImVec2(Size.x, Size.y - 210), ImGuiInputTextFlags_AllowTabInput);
+			ImGui::InputTextMultiline("Code", SceneScripts[SelectedScript].Script, MAX_CHAR_SCRIPT_LENGTH, ImVec2(Size.x, Size.y - 230), ImGuiInputTextFlags_AllowTabInput);
 			ImGui::PopStyleColor();
 
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));

@@ -6,7 +6,7 @@ void CreateSceneRenderPass()
 	ScenePBRMapAttachment = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, MsaaSamples, true, OPENVK_FORMAT_RGBA16F);
 	SceneLightPassAttachment = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, MsaaSamples, true, OPENVK_FORMAT_RGBA);
 	SceneDepthAttachment = OpenVkCreateDepthImageAttachment(SceneWidth, SceneHeight, MsaaSamples, false, OPENVK_FORMAT_DEFAULT);
-//	exit(0);
+
 //	uint32_t ColorFormats[] = { OPENVK_FORMAT_DEFAULT };
 //	SceneRenderPass = OpenVkCreateRenderPass(4, ColorFormats, true, OPENVK_FORMAT_DEFAULT, true, MsaaSamples, true);
 
@@ -23,13 +23,12 @@ void CreateSceneLayout()
 {
 	uint32_t DescriptorSetLayouts[] =
 	{
-//		SceneDescriptorSetLayout,
 		TextureDescriptorSetLayout,
 		TextureDescriptorSetLayout,
 		TextureDescriptorSetLayout,
 		TextureDescriptorSetLayout,
 		TextureDescriptorSetLayout,
-		ShadowMapDescriptorSetLayout,
+		TextureDescriptorSetLayout,
 		FragmentUniformDescriptorSetLayout,
 		VertexUniformDescriptorSetLayout
 	};
@@ -213,8 +212,8 @@ void CreateSceneDescriptorSets()
 //	for (uint32_t i = 0; i < 4; i++)
 	
 	{
-		/*
-		uint32_t Attachments[] = { SceneLightPassAttachment, SceneDepthPositionAttachment, SceneNormalMapAttachment, ScenePBRMapAttachment };
+		/**/
+		uint32_t Attachments[] = { SceneDepthPositionAttachment, SceneNormalMapAttachment, ScenePBRMapAttachment, SceneLightPassAttachment };
 
 		uint32_t DescriptorCounts[] = { 1, 1, 1, 1 };
 		uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
@@ -237,8 +236,8 @@ void CreateSceneDescriptorSets()
 		DescriptorSetCreateInfo.DescriptorSet = NULL;
 		
 		SceneDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
-		*/
-
+		
+		/*
 		{
 			uint32_t Attachments[] = { SceneDepthPositionAttachment, SceneNormalMapAttachment, ScenePBRMapAttachment, SceneLightPassAttachment };
 			
@@ -295,8 +294,9 @@ void CreateSceneDescriptorSets()
 				vkUpdateDescriptorSets(VkRenderer.Device, 4, DescriptorWrites, 0, NULL);
 			}
 		}
-
+		*/
 	}
+	
 	
 
 	{
@@ -307,7 +307,7 @@ void CreateSceneDescriptorSets()
 		uint32_t Bindings[] = { 0 };
 
 		OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
-		DescriptorSetCreateInfo.DescriptorSetLayout = ShadowMapDescriptorSetLayout;
+		DescriptorSetCreateInfo.DescriptorSetLayout = TextureDescriptorSetLayout;
 		DescriptorSetCreateInfo.DescriptorPool = DescriptorPool;
 		DescriptorSetCreateInfo.DescriptorWriteCount = 1;
 		DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
@@ -325,6 +325,7 @@ void CreateSceneDescriptorSets()
 
 void SceneUpdateUniformBuffer()
 {
+//	Mutex.lock();
 	LoadMat4IdentityP(&SceneVertexUBO.View);
 	if (GameMode)
 	{
@@ -355,9 +356,14 @@ void SceneUpdateUniformBuffer()
 		SceneFragmentUBO.CascadeProjectionView[i] = Cascades[i].ProjectionView;
 	}
 	SceneFragmentUBO.View = SceneVertexUBO.View;
+	
+//	mat4 ViewProj = MultiplyMat4P(&SceneVertexUBO.Projection, &SceneVertexUBO.View);
+//	RunFrustumCulling(ViewProj, RENDER_TYPE_DEFAULT);
+
 
 	OpenVkUpdateBuffer(sizeof(SceneVertexUniformBufferObject), &SceneVertexUBO, SceneVertexUniformBuffer);
 	OpenVkUpdateBuffer(sizeof(SceneFragmentUniformBufferObject), &SceneFragmentUBO, SceneFragmentUniformBuffer);
+//	Mutex.unlock();
 }
 
 int EntityDistCompareFunc(const void* a, const void* b)
@@ -473,7 +479,7 @@ void SceneDraw()
 	//	OpenVkDrawVertices(Model.NumTriangles * 3);
 
 	//	qsort(Entities, EntityCount, sizeof(EntityInfo), EntityDistCompareFunc);
-
+		Mutex.lock();
 		for (uint32_t i = 0; i < EntityCount; i++)
 		{
 			if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] ||
@@ -552,43 +558,46 @@ void SceneDraw()
 					{
 						for (uint32_t m = 0; m < Mesh->MeshCount; m++)
 						{
-							if (!Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
+							if (Mesh->MeshData[m].Render[RENDER_TYPE_DEFAULT])
 							{
-								SceneFragmentPc.Color = Mesh->MeshData[m].Material.Color;
-								//set to mesh
-								SceneFragmentPc.Metallic = Mesh->MeshData[m].Material.Metallic;
-								SceneFragmentPc.Roughness = Mesh->MeshData[m].Material.Roughness;
-								SceneFragmentPc.Occlusion = Mesh->MeshData[m].Material.Occlusion;
-								OpenVkPushConstant(SceneLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(SceneFragmentPushConstant), &SceneFragmentPc);
+								if (!Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
+								{
+									SceneFragmentPc.Color = Mesh->MeshData[m].Material.Color;
+									//set to mesh
+									SceneFragmentPc.Metallic = Mesh->MeshData[m].Material.Metallic;
+									SceneFragmentPc.Roughness = Mesh->MeshData[m].Material.Roughness;
+									SceneFragmentPc.Occlusion = Mesh->MeshData[m].Material.Occlusion;
+									OpenVkPushConstant(SceneLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(SceneFragmentPushConstant), &SceneFragmentPc);
 
-								Albedo = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.AlbedoIndex);
-								Normal = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.NormalIndex);
-								Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.MetallicIndex);
-								Roughness = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.RoughnessIndex);
-								Occlusion = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.OcclusionIndex);
+									Albedo = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.AlbedoIndex);
+									Normal = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.NormalIndex);
+									Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.MetallicIndex);
+									Roughness = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.RoughnessIndex);
+									Occlusion = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.OcclusionIndex);
 
-								if (Albedo != NULL) AlbedoDescriptorSet = Albedo->TextureDescriptorSet;
-								if (Normal != NULL) NormalDescriptorSet = Normal->TextureDescriptorSet;
-								if (Metallic != NULL) MetallicDescriptorSet = Metallic->TextureDescriptorSet;
-								if (Roughness != NULL) RoughnessDescriptorSet = Roughness->TextureDescriptorSet;
-								if (Occlusion != NULL) OcclusionDescriptorSet = Occlusion->TextureDescriptorSet;
-							}
+									if (Albedo != NULL) AlbedoDescriptorSet = Albedo->TextureDescriptorSet;
+									if (Normal != NULL) NormalDescriptorSet = Normal->TextureDescriptorSet;
+									if (Metallic != NULL) MetallicDescriptorSet = Metallic->TextureDescriptorSet;
+									if (Roughness != NULL) RoughnessDescriptorSet = Roughness->TextureDescriptorSet;
+									if (Occlusion != NULL) OcclusionDescriptorSet = Occlusion->TextureDescriptorSet;
+								}
 
-							OpenVkBindDescriptorSet(SceneLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-							OpenVkBindDescriptorSet(SceneLayout, 1, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-							OpenVkBindDescriptorSet(SceneLayout, 2, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-							OpenVkBindDescriptorSet(SceneLayout, 3, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-							OpenVkBindDescriptorSet(SceneLayout, 4, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								OpenVkBindDescriptorSet(SceneLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								OpenVkBindDescriptorSet(SceneLayout, 1, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								OpenVkBindDescriptorSet(SceneLayout, 2, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								OpenVkBindDescriptorSet(SceneLayout, 3, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								OpenVkBindDescriptorSet(SceneLayout, 4, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
-							if (Mesh->MeshData[m].Indices == NULL)
-							{
-								OpenVkBindVertexBuffer(Mesh->MeshData[m].VertexBuffer);
-								OpenVkDrawVertices(Mesh->MeshData[m].VertexCount);
-							}
-							else
-							{
-								OpenVkBindIndexBuffer(Mesh->MeshData[m].VertexBuffer, Mesh->MeshData[m].IndexBuffer);
-								OpenVkDrawIndices(Mesh->MeshData[m].IndexCount);
+								if (Mesh->MeshData[m].Indices == NULL)
+								{
+									OpenVkBindVertexBuffer(Mesh->MeshData[m].VertexBuffer);
+									OpenVkDrawVertices(Mesh->MeshData[m].VertexCount);
+								}
+								else
+								{
+									OpenVkBindIndexBuffer(Mesh->MeshData[m].VertexBuffer, Mesh->MeshData[m].IndexBuffer);
+									OpenVkDrawIndices(Mesh->MeshData[m].IndexCount);
+								}
 							}
 						}
 					}
@@ -614,6 +623,7 @@ void SceneDraw()
 				}
 			}						
 		}
+		Mutex.unlock();
 	}
 	OpenVkEndRenderPass();
 }

@@ -25,6 +25,12 @@ typedef enum
 	CULL_MODE_FRONT = 0x2,
 } CullModes;
 
+typedef struct
+{
+	vec3 Min;
+	vec3 Max;
+} AABBData;
+
 SDL_Window* Window;
 SDL_Event Event;
 
@@ -33,6 +39,21 @@ uint32_t WindowHeight = 1110;
 
 float DeltaTime = 0.0;
 float LastTime = 0.0;
+
+class Mtx
+{
+public:
+	void lock()
+	{
+
+	}
+	void unlock()
+	{
+
+	}
+};
+
+std::mutex Mutex;
 
 float GetDeltaTime()
 {

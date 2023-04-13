@@ -97,11 +97,15 @@ void UpdateCascades()
 		float d = CascadeSplitLambda * (Log - Uniform) + Uniform;
 		CascadeSplits[i] = (d - CascadeNearClip) / ClipRange;
 	}
+	Mutex.lock();
+	mat4 TempSceneProjection = SceneVertexUBO.Projection;
 
 	SceneVertexUBO.Projection.m[2][2] = CascadeFarClip / (CascadeNearClip - CascadeFarClip);
 	SceneVertexUBO.Projection.m[3][2] = (CascadeNearClip * CascadeFarClip) / (CascadeNearClip - CascadeFarClip);
-
+	
 	mat4 InvCam = InverseMat4(MultiplyMat4P(&SceneVertexUBO.Projection, &SceneVertexUBO.View));
+	Mutex.unlock();
+
 	float LastSplitDist = 0.0;
 	for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
 	{
@@ -164,8 +168,16 @@ void UpdateCascades()
 		Cascades[i].SplitDepth = (CascadeNearClip + SplitDist * ClipRange) * -1.0;
 		Cascades[i].ProjectionView = MultiplyMat4P(&Projection, &View);
 
+		Mutex.lock();
+		CullingCascades[i] = MultiplyMat4P(&Projection, &View);
+		Mutex.unlock();
+
 		LastSplitDist = CascadeSplits[i];
 	}
+
+	Mutex.lock();
+	SceneVertexUBO.Projection = TempSceneProjection;
+	Mutex.unlock();
 }
 
 void UpdateAnimation(uint32_t AnimationIndex)
@@ -220,7 +232,6 @@ void UpdateAnimation(uint32_t AnimationIndex)
 
 void ShadowDraw()
 {
-
 	OpenVkBeginRenderPassInfo BeginInfo;
 	BeginInfo.ClearColor[0] = 0.01;
 	BeginInfo.ClearColor[1] = 0.01;
@@ -259,7 +270,7 @@ void ShadowDraw()
 			OpenVkBindPipeline(Pipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
 			mat4 Model;
-
+			Mutex.lock();
 			for (uint32_t i = 0; i < EntityCount; i++)
 			{
 				LoadMat4IdentityP(&Model);
@@ -294,25 +305,28 @@ void ShadowDraw()
 					{
 						for (uint32_t m = 0; m < Mesh->MeshCount; m++)
 						{
-							if (!Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
+							if (Mesh->MeshData[m].Render[j + 1])
 							{
-								SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.AlbedoIndex);
-								if (Image != NULL)
-									TextureDescriptorSet = Image->TextureDescriptorSet;
-							}
+								if (!Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
+								{
+									SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.AlbedoIndex);
+									if (Image != NULL)
+										TextureDescriptorSet = Image->TextureDescriptorSet;
+								}
 
-							OpenVkBindDescriptorSet(ShadowLayout, 0, TextureDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								OpenVkBindDescriptorSet(ShadowLayout, 0, TextureDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
-							if (Mesh->MeshData[m].Indices == NULL)
-							{
-								OpenVkBindVertexBuffer(Mesh->MeshData[m].VertexBuffer);
-								OpenVkDrawVertices(Mesh->MeshData[m].VertexCount);
-							}
-							else
-							{
-								OpenVkBindIndexBuffer(Mesh->MeshData[m].VertexBuffer, Mesh->MeshData[m].IndexBuffer);
-								OpenVkDrawIndices(Mesh->MeshData[m].IndexCount);
-							}
+								if (Mesh->MeshData[m].Indices == NULL)
+								{
+									OpenVkBindVertexBuffer(Mesh->MeshData[m].VertexBuffer);
+									OpenVkDrawVertices(Mesh->MeshData[m].VertexCount);
+								}
+								else
+								{
+									OpenVkBindIndexBuffer(Mesh->MeshData[m].VertexBuffer, Mesh->MeshData[m].IndexBuffer);
+									OpenVkDrawIndices(Mesh->MeshData[m].IndexCount);
+								}
+							}							
 						}
 					}
 				}
@@ -331,7 +345,7 @@ void ShadowDraw()
 					}
 				}
 			}
-
+			Mutex.unlock();
 		}
 	}
 	OpenVkEndRenderPass();

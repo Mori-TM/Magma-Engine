@@ -1,6 +1,3 @@
-//uint32_t QuadVertexBuffer;
-//uint32_t QuadIndexBuffer;
-
 uint32_t GridVertexBuffer;
 uint32_t DirectionVertexBuffer;
 
@@ -20,11 +17,9 @@ uint32_t BeanIndexBuffer;
 
 void CreateBuffers()
 {	
-//	QuadVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(QuadVertices) * sizeof(QuadVertex), QuadVertices);
-//	QuadIndexBuffer = OpenVkCreateIndexBuffer(ARRAY_SIZE(QuadIndices) * sizeof(uint32_t), QuadIndices);
-
 	GridVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(GridVertices) * sizeof(DebugVertex), GridVertices);
 	DirectionVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(DirectionVertices) * sizeof(DebugVertex), DirectionVertices);
+
 	CameraVertexBuffer = OpenVkCreateVertexBuffer(ARRAY_SIZE(CameraVertices) * sizeof(DebugVertex), CameraVertices);
 	CameraIndexBuffer = OpenVkCreateIndexBuffer(ARRAY_SIZE(CameraIndices) * sizeof(uint32_t), CameraIndices);
 	

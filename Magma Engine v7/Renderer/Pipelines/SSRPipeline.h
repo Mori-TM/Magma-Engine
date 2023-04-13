@@ -122,11 +122,13 @@ void CreateSSRDescriptorSet()
 
 void SSRUpdateUniform()
 {
+	Mutex.lock();
 	SSRFragmentUBO.Projection = SceneVertexUBO.Projection;
 	SSRFragmentUBO.View = SceneVertexUBO.View;
 	
 	SSRFragmentUBO.InvProjection = InverseMat4(SceneVertexUBO.Projection);
 	SSRFragmentUBO.InvView = InverseMat4(SceneVertexUBO.View);
+	Mutex.unlock();
 
 	SSRFragmentUBO.MsaaSamples = MsaaSamples;
 

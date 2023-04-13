@@ -35,3 +35,4 @@ float CascadeSplitLambda = 0.95;
 float CascadeNearClip = 0.5;
 float CascadeFarClip = 48.0;
 Cascade Cascades[SHADOW_MAP_CASCADE_COUNT];
+mat4 CullingCascades[SHADOW_MAP_CASCADE_COUNT];

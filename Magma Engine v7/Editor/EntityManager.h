@@ -25,17 +25,25 @@ void ResetEntityAnimation(EntityInfo* Entity)
 	Entity->Animation.AnimationIndex = 0;
 }
 
-void AddEntity(EntityInfo* Entity)
+void AddEntity(uint32_t UsedComponent)
 {
-	ResetEntityMesh(Entity);
-	ResetEntityMaterial(Entity);
-	ResetEntityCamera(Entity);
-	ResetEntityAnimation(Entity);
+	Mutex.lock();
+	EntityInfo Entity;
+	for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
+		Entity.UsedComponents[i] = false;
+
+	if (UsedComponent != UINT32_MAX)
+		Entity.UsedComponents[UsedComponent] = true;
+
+	ResetEntityMesh(&Entity);
+	ResetEntityMaterial(&Entity);
+	ResetEntityCamera(&Entity);
+	ResetEntityAnimation(&Entity);
 	
-	Entity->Translate = Vec3f(0.0);
-	Entity->Rotate = Vec3f(0.0);
-	Entity->Scale = Vec3f(1.0);
-	Entity->Selected = false;
+	Entity.Translate = Vec3f(0.0);
+	Entity.Rotate = Vec3f(0.0);
+	Entity.Scale = Vec3f(1.0);
+	Entity.Selected = false;
 	
 	uint32_t Count = 0;
 	for (uint32_t i = 0; i < EntityCount; i++)
@@ -43,20 +51,22 @@ void AddEntity(EntityInfo* Entity)
 			Count++;
 
 	if (Count > 0)
-		sprintf(Entity->Name, "Entity (%d)", Count);
+		sprintf(Entity.Name, "Entity (%d)", Count);
 	else
-		strcpy(Entity->Name, "Entity");
+		strcpy(Entity.Name, "Entity");
 	
 	Entities = (EntityInfo*)realloc(Entities, (EntityCount + 1) * sizeof(EntityInfo));
-	Entities[EntityCount] = *Entity;
-	SelectedEntity = EntityCount;
-	EntityCount++;
+	Entities[EntityCount] = Entity;
+	SelectedEntity = EntityCount++;
+
+	Mutex.unlock();
 }
 
 void EditorEntities()
 {
 	ImGui::Begin("Entities");
 	{
+		Mutex.lock();
 		for (uint32_t i = 0; i < EntityCount; i++)
 		{
 			for (uint32_t j = 0; j < EntityCount; j++)
@@ -67,66 +77,27 @@ void EditorEntities()
 			sprintf(Buffer, "%d %s\n", i, Entities[i].Name);
 
 			if (ImGui::Selectable(Buffer, Entities[i].Selected))
-			{
-				SelectedEntity = i;
-			}				
+				SelectedEntity = i;			
 		}
+		Mutex.unlock();
 
 		ImGui::BeginChild("Pop Up");
 		if (ImGui::BeginPopupContextWindow())
 		{
 			if (ImGui::Selectable("Add Empty Entity"))
-			{
-				EntityInfo Entity;
-				for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
-					Entity.UsedComponents[i] = false;					
-				AddEntity(&Entity);
-			}
+				AddEntity(UINT32_MAX);
 
 			if (ImGui::Selectable("Add Mesh Entity"))
-			{
-				EntityInfo Entity;
-				for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
-					Entity.UsedComponents[i] = false;
-
-				Entity.UsedComponents[COMPONENT_TYPE_MESH] = true;
-			//	Entity.UsedComponents[COMPONENT_TYPE_MATERIAL] = true;
-				
-				AddEntity(&Entity);
-			}
+				AddEntity(COMPONENT_TYPE_MESH);
 
 			if (ImGui::Selectable("Add Camera Entity"))
-			{
-				EntityInfo Entity;
-				for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
-					Entity.UsedComponents[i] = false;
-
-				Entity.UsedComponents[COMPONENT_TYPE_CAMERA] = true;
-
-				AddEntity(&Entity);
-			}
+				AddEntity(COMPONENT_TYPE_CAMERA);
 
 			if (ImGui::Selectable("Add Audio Entity"))
-			{
-				EntityInfo Entity;
-				for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
-					Entity.UsedComponents[i] = false;
-
-				Entity.UsedComponents[COMPONENT_TYPE_AUDIO] = true;
-
-				AddEntity(&Entity);
-			}
+				AddEntity(COMPONENT_TYPE_AUDIO);
 
 			if (ImGui::Selectable("Add Animation Entity"))
-			{
-				EntityInfo Entity;
-				for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
-					Entity.UsedComponents[i] = false;
-
-				Entity.UsedComponents[COMPONENT_TYPE_ANIMATION] = true;
-
-				AddEntity(&Entity);
-			}
+				AddEntity(COMPONENT_TYPE_ANIMATION);
 
 			ImGui::EndPopup();
 		}

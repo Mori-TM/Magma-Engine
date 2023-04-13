@@ -5,17 +5,20 @@
 #include "Pipelines/SceneHelper.h"
 #include "Pipelines/SwapChainHelper.h"
 
-#include "Helper/Helper.h"
+#include "Helper/RendererHelper.h"
 #include "Helper/Meshes.h"
 #include "Helper/DescriptorSetLayouts.h"
 #include "Helper/DescriptorPool.h"
 #include "Helper/Buffers.h"
 #include "Helper/Sampler.h"
-#include "Helper/ImGuiHelper.h"
+#include "Helper/GUI.h"
 
-#include "../Editor/Helper.h"
-#include "../Editor/Camera.h"
-#include "../Editor/ScriptEngine.h"
+#include "../Engine/Engine.h"
+#include "../Engine/FpsCamera.h"
+#include "../Engine/ScriptEngine.h"
+#include "../Engine/FrustumCulling.h"
+#include "../Engine/ImageCompression.h"
+
 #include "../Editor/SceneManager.h"
 #include "../Editor/AssetBrowser.h"
 #include "../Editor/EntityManager.h"
@@ -32,7 +35,6 @@
 void CreateRenderPasses()
 {
 	CreateBlurRenderPass();
-//	exit(0);
 	CreateShadowRenderPass();
 	CreateSceneRenderPass();
 	CreateSSRRenderPass();
@@ -56,7 +58,6 @@ void CreateGraphicsPipelines()
 	CreateShadowPipeline();	
 	CreateScenePipeline();
 	CreateSSRPipeline();
-//	exit(0);
 	CreateSwapChainPipeline();
 }
 
@@ -75,8 +76,6 @@ void CreateDescriptors()
 	CreateBlurDescriptorSets();
 	CreateSSRDescriptorSet();
 	CreateSceneDescriptorSets();
-//	exit(0);
-//	exit(0);
 }
 
 void CreateRenderer()
@@ -89,7 +88,7 @@ void CreateRenderer()
 	* 80, "C:/Windows/Fonts/RAGE.TTF"
 	* 30, "Data/Fonts/Roboto-Medium.TTF"
 	*/
-	OpenVkGUIInit(WindowWidth, WindowHeight, SwapChainRenderPass, 1, 80, "C:/Windows/Fonts/RAGE.TTF", GetMousePos);
+	OpenVkGUIInit(WindowWidth, WindowHeight, SwapChainRenderPass, 1, 30, "Data/Fonts/Roboto-Medium.TTF", GetMousePos);
 	CreateDescriptorSetLayout();
 	CreatePipelineLayouts();
 	CreateGraphicsPipelines();
@@ -109,6 +108,7 @@ void CreateRenderer()
 	InitImGui();
 	InitFpsCamera();
 	EngineInitEditor();
+	OpenVkRuntimeInfo("Engine was initilaized", "");
 }
 
 void DestroyRenderer()
@@ -137,19 +137,45 @@ void RendererUpdate()
 	SceneFragmentUBO.CameraPosition.z = CameraPos.z;
 	SceneFragmentUBO.CameraPosition.w = 0.0;
 	Normalize4P(&SceneFragmentUBO.LightDirection);
+	
+	if (RenderShadows || EffectFrame == 2)
+		UpdateCascades();
 
-	UpdateCascades();
 	SceneUpdateUniformBuffer();
+	/*
+	Mutex.lock();
+	mat4 ViewProj = MultiplyMat4P(&SceneVertexUBO.Projection, &SceneVertexUBO.View);
+	Mutex.unlock();
+
+	RunFrustumCulling(ViewProj, RENDER_TYPE_DEFAULT);
+	for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+	{
+		Mutex.lock();
+		mat4 ViewProj = CullingCascades[i];
+		Mutex.unlock();
+		RunFrustumCulling(ViewProj, i + 1);
+	}
+	*/
 	SSRUpdateUniform();	
 }
+
+
 
 void RendererDraw()
 {
 	BeginFrameTime = GetExecutionTimeOpenVkBool(OpenVkBeginFrame);
 	{
-		ShadowRenderingTime = GetExecutionTime(ShadowDraw);
+		if (RenderShadows || EffectFrame == UINT32_MAX)
+			ShadowRenderingTime = GetExecutionTime(ShadowDraw);
+
+		EffectFrame++;
+		if (EffectFrame >= SHADOW_MAP_CASCADE_COUNT)
+			EffectFrame = 0;
+
 		SceneRenderingTime = GetExecutionTime(SceneDraw);
 		SSRRenderingTime = GetExecutionTime(SSRDraw);
+		
+		
 		SwapChainRenderingTime = GetExecutionTime(SwapChainDraw);
 	}
 	EndFrameTime = GetExecutionTimeOpenVkBool(OpenVkEndFrame);
@@ -175,12 +201,31 @@ void RendererEvent()
 		SDL_SetWindowFullscreen(Window, (FullScreen = !FullScreen) ? SDL_WINDOW_FULLSCREEN_DESKTOP : false);
 	}
 
+	if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_F5)
+	{
+		RenderGamePreview = !RenderGamePreview;
+		ForceResizeEvent = true;
+	}
+
 	if (Event.window.event == SDL_WINDOWEVENT_RESIZED || ForceResizeEvent)
 	{
 		ForceResizeEvent = false;
 
-		SceneWidth = ImGuiSceneWidth;
-		SceneHeight = ImGuiSceneHeight;
+		const float Scale = ((float)SceneScaling / 100);
+
+		if (RenderGamePreview)
+		{
+		//	SceneWidth = 128 * ((float)WindowWidth / (float)WindowHeight);
+		//	SceneHeight = 128;
+			SceneWidth = WindowWidth * Scale;
+			SceneHeight = WindowHeight * Scale;
+		}
+		else
+		{
+			SceneWidth = ImGuiSceneWidth * Scale;
+			SceneHeight = ImGuiSceneHeight * Scale;
+		}
+		printf("Event\n");
 		RendererResize();
 	}
 
@@ -212,7 +257,6 @@ void DeleteMeshTexture(uint32_t TextureImage, uint32_t TextureIndex)
 
 void RendererRender()
 {
-
 	if (ImGuiTexturesToDelete.size() != 0)
 	{
 		OpenVkDeviceWaitIdle();
@@ -239,6 +283,7 @@ void RendererRender()
 	}
 	if (DeleteMesh || DeleteMeshWithTextures)
 	{
+		Mutex.lock();
 		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshToDelete);
 		if (Mesh != NULL)
 		{
@@ -275,6 +320,8 @@ void RendererRender()
 			if (CMA_GetAt(&SceneMeshes, i) != NULL)
 				SelectedMesh = i;
 
+		Mutex.unlock();
+		
 		DeleteMesh = false;
 		DeleteMeshWithTextures = false;
 

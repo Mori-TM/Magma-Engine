@@ -1,9 +1,3 @@
-int32_t Frame = 0;
-int32_t FinalTime = 0;
-int32_t InitTime = 0;
-float FPS = 0.0;
-float MS = 0.0;
-
 void EngineInitEditor()
 {
 	InitLua();
@@ -20,17 +14,11 @@ int32_t LastMouseX = 0;
 int32_t LastMouseY = 0;
 int32_t LastWindowX = 0;
 int32_t LastWindowY = 0;
-uint32_t LastMouseState = 0;
-bool EditorBarButtonPressed = false;
+bool WinBarMouseState = false;
 
-void PushEventSDL(UINT32 Type, UINT32 Key)
-{
-	SDL_Event Event;
-	memset(&Event, 0, sizeof(SDL_Event));
-	Event.type = Type;
-	Event.key.keysym.sym = Key;
-	SDL_PushEvent(&Event);
-}
+bool WinResizeMouseState = false;
+
+bool EditorBarButtonPressed = false;
 
 void EditorWindowBar()
 {
@@ -45,15 +33,15 @@ void EditorWindowBar()
 	int32_t MouseY;
 	SDL_GetMouseState(&MouseX, &MouseY);
 
-	if (MouseState == 1 && LastMouseState == 0 &&
+	if (MouseState == 1 && WinBarMouseState == 0 &&
 		MouseX > Rect.Min.x && MouseX < Rect.Max.x &&
 		MouseY > Rect.Min.y && MouseY < Rect.Max.y)
-		LastMouseState = 1;
+		WinBarMouseState = 1;
 
 	if (MouseState == 0)
-		LastMouseState = 0;
+		WinBarMouseState = 0;
 
-	if (LastMouseState == 1)
+	if (WinBarMouseState == 1)
 	{
 		int32_t x = MouseGX - LastMouseX + LastWindowX;
 		int32_t y = MouseGY - LastMouseY + LastWindowY;
@@ -64,7 +52,11 @@ void EditorWindowBar()
 				PushEventSDL(SDL_KEYDOWN, SDLK_F11);
 		}
 		else
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
 			SDL_SetWindowPosition(Window, x, y);
+		}
+			
 	}
 	else
 	{
@@ -72,6 +64,92 @@ void EditorWindowBar()
 		LastMouseX = MouseGX;
 		LastMouseY = MouseGY;
 	}
+
+	if (MouseState == 1 && WinResizeMouseState == 0 &&
+		MouseX > Rect.Min.x && MouseX < Rect.Max.x &&
+		MouseY > Rect.Min.y && MouseY < Rect.Max.y)
+		WinResizeMouseState = 1;
+
+	if (MouseState == 0)
+		WinResizeMouseState = 0;
+
+	if (WinResizeMouseState == 1)
+	{
+
+	}
+}
+
+bool EditorOpenedSettingsWindow = false;
+void EditorSettingsWindow()
+{
+	if (EditorOpenedSettingsWindow)
+	{
+		ImGui::Begin("Settings", &EditorOpenedSettingsWindow);
+		{
+			ImGui::BeginChild("##preferences", ImVec2(0, 0), false, ImGuiWindowFlags_None);
+
+			const float total_width = ImGui::GetWindowWidth() - ImGui::GetStyle().ScrollbarSize - ImGui::GetStyle().WindowPadding.x * 2.0f;
+			const float first_column_width = total_width * 0.25f;
+
+			ImGui::Columns(2, "##preferences_columns", true);
+
+			// First column
+		//	ImGui::SetColumnWidth(0, first_column_width);
+
+			if (ImGui::Button("Textures##ES-Tex", ImVec2(-1, 0))) {
+				// Handle button 1 click
+			}
+			if (ImGui::Button("Model Importer##ES-Mim", ImVec2(-1, 0))) {
+				// Handle button 2 click
+			}
+			if (ImGui::Button("Materials##ES-Mat", ImVec2(-1, 0))) {
+				// Handle button 2 click
+			}
+			if (ImGui::Button("Themes##ES-The", ImVec2(-1, 0))) {
+				// Handle button 3 click
+			}
+			if (ImGui::Button("Other##ES-Oth", ImVec2(-1, 0))) {
+				// Handle button 3 click
+			}
+
+			// Second column
+			ImGui::NextColumn();
+			ImGui::Text("Second column");
+
+			ImGui::Columns(1);
+
+			ImGui::EndChild();
+
+			/*
+			ImGui::BeginChild("##preferences", ImVec2(0, 0), false, ImGuiWindowFlags_NoDecoration);
+
+			ImGui::Columns(2, "##preferences_columns", false);
+		
+
+			
+			const float button_width = ImGui::GetColumnWidth() - ImGui::GetStyle().ItemSpacing.x;
+			if (ImGui::Button("Button 1", ImVec2(button_width, 0))) {
+				// Handle button 1 click
+			}
+			if (ImGui::Button("Button 2", ImVec2(button_width, 0))) {
+				// Handle button 2 click
+			}
+			if (ImGui::Button("Button 3", ImVec2(button_width, 0))) {
+				// Handle button 3 click
+			}
+
+			ImGui::NextColumn();
+
+			// More preferences...
+
+			ImGui::Columns(1);
+
+			ImGui::EndChild();
+			*/
+
+		}
+		ImGui::End();
+	}	
 }
 
 void EditorDrawMainMenuBar()
@@ -97,29 +175,33 @@ void EditorDrawMainMenuBar()
 			ImGui::EndMenu();
 		}
 
-		if (ImGui::BeginMenu("Settings"))
-		{
-			EditorBarButtonPressed = true;
-			ImGui::DragFloat("Font Size", &IO->FontGlobalScale, 0.005, 0.1, 5.0, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-			ImGui::EndMenu();
-		}
+	//	if (ImGui::BeginMenu("Settings"))
+	//	{
+	//		EditorBarButtonPressed = true;
+	//		ImGui::DragFloat("Font Size", &IO->FontGlobalScale, 0.005, 0.1, 5.0, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	//		
+	//	//	ImGui::MenuItem("Texture Settings");
+	//		ImGui::EndMenu();
+	//	}
+		if (ImGui::MenuItem("Settings"))
+			EditorOpenedSettingsWindow = true;
 
 		ImGui::PushFont(IconFontSmall);
 		ImGui::SetCursorPosX((WindowWidth * 0.5));
-		static char ButtonType = 'G';
+		static char* ButtonType = (char*)"G";
 		ImGui::PushID("Play Button");
-		if (ImGui::Button(&ButtonType))
+		if (ImGui::Button(ButtonType))
 		{
 			EditorBarButtonPressed = true;
 			GameMode = !GameMode;
 			if (GameMode)
-				ButtonType = 'L';
+				ButtonType = (char*)"L";
 			else
-				ButtonType = 'G';
+				ButtonType = (char*)"G";
 			LuaOnStart = true;
-		}
-		ImGui::PopFont();
+		}		
 		ImGui::PopID();
+		ImGui::PopFont();
 
 		ImGui::PushFont(IconFontExt);
 		{
@@ -139,11 +221,11 @@ void EditorDrawMainMenuBar()
 			ImGui::PopStyleColor(1);
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_Button, Style->Colors[ImGuiCol_MenuBarBg]);
-			char Icon[2];
+			char Icon[4];
 			if (FullScreen)
-				strcpy(Icon, "W\0");
+				strcpy(Icon, "W");
 			else
-				strcpy(Icon, "V\0");
+				strcpy(Icon, "V");
 
 			if (ImGui::Button(Icon))
 			{
@@ -188,6 +270,7 @@ void EngineDrawEditor()
 	ImGuiIO* IO = &ImGui::GetIO();
 
 	EditorDrawMainMenuBar();
+	EditorSettingsWindow();
 	EditorDrawScene();
 	EditorEntities();
 	EditorInspector();
@@ -198,21 +281,21 @@ void EngineDrawEditor()
 	{
 		if (ifd::FileDialog::Instance().HasResult())
 			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
-				LoadModel(0, ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
+				LoadModel(0, (const char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
 		ifd::FileDialog::Instance().Close();
 	}
 	if (ifd::FileDialog::Instance().IsDone("LoadSmoothModel"))
 	{
 		if (ifd::FileDialog::Instance().HasResult())
 			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
-				LoadModel(WAVE_GEN_SMOOTH_NORMALS, ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
+				LoadModel(WAVE_GEN_SMOOTH_NORMALS, (const char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
 		ifd::FileDialog::Instance().Close();
 	}
 	if (ifd::FileDialog::Instance().IsDone("LoadFlatModel"))
 	{
 		if (ifd::FileDialog::Instance().HasResult())
 			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
-				LoadModel(WAVE_FORCE_GEN_NORMALS, ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
+				LoadModel(WAVE_FORCE_GEN_NORMALS, (const char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
 		ifd::FileDialog::Instance().Close();
 	}
 	if (ifd::FileDialog::Instance().IsDone("LoadTexture"))
@@ -232,32 +315,22 @@ void EngineDrawEditor()
 	if (ifd::FileDialog::Instance().IsDone("LoadScript"))
 	{
 		if (ifd::FileDialog::Instance().HasResult())
-			AddScript(ifd::FileDialog::Instance().GetResult().u8string().c_str());
+			AddScript((const char*)ifd::FileDialog::Instance().GetResult().u8string().c_str());
 		ifd::FileDialog::Instance().Close();
 	}
 	if (ifd::FileDialog::Instance().IsDone("SaveScript"))
 	{
 		if (ifd::FileDialog::Instance().HasResult())
-			SaveScript(ifd::FileDialog::Instance().GetResult().u8string().c_str());
+			SaveScript((const char*)ifd::FileDialog::Instance().GetResult().u8string().c_str());
 		ifd::FileDialog::Instance().Close();
 	}
 	
 	ImGui::Begin("Debug");
 	{
-		Frame++;
-		FinalTime = time(NULL);
-		if (FinalTime - InitTime > 0)
-		{
-			FPS = Frame / (FinalTime - InitTime);
-			Frame = 0;
-			InitTime = FinalTime;
-
-			MS = 1000 / FPS;
-		}
-
 		uint32_t VertexCount = 0;
 		uint32_t IndexCount = 0;
 
+		Mutex.lock();
 		for (uint32_t i = 0; i < EntityCount; i++)
 		{
 			if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] == true)
@@ -273,9 +346,11 @@ void EngineDrawEditor()
 				}
 			}
 		}
+		Mutex.unlock();
 			
 		ImGui::Text("Scene Vertices: %d", VertexCount);
 		ImGui::Text("Scene Indices: %d", IndexCount);
+		ImGui::Text("Scene Triangles: %d", IndexCount / 3);
 		ImGui::NewLine();
 
 		ImGui::Text("FPS: %f MS: %f", FPS, MS);
@@ -345,6 +420,23 @@ void EngineDrawEditor()
 		ImGui::DragFloat3("Light Direction", (float*)&SceneFragmentUBO.LightDirection, 0.01, -10000.0, 10000.0);
 		ImGui::SliderFloat("Exposure", &SceneFragmentUBO.Exposure, 0.01, 10.0);
 		ImGui::SliderFloat("Gamma", &SceneFragmentUBO.Gamma, 0.01, 10.0);
+		{
+			const char* ScaleOptions[] = { "0 %", "10 %", "20 %", "30 %", "40 %", "50 %", "60 %", "70 %", "80 %", "90 %", "100 %" };
+			if (ImGui::BeginCombo("Scene Scaling", ScaleOptions[SceneScaling / 10]))
+			{
+				for (uint32_t i = 1; i < 11; i++)
+					if (ImGui::Button(ScaleOptions[i]))
+					{
+						SceneScaling = i * 10;
+						ForceResizeEvent = true;
+
+						PushEventSDL(0, 0);
+					}
+						
+				ImGui::EndCombo();
+			}
+		}
+		
 		if (ImGui::Button("Reset Settings"))
 			ResetSceneSettings();
 		/*
@@ -390,10 +482,12 @@ void EngineDrawEditor()
 		*/
 	//	ImGui::Checkbox("Scene Backface Culling", &SceneBackfaceCulling);
 
+		ImGui::Checkbox("Render Shadows", &RenderShadows);
+
 		const char* CullingOptions[] = { "No Culling", "Back Face Culling", "Front Face Culling" };
 		if (ImGui::BeginCombo("Scene Face Culling", CullingOptions[SceneCullMode]))
 		{
-			for (uint32_t i = 0; i < 3; i++)
+			for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
 				if (ImGui::Button(CullingOptions[i]))
 					SceneCullMode = i;
 			ImGui::EndCombo();
@@ -412,7 +506,7 @@ void EngineDrawEditor()
 			ImGuiSetPosPaddingX(33);
 			if (ImGui::BeginCombo("Shadow Face Culling", CullingOptions[ShadowCullMode]))
 			{
-				for (uint32_t i = 0; i < 3; i++)
+				for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
 					if (ImGui::Button(CullingOptions[i]))
 						ShadowCullMode = i;
 				ImGui::EndCombo();

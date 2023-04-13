@@ -25,6 +25,9 @@
     <Filter Include="Header Files\Renderer\Pipelines">
       <UniqueIdentifier>{73cad9b4-689c-4506-a8b7-cd2473e1d820}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine">
+      <UniqueIdentifier>{fa4c4a35-b5fc-4fe7-afdf-283ce1a2c54b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -53,28 +56,16 @@
     <ClInclude Include="Editor\AssetBrowser.h">
       <Filter>Header Files\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\AudioEngine.h">
-      <Filter>Header Files\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\Camera.h">
-      <Filter>Header Files\Editor</Filter>
-    </ClInclude>
     <ClInclude Include="Editor\Editor.h">
       <Filter>Header Files\Editor</Filter>
     </ClInclude>
     <ClInclude Include="Editor\EntityManager.h">
       <Filter>Header Files\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\Helper.h">
-      <Filter>Header Files\Editor</Filter>
-    </ClInclude>
     <ClInclude Include="Editor\Inspector.h">
       <Filter>Header Files\Editor</Filter>
     </ClInclude>
     <ClInclude Include="Editor\SceneManager.h">
-      <Filter>Header Files\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\ScriptEngine.h">
       <Filter>Header Files\Editor</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\Pipelines\BlurHelper.h">
@@ -101,10 +92,10 @@
     <ClInclude Include="Renderer\Helper\DescriptorSetLayouts.h">
       <Filter>Header Files\Renderer\Helper</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\Helper\Helper.h">
+    <ClInclude Include="Renderer\Helper\RendererHelper.h">
       <Filter>Header Files\Renderer\Helper</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\Helper\ImGuiHelper.h">
+    <ClInclude Include="Renderer\Helper\GUI.h">
       <Filter>Header Files\Renderer\Helper</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\Helper\Meshes.h">
@@ -121,6 +112,24 @@
     </ClInclude>
     <ClInclude Include="Renderer\Pipelines\SwapChainPipeline.h">
       <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\AudioEngine.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\FpsCamera.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\FrustumCulling.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ScriptEngine.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Engine.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ImageCompression.h">
+      <Filter>Header Files\Engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

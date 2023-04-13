@@ -36,8 +36,35 @@ void EditorDrawScene()
 		{
 			ImVec2 WindowSize = ImGui::GetWindowSize();
 
-			if (SceneWidth != WindowSize.x || SceneHeight != WindowSize.y)
+			/*
+			const float Scale = ((float)SceneScaling / 100);
+			uint32_t x = WindowSize.x;
+			uint32_t y = WindowSize.y;
+			if (SceneWidth / Scale != x || SceneHeight / Scale != y)
+			{
+				printf("%d/%d, %d/%d\n", SceneWidth, uint32_t(x * Scale), SceneHeight, uint32_t(y * Scale));
+
 				ForceResizeEvent = true;
+			}				
+
+			ImGuiScenePosX = ImGui::GetWindowPos().x;
+			ImGuiScenePosY = ImGui::GetWindowPos().y;
+
+			ImGuiSceneWidth = WindowSize.x;
+			ImGuiSceneHeight = WindowSize.y;
+			*/
+
+			static ImVec2 PrevWindowSize = ImGui::GetWindowSize();
+			// Check if window size has changed
+			if (PrevWindowSize.x != WindowSize.x ||
+				PrevWindowSize.y != WindowSize.y) {
+				// Handle window resize event
+				PrevWindowSize = ImGui::GetWindowSize();
+				printf("%d, %d\n", SceneWidth, SceneHeight);
+
+				ForceResizeEvent = true;
+				PushEventSDL(0, 0);
+			}
 
 			ImGuiScenePosX = ImGui::GetWindowPos().x;
 			ImGuiScenePosY = ImGui::GetWindowPos().y;

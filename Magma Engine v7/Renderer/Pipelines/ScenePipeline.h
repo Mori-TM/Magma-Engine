@@ -160,6 +160,7 @@ void CreateSceneDescriptorSets()
 			DescriptorSetCreateInfo.Bindings = Bindings;
 			DescriptorSetCreateInfo.Images = &Image->TextureImage;
 			DescriptorSetCreateInfo.DescriptorSet = NULL;
+			DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
 			Image->TextureDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 		}		
@@ -182,6 +183,7 @@ void CreateSceneDescriptorSets()
 		DescriptorSetCreateInfo.BufferSizes = UniformSizes;
 		DescriptorSetCreateInfo.Bindings = Bindings;
 		DescriptorSetCreateInfo.DescriptorSet = NULL;
+		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
 		SceneVertexUniformDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}
@@ -203,6 +205,7 @@ void CreateSceneDescriptorSets()
 		DescriptorSetCreateInfo.BufferSizes = UniformSizes;
 		DescriptorSetCreateInfo.Bindings = Bindings;
 		DescriptorSetCreateInfo.DescriptorSet = NULL;
+		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
 		SceneFragmentUniformDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}
@@ -234,6 +237,7 @@ void CreateSceneDescriptorSets()
 		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
 		DescriptorSetCreateInfo.Bindings = Bindings;
 		DescriptorSetCreateInfo.DescriptorSet = NULL;
+		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 		
 		SceneDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 		
@@ -318,6 +322,7 @@ void CreateSceneDescriptorSets()
 		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
 		DescriptorSetCreateInfo.Bindings = Bindings;
 		DescriptorSetCreateInfo.DescriptorSet = NULL;
+		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
 		SceneShadowMapDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}

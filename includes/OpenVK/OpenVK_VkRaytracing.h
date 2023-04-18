@@ -42,6 +42,7 @@ typedef struct
 	VkPhysicalDeviceBufferDeviceAddressFeatures EnabledBufferDeviceAddresFeatures;
 	VkPhysicalDeviceRayTracingPipelineFeaturesKHR EnabledRayTracingPipelineFeatures;
 	VkPhysicalDeviceAccelerationStructureFeaturesKHR EnabledAccelerationStructureFeatures;
+	VkPhysicalDeviceDescriptorIndexingFeaturesEXT EnabledDescriptorIndexingFeatures;
 
 	VkPhysicalDeviceFeatures2 PhysicalDeviceFeatures2;
 
@@ -75,8 +76,14 @@ void VkGetRaytracingFeatures(VkDeviceCreateInfo* DeviceCreateInfo)
 	VkRaytracer.BottomLevelAS = CMA_Create(sizeof(VkAccelerationStructure));
 	VkRaytracer.TopLevelAS = CMA_Create(sizeof(VkAccelerationStructure));
 
+	VkRaytracer.EnabledDescriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
+	VkRaytracer.EnabledDescriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+	VkRaytracer.EnabledDescriptorIndexingFeatures.runtimeDescriptorArray = VK_TRUE;
+	VkRaytracer.EnabledDescriptorIndexingFeatures.descriptorBindingVariableDescriptorCount = VK_TRUE;
+
 	VkRaytracer.EnabledBufferDeviceAddresFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
 	VkRaytracer.EnabledBufferDeviceAddresFeatures.bufferDeviceAddress = VK_TRUE;
+	VkRaytracer.EnabledBufferDeviceAddresFeatures.pNext = &VkRaytracer.EnabledDescriptorIndexingFeatures;
 
 	VkRaytracer.EnabledRayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
 	VkRaytracer.EnabledRayTracingPipelineFeatures.rayTracingPipeline = VK_TRUE;
@@ -93,9 +100,7 @@ void VkGetRaytracingFeatures(VkDeviceCreateInfo* DeviceCreateInfo)
 	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME;
 	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_KHR_SPIRV_1_4_EXTENSION_NAME;
 	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME;
-
-	for (uint32_t i = 0; i < VkRenderer.DeviceExtensionCount; i++)
-		printf("Ext: %s\n", VkRenderer.DeviceExtensions[i]);
+	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_KHR_MAINTENANCE3_EXTENSION_NAME;
 
 	DeviceCreateInfo->enabledExtensionCount = VkRenderer.DeviceExtensionCount;
 	DeviceCreateInfo->ppEnabledExtensionNames = VkRenderer.DeviceExtensions;
@@ -262,34 +267,27 @@ uint64_t VkGetBufferDeviceAddress(VkBuffer Buffer)
 uint32_t VkCreateTranformBuffer(OpenVkTransformMatrix Matrix)
 {
 	return VkCreateBufferExt(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		sizeof(OpenVkTransformMatrix), &Matrix);
+							 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+							 sizeof(OpenVkTransformMatrix), &Matrix);
 }
 
-typedef struct
-{
-	uint32_t VertexCount; 
-	uint32_t VertexBuffer; 
-	uint32_t IndexCount; 
-	uint32_t IndexBuffer; 
-	uint32_t TranformBuffer; 
-	uint32_t VertexFormat; 
-	size_t	 VertexSize;
-} OpenVkRaytracingGeometryCreateInfo;
-
-//check if CMA_GetAt is NULL
-uint32_t VkCreateRaytracingGeometry(uint32_t VertexFormat, size_t VertexSize, uint32_t VertexCount, uint32_t VertexBuffer, uint32_t IndexCount, uint32_t IndexBuffer, uint32_t TranformBuffer)
+//Find out how to use dynamic vertex/index buffers with raytracing
+uint32_t VkCreateRaytracingGeometry(OpenVkRaytracingGeometryCreateInfo* Info)
 {
 	VkDeviceOrHostAddressConstKHR VertexBufferDeviceAddress;
 	VkDeviceOrHostAddressConstKHR IndexBufferDeviceAddress;
 	VkDeviceOrHostAddressConstKHR TransformBufferDeviceAddress;
 	
-	VkStaticBufferInfo* Vertex = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, VertexBuffer);
+	VkStaticBufferInfo* Vertex;
+	Vertex = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Info->VertexBuffer);
+	if (!Vertex) return OpenVkRuntimeError("Failed to find Vertex Buffer: %d with Count: %d", Info->VertexBuffer, Info->VertexCount);
+
 	VertexBufferDeviceAddress.deviceAddress = VkGetBufferDeviceAddress(Vertex->Buffer);
 
-	if (IndexCount != 0)
+	if (Info->IndexCount != 0)
 	{
-		VkStaticBufferInfo* Index = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, IndexBuffer);
+		VkStaticBufferInfo* Index = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Info->IndexBuffer);
+		if (!Index)	return OpenVkRuntimeError("Failed to find Index Buffer: %d with Count: %d", Info->IndexBuffer, Info->IndexCount);
 		IndexBufferDeviceAddress.deviceAddress = VkGetBufferDeviceAddress(Index->Buffer);
 	}
 	else
@@ -297,10 +295,10 @@ uint32_t VkCreateRaytracingGeometry(uint32_t VertexFormat, size_t VertexSize, ui
 		//works maybe
 		IndexBufferDeviceAddress.deviceAddress = 0;
 		IndexBufferDeviceAddress.hostAddress = NULL;
-		IndexCount = VertexCount;
+	//	IndexCount = VertexCount;
 	}
 
-	VkStaticBufferInfo* Transform = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, TranformBuffer);
+	VkStaticBufferInfo* Transform = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Info->TranformBuffer);
 	TransformBufferDeviceAddress.deviceAddress = VkGetBufferDeviceAddress(Transform->Buffer);
 
 	VkAccelerationStructureGeometryKHR AccelerationStructureGeometry;
@@ -310,13 +308,10 @@ uint32_t VkCreateRaytracingGeometry(uint32_t VertexFormat, size_t VertexSize, ui
 	AccelerationStructureGeometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
 	AccelerationStructureGeometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
 	AccelerationStructureGeometry.geometry.triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
-	if (VertexFormat == 1) AccelerationStructureGeometry.geometry.triangles.vertexFormat = VK_FORMAT_R32_SFLOAT;
-	if (VertexFormat == 2) AccelerationStructureGeometry.geometry.triangles.vertexFormat = VK_FORMAT_R32G32_SFLOAT;
-	if (VertexFormat == 3) AccelerationStructureGeometry.geometry.triangles.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;
-	if (VertexFormat == 4) AccelerationStructureGeometry.geometry.triangles.vertexFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
+	AccelerationStructureGeometry.geometry.triangles.vertexFormat = VkGetOpenVkFormat(Info->VertexFormat);
 	AccelerationStructureGeometry.geometry.triangles.vertexData = VertexBufferDeviceAddress;
-	AccelerationStructureGeometry.geometry.triangles.maxVertex = VertexCount;
-	AccelerationStructureGeometry.geometry.triangles.vertexStride = VertexSize;
+	AccelerationStructureGeometry.geometry.triangles.maxVertex = Info->VertexCount;
+	AccelerationStructureGeometry.geometry.triangles.vertexStride = Info->VertexSize;
 	AccelerationStructureGeometry.geometry.triangles.indexType = VK_INDEX_TYPE_UINT32;
 	AccelerationStructureGeometry.geometry.triangles.indexData = IndexBufferDeviceAddress;
 	AccelerationStructureGeometry.geometry.triangles.transformData.deviceAddress = 0;
@@ -325,17 +320,17 @@ uint32_t VkCreateRaytracingGeometry(uint32_t VertexFormat, size_t VertexSize, ui
 
 	VkRaytracingGeometryInfo GeometryInfo;
 	GeometryInfo.AccelerationStructureGeometry = AccelerationStructureGeometry;
-	GeometryInfo.VertexCount = VertexCount;
-	GeometryInfo.IndexCount = IndexCount;
+	GeometryInfo.VertexCount = Info->VertexCount;
+	GeometryInfo.IndexCount = Info->IndexCount;
 
 	return CMA_Push(&VkRaytracer.Geometry, &GeometryInfo);
 }
 
-uint32_t VkCreateBottomLevelAccelerationStructure(uint32_t InGeometry, OpenVkBool AllowUpdate, uint32_t* OldBottomLevelAS)
+uint32_t VkCreateBottomLevelAS(uint32_t InGeometry, OpenVkBool AllowUpdate, uint32_t* OldBottomLevelAS)
 {
 	VkRaytracingGeometryInfo* Geometry = (VkRaytracingGeometryInfo*)CMA_GetAt(&VkRaytracer.Geometry, InGeometry);
 	if (Geometry == NULL)
-		return OpenVkRuntimeError("Failed to find geometry");
+		return OpenVkRuntimeError("Failed to find Geometry: %d", InGeometry);
 
 	VkBuildAccelerationStructureFlagsKHR Flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
 	if (AllowUpdate)
@@ -420,52 +415,44 @@ uint32_t VkCreateBottomLevelAccelerationStructure(uint32_t InGeometry, OpenVkBoo
 	return CMA_Push(&VkRaytracer.BottomLevelAS, &BottomLevelAS);
 }
 
-uint32_t VkCreateInstance(OpenVkTransformMatrix Matrix, OpenVkBool FrontCCWCulling, uint32_t BottomLevelAccelerationStructure)
+//make VkRaytracer.InstanceStorage CMA and add a destroy/free function
+uint32_t VkCreateInstance(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS)
 {
 	VkRaytracer.InstanceStorage = (VkAccelerationStructureInstanceKHR*)OpenVkRealloc(VkRaytracer.InstanceStorage, (VkRaytracer.Instances.Size + 1) * sizeof(VkAccelerationStructureInstanceKHR));
 
-	VkAccelerationStructure* BottomLevelAS = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.BottomLevelAS, BottomLevelAccelerationStructure);
-	if (BottomLevelAS == NULL)
-		return OpenVkRuntimeError("Failed to find bottom level as");
+	VkAccelerationStructure* AccelerationStructure = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.BottomLevelAS, BottomLevelAS);
+	if (AccelerationStructure == NULL)
+		return OpenVkRuntimeError("Failed to find Bottom Level Acceleration Structure: %d", BottomLevelAS);
 
 	VkAccelerationStructureInstanceKHR Instance;
 	memcpy(&Instance.transform, &Matrix, sizeof(VkTransformMatrixKHR));
 	Instance.instanceCustomIndex = 0;
 	Instance.mask = 0xFF;
 	Instance.instanceShaderBindingTableRecordOffset = 0;
-	Instance.flags = (FrontCCWCulling ? VK_GEOMETRY_INSTANCE_TRIANGLE_FRONT_COUNTERCLOCKWISE_BIT_KHR : VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR);
-	Instance.accelerationStructureReference = BottomLevelAS->DeviceAddress;
+	Instance.flags = (TriangleFrontCCW ? VK_GEOMETRY_INSTANCE_TRIANGLE_FRONT_COUNTERCLOCKWISE_BIT_KHR : VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR);
+	Instance.accelerationStructureReference = AccelerationStructure->DeviceAddress;
 
 	return CMA_Push(&VkRaytracer.Instances, &Instance);
 }
 
-OpenVkBool VkUpdateInstance(OpenVkTransformMatrix Matrix, OpenVkBool FrontCCWCulling, uint32_t BottomLevelAccelerationStructure, uint32_t Instance)
+OpenVkBool VkUpdateInstance(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS, uint32_t Instance)
 {
 	VkAccelerationStructureInstanceKHR* InstancePTR = (VkAccelerationStructureInstanceKHR*)CMA_GetAt(&VkRaytracer.Instances, Instance);
 	if (InstancePTR == NULL)
 		return OpenVkRuntimeError("Failed to find instance");
 
-	VkAccelerationStructure* BottomLevelAS = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.BottomLevelAS, BottomLevelAccelerationStructure);
-	if (BottomLevelAS == NULL)
+	VkAccelerationStructure* AccelerationStructure = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.BottomLevelAS, BottomLevelAS);
+	if (AccelerationStructure == NULL)
 		return OpenVkRuntimeError("Failed to find bottom level as");
 
 	memcpy(&InstancePTR->transform, &Matrix, sizeof(VkTransformMatrixKHR));
-	InstancePTR->flags = (FrontCCWCulling ? VK_GEOMETRY_INSTANCE_TRIANGLE_FRONT_COUNTERCLOCKWISE_BIT_KHR : VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR);
-	InstancePTR->accelerationStructureReference = BottomLevelAS->DeviceAddress;
+	InstancePTR->flags = (TriangleFrontCCW ? VK_GEOMETRY_INSTANCE_TRIANGLE_FRONT_COUNTERCLOCKWISE_BIT_KHR : VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR);
+	InstancePTR->accelerationStructureReference = AccelerationStructure->DeviceAddress;
 
 	return OpenVkTrue;
 }
 
-typedef struct
-{
-	uint32_t	InsanceCount;
-	uint32_t*	Instances;
-	
-	OpenVkBool	Update; 
-	uint32_t*	OldTopLevelAS;
-} OpenVkTopLevelAccelerationStructureCreateInfo;
-
-OpenVkBool VkCreateTopLevelAccelerationStructure(uint32_t InstanceCount, uint32_t* Instances, OpenVkBool AllowUpdate, uint32_t* OldTopLevelAS)
+OpenVkBool VkCreateTopLevelAS(uint32_t InstanceCount, uint32_t* Instances, OpenVkBool AllowUpdate, uint32_t* OldTopLevelAS)
 {
 	uint32_t InstanceASCount = 0;
 
@@ -473,15 +460,13 @@ OpenVkBool VkCreateTopLevelAccelerationStructure(uint32_t InstanceCount, uint32_
 	{
 		VkAccelerationStructureInstanceKHR* Instance = (VkAccelerationStructureInstanceKHR*)CMA_GetAt(&VkRaytracer.Instances, Instances[i]);
 		if (Instance != NULL)
-		{
 			VkRaytracer.InstanceStorage[InstanceASCount++] = *Instance;
-		}
 	}
 
 	VkStaticBufferInfo InstancesBuffer;
 	VkCreateVkBufferExt(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		InstanceASCount * sizeof(VkAccelerationStructureInstanceKHR), VkRaytracer.InstanceStorage, &InstancesBuffer.Buffer, &InstancesBuffer.BufferMemory);
+						VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+						InstanceASCount * sizeof(VkAccelerationStructureInstanceKHR), VkRaytracer.InstanceStorage, &InstancesBuffer.Buffer, &InstancesBuffer.BufferMemory);
 
 	VkDeviceOrHostAddressConstKHR InstanceDataDeviceAddress;
 	InstanceDataDeviceAddress.deviceAddress = VkGetBufferDeviceAddress(InstancesBuffer.Buffer);
@@ -596,14 +581,14 @@ uint32_t VkCreateRaytracingPipeline(uint32_t MaxPipelineRayRecursionDepth, uint3
 	{
 		VkShaderModule ShaderModule;
 		if (VkCreateShaderModule(Shader[i], &ShaderModule) == OPENVK_ERROR)
-			return OpenVkRuntimeError("Failed to create raytracing shader module");
+			return OpenVkRuntimeError("Failed to Create Raytracing Shader Module: %d", i);
 
 		ShaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		ShaderStages[i].pNext = NULL;
 		ShaderStages[i].flags = 0;
-		if (ShaderTypes[i] == OPENVK_SHADER_TYPE_RAYGEN) ShaderStages[i].stage = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-		if (ShaderTypes[i] == OPENVK_SHADER_TYPE_MISS) ShaderStages[i].stage = VK_SHADER_STAGE_MISS_BIT_KHR;
-		if (ShaderTypes[i] == OPENVK_SHADER_TYPE_CLOSEST_HIT) ShaderStages[i].stage = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+		if (ShaderTypes[i] & OPENVK_SHADER_TYPE_RAYGEN)		ShaderStages[i].stage = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+		if (ShaderTypes[i] & OPENVK_SHADER_TYPE_MISS)		ShaderStages[i].stage = VK_SHADER_STAGE_MISS_BIT_KHR;
+		if (ShaderTypes[i] & OPENVK_SHADER_TYPE_CLOSEST_HIT)ShaderStages[i].stage = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
 		ShaderStages[i].module = ShaderModule;
 		ShaderStages[i].pName = "main";
 		ShaderStages[i].pSpecializationInfo = NULL;
@@ -611,7 +596,7 @@ uint32_t VkCreateRaytracingPipeline(uint32_t MaxPipelineRayRecursionDepth, uint3
 		VkRayTracingShaderGroupCreateInfoKHR* ShaderGroup = &VkRaytracer.ShaderGroups[VkRaytracer.ShaderGroupCount];
 		ShaderGroup->sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
 		ShaderGroup->pNext = NULL;
-		if (ShaderTypes[i] == OPENVK_SHADER_TYPE_RAYGEN || ShaderTypes[i] == OPENVK_SHADER_TYPE_MISS)
+		if (ShaderTypes[i] & OPENVK_SHADER_TYPE_RAYGEN || ShaderTypes[i] & OPENVK_SHADER_TYPE_MISS)
 		{
 			ShaderGroup->type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
 			ShaderGroup->generalShader = i;
@@ -621,7 +606,7 @@ uint32_t VkCreateRaytracingPipeline(uint32_t MaxPipelineRayRecursionDepth, uint3
 			ShaderGroup->pShaderGroupCaptureReplayHandle = NULL;
 		}
 			
-		if (ShaderTypes[i] == OPENVK_SHADER_TYPE_CLOSEST_HIT)
+		if (ShaderTypes[i] & OPENVK_SHADER_TYPE_CLOSEST_HIT)
 		{
 			ShaderGroup->type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
 			ShaderGroup->generalShader = VK_SHADER_UNUSED_KHR;
@@ -651,7 +636,7 @@ uint32_t VkCreateRaytracingPipeline(uint32_t MaxPipelineRayRecursionDepth, uint3
 	PipelineCreateInfo.basePipelineIndex = 0;
 
 	if (KHR.vkCreateRayTracingPipelines(VkRenderer.Device, VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &PipelineCreateInfo, NULL, &VkRenderer.Pipelines[VkRenderer.PipelineCount]) != VK_SUCCESS)
-		return OpenVkRuntimeError("Failed to create ray tracing pipeline");
+		return OpenVkRuntimeError("Failed to Create Raytracing Pipeline with Max Recursion: %d, Layout: %d, Shader: %d", MaxPipelineRayRecursionDepth, PipelineLayout, ShaderCount);
 
 	for (uint32_t i = 0; i < ShaderCount; i++)
 		vkDestroyShaderModule(VkRenderer.Device, ShaderStages[i].module, NULL);
@@ -661,7 +646,7 @@ uint32_t VkCreateRaytracingPipeline(uint32_t MaxPipelineRayRecursionDepth, uint3
 	return VkRenderer.PipelineCount++;
 }
 
-uint32_t* VkCreateShaderBindingTable(uint32_t Pipeline, uint32_t ShaderCount)
+uint32_t* VkCreateShaderBindingTable(uint32_t Pipeline, uint32_t ShaderCount, uint32_t* HandleCount)
 {
 	VkRaytracer.ShaderBindings = (uint32_t*)OpenVkRealloc(VkRaytracer.ShaderBindings, (VkRaytracer.ShaderBindingCount + ShaderCount) * sizeof(uint32_t));
 
@@ -673,46 +658,51 @@ uint32_t* VkCreateShaderBindingTable(uint32_t Pipeline, uint32_t ShaderCount)
 	uint8_t* ShaderHandleStorage = (uint8_t*)OpenVkMalloc(SbtSize);
 	if (KHR.vkGetRayTracingShaderGroupHandles(VkRenderer.Device, VkRenderer.Pipelines[Pipeline], 0, GroupCount, SbtSize, ShaderHandleStorage) != VK_SUCCESS)
 	{
-		OpenVkRuntimeError("Failed to get ray tracing shader group handles");
+		OpenVkRuntimeError("Failed to get Raytracing Shader Group Handles, Pipeline: %d, Shader: %d", Pipeline, ShaderCount);
 		return NULL;
 	}
 		
-
+	uint32_t j = 0;
 	for (uint32_t i = 0; i < ShaderCount; i++)
 	{
 		VkRaytracer.ShaderBindings[VkRaytracer.ShaderBindingCount] = VkCreateBufferExt(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			HandleSize, ShaderHandleStorage + (HandleSizeAligned * i));
+			HandleSize * HandleCount[i], ShaderHandleStorage + (HandleSizeAligned * j));
 
 		VkRaytracer.ShaderBindingCount++;
+		j += HandleCount[i];
 	}
 
 
 	return VkRaytracer.ShaderBindings + (VkRaytracer.ShaderBindingCount - ShaderCount);
 }
 
-void VkTraceRays(uint32_t Width, uint32_t Height, uint32_t RaygenShader, uint32_t MissShader, uint32_t HitShader)
+OpenVkBool VkTraceRays(OpenVkTraceRaysInfo* Info)
 {
 	const uint32_t HandleSizeAligned = OpenVkAlignedSize(VkRaytracer.RayTracingPipelineProperties.shaderGroupHandleSize, VkRaytracer.RayTracingPipelineProperties.shaderGroupHandleAlignment);
 
-	VkStaticBufferInfo* RayBufferInfo = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, RaygenShader);
-	VkStaticBufferInfo* MissBufferInfo = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, MissShader);
-	VkStaticBufferInfo* HitBufferInfo = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, HitShader);
+	VkStaticBufferInfo* RayBufferInfo = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Info->RaygenShader);
+	VkStaticBufferInfo* MissBufferInfo = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Info->MissShader);
+	VkStaticBufferInfo* HitBufferInfo = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Info->HitShader);
+
+	if (RayBufferInfo == NULL)	return OpenVkRuntimeError("Failed to find Raygen Shader: %d", Info->RaygenShader);
+	if (MissBufferInfo == NULL) return OpenVkRuntimeError("Failed to find Miss Shader: %d", Info->MissShader);
+	if (HitBufferInfo == NULL)	return OpenVkRuntimeError("Failed to find Hit Shader: %d", Info->HitShader);
 
 	VkStridedDeviceAddressRegionKHR RaygenShaderSbtEntry;
 	RaygenShaderSbtEntry.deviceAddress = VkGetBufferDeviceAddress(RayBufferInfo->Buffer);
 	RaygenShaderSbtEntry.stride = HandleSizeAligned;
-	RaygenShaderSbtEntry.size = HandleSizeAligned;
+	RaygenShaderSbtEntry.size = HandleSizeAligned * Info->RaygenHandleCount;
 
 	VkStridedDeviceAddressRegionKHR MissShaderSbtEntry;
 	MissShaderSbtEntry.deviceAddress = VkGetBufferDeviceAddress(MissBufferInfo->Buffer);
 	MissShaderSbtEntry.stride = HandleSizeAligned;
-	MissShaderSbtEntry.size = HandleSizeAligned;
+	MissShaderSbtEntry.size = HandleSizeAligned * Info->MissHandleCount;
 
 	VkStridedDeviceAddressRegionKHR HitShaderSbtEntry;
 	HitShaderSbtEntry.deviceAddress = VkGetBufferDeviceAddress(HitBufferInfo->Buffer);
 	HitShaderSbtEntry.stride = HandleSizeAligned;
-	HitShaderSbtEntry.size = HandleSizeAligned;
+	HitShaderSbtEntry.size = HandleSizeAligned * Info->HitHandleCount;
 
 	VkStridedDeviceAddressRegionKHR CallableShaderSbtEntry;
 	memset(&CallableShaderSbtEntry, 0, sizeof(VkStridedDeviceAddressRegionKHR));
@@ -723,9 +713,10 @@ void VkTraceRays(uint32_t Width, uint32_t Height, uint32_t RaygenShader, uint32_
 		&MissShaderSbtEntry,
 		&HitShaderSbtEntry,
 		&CallableShaderSbtEntry,
-		Width,
-		Height,
+		Info->Width,
+		Info->Height,
 		1);
+	return OpenVkTrue;
 }
 
 void VkDestroyRaytracing()

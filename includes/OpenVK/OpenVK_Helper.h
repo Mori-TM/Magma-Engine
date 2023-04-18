@@ -1,7 +1,7 @@
 static void (*GetWindowSizeFunc)(uint32_t* Width, uint32_t* Height) = NULL;
 uint32_t OpenVkRendererFlags;
 
-uint32_t OpenVkThreadCount;
+uint32_t OpenVkThreadCount = 1;
 #ifdef SDL_INIT_VIDEO
 SDL_Thread** OpenVkThreads;
 
@@ -51,7 +51,25 @@ void OpenVkFreeThreads()
 	free(OpenVkThreads);
 }
 #else
-#error OPENVK_ERROR_NO_MULTITHREADING_FOR_PURE_C
+void OpenVkInitThreads()
+{
+	OpenVkRuntimeError("Multi threading not supported, please use c++ or sdl2 or implement your own shit");
+}
+
+void OpenVkCreateThread(uint32_t Thread, int (*OpenVkExecutionThread)(void* Data), void* Data)
+{
+	OpenVkRuntimeError("Multi threading not supported, please use c++ or sdl2 or implement your own shit");
+}
+
+void OpenVkWaitThread(uint32_t Thread)
+{
+	OpenVkRuntimeError("Multi threading not supported, please use c++ or sdl2 or implement your own shit");
+}
+
+void OpenVkFreeThreads()
+{
+	OpenVkRuntimeError("Multi threading not supported, please use c++ or sdl2 or implement your own shit");
+}
 #endif 
 
 //typedef enum { OpenVkFalse = 0, OpenVkTrue = 1, OpenVkBoolMaxBits = 0xffffffffui32 } OpenVkBool;
@@ -105,16 +123,16 @@ typedef enum
 
 typedef enum
 {
-	OPENVK_SHADER_TYPE_VERTEX = 0x0,
-	OPENVK_SHADER_TYPE_FRAGMENT = 0x1,
-	OPENVK_SHADER_TYPE_RAYGEN = 0x2,
-	OPENVK_SHADER_TYPE_MISS = 0x3,
-	OPENVK_SHADER_TYPE_CLOSEST_HIT = 0x4,
+	OPENVK_SHADER_TYPE_VERTEX = 0x1,
+	OPENVK_SHADER_TYPE_FRAGMENT = 0x2,
+	OPENVK_SHADER_TYPE_RAYGEN = 0x4,
+	OPENVK_SHADER_TYPE_MISS = 0x8,
+	OPENVK_SHADER_TYPE_CLOSEST_HIT = 0x10,
 } OpenVkShaderTypes;
 
 typedef enum
 {
-	OPENVK_DESCRIPTOR_POOL_DEFAULT = 0x1,
+	OPENVK_DESCRIPTOR_POOL_DEFAULT = 0x0,
 	OPENVK_DESCRIPTOR_POOL_FREEABLE = 0x1,
 	OPENVK_DESCRIPTOR_POOL_UPDATABLE = 0x2,
 } OpenVkDescriptorPoolTypes;
@@ -128,6 +146,15 @@ typedef enum
 	OPENVK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE = 0x4,
 	OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER = 0x5,
 } OpenVkDescriptorTypes;
+
+typedef enum
+{
+	OPENVK_DESCRIPTOR_FLAG_NONE = 0x0,
+	OPENVK_DESCRIPTOR_FLAG_UPDATE_AFTER_BIND = 0x1,
+	OPENVK_DESCRIPTOR_FLAG_UNUSED_WHILE_PENDING = 0x2,
+	OPENVK_DESCRIPTOR_FLAG_PARTIALLY_BOUND_BIT = 0x3,
+	OPENVK_DESCRIPTOR_FLAG_VARIABLE_DESCRIPTOR_COUNT = 0x4,
+} OpenVkDescriptorFlags;
 
 typedef enum
 {
@@ -152,6 +179,11 @@ typedef enum
 	OPENVK_FORMAT_RG_UINT = 0xE,
 	OPENVK_FORMAT_RGB_UINT = 0xF,
 	OPENVK_FORMAT_RGBA_UINT = 0x10,
+
+	OPENVK_FORMAT_BC1_RGB = 0x11,
+	OPENVK_FORMAT_BC1_RGBA = 0x12,
+	OPENVK_FORMAT_BC4_RGBA = 0x13,
+	OPENVK_FORMAT_BC7_RGBA = 0x14,
 } OpenVkFormats;
 
 typedef enum
@@ -196,45 +228,45 @@ typedef struct
 
 typedef struct
 {
-	size_t Size;
-	char* Data;
-	OpenVkBool Freeable;
+	size_t		Size;
+	char*		Data;
+	OpenVkBool	Freeable;
 } OpenVkFile;
 
 typedef struct
 {
-	uint32_t		PushConstantCount;
-	uint32_t*		PushConstantShaderTypes;
-	uint32_t*		PushConstantOffsets;
-	uint32_t*		PushConstantSizes;
-	uint32_t		DescriptorSetLayoutCount;
-	uint32_t*		DescriptorSetLayouts;
+	uint32_t	PushConstantCount;
+	uint32_t*	PushConstantShaderTypes;
+	uint32_t*	PushConstantOffsets;
+	uint32_t*	PushConstantSizes;
+	uint32_t	DescriptorSetLayoutCount;
+	uint32_t*	DescriptorSetLayouts;
 } OpenVkPipelineLayoutCreateInfo;
 
 typedef struct
 {
-	OpenVkFile		VertexShader;
-	OpenVkFile		FragmentShader;
-	size_t			BindingStride;
-	uint32_t		ShaderAttributeFormatCount;
-	uint32_t*		ShaderAttributeFormats;
-	uint32_t*		ShaderAttributeOffsets;
-	uint32_t		PrimitiveTopology;
-	uint32_t		x;
-	uint32_t		y;
-	uint32_t		Width;
-	uint32_t		Height;
-	OpenVkBool		DepthClamp;
-	uint32_t		PolygonMode;
-	float			LineWidth;
-	uint32_t		CullMode;
-	uint32_t		FrontFace;
-	uint32_t		MsaaSamples;
-	OpenVkBool		AlphaBlending;
-	uint32_t		ColorBlendAttachments;
-	OpenVkBool		DepthStencil;
-	uint32_t		PipelineLayout;
-	uint32_t		RenderPass;
+	OpenVkFile	VertexShader;
+	OpenVkFile	FragmentShader;
+	size_t		BindingStride;
+	uint32_t	ShaderAttributeFormatCount;
+	uint32_t*	ShaderAttributeFormats;
+	uint32_t*	ShaderAttributeOffsets;
+	uint32_t	PrimitiveTopology;
+	uint32_t	x;
+	uint32_t	y;
+	uint32_t	Width;
+	uint32_t	Height;
+	OpenVkBool	DepthClamp;
+	uint32_t	PolygonMode;
+	float		LineWidth;
+	uint32_t	CullMode;
+	uint32_t	FrontFace;
+	uint32_t	MsaaSamples;
+	OpenVkBool	AlphaBlending;
+	uint32_t	ColorBlendAttachments;
+	OpenVkBool	DepthStencil;
+	uint32_t	PipelineLayout;
+	uint32_t	RenderPass;
 } OpenVkGraphicsPipelineCreateInfo;
 
 typedef struct
@@ -262,6 +294,8 @@ typedef struct
 	uint32_t*	TopLevelAS;
 	uint32_t*	Bindings;
 	uint32_t*	DescriptorSet;
+	uint32_t	VariableDescriptorSetCount;
+	uint32_t	Dummy;//Don't set this to something!
 } OpenVkDescriptorSetCreateInfo;
 
 typedef struct
@@ -277,14 +311,46 @@ typedef struct
 	uint32_t	Height;
 } OpenVkBeginRenderPassInfo;
 
+typedef struct
+{
+	uint32_t	VertexFormat;
+	size_t		VertexSize;
+	OpenVkBool	VertexBufferDynamic;
+	uint32_t	VertexCount;
+	uint32_t	VertexBuffer;
+	OpenVkBool	IndexBufferDynamic;
+	uint32_t	IndexCount;
+	uint32_t	IndexBuffer;
+	uint32_t	TranformBuffer;
+} OpenVkRaytracingGeometryCreateInfo;
+
+typedef struct
+{
+	uint32_t Width;
+	uint32_t Height;
+	uint32_t RaygenShader;
+	uint32_t RaygenHandleCount;
+	uint32_t MissShader;
+	uint32_t MissHandleCount;
+	uint32_t HitShader;
+	uint32_t HitHandleCount;
+} OpenVkTraceRaysInfo;
+
 void OpenVkRuntimeInfo(const char* Msg, const char* Val)
 {
 	printf("\x1B[36m[Renderer Info]\033[0m\t%s%s\n", Msg, Val);
 }
 
-OpenVkBool OpenVkRuntimeError(const char* Msg)
+OpenVkBool OpenVkRuntimeError(const char* Msg, ...)
 {
-	printf("\x1B[31m[Renderer Error]\033[0m\t%s\n", Msg);
+	char Buf[2048];
+	sprintf(Buf, "\x1B[31m[Renderer Error]\033[0m\t%s\n", Msg);
+
+	va_list ArgList;
+	va_start(ArgList, Msg);
+	vprintf(Buf, ArgList);
+	va_end(ArgList);
+//	printf("\x1B[31m[Renderer Error]\033[0m\t%s\n", Msg);
 
 	return OPENVK_ERROR;
 }
@@ -327,7 +393,7 @@ OpenVkFile OpenVkReadFile(const char* Path)
 		F.Size = Length;
 		F.Data = Buffer;
 		F.Freeable = OpenVkFalse;
-		OpenVkRuntimeError("Failed to load file");
+		OpenVkRuntimeError("Failed to load file: %s", Path);
 		return F;
 	}
 
@@ -353,7 +419,7 @@ OpenVkBool OpenVkLoadTexture(const char* Path, OpenVkBool FlipVertical, unsigned
 	int32_t TextureChannels;
 	*Pixels = stbi_load(Path, Width, Height, &TextureChannels, Comp);
 	if (*Pixels == NULL)
-		return OpenVkRuntimeError("Failed to load texture");
+		return OpenVkRuntimeError("Failed to load texture: %s", Path);
 
 	return OpenVkTrue;
 }

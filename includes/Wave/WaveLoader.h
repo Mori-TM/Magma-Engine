@@ -4,16 +4,21 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdarg.h>
+#include <ctype.h>
 #include <float.h>
 #include <math.h>
 #ifndef WAVE_NO_MULTI_THREDED_LOADING
+#if _HAS_CXX23
 #include <stdatomic.h>
 atomic_int WaveLoadingStatus;
 #else
 int WaveLoadingStatus;
+#endif
+#else
+int WaveLoadingStatus;
 #endif // WAVE_NO_MULTI_THREDED_LOADING
 
-#define WAVE_MAX_ALLOCATION_SIZE 8388608//8mb
+#define WAVE_MAX_ALLOCATION_SIZE 388608//8mb
 
 #ifndef WAVE_BASIC_MATH
 #define WAVE_BASIC_MATH
@@ -203,6 +208,12 @@ typedef struct
 
 typedef struct
 {
+	WaveVec3 Min;
+	WaveVec3 Max;
+} WaveAABBData;
+
+typedef struct
+{
 	uint32_t VertexSize;
 	uint32_t IndexSize;
 
@@ -213,6 +224,8 @@ typedef struct
 
 	uint32_t IndexCount;
 	uint32_t* Indices;
+
+	WaveAABBData AABB;
 } WaveMeshData;
 
 typedef struct
@@ -629,6 +642,27 @@ void WaveRemoveRedundantMaterials(WaveModelData* ModelData)
 //	qsort(ModelData->Materials, ModelData->MaterialCount, sizeof(WaveModelMaterial), WaveCompareMaterials);
 }
 
+void WaveGenAABBs(WaveModelData* ModelData)
+{
+	for (uint32_t i = 0; i < ModelData->MeshCount; i++)
+	{
+		WaveMeshData* Data = &ModelData->Meshes[i];
+
+		Data->AABB.Min = Data->Vertices[0].Vertices;
+		Data->AABB.Max = Data->Vertices[0].Vertices;
+		for (uint32_t i = 1; i < Data->VertexCount; i++)
+		{
+			if (Data->Vertices[i].Vertices.x > Data->AABB.Max.x) Data->AABB.Max.x = Data->Vertices[i].Vertices.x;
+			if (Data->Vertices[i].Vertices.y > Data->AABB.Max.y) Data->AABB.Max.y = Data->Vertices[i].Vertices.y;
+			if (Data->Vertices[i].Vertices.z > Data->AABB.Max.z) Data->AABB.Max.z = Data->Vertices[i].Vertices.z;
+
+			if (Data->Vertices[i].Vertices.x < Data->AABB.Min.x) Data->AABB.Min.x = Data->Vertices[i].Vertices.x;
+			if (Data->Vertices[i].Vertices.y < Data->AABB.Min.y) Data->AABB.Min.y = Data->Vertices[i].Vertices.y;
+			if (Data->Vertices[i].Vertices.z < Data->AABB.Min.z) Data->AABB.Min.z = Data->Vertices[i].Vertices.z;
+		}
+	}
+}
+
 void WaveRunPPP(WaveModelData* ModelData, uint32_t Settings)
 {
 	if (Settings & WAVE_FORCE_GEN_NORMALS)
@@ -650,6 +684,8 @@ void WaveRunPPP(WaveModelData* ModelData, uint32_t Settings)
 
 	if (Settings & WAVE_GEN_SMOOTH_NORMALS)
 		WaveGenSmoothNormals(ModelData);
+
+	WaveGenAABBs(ModelData);
 }
 
 WaveModelMaterial WaveEmptyMaterial =
@@ -878,7 +914,7 @@ WaveModelData WaveLoadOBJ(size_t Length, char* Buffer, uint32_t Settings)
 	MaterialCount = 0;
 
 	uint32_t VertexReferenceIndex = 0;
-	WaveVertexReference VertexReferences[4];
+	WaveVertexReference VertexReferences[128];
 
 	char FoundMaterialFile = 0;
 
@@ -920,6 +956,8 @@ WaveModelData WaveLoadOBJ(size_t Length, char* Buffer, uint32_t Settings)
 					if (Data.Meshes[i].VertexSize > WAVE_MAX_ALLOCATION_SIZE)
 						Data.Meshes[i].VertexSize = WAVE_MAX_ALLOCATION_SIZE;
 					Data.Meshes[i].Vertices = (WaveVertexData*)calloc(Data.Meshes[i].VertexSize, sizeof(WaveVertexData));
+					if (Data.Meshes[i].Vertices == NULL)
+						printf("Failed to allocate Mesh: %d\n", i);
 					Data.Meshes[i].VertexCount = 0;
 					Data.Meshes[i].IndexCount = 0;
 					Data.Meshes[i].IndexSize = 0;
@@ -994,7 +1032,7 @@ WaveModelData WaveLoadOBJ(size_t Length, char* Buffer, uint32_t Settings)
 				{
 					WaveVertexData Vertex;
 
-					if (Mesh->VertexCount + 1 >= Mesh->VertexSize)
+					if (Mesh->VertexCount >= Mesh->VertexSize)
 					{
 						uint32_t TmpCount = FaceCount * 3;
 						if (TmpCount > WAVE_MAX_ALLOCATION_SIZE)
@@ -1002,6 +1040,8 @@ WaveModelData WaveLoadOBJ(size_t Length, char* Buffer, uint32_t Settings)
 
 						Mesh->VertexSize += TmpCount;
 						Mesh->Vertices = (WaveVertexData*)realloc(Mesh->Vertices, Mesh->VertexSize * sizeof(WaveVertexData));
+						if (Mesh->Vertices == NULL)
+							printf("Wave Error: Failed to resize vertex buffer!\n");
 					}						
 
 					Vertex.VertexIndex = Mesh->VertexCount;

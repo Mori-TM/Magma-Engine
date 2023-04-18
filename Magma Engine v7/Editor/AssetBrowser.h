@@ -45,7 +45,7 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 	unsigned char* Pixels = NULL;
 	Image->Components = OPENVK_FORMAT_RGBA;
 	
-	
+//	LoadTextureCompressed = true;
 
 	if (OpenVkLoadTexture(Path, false, &Pixels, &Image->Width, &Image->Height, OPENVK_FORMAT_RGBA) == OpenVkTrue)
 	{
@@ -86,7 +86,7 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 
 		//	stb_compress_dxt_block(Block, Pixels, 1, STB_DXT_HIGHQUAL);
 
-			Image->Components = OPENVK_FORMAT_BC4_RGBA;
+			Image->Components = OPENVK_FORMAT_BC1_RGB;
 
 			size_t BlockSize = 0;
 			unsigned char* Block;
@@ -147,6 +147,7 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 	DescriptorSetCreateInfo.Bindings = Bindings;
 	DescriptorSetCreateInfo.Images = &Image->TextureImage;
 	DescriptorSetCreateInfo.DescriptorSet = NULL;
+	DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
 	LoadTextureCompressed = false;
 

@@ -92,6 +92,7 @@ void CreateBlurDescriptorSets()
 		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
 		DescriptorSetCreateInfo.Bindings = Bindings;
 		DescriptorSetCreateInfo.DescriptorSet = NULL;
+		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
 		BlurDescriptorSets[i] = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}

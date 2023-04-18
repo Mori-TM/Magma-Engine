@@ -1175,6 +1175,19 @@ mat4 InverseMat4(mat4 m)
 	return MulMat4Float(Inverse, OneOverDeterminant);
 }
 
+mat4 TransposeMat4(mat4* Mat)
+{
+	mat4 Matrix =
+	{
+		Mat->m[0][0], Mat->m[1][0], Mat->m[2][0], Mat->m[3][0],
+		Mat->m[0][1], Mat->m[1][1], Mat->m[2][1], Mat->m[3][1],
+		Mat->m[0][2], Mat->m[1][2], Mat->m[2][2], Mat->m[3][2],
+		Mat->m[0][3], Mat->m[1][3], Mat->m[2][3], Mat->m[3][3]
+	};
+
+	return Matrix;
+}
+
 //helper
 extern inline void PrintVec2(vec2* a)
 {

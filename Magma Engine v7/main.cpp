@@ -64,8 +64,6 @@ static std::atomic<bool> Init = false;
 
 void RenderThread()
 {
-	
-
 #ifdef _WIN32
 	system("GLSLCompiler.bat");
 #endif

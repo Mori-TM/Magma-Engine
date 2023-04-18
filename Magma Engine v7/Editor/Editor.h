@@ -356,7 +356,9 @@ void EngineDrawEditor()
 		ImGui::Text("FPS: %f MS: %f", FPS, MS);
 		ImGui::Text("Shadow Render Time: %f ms", ShadowRenderingTime);
 		ImGui::Text("Scene Render Time: %f ms", SceneRenderingTime);
+		ImGui::Text("SSR Render Time: %f ms", SSRRenderingTime);
 		ImGui::Text("SwapChain Render Time: %f ms", SwapChainRenderingTime);
+		ImGui::Text("Render Time: %f ms", ShadowRenderingTime + SceneRenderingTime + SSRRenderingTime + SwapChainRenderingTime);
 		ImGui::Text("Begin Frame Time: %f ms", BeginFrameTime);
 		ImGui::Text("End Frame Time: %f ms", EndFrameTime);
 		ImGui::Text("Frame Time: %f ms", FrameTime);

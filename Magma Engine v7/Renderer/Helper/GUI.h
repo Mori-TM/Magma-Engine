@@ -340,6 +340,7 @@ ifd::ImageData CreateImGuiTexture(uint8_t* Data, int w, int h, char Format)
 	DescriptorSetCreateInfo.Bindings = Bindings;
 	DescriptorSetCreateInfo.Images = &Image;
 	DescriptorSetCreateInfo.DescriptorSet = NULL;
+	DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
 	uint32_t DescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 

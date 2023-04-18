@@ -113,45 +113,45 @@ void SwapChainDraw()
 			sprintf(String, "%f FPS\n%f MS", FPS, MS);
 			OpenVkGUITextPos(String, ImGuiScenePosX + 20, ImGuiScenePosY + 20, 0, 0);
 			
-			OpenVkGUIBegin("OpenVk Window");
-			{
-				static OpenVkBool Selected = OpenVkTrue;
-				if (!OpenVkGUICheckbox("Rounding", &Selected))
-					OpenVkGUI.Rounding = 0.0;
-		
-				static OpenVkBool Selected2 = OpenVkFalse;
-				OpenVkGUICheckbox("Check Box 2", &Selected2);
-		
-				OpenVkGUIButton("Button");
-				OpenVkGUIText(String);				
-				OpenVkGUIButton("Button2");
-			//	static float Border = 13.2;
-			//	OpenVkGUISlider("Border Size", 0.0, 80.0, &Border);				
-			//	OpenVkGUI.Border = Border;
-		
-				OpenVkGUISlider("Rounding", 0.0, 100.0, &OpenVkGUI.Rounding);
-				OpenVkGUISlider("Window Color", 0.0, 1.0, &OpenVkGUI.WindowColor);
-				OpenVkGUISlider("Color", 0.0, 1.0, &OpenVkGUI.Color);
-				OpenVkGUISlider("Color Selected", 0.0, 1.0, &OpenVkGUI.ColorSelected);
-				OpenVkGUISlider("Color Hovered", 0.0, 1.0, &OpenVkGUI.ColorHovered);
-				float Offset = OpenVkGUI.Offset;
-				OpenVkGUISlider("Offset Size", 0.0, 30.0, &Offset);
-				OpenVkGUI.Offset = Offset;
-		
-				OpenVkGUIText("Some Text\nMultiline Text");
-			}
-			OpenVkGUIEnd();
-		
-			OpenVkGUIBegin("Another Window");
-			{
-				OpenVkGUIText(String);
-				static OpenVkBool Selected2 = OpenVkFalse;
-				OpenVkGUICheckbox("Check Box", &Selected2);
-				static float Dummy = 2.0;
-				OpenVkGUISlider("Offset Size", 0.0, 30.0, &Dummy);
-				OpenVkGUIDragSlider("Drag Slider", 0.0, 30.0, &Dummy);
-			}
-			OpenVkGUIEnd();
+		//	OpenVkGUIBegin("OpenVk Window");
+		//	{
+		//		static OpenVkBool Selected = OpenVkTrue;
+		//		if (!OpenVkGUICheckbox("Rounding", &Selected))
+		//			OpenVkGUI.Rounding = 0.0;
+		//
+		//		static OpenVkBool Selected2 = OpenVkFalse;
+		//		OpenVkGUICheckbox("Check Box 2", &Selected2);
+		//
+		//		OpenVkGUIButton("Button");
+		//		OpenVkGUIText(String);				
+		//		OpenVkGUIButton("Button2");
+		//	//	static float Border = 13.2;
+		//	//	OpenVkGUISlider("Border Size", 0.0, 80.0, &Border);				
+		//	//	OpenVkGUI.Border = Border;
+		//
+		//		OpenVkGUISlider("Rounding", 0.0, 100.0, &OpenVkGUI.Rounding);
+		//		OpenVkGUISlider("Window Color", 0.0, 1.0, &OpenVkGUI.WindowColor);
+		//		OpenVkGUISlider("Color", 0.0, 1.0, &OpenVkGUI.Color);
+		//		OpenVkGUISlider("Color Selected", 0.0, 1.0, &OpenVkGUI.ColorSelected);
+		//		OpenVkGUISlider("Color Hovered", 0.0, 1.0, &OpenVkGUI.ColorHovered);
+		//		float Offset = OpenVkGUI.Offset;
+		//		OpenVkGUISlider("Offset Size", 0.0, 30.0, &Offset);
+		//		OpenVkGUI.Offset = Offset;
+		//
+		//		OpenVkGUIText("Some Text\nMultiline Text");
+		//	}
+		//	OpenVkGUIEnd();
+		//
+		//	OpenVkGUIBegin("Another Window");
+		//	{
+		//		OpenVkGUIText(String);
+		//		static OpenVkBool Selected2 = OpenVkFalse;
+		//		OpenVkGUICheckbox("Check Box", &Selected2);
+		//		static float Dummy = 2.0;
+		//		OpenVkGUISlider("Offset Size", 0.0, 30.0, &Dummy);
+		//		OpenVkGUIDragSlider("Drag Slider", 0.0, 30.0, &Dummy);
+		//	}
+		//	OpenVkGUIEnd();
 		}
 		OpenVkGUIEndRender();
 		

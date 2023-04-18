@@ -155,11 +155,18 @@ uint32_t VkCreateRenderer(const char**(*GetExtensions)(uint32_t* ExtensionCount)
 	AppInfo.pApplicationName = "OpenVK Framework";
 	AppInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 	AppInfo.pEngineName = "OpenVK";
-	AppInfo.engineVersion = VK_MAKE_VERSION(2, 0, 0);
+	AppInfo.engineVersion = VK_MAKE_VERSION(3, 0, 0);
 	AppInfo.apiVersion = VK_MAKE_VERSION(1, 2, 0);
 
 	uint32_t ExtensionCount;
 	const char** Extensions = GetExtensions(&ExtensionCount);
+	
+	if (OpenVkRendererFlags & OPENVK_RAYTRACING)
+	{
+		ExtensionCount++;
+		Extensions = (const char**)realloc(Extensions, ExtensionCount * sizeof(char*));
+		Extensions[ExtensionCount - 1] = VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME;
+	}	
 
 	VkInstanceCreateInfo InstanceCreateInfo;
 	InstanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -204,9 +211,7 @@ uint32_t VkCreateRenderer(const char**(*GetExtensions)(uint32_t* ExtensionCount)
 	VkPhysicalDevice* PhysicalDevices = (VkPhysicalDevice*)OpenVkMalloc(PhysicalDeviceCount * sizeof(VkPhysicalDevice));
 	vkEnumeratePhysicalDevices(VkRenderer.Instance, &PhysicalDeviceCount, PhysicalDevices);
 
-	for (uint32_t i = 0; i < PhysicalDeviceCount; i++)
-		if (VkIsPhysicalDeviceSuitable(PhysicalDevices[i]))
-			VkRenderer.PhysicalDevice = PhysicalDevices[i];
+	VkRenderer.PhysicalDevice = PhysicalDevices[VkGetBestSuitablePhysicalDevice(PhysicalDeviceCount, PhysicalDevices)];
 
 	OpenVkFree(PhysicalDevices);
 	
@@ -330,31 +335,24 @@ uint32_t VkCreateColorImageAttachment(uint32_t Width, uint32_t Height, uint32_t 
 {
 	VkFormat ColorFormat = VkGetOpenVkFormat(Format);
 
-//	VkRenderer.Images = (VkImage*)OpenVkRealloc(VkRenderer.Images, (VkRenderer.ImageCount + 1) * sizeof(VkImage));
-//	VkRenderer.ImageMemories = (VkDeviceMemory*)OpenVkRealloc(VkRenderer.ImageMemories, (VkRenderer.ImageCount + 1) * sizeof(VkDeviceMemory));
-//	VkRenderer.ImageViews = (VkImageView*)OpenVkRealloc(VkRenderer.ImageViews, (VkRenderer.ImageCount + 1) * sizeof(VkImageView));
-
 	VkSampleCountFlagBits Samples = (VkSampleCountFlagBits)(VkRenderer.MsaaSamples < MsaaSamples ? VkRenderer.MsaaSamples : MsaaSamples);
 	VkImageInfo Image;
 	Image.Format = ColorFormat;
 
 	if (Sampled)
 	{
-		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
+		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory, NULL) == OPENVK_ERROR)
 			return OpenVkRuntimeError("Failed to Create Sampled Attachment Image");
 		Image.ImageView = VkCreateImageView(Image.Image, ColorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 	}
 	else
 	{
-		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
+		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory, NULL) == OPENVK_ERROR)
 			return OpenVkRuntimeError("Failed to Create Msaa Attachment Image");
 		Image.ImageView = VkCreateImageView(Image.Image, ColorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 	}
 
 	return CMA_Push(&VkRenderer.ImageAttachments, &Image);
-//	VkRenderer.ImageCount++;
-
-//	return VkRenderer.ImageCount - 1;
 }
 
 uint32_t VkCreateDepthImageAttachment(uint32_t Width, uint32_t Height, uint32_t MsaaSamples, OpenVkBool Sampled, uint32_t Format)
@@ -365,9 +363,6 @@ uint32_t VkCreateDepthImageAttachment(uint32_t Width, uint32_t Height, uint32_t 
 	else
 		DepthFormat = VkGetOpenVkFormat(Format);
 
-//	VkRenderer.Images = (VkImage*)OpenVkRealloc(VkRenderer.Images, (VkRenderer.ImageCount + 1) * sizeof(VkImage));
-//	VkRenderer.ImageMemories = (VkDeviceMemory*)OpenVkRealloc(VkRenderer.ImageMemories, (VkRenderer.ImageCount + 1) * sizeof(VkDeviceMemory));
-//	VkRenderer.ImageViews = (VkImageView*)OpenVkRealloc(VkRenderer.ImageViews, (VkRenderer.ImageCount + 1) * sizeof(VkImageView));
 	VkImageInfo Image;
 	Image.Format = DepthFormat;
 
@@ -375,22 +370,18 @@ uint32_t VkCreateDepthImageAttachment(uint32_t Width, uint32_t Height, uint32_t 
 
 	if (Sampled)
 	{
-		if (VkCreateImage(Width, Height, 1, Samples, DepthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
+		if (VkCreateImage(Width, Height, 1, Samples, DepthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory, NULL) == OPENVK_ERROR)
 			return OpenVkRuntimeError("Failed to Create Depth Sampled Attachment Image");
 		Image.ImageView = VkCreateImageView(Image.Image, DepthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 	}
 	else
 	{
-		if (VkCreateImage(Width, Height, 1, Samples, DepthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
+		if (VkCreateImage(Width, Height, 1, Samples, DepthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory, NULL) == OPENVK_ERROR)
 			return OpenVkRuntimeError("Failed to Create Depth Attachment Image");
 		Image.ImageView = VkCreateImageView(Image.Image, DepthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 	}	
 
 	return CMA_Push(&VkRenderer.ImageAttachments, &Image);
-
-//	VkRenderer.ImageCount++;
-//
-//	return VkRenderer.ImageCount - 1;
 }
 
 uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uint32_t* AttachmentFormats, uint32_t* MsaaSamples, uint32_t* ResolveAttachments, OpenVkBool Sampled)
@@ -562,194 +553,7 @@ uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uin
 
 	OpenVkFree(AttachmentDescriptions);
 
-	VkRenderer.RenderPassCount++;
-
-	return VkRenderer.RenderPassCount - 1;
-
-	/*
-	VkRenderer.RenderPasses = (VkRenderPass*)OpenVkRealloc(VkRenderer.RenderPasses, (VkRenderer.RenderPassCount + 1) * sizeof(VkRenderPass));
-	
-	VkAttachmentDescription ColorAttachmentDescription;
-	VkAttachmentDescription DepthAttachmentDescription;
-	VkAttachmentDescription ColorAttachmentResolveDescription;
-
-	VkSampleCountFlagBits Samples = (VkSampleCountFlagBits)(VkRenderer.MsaaSamples < MsaaSamples ? VkRenderer.MsaaSamples : MsaaSamples);
-
-	if (ColorAttachmentCount > 0)
-	{
-		ColorAttachmentDescription.flags = 0;
-		ColorAttachmentDescription.format = VkRenderer.SwapChainImageFormat;
-		ColorAttachmentDescription.samples = Samples;
-		ColorAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		ColorAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		ColorAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		ColorAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		ColorAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		ColorAttachmentDescription.finalLayout = (MsaaAttachment ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : (Sampled ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR));
-	}
-
-	if (DepthAttachment && ColorAttachmentCount > 0)
-	{
-		DepthAttachmentDescription.flags = 0;
-		DepthAttachmentDescription.format = VkFindDepthFormat();
-		DepthAttachmentDescription.samples = Samples;
-		DepthAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		DepthAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		DepthAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		DepthAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		DepthAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		DepthAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	}
-	else if (DepthAttachment && ColorAttachmentCount == 0)
-	{
-		DepthAttachmentDescription.flags = 0;
-		DepthAttachmentDescription.format = VkFindDepthFormat();
-		DepthAttachmentDescription.samples = Samples;
-		DepthAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		DepthAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		DepthAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		DepthAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		DepthAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		DepthAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-	}
-
-	if (MsaaAttachment)
-	{
-		ColorAttachmentResolveDescription.flags = 0;
-		ColorAttachmentResolveDescription.format = VkRenderer.SwapChainImageFormat;
-		ColorAttachmentResolveDescription.samples = VK_SAMPLE_COUNT_1_BIT;
-		ColorAttachmentResolveDescription.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		ColorAttachmentResolveDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		ColorAttachmentResolveDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		ColorAttachmentResolveDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		ColorAttachmentResolveDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		ColorAttachmentResolveDescription.finalLayout = (Sampled ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-	}
-
-
-	VkAttachmentReference* ColorAttachmentReferences = NULL;
-	VkAttachmentReference  DepthAttachmentReference;
-	VkAttachmentReference* ColorAttachmentResolveReferences = NULL;
-
-	if (ColorAttachmentCount > 0)
-	{
-		ColorAttachmentReferences = (VkAttachmentReference*)OpenVkMalloc(ColorAttachmentCount * sizeof(VkAttachmentReference));
-		for (uint32_t i = 0; i < ColorAttachmentCount; i++)
-		{
-			ColorAttachmentReferences[i].attachment = i;
-			ColorAttachmentReferences[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		}
-	}    
-
-	if (DepthAttachment)
-	{
-		DepthAttachmentReference.attachment = ColorAttachmentCount;
-		DepthAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	}
-
-	if (MsaaAttachment)
-	{
-		uint32_t ResolveRefrenceCount = 0;
-		ColorAttachmentResolveReferences = (VkAttachmentReference*)OpenVkMalloc(ColorAttachmentCount * sizeof(VkAttachmentReference));;
-		for (uint32_t i = ColorAttachmentCount + DepthAttachment; i < (ColorAttachmentCount * 2) + DepthAttachment; i++)
-		{
-			ColorAttachmentResolveReferences[ResolveRefrenceCount].attachment = i;
-			ColorAttachmentResolveReferences[ResolveRefrenceCount].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-			ResolveRefrenceCount++;
-		}
-	}
-
-	VkSubpassDescription Subpass;
-	Subpass.flags = 0;
-	Subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	Subpass.inputAttachmentCount = 0;
-	Subpass.pInputAttachments = NULL;
-	Subpass.colorAttachmentCount = ColorAttachmentCount;
-	Subpass.pColorAttachments = ColorAttachmentReferences;
-	Subpass.pResolveAttachments = ColorAttachmentResolveReferences;
-	Subpass.pDepthStencilAttachment = (DepthAttachment ? &DepthAttachmentReference : NULL);
-	Subpass.preserveAttachmentCount = NULL;
-	Subpass.pPreserveAttachments = NULL;
-
-	VkSubpassDependency Dependencies[2];
-	Dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
-	Dependencies[0].dstSubpass = 0;
-	Dependencies[0].srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	Dependencies[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-	Dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-	Dependencies[1].srcSubpass = 0;
-	Dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-	Dependencies[1].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	Dependencies[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-	Dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-	if (ColorAttachmentCount > 0)
-	{
-		Dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		Dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-		Dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		Dependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-	}
-	else
-	{
-		Dependencies[0].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-		Dependencies[0].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-		Dependencies[1].srcStageMask = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-		Dependencies[1].srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-	}
-
-	uint32_t AttachmentCount = ((ColorAttachmentCount * (MsaaAttachment == 1 ? 2 : 1)) + DepthAttachment);
-	VkAttachmentDescription* AttachmentDescriptions = (VkAttachmentDescription*)OpenVkMalloc(AttachmentCount * sizeof(VkAttachmentDescription));
-	for (uint32_t i = 0; i < ColorAttachmentCount; i++)
-	{
-		AttachmentDescriptions[i] = ColorAttachmentDescription;
-		AttachmentDescriptions[i].format = VkGetOpenVkFormat(ColorFormats[i]);
-	}		
-	for (uint32_t i = ColorAttachmentCount; i < ColorAttachmentCount + DepthAttachment; i++)
-	{
-		AttachmentDescriptions[i] = DepthAttachmentDescription;
-
-		if (DepthFormat == OPENVK_FORMAT_DEFAULT)
-			 AttachmentDescriptions[i].format = VkFindDepthFormat();
-		else AttachmentDescriptions[i].format = VkGetOpenVkFormat(DepthFormat);
-	}
-		
-	for (uint32_t i = ColorAttachmentCount + DepthAttachment; i < AttachmentCount; i++)
-	{
-		AttachmentDescriptions[i] = ColorAttachmentResolveDescription;
-		AttachmentDescriptions[i].format = VkGetOpenVkFormat(ColorFormats[i - (ColorAttachmentCount + DepthAttachment)]);
-	}
-		
-
-	VkRenderPassCreateInfo RenderPassInfo;
-	RenderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	RenderPassInfo.pNext = NULL;
-	RenderPassInfo.flags = 0;
-	RenderPassInfo.attachmentCount = AttachmentCount;
-	RenderPassInfo.pAttachments = AttachmentDescriptions;
-	RenderPassInfo.subpassCount = 1;
-	RenderPassInfo.pSubpasses = &Subpass;
-	RenderPassInfo.dependencyCount = 2;
-	RenderPassInfo.pDependencies = Dependencies;
-
-	if (vkCreateRenderPass(VkRenderer.Device, &RenderPassInfo, NULL, &VkRenderer.RenderPasses[VkRenderer.RenderPassCount]) != VK_SUCCESS)
-		return OpenVkRuntimeError("Failed to Create Render Pass");
-
-	if (ColorAttachmentCount > 0)
-		OpenVkFree(ColorAttachmentReferences);
-	if (MsaaAttachment)
-		OpenVkFree(ColorAttachmentResolveReferences);
-	
-	OpenVkFree(AttachmentDescriptions);
-
-	VkRenderer.RenderPassCount++;
-
-	return VkRenderer.RenderPassCount - 1;
-	*/
+	return VkRenderer.RenderPassCount++;
 }
 
 uint32_t VkCreatePipelineLayout(OpenVkPipelineLayoutCreateInfo* Info)
@@ -774,8 +578,9 @@ uint32_t VkCreatePipelineLayout(OpenVkPipelineLayoutCreateInfo* Info)
 		PushConstantRanges = (VkPushConstantRange*)OpenVkMalloc(Info->PushConstantCount * sizeof(VkPushConstantRange));
 		for (uint32_t i = 0; i < Info->PushConstantCount; i++)
 		{
-			if (Info->PushConstantShaderTypes[i] == 0) PushConstantRanges[i].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-			if (Info->PushConstantShaderTypes[i] == 1) PushConstantRanges[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+			PushConstantRanges[i].stageFlags = VkGetOpenVkShader(Info->PushConstantShaderTypes[i]);
+		//	if (Info->PushConstantShaderTypes[i] == 0) PushConstantRanges[i].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		//	if (Info->PushConstantShaderTypes[i] == 1) PushConstantRanges[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 			PushConstantRanges[i].offset = Info->PushConstantOffsets[i];
 			PushConstantRanges[i].size = Info->PushConstantSizes[i];
 		}
@@ -1087,13 +892,8 @@ uint32_t VkCreateFramebuffer(OpenVkFramebufferCreateInfo* Info)
 	return VkRenderer.FramebufferCount - 1;
 }
 
-//DescriptorTypes
-//0 = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
-//1 = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-//ShaderTypes
-//0 = Vertex Shader
-//1 = Fragment Shader
-uint32_t VkCreateDescriptorSetLayout(uint32_t BindingCount, uint32_t* Bindings, uint32_t* DescriptorCounts, uint32_t* DescriptorTypes, uint32_t* ShaderTypes)
+//Implement multiple descriptor flags
+uint32_t VkCreateDescriptorSetLayout(uint32_t BindingCount, uint32_t* Bindings, uint32_t* DescriptorCounts, uint32_t* DescriptorTypes, uint32_t* DescriptorFlags, uint32_t* ShaderTypes)
 {
 	VkRenderer.DescriptorSetLayouts = (VkDescriptorSetLayout*)OpenVkRealloc(VkRenderer.DescriptorSetLayouts, (VkRenderer.DescriptorSetLayoutCount + 1) * sizeof(VkDescriptorSetLayout));
 
@@ -1102,17 +902,14 @@ uint32_t VkCreateDescriptorSetLayout(uint32_t BindingCount, uint32_t* Bindings, 
 	for (uint32_t i = 0; i < BindingCount; i++)
 	{
 		LayoutBindings[i].binding = Bindings[i];
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER) LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER) LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE) LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE) LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)			LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER)	LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER)				LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE)				LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE)	LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER)			LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		LayoutBindings[i].descriptorCount = DescriptorCounts[i];
-		if (ShaderTypes[i] == OPENVK_SHADER_TYPE_VERTEX) LayoutBindings[i].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		if (ShaderTypes[i] == OPENVK_SHADER_TYPE_FRAGMENT) LayoutBindings[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-		if (ShaderTypes[i] == OPENVK_SHADER_TYPE_RAYGEN) LayoutBindings[i].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-		if (ShaderTypes[i] == OPENVK_SHADER_TYPE_MISS) LayoutBindings[i].stageFlags = VK_SHADER_STAGE_MISS_BIT_KHR;
-		if (ShaderTypes[i] == OPENVK_SHADER_TYPE_CLOSEST_HIT) LayoutBindings[i].stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+		LayoutBindings[i].stageFlags = VkGetOpenVkShader(ShaderTypes[i]);
 		LayoutBindings[i].pImmutableSamplers = NULL;
 	}
 
@@ -1123,9 +920,34 @@ uint32_t VkCreateDescriptorSetLayout(uint32_t BindingCount, uint32_t* Bindings, 
 	DescriptorSetLayoutCreateInfo.bindingCount = BindingCount;
 	DescriptorSetLayoutCreateInfo.pBindings = LayoutBindings;
 
+	VkDescriptorBindingFlags* LayoutBindingFlags = NULL;
+	VkDescriptorSetLayoutBindingFlagsCreateInfo SetLayoutBindingFlags;
+
+	if (DescriptorFlags != NULL)
+	{
+		LayoutBindingFlags = (VkDescriptorBindingFlags*)OpenVkMalloc(BindingCount * sizeof(VkDescriptorBindingFlags));
+	
+		SetLayoutBindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
+		SetLayoutBindingFlags.pNext = NULL;
+		SetLayoutBindingFlags.bindingCount = BindingCount;
+		SetLayoutBindingFlags.pBindingFlags = LayoutBindingFlags;
+		DescriptorSetLayoutCreateInfo.pNext = &SetLayoutBindingFlags;
+		
+		for (uint32_t i = 0; i < BindingCount; i++)
+		{
+			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_NONE)						LayoutBindingFlags[i] = 0;
+			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_UPDATE_AFTER_BIND)			LayoutBindingFlags[i] = VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_UNUSED_WHILE_PENDING)		LayoutBindingFlags[i] = VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT;
+			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_PARTIALLY_BOUND_BIT)		LayoutBindingFlags[i] = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT;
+			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_VARIABLE_DESCRIPTOR_COUNT)	LayoutBindingFlags[i] = VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT;
+		}
+	}
+
 	if (vkCreateDescriptorSetLayout(VkRenderer.Device, &DescriptorSetLayoutCreateInfo, NULL, &VkRenderer.DescriptorSetLayouts[VkRenderer.DescriptorSetLayoutCount]) != VK_SUCCESS)
 		return OpenVkRuntimeError("Failed to Create Descriptor Set Layout");
 	OpenVkFree(LayoutBindings);
+	if (LayoutBindingFlags != NULL)
+		OpenVkFree(LayoutBindingFlags);
 
 	return VkRenderer.DescriptorSetLayoutCount++;
 }
@@ -1159,7 +981,7 @@ uint32_t VkCreateDescriptorPool(uint32_t DescriptorPoolType, uint32_t PoolSizeCo
 	VkDescriptorPoolCreateInfo PoolInfo;
 	PoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	PoolInfo.pNext = NULL;
-	PoolInfo.maxSets = MaxSets * MAX_FRAMES_IN_FLIGHT;	//maximum number of descriptor sets that may be allocated
+	PoolInfo.maxSets = MaxSets;	//maximum number of descriptor sets that may be allocated
 	if (DescriptorPoolType == OPENVK_DESCRIPTOR_POOL_DEFAULT)	PoolInfo.flags = 0;
 	if (DescriptorPoolType == OPENVK_DESCRIPTOR_POOL_FREEABLE)	PoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 	if (DescriptorPoolType == OPENVK_DESCRIPTOR_POOL_UPDATABLE)	PoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
@@ -1235,146 +1057,170 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 
 	VkWriteDescriptorSet* DescriptorWrites = (VkWriteDescriptorSet*)OpenVkMalloc(Info->DescriptorWriteCount * sizeof(VkWriteDescriptorSet));
 
-	VkDescriptorBufferInfo* DescriptorBufferInfos = NULL;
-	VkDescriptorImageInfo* DescriptorImageInfos = NULL;
-	VkWriteDescriptorSetAccelerationStructureKHR* DescriptorASInfos = NULL;
+	uint32_t BufferCount = 0;
+	uint32_t ImageCount = 0;
+	uint32_t ASCount = 0;
 
-	//i guess for static textures we don't need to do something like this(MAX_FRAMES_IN_FLIGHT)
+	for (uint32_t i = 0; i < Info->DescriptorWriteCount; i++)
+	{
+		if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER ||
+			Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ||
+			Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER)
+			BufferCount += Info->DescriptorCounts[i];
+
+		else if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER ||
+				 Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
+			ImageCount += Info->DescriptorCounts[i];
+
+		else if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE)
+			ASCount += Info->DescriptorCounts[i];
+	}
+	
+	VkDescriptorBufferInfo* DescriptorBufferInfos = NULL;
+	if (BufferCount > 0)	
+		DescriptorBufferInfos = (VkDescriptorBufferInfo*)OpenVkMalloc(BufferCount * sizeof(VkDescriptorBufferInfo));
+	
+	VkDescriptorImageInfo* DescriptorImageInfos = NULL;
+	if (ImageCount > 0)	   
+		DescriptorImageInfos = (VkDescriptorImageInfo*)OpenVkMalloc(ImageCount * sizeof(VkDescriptorImageInfo));
+
+	VkWriteDescriptorSetAccelerationStructureKHR* DescriptorASInfos = NULL;
+	if (ASCount > 0)							  
+		DescriptorASInfos = (VkWriteDescriptorSetAccelerationStructureKHR*)OpenVkMalloc(ASCount * sizeof(VkWriteDescriptorSetAccelerationStructureKHR));
+
 	for (uint32_t j = 0; j < MAX_FRAMES_IN_FLIGHT; j++)
 	{
+		BufferCount = 0;
+		ImageCount = 0;
+		ASCount = 0;
+
 		for (uint32_t i = 0; i < Info->DescriptorWriteCount; i++)
 		{
-			OpenVkBool Failed = OpenVkFalse;
-
-			if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ||
-				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER ||
-				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+			if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER ||
+				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ||
+				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER)
 			{
-				//Uniform
-				if (DescriptorBufferInfos != NULL) OpenVkFree(DescriptorBufferInfos);
-				DescriptorBufferInfos = (VkDescriptorBufferInfo*)OpenVkMalloc(Info->DescriptorCounts[i] * sizeof(VkDescriptorBufferInfo));
-
+				uint32_t OldBufferCount = BufferCount;				
 				for (uint32_t m = 0; m < Info->DescriptorCounts[i]; m++)
 				{
-					VkDynamicBufferInfo* Buffer = (VkDynamicBufferInfo*)CMA_GetAt(&VkRenderer.DynamicBuffers, Info->Buffers[m]);
+					uint32_t k = m + BufferCount;
+					VkBuffer BufferVk;
 
-					if (Buffer == NULL)
-						Failed = OpenVkTrue;
-
-					DescriptorBufferInfos[m].buffer = Buffer->Buffers[j];
-					DescriptorBufferInfos[m].offset = 0;
-					if (Info->BufferSizes[m] == 0)
-						 DescriptorBufferInfos[m].range = VK_WHOLE_SIZE;
-					else DescriptorBufferInfos[m].range = Info->BufferSizes[m];
-				}
-
-				if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-					DescriptorWrites[i] = VkDescriptorSetWrite(DescriptorSetInfo->DescriptorSets[j], Info->Bindings[i], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, Info->DescriptorCounts[i], NULL, DescriptorBufferInfos, NULL);
-				if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER)
-					DescriptorWrites[i] = VkDescriptorSetWrite(DescriptorSetInfo->DescriptorSets[j], Info->Bindings[i], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, Info->DescriptorCounts[i], NULL, DescriptorBufferInfos, NULL);
-			}
-			if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-			{
-				//Uniform
-				if (DescriptorBufferInfos != NULL) OpenVkFree(DescriptorBufferInfos);
-				DescriptorBufferInfos = (VkDescriptorBufferInfo*)OpenVkMalloc(Info->DescriptorCounts[i] * sizeof(VkDescriptorBufferInfo));
-
-				for (uint32_t m = 0; m < Info->DescriptorCounts[i]; m++)
-				{
-					VkStaticBufferInfo* Buffer = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Info->Buffers[m]);
-					if (Buffer == NULL)
-						Failed = OpenVkTrue;
-
-					DescriptorBufferInfos[m].buffer = Buffer->Buffer;
-					DescriptorBufferInfos[m].offset = 0;
-					if (Info->BufferSizes[m] == 0)
-						 DescriptorBufferInfos[m].range = VK_WHOLE_SIZE;
-					else DescriptorBufferInfos[m].range = Info->BufferSizes[m];
-				}
-
-				if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-					DescriptorWrites[i] = VkDescriptorSetWrite(DescriptorSetInfo->DescriptorSets[j], Info->Bindings[i], VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, Info->DescriptorCounts[i], NULL, DescriptorBufferInfos, NULL);
-			}
-			if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER ||
-				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
-			{
-				//image
-				if (DescriptorImageInfos != NULL) OpenVkFree(DescriptorImageInfos);
-				DescriptorImageInfos = (VkDescriptorImageInfo*)OpenVkMalloc(Info->DescriptorCounts[i] * sizeof(VkDescriptorImageInfo));
-
-				for (uint32_t m = 0; m < Info->DescriptorCounts[i]; m++)
-				{
-					if (Info->ImageTypes[m] == OPENVK_IMAGE_TYPE_TEXTURE)
+					if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
 					{
-						VkSampler* ImageSampler = (VkSampler*)CMA_GetAt(&VkRenderer.Sampler, Info->Sampler[m]);
-						VkImageInfo* TextureImage = (VkImageInfo*)CMA_GetAt(&VkRenderer.Images, Info->Images[m]);
+						VkStaticBufferInfo* Buffer = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Info->Buffers[k]);
+						if (Buffer == NULL)
+							return OpenVkRuntimeError("Failed to find buffer for descriptor set");
 
-						if (ImageSampler != NULL) DescriptorImageInfos[m].sampler = *ImageSampler;
-						else Failed = OpenVkTrue;
-						if (TextureImage != NULL) DescriptorImageInfos[m].imageView = TextureImage->ImageView;
-						else Failed = OpenVkTrue;
+						BufferVk = Buffer->Buffer;
 					}
-					if (Info->ImageTypes[m] == OPENVK_IMAGE_TYPE_ATTACHMENT)
+					else
 					{
-						VkSampler* ImageSampler = (VkSampler*)CMA_GetAt(&VkRenderer.Sampler, Info->Sampler[m]);
-						VkImageInfo* TextureImage = (VkImageInfo*)CMA_GetAt(&VkRenderer.ImageAttachments, Info->Images[m]);
-
-						if (ImageSampler != NULL) DescriptorImageInfos[m].sampler = *ImageSampler;
-						else Failed = OpenVkTrue;
-						if (TextureImage != NULL) DescriptorImageInfos[m].imageView = TextureImage->ImageView;
-						else Failed = OpenVkTrue;
-					}
-					if (Info->ImageTypes[m] == OPENVK_IMAGE_TYPE_STORAGE)
-					{
-						VkImageInfo* Image = (VkImageInfo*)CMA_GetAt(&VkRenderer.Images, Info->Images[m]);
-
-						DescriptorImageInfos[m].sampler = 0;
-						if (Image != NULL) DescriptorImageInfos[m].imageView = Image->ImageView;
-						else Failed = OpenVkTrue;
+						VkDynamicBufferInfo* Buffer = (VkDynamicBufferInfo*)CMA_GetAt(&VkRenderer.DynamicBuffers, Info->Buffers[k]);
+						if (Buffer == NULL)
+							return OpenVkRuntimeError("Failed to find buffer for descriptor set");
+						
+						BufferVk = Buffer->Buffers[j];
 					}
 
-					if (Info->ImageLayouts[m] == OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT) DescriptorImageInfos[m].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-					if (Info->ImageLayouts[m] == OPENVK_IMAGE_LAYOUT_DEPTH_OUTPUT) DescriptorImageInfos[m].imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-					if (Info->ImageLayouts[m] == OPENVK_IMAGE_LAYOUT_GENERAL_OUTPUT) DescriptorImageInfos[m].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+					
+					VkDescriptorBufferInfo* BufferInfo = &DescriptorBufferInfos[k];
+
+					BufferInfo->buffer = BufferVk;
+					BufferInfo->offset = 0;
+					BufferInfo->range = Info->BufferSizes[k] == 0 ? VK_WHOLE_SIZE : Info->BufferSizes[k];
+
+					
 				}
+				BufferCount += Info->DescriptorCounts[i];
 
-				if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER)
-					DescriptorWrites[i] = VkDescriptorSetWrite(DescriptorSetInfo->DescriptorSets[j], Info->Bindings[i], VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, Info->DescriptorCounts[i], DescriptorImageInfos, NULL, NULL);
-				if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
-					DescriptorWrites[i] = VkDescriptorSetWrite(DescriptorSetInfo->DescriptorSets[j], Info->Bindings[i], VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, Info->DescriptorCounts[i], DescriptorImageInfos, NULL, NULL);
+				DescriptorWrites[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				DescriptorWrites[i].pNext = NULL;
+				DescriptorWrites[i].dstSet = DescriptorSetInfo->DescriptorSets[j];
+				DescriptorWrites[i].dstBinding = Info->Bindings[i];
+				DescriptorWrites[i].dstArrayElement = 0;
+				DescriptorWrites[i].descriptorCount = Info->DescriptorCounts[i];
+				DescriptorWrites[i].descriptorType = VkGetOpenVkDescriptorType(Info->DescriptorTypes[i]);
+				DescriptorWrites[i].pImageInfo = NULL;
+				DescriptorWrites[i].pBufferInfo = DescriptorBufferInfos + OldBufferCount;
+				DescriptorWrites[i].pTexelBufferView = NULL;
 			}
-			if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE)
-			{
-				if (DescriptorASInfos != NULL) OpenVkFree(DescriptorASInfos);
-				DescriptorASInfos = (VkWriteDescriptorSetAccelerationStructureKHR*)OpenVkMalloc(Info->DescriptorCounts[i] * sizeof(VkWriteDescriptorSetAccelerationStructureKHR));
 
+			else if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER ||
+					 Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
+			{
+				uint32_t OldImageCount = ImageCount;
 				for (uint32_t m = 0; m < Info->DescriptorCounts[i]; m++)
 				{
-					//	DescriptorASInfos[m].buffer = VkRenderer.UniformBuffers[Info->UniformBuffers[m]].Buffers[j];
-					//	DescriptorASInfos[m].offset = 0;
-					//	DescriptorASInfos[m].range = Info->UniformBufferSizes[m];
+					uint32_t k = m + ImageCount;
+					VkDescriptorImageInfo* ImageInfo = &DescriptorImageInfos[k];
+
+					VkImageInfo* TextureImage = (VkImageInfo*)CMA_GetAt(Info->ImageTypes[k] == OPENVK_IMAGE_TYPE_ATTACHMENT ? &VkRenderer.ImageAttachments : &VkRenderer.Images, Info->Images[k]);
+					if (TextureImage != NULL)
+						ImageInfo->imageView = TextureImage->ImageView;
+					else
+						return OpenVkRuntimeError("Failed to find Image for descriptor set");
+
+					if (Info->ImageTypes[k] != OPENVK_IMAGE_TYPE_STORAGE)
+					{
+						VkSampler* ImageSampler = (VkSampler*)CMA_GetAt(&VkRenderer.Sampler, Info->Sampler[k]);
+						if (ImageSampler != NULL)
+							ImageInfo->sampler = *ImageSampler;
+						else
+							return OpenVkRuntimeError("Failed to find Image Sampler for descriptor set");
+					}
+
+					if (Info->ImageLayouts[k] == OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT) ImageInfo->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+					if (Info->ImageLayouts[k] == OPENVK_IMAGE_LAYOUT_DEPTH_OUTPUT) ImageInfo->imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+					if (Info->ImageLayouts[k] == OPENVK_IMAGE_LAYOUT_GENERAL_OUTPUT) ImageInfo->imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+				}
+				ImageCount += Info->DescriptorCounts[i];
+
+
+				DescriptorWrites[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				DescriptorWrites[i].pNext = NULL;
+				DescriptorWrites[i].dstSet = DescriptorSetInfo->DescriptorSets[j];
+				DescriptorWrites[i].dstBinding = Info->Bindings[i];
+				DescriptorWrites[i].dstArrayElement = 0;
+				DescriptorWrites[i].descriptorCount = Info->DescriptorCounts[i];
+				DescriptorWrites[i].descriptorType = VkGetOpenVkDescriptorType(Info->DescriptorTypes[i]);
+				DescriptorWrites[i].pImageInfo = DescriptorImageInfos + OldImageCount;
+				DescriptorWrites[i].pBufferInfo = NULL;
+				DescriptorWrites[i].pTexelBufferView = NULL;
+			}
+
+			else if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE)
+			{
+				uint32_t OldASCount = ASCount;
+				for (uint32_t m = 0; m < Info->DescriptorCounts[i]; m++)
+				{
+					VkAccelerationStructure* AS = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.TopLevelAS, Info->TopLevelAS[m + ASCount]);
+					if (AS == NULL)
+						return OpenVkRuntimeError("Failed to find Acceleration Structure for descriptor set");
+					else					
+					DescriptorASInfos[m].pAccelerationStructures = &AS->Handle;
 					DescriptorASInfos[m].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
 					DescriptorASInfos[m].pNext = NULL;
-					DescriptorASInfos[m].accelerationStructureCount = 1;
-					VkAccelerationStructure* AS = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.TopLevelAS, Info->TopLevelAS[m]);
-					if (AS != NULL)	DescriptorASInfos[m].pAccelerationStructures = &AS->Handle;
-					else Failed = OpenVkTrue;
+					DescriptorASInfos[m].accelerationStructureCount = 1;					
 				}
+				ASCount += Info->DescriptorCounts[i];
 
-				DescriptorWrites[i] = VkDescriptorSetWrite(DescriptorSetInfo->DescriptorSets[j], Info->Bindings[i], VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, Info->DescriptorCounts[i], NULL, NULL, DescriptorASInfos);
-			}
-
-			if (Failed)
-			{
-				OpenVkFree(DescriptorWrites);
-				if (DescriptorBufferInfos != NULL) OpenVkFree(DescriptorBufferInfos);
-				if (DescriptorImageInfos != NULL) OpenVkFree(DescriptorImageInfos);
-
-				return OpenVkRuntimeError("Failed to descriptor stuff");
+				DescriptorWrites[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				DescriptorWrites[i].pNext = DescriptorASInfos + OldASCount;
+				DescriptorWrites[i].dstSet = DescriptorSetInfo->DescriptorSets[j];
+				DescriptorWrites[i].dstBinding = Info->Bindings[i];
+				DescriptorWrites[i].dstArrayElement = 0;
+				DescriptorWrites[i].descriptorCount = Info->DescriptorCounts[i];
+				DescriptorWrites[i].descriptorType = VkGetOpenVkDescriptorType(Info->DescriptorTypes[i]);
+				DescriptorWrites[i].pImageInfo = NULL;
+				DescriptorWrites[i].pBufferInfo = NULL;
+				DescriptorWrites[i].pTexelBufferView = NULL;
 			}
 		}
 
 		vkUpdateDescriptorSets(VkRenderer.Device, Info->DescriptorWriteCount, DescriptorWrites, 0, NULL);
+	
 	}
 
 	OpenVkFree(DescriptorWrites);
@@ -1382,11 +1228,7 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 	if (DescriptorImageInfos != NULL) OpenVkFree(DescriptorImageInfos);
 	if (DescriptorASInfos != NULL) OpenVkFree(DescriptorASInfos);
 
-	uint32_t Set = *Info->DescriptorSet;
-
-//	OpenVkFree(Info->DescriptorSet);
-
-	return Set;
+	return *Info->DescriptorSet;
 }
 
 uint32_t VkCreateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
@@ -1399,22 +1241,38 @@ uint32_t VkCreateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 		for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 			DescriptorSetLayouts[i] = VkRenderer.DescriptorSetLayouts[Info->DescriptorSetLayout];
 
-		VkDescriptorSetAllocateInfo AllocateInfo;
-
 		VkDescriptorPoolInfo* DescriptorPoolPTR = (VkDescriptorPoolInfo*)CMA_GetAt(&VkRenderer.DescriptorPools, Info->DescriptorPool);
 		if (DescriptorPoolPTR == NULL)
 			return OpenVkRuntimeError("Failed to find descriptor pool");
 
-		AllocateInfo = VkAllocateDescriptorSets(DescriptorPoolPTR->DescriptorPool, MAX_FRAMES_IN_FLIGHT, DescriptorSetLayouts);
+		VkDescriptorSetAllocateInfo AllocateInfo;
+		AllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		AllocateInfo.pNext = NULL;
+		AllocateInfo.descriptorPool = DescriptorPoolPTR->DescriptorPool;
+		AllocateInfo.descriptorSetCount = MAX_FRAMES_IN_FLIGHT;
+		AllocateInfo.pSetLayouts = DescriptorSetLayouts;
+
+		uint32_t VariableDescCounts[MAX_FRAMES_IN_FLIGHT];
+		VkDescriptorSetVariableDescriptorCountAllocateInfo VariableDescriptorCountAllocInfo;
+		if (Info->VariableDescriptorSetCount > 0)
+		{			
+			for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+				VariableDescCounts[i] = Info->VariableDescriptorSetCount;
+
+			VariableDescriptorCountAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT;
+			VariableDescriptorCountAllocInfo.pNext = NULL;
+			VariableDescriptorCountAllocInfo.descriptorSetCount = MAX_FRAMES_IN_FLIGHT;
+			VariableDescriptorCountAllocInfo.pDescriptorCounts = VariableDescCounts;
+			AllocateInfo.pNext = &VariableDescriptorCountAllocInfo;
+		}
 
 		if (vkAllocateDescriptorSets(VkRenderer.Device, &AllocateInfo, DescriptorSetInfo.DescriptorSets) != VK_SUCCESS)
 			return OpenVkRuntimeError("Failed to Allocate Descriptor Set");
 
 		uint32_t DescriptorSetPTR = CMA_Push(&VkRenderer.DescriptorSets, &DescriptorSetInfo);
 		CMA_Push(&DescriptorPoolPTR->DescriptorSets, &DescriptorSetPTR);
-		//Info->DescriptorSet = &DescriptorSetPTR;//is that legal or is this variable remove from the stack before the next fuction?
-		Info->DescriptorSet = (uint32_t*)OpenVkMalloc(sizeof(uint32_t));//memory leak!
-		memcpy(Info->DescriptorSet, &DescriptorSetPTR, sizeof(uint32_t));
+		Info->Dummy = DescriptorSetPTR;
+		Info->DescriptorSet = &Info->Dummy;
 	}	
 	
 	return VkUpdateDescriptorSet(Info);
@@ -1562,9 +1420,24 @@ uint32_t VkCreateTextureImage(unsigned char* Pixels, int32_t Width, int32_t Heig
 //
 //	stbi_set_flip_vertically_on_load(FlipVertical);
 //	unsigned char* Pixel = stbi_load(Path, &TextureWidth, &TextureHeight, &TextureChannels, STBI_rgb_alpha);
-	VkRenderer.MipLevels = floorf(log2f(MAX(Width, Height))) + 1;
+	
+	VkRenderer.MipLevels = 1;
 
-	VkDeviceSize ImageSize = Width * Height * Format;
+	VkDeviceSize ImageSize;
+	if (Format == OPENVK_FORMAT_BC7_RGBA)
+		ImageSize = (Width * Height * 4) / 4;
+	else if (Format == OPENVK_FORMAT_BC4_RGBA)
+		ImageSize = (Width * Height * 4) / 8;
+	else if (Format == OPENVK_FORMAT_BC1_RGB)
+		ImageSize = (Width / 4) * (Height / 4) * 8;
+	else if (Format == OPENVK_FORMAT_BC1_RGBA)
+		ImageSize = (Width / 4) * (Height / 4) * 16;
+	else
+	{
+		ImageSize = Width * Height * Format;
+		VkRenderer.MipLevels = floorf(log2f(MAX(Width, Height))) + 1;		
+	}
+
 	if (!Pixels)
 		return OpenVkRuntimeError("Invalid Texture");
 
@@ -1581,18 +1454,30 @@ uint32_t VkCreateTextureImage(unsigned char* Pixels, int32_t Width, int32_t Heig
 
 //	OpenVkFree(Pixels);
 
-	if (VkCreateImage(Width, Height, VkRenderer.MipLevels, VK_SAMPLE_COUNT_1_BIT, TextureImage.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &TextureImage.Image, &TextureImage.ImageMemory) == OPENVK_ERROR)
+	OpenVkBool SupportsBlit = OpenVkFalse;
+	
+	if (VkCreateImage(Width, Height, VkRenderer.MipLevels, VK_SAMPLE_COUNT_1_BIT, TextureImage.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &TextureImage.Image, &TextureImage.ImageMemory, &SupportsBlit) == OPENVK_ERROR)
 		return OpenVkRuntimeError("Failed to create Texture Image");
-
-//	VkTransitionImageLayout(TextureImage.Image, TextureImage.Format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VkRenderer.MipLevels);
+	OpenVkRuntimeError("Supports Blit: %d", SupportsBlit);
 	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
 	VkSetImageLayout(CommandBuffer, TextureImage.Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VkRenderer.MipLevels, NULL);
 	VkEndSingleTimeCommandBuffer(CommandBuffer);
 
 	VkCopyBufferToImage(StagingBuffer, TextureImage.Image, Width, Height);
-	//	if (TransitionImageLayout(TextureImages, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, MipLevels) != VK_SUCCESS)
-	//		return 1;
-	VkGenerateMipmaps(TextureImage.Image, TextureImage.Format, Width, Height, VkRenderer.MipLevels);
+	
+	if (VkRenderer.MipLevels > 1)
+		VkGenerateMipmaps(TextureImage.Image, TextureImage.Format, Width, Height, VkRenderer.MipLevels, SupportsBlit);
+	else
+	{
+		CommandBuffer = VkBeginSingleTimeCommands();
+		VkSetImageLayout(CommandBuffer, TextureImage.Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VkRenderer.MipLevels, NULL);
+		VkEndSingleTimeCommandBuffer(CommandBuffer);
+	}
+	
+
+		//	CommandBuffer = VkBeginSingleTimeCommands();
+		//	VkSetImageLayout(CommandBuffer, TextureImage.Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VkRenderer.MipLevels, NULL);
+		//	VkEndSingleTimeCommandBuffer(CommandBuffer);
 
 	vkDestroyBuffer(VkRenderer.Device, StagingBuffer, NULL);
 	vkFreeMemory(VkRenderer.Device, StagingBufferMemory, NULL);
@@ -1606,36 +1491,8 @@ uint32_t VkCreateStorageImage(uint32_t Width, uint32_t Height, uint32_t Format)
 {
 	VkImageInfo Image;
 	Image.Format = VkGetOpenVkFormat(Format);
-	VkCreateImage(Width, Height, 1, VK_SAMPLE_COUNT_1_BIT, Image.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory);
+	VkCreateImage(Width, Height, 1, VK_SAMPLE_COUNT_1_BIT, Image.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory, NULL);
 	Image.ImageView = VkCreateImageView(Image.Image, Image.Format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
-	/*
-	VkImageMemoryBarrier ImageMemoryBarrier;
-	ImageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	ImageMemoryBarrier.pNext = NULL;
-	ImageMemoryBarrier.srcAccessMask = 0;
-	ImageMemoryBarrier.dstAccessMask = 0;
-	ImageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	ImageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
-	ImageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	ImageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	ImageMemoryBarrier.image = Image.Image;
-	ImageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	ImageMemoryBarrier.subresourceRange.baseMipLevel = 0;
-	ImageMemoryBarrier.subresourceRange.levelCount = 1;
-	ImageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
-	ImageMemoryBarrier.subresourceRange.layerCount = 1;
-
-	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
-	vkCmdPipelineBarrier(
-		CommandBuffer,
-		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-		0,
-		0, NULL,
-		0, NULL,
-		1, &ImageMemoryBarrier);
-	VkEndSingleTimeCommandBuffer(CommandBuffer);
-	*/
 
 	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
 	VkSetImageLayout(CommandBuffer, Image.Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, 1, NULL);
@@ -1742,6 +1599,7 @@ uint32_t VkCreateImageSampler(uint32_t Filter, uint32_t AddressMode)
 	SamplerInfo.maxLod = VkRenderer.MipLevels;
 	SamplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 	SamplerInfo.unnormalizedCoordinates = VK_FALSE;
+	
 
 	VkSampler Sampler;
 	if (vkCreateSampler(VkRenderer.Device, &SamplerInfo, NULL, &Sampler) != VK_SUCCESS)
@@ -1765,13 +1623,12 @@ void VkDestroySampler(uint32_t Sampler)
 	}
 }
 
-//I need to come up with an idea to also create a normal vertex/ index buffer when using raytracing
 uint32_t VkCreateVertexBuffer(size_t Size, const void* Vertices)
 {
 	if (OpenVkRendererFlags & OPENVK_RAYTRACING)
 	{
 		return VkCreateBufferExt(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,			//removed VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
-								 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+								 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 								 Size, Vertices);
 	}
 	
@@ -1786,7 +1643,7 @@ uint32_t VkCreateIndexBuffer(size_t Size, const void* Indices)
 	if (OpenVkRendererFlags & OPENVK_RAYTRACING)
 	{
 		return VkCreateBufferExt(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,			//removed VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
-								 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+								 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 								 Size, Indices);
 	}
 
@@ -1821,18 +1678,6 @@ uint32_t VkCreateUniformBuffer(size_t Size)
 
 uint32_t VkCreateDynamicUniformBuffer(size_t Size)
 {
-	//FIX make it working?
-/*
-	VkRenderer.StaticBuffers = (VkBuffer*)OpenVkRealloc(VkRenderer.StaticBuffers, (VkRenderer.BufferCount + 1) * sizeof(VkBuffer));
-	VkRenderer.BufferMemories = (VkDeviceMemory*)OpenVkRealloc(VkRenderer.BufferMemories, (VkRenderer.BufferCount + 1) * sizeof(VkDeviceMemory));
-
-	if (VkCreateBuffer(Size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &VkRenderer.StaticBuffers[VkRenderer.BufferCount], &VkRenderer.BufferMemories[VkRenderer.BufferCount]) == OPENVK_ERROR)
-		return OpenVkRuntimeError("Failed To Create Dynamic Uniform Buffer");
-
-	VkRenderer.BufferCount++;
-
-	return VkRenderer.BufferCount - 1;
-*/
 	return VkCreateDynamicBuffer(Size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 }
 
@@ -1871,24 +1716,6 @@ OpenVkBool VkUpdateDynamicBuffer(size_t Size, const void* Data, uint32_t Buffer)
 	vkUnmapMemory(VkRenderer.Device, BufferPTR->BufferMemories[VkRenderer.CurrentFrame]);
 
 	return OpenVkTrue;
-
-	//FIX doesn't work I guess?
-	/*
-	void* Data;
-	vkMapMemory(VkRenderer.Device, VkRenderer.BufferMemories[UniformBuffer], 0, Size, 0, &Data);
-	memcpy(Data, UBO, Size);
-	
-
-	VkMappedMemoryRange MemoryRange;
-	MemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-	MemoryRange.pNext = NULL;
-	MemoryRange.memory = VkRenderer.BufferMemories[UniformBuffer];
-	MemoryRange.offset = 0;
-	MemoryRange.size = VK_WHOLE_SIZE;
-	vkFlushMappedMemoryRanges(VkRenderer.Device, 1, &MemoryRange);
-
-	vkUnmapMemory(VkRenderer.Device, VkRenderer.BufferMemories[UniformBuffer]);
-	*/
 }
 
 void VkBindPipeline(uint32_t Pipeline, uint32_t PipelineType)
@@ -1984,12 +1811,9 @@ void VkBindDescriptorSet(uint32_t PipelineLayout, uint32_t Set, uint32_t Descrip
 	if (DescriptorSetInfo != NULL) vkCmdBindDescriptorSets(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], (VkPipelineBindPoint)PipelineType, VkRenderer.PipelineLayouts[PipelineLayout], Set, 1, &DescriptorSetInfo->DescriptorSets[VkRenderer.CurrentFrame], 0, NULL);
 }
 
-//Shader Types
-//0 = Vertex Shader
-//1 = Fragment Shader
 void VkPushConstant(uint32_t PipelineLayout, uint32_t ShaderType, uint32_t Offset, size_t Size, const void* Data)
 {
-	vkCmdPushConstants(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], VkRenderer.PipelineLayouts[PipelineLayout], (ShaderType == 0 ? VK_SHADER_STAGE_VERTEX_BIT : VK_SHADER_STAGE_FRAGMENT_BIT), Offset, Size, Data);
+	vkCmdPushConstants(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], VkRenderer.PipelineLayouts[PipelineLayout], VkGetOpenVkShader(ShaderType), Offset, Size, Data);
 }
 
 void VkCleanupSwapChain()
@@ -2142,6 +1966,7 @@ void VkDestroyRenderer()
 	CMA_Destroy(&VkRenderer.DescriptorSets);
 	CMA_Destroy(&VkRenderer.StaticBuffers);
 	CMA_Destroy(&VkRenderer.Images);
+	CMA_Destroy(&VkRenderer.ImageAttachments);
 
 //	OpenVkFree(VkRenderer.Pipelines);
 //	OpenVkFree(VkRenderer.PipelineLayouts);

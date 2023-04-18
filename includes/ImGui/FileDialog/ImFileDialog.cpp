@@ -42,7 +42,7 @@
 #define ICON_SIZE ImGui::GetFont()->FontSize + 3
 #define GUI_ELEMENT_SIZE std::max(GImGui->FontSize + 10.f, 24.f)
 #define DEFAULT_ICON_SIZE 32
-#define PI 3.141592f
+#define PI 3.141592653589793238f
 
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
 using namespace lunasvg;
@@ -1526,10 +1526,14 @@ namespace ifd {
         bool isSelected = std::count(m_selections.begin(), m_selections.end(), entry.Path);
 
         std::error_code ec; 
-        filename[14] = '.';
-        filename[15] = '.';
-        filename[16] = '.';
-        filename[17] = '\0';
+     //   if (filename.size() >= 18)
+     //   {
+     //       filename[14] = '.';
+     //       filename[15] = '.';
+     //       filename[16] = '.';
+     //       filename[17] = '\0';
+     //   }
+        
         if (FileIcon(filename.c_str(), isSelected, entry.HasIconPreview ? &GetDescriptorSet(entry.IconPreview.DescriptorSet)[0] : &GetDescriptorSet(m_getIcon(entry.Path).DescriptorSet)[0],
         ImVec2(32 + 16 * m_zoom, 32 + 16 * m_zoom), entry.HasIconPreview, entry.IconPreviewWidth, entry.IconPreviewHeight)) {
           bool isDir = ghc::filesystem::is_directory(entry.Path, ec);

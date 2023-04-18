@@ -94,6 +94,7 @@ void CreateSSRDescriptorSet()
 		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
 		DescriptorSetCreateInfo.Bindings = Bindings;
 		DescriptorSetCreateInfo.DescriptorSet = NULL;
+		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
 		SSRDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}
@@ -115,6 +116,7 @@ void CreateSSRDescriptorSet()
 		DescriptorSetCreateInfo.BufferSizes = UniformSizes;
 		DescriptorSetCreateInfo.Bindings = Bindings;
 		DescriptorSetCreateInfo.DescriptorSet = NULL;
+		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
 		SSRUniformDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}	

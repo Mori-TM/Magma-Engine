@@ -9,7 +9,7 @@ typedef struct
 	mat4 ProjectionView;
 } Cascade;
 
-#define SHADOW_MAP_CASCADE_COUNT 1
+#define SHADOW_MAP_CASCADE_COUNT 3
 uint32_t ShadowMapWidth = 2048 * SHADOW_MAP_CASCADE_COUNT;
 uint32_t ShadowMapHeight = 2048;
 int32_t ShadowMapSizeTmp = 2048;

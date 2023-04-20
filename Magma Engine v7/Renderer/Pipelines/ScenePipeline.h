@@ -484,6 +484,19 @@ void SceneDraw()
 	//	OpenVkDrawVertices(Model.NumTriangles * 3);
 
 	//	qsort(Entities, EntityCount, sizeof(EntityInfo), EntityDistCompareFunc);
+
+		uint32_t AlbedoDescriptorSet = 0;
+		uint32_t NormalDescriptorSet = 0;
+		uint32_t MetallicDescriptorSet = 0;
+		uint32_t RoughnessDescriptorSet = 0;
+		uint32_t OcclusionDescriptorSet = 0;
+
+		uint32_t LastAlbedoDescriptorSet = 0;
+		uint32_t LastNormalDescriptorSet = 0;
+		uint32_t LastMetallicDescriptorSet = 0;
+		uint32_t LastRoughnessDescriptorSet = 0;
+		uint32_t LastOcclusionDescriptorSet = 0;
+
 		Mutex.lock();
 		for (uint32_t i = 0; i < EntityCount; i++)
 		{
@@ -524,13 +537,6 @@ void SceneDraw()
 					Occlusion = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
 				}
 
-				
-					
-				uint32_t AlbedoDescriptorSet = 0;
-				uint32_t NormalDescriptorSet = 0;
-				uint32_t MetallicDescriptorSet = 0;
-				uint32_t RoughnessDescriptorSet = 0;
-				uint32_t OcclusionDescriptorSet = 0;
 				if (Albedo != NULL) AlbedoDescriptorSet = Albedo->TextureDescriptorSet;
 				if (Normal != NULL) NormalDescriptorSet = Normal->TextureDescriptorSet;
 				if (Metallic != NULL) MetallicDescriptorSet = Metallic->TextureDescriptorSet;
@@ -587,21 +593,32 @@ void SceneDraw()
 									if (Occlusion != NULL) OcclusionDescriptorSet = Occlusion->TextureDescriptorSet;
 								}
 
-								OpenVkBindDescriptorSet(SceneLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-								OpenVkBindDescriptorSet(SceneLayout, 1, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-								OpenVkBindDescriptorSet(SceneLayout, 2, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-								OpenVkBindDescriptorSet(SceneLayout, 3, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-								OpenVkBindDescriptorSet(SceneLayout, 4, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								if (LastAlbedoDescriptorSet != AlbedoDescriptorSet)
+									OpenVkBindDescriptorSet(SceneLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								if (LastNormalDescriptorSet != NormalDescriptorSet)
+									OpenVkBindDescriptorSet(SceneLayout, 1, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								if (LastMetallicDescriptorSet != MetallicDescriptorSet)
+									OpenVkBindDescriptorSet(SceneLayout, 2, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								if (LastRoughnessDescriptorSet != RoughnessDescriptorSet)
+									OpenVkBindDescriptorSet(SceneLayout, 3, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								if (LastOcclusionDescriptorSet != OcclusionDescriptorSet)
+									OpenVkBindDescriptorSet(SceneLayout, 4, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+
+								LastAlbedoDescriptorSet = AlbedoDescriptorSet;
+								LastNormalDescriptorSet = NormalDescriptorSet;
+								LastMetallicDescriptorSet = MetallicDescriptorSet;
+								LastRoughnessDescriptorSet = RoughnessDescriptorSet;
+								LastOcclusionDescriptorSet = OcclusionDescriptorSet;
 
 								if (Mesh->MeshData[m].Indices == NULL)
 								{
 									OpenVkBindVertexBuffer(Mesh->MeshData[m].VertexBuffer);
-									OpenVkDrawVertices(Mesh->MeshData[m].VertexCount);
+									OpenVkDrawVertices(0, Mesh->MeshData[m].VertexCount);
 								}
 								else
 								{
 									OpenVkBindIndexBuffer(Mesh->MeshData[m].VertexBuffer, Mesh->MeshData[m].IndexBuffer);
-									OpenVkDrawIndices(Mesh->MeshData[m].IndexCount);
+									OpenVkDrawIndices(0, Mesh->MeshData[m].IndexCount, 0);
 								}
 							}
 						}
@@ -614,15 +631,26 @@ void SceneDraw()
 						SceneAnimation* Animation = (SceneAnimation*)CMA_GetAt(&SceneAnimations, Entities[i].Animation.AnimationIndex);
 						if (Animation != NULL)
 						{
-							OpenVkBindDescriptorSet(SceneLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-							OpenVkBindDescriptorSet(SceneLayout, 1, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-							OpenVkBindDescriptorSet(SceneLayout, 2, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-							OpenVkBindDescriptorSet(SceneLayout, 3, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-							OpenVkBindDescriptorSet(SceneLayout, 4, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							if (LastAlbedoDescriptorSet != AlbedoDescriptorSet)
+								OpenVkBindDescriptorSet(SceneLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							if (LastNormalDescriptorSet != NormalDescriptorSet)
+								OpenVkBindDescriptorSet(SceneLayout, 1, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							if (LastMetallicDescriptorSet != MetallicDescriptorSet)
+								OpenVkBindDescriptorSet(SceneLayout, 2, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							if (LastRoughnessDescriptorSet != RoughnessDescriptorSet)
+								OpenVkBindDescriptorSet(SceneLayout, 3, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							if (LastOcclusionDescriptorSet != OcclusionDescriptorSet)
+								OpenVkBindDescriptorSet(SceneLayout, 4, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+
+							LastAlbedoDescriptorSet = AlbedoDescriptorSet;
+							LastNormalDescriptorSet = NormalDescriptorSet;
+							LastMetallicDescriptorSet = MetallicDescriptorSet;
+							LastRoughnessDescriptorSet = RoughnessDescriptorSet;
+							LastOcclusionDescriptorSet = OcclusionDescriptorSet;
 
 						//	UpdateAnimation(Entities[i].Animation.AnimationIndex);
 							OpenVkBindDynamicVertexBuffer(Animation->VertexBuffer);
-							OpenVkDrawVertices(Animation->MeshData.NumTriangles * 3);
+							OpenVkDrawVertices(0, Animation->MeshData.NumTriangles * 3);
 						}
 					}					
 				}

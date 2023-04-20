@@ -89,7 +89,7 @@ void SwapChainDraw()
 
 			OpenVkBindPipeline(SwapChainPipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 			OpenVkBindDescriptorSet(SwapChainLayout, 0, SSRDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-			OpenVkDrawVertices(3);
+			OpenVkDrawVertices(0, 3);
 		}
 		else
 		{

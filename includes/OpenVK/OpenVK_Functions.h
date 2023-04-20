@@ -40,8 +40,8 @@ void		(*OpenVkBindVertexBuffer			)(uint32_t VertexBuffer);
 void		(*OpenVkBindIndexBuffer				)(uint32_t VertexBuffer, uint32_t IndexBuffer);
 void		(*OpenVkBindDynamicVertexBuffer		)(uint32_t VertexBuffer);
 void		(*OpenVkBindDynamicIndexBuffer		)(uint32_t VertexBuffer, uint32_t IndexBuffer);
-void		(*OpenVkDrawVertices				)(uint32_t VertexCount);
-void		(*OpenVkDrawIndices					)(uint32_t IndexCount);
+void		(*OpenVkDrawVertices				)(uint32_t FirstVertex, uint32_t VertexCount);
+void		(*OpenVkDrawIndices					)(uint32_t FirstIndex, uint32_t IndexCount, int32_t VertexOffset);
 void		(*OpenVkBindDescriptorSet			)(uint32_t PipelineLayout, uint32_t Set, uint32_t DescriptorSet, uint32_t PipelineType);
 void		(*OpenVkPushConstant				)(uint32_t PipelineLayout, uint32_t ShaderType, uint32_t Offset, size_t Size, const void* Data);
 //Raytracing

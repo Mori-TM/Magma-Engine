@@ -270,6 +270,10 @@ void ShadowDraw()
 			OpenVkBindPipeline(Pipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
 			mat4 Model;
+
+			uint32_t TextureDescriptorSet = 0;
+			uint32_t LastTextureDescriptorSet = 0;
+
 			Mutex.lock();
 			for (uint32_t i = 0; i < EntityCount; i++)
 			{
@@ -294,7 +298,6 @@ void ShadowDraw()
 				else
 					Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
 
-				uint32_t TextureDescriptorSet = 0;
 				if (Image != NULL)
 					TextureDescriptorSet = Image->TextureDescriptorSet;
 
@@ -314,17 +317,20 @@ void ShadowDraw()
 										TextureDescriptorSet = Image->TextureDescriptorSet;
 								}
 
-								OpenVkBindDescriptorSet(ShadowLayout, 0, TextureDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								if (LastTextureDescriptorSet != TextureDescriptorSet)
+									OpenVkBindDescriptorSet(ShadowLayout, 0, TextureDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+
+								LastTextureDescriptorSet = TextureDescriptorSet;
 
 								if (Mesh->MeshData[m].Indices == NULL)
 								{
 									OpenVkBindVertexBuffer(Mesh->MeshData[m].VertexBuffer);
-									OpenVkDrawVertices(Mesh->MeshData[m].VertexCount);
+									OpenVkDrawVertices(0, Mesh->MeshData[m].VertexCount);
 								}
 								else
 								{
 									OpenVkBindIndexBuffer(Mesh->MeshData[m].VertexBuffer, Mesh->MeshData[m].IndexBuffer);
-									OpenVkDrawIndices(Mesh->MeshData[m].IndexCount);
+									OpenVkDrawIndices(0, Mesh->MeshData[m].IndexCount, 0);
 								}
 							}							
 						}
@@ -338,9 +344,13 @@ void ShadowDraw()
 						if (Animation != NULL)
 						{
 							UpdateAnimation(Entities[i].Animation.AnimationIndex);
-							OpenVkBindDescriptorSet(ShadowLayout, 0, TextureDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+
+							if (LastTextureDescriptorSet != TextureDescriptorSet)
+								OpenVkBindDescriptorSet(ShadowLayout, 0, TextureDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							LastTextureDescriptorSet = TextureDescriptorSet;
+
 							OpenVkBindDynamicVertexBuffer(Animation->VertexBuffer);
-							OpenVkDrawVertices(Animation->MeshData.NumTriangles * 3);
+							OpenVkDrawVertices(0, Animation->MeshData.NumTriangles * 3);
 						}
 					}
 				}

@@ -328,14 +328,14 @@ void LoadModel(uint32_t Settings, const char* FileName)
 			break;
 		}
 
-	WaveGetPath(LastPath);
-	WaveSetPath(Path);
+//	WaveGetPath(LastPath);
+//	WaveSetPath(Path);
 
 	SceneMesh MeshInfo;
 
 	uint32_t LastTexture = SelectedTexture;
 
-	Settings |= WAVE_LOAD_MATERIAL | WAVE_GEN_NORMALS | WAVE_FLIP_UVS | WAVE_GEN_UVS | WAVE_GEN_INDICES | WAVE_REMOVE_REDUNDANT_MATERIALS | WAVE_PRINT_DEBUG_INOFS;
+	Settings |= WAVE_LOAD_MATERIAL | WAVE_GEN_NORMALS | WAVE_FLIP_UVS | WAVE_GEN_UVS | WAVE_GEN_INDICES | WAVE_MATERIAL_USE_MODEL_PATH | WAVE_REMOVE_REDUNDANT_MATERIALS | WAVE_PRINT_DEBUG_INOFS;
 	WaveModelData Model = WaveLoadModel(FileName, Settings);
 
 	if (LoadModelWave(FileName, &Model, &MeshInfo))
@@ -344,7 +344,7 @@ void LoadModel(uint32_t Settings, const char* FileName)
 	WaveFreeModel(&Model);
 
 	SelectedTexture = LastTexture;
-	WaveSetPath(LastPath);
+//	WaveSetPath(LastPath);
 }
 
 void EditorAssetBrowser()

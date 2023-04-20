@@ -1790,14 +1790,14 @@ void VkBindDynamicIndexBuffer(uint32_t VertexBuffer, uint32_t IndexBuffer)
 		vkCmdBindIndexBuffer(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], IndexBufferInfo->Buffers[VkRenderer.CurrentFrame], 0, VK_INDEX_TYPE_UINT32);
 }
 
-void VkDrawVertices(uint32_t VertexCount)
+void VkDrawVertices(uint32_t FirstVertex, uint32_t VertexCount)
 {
-	vkCmdDraw(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], VertexCount, 1, 0, 0);
+	vkCmdDraw(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], VertexCount, 1, FirstVertex, 0);
 }
 
-void VkDrawIndices(uint32_t IndexCount)
+void VkDrawIndices(uint32_t FirstIndex, uint32_t IndexCount, int32_t VertexOffset)
 {
-	vkCmdDrawIndexed(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], IndexCount, 1, 0, 0, 0);
+	vkCmdDrawIndexed(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], IndexCount, 1, FirstIndex, VertexOffset, 0);
 }
 
 void VkBindDescriptorSet(uint32_t PipelineLayout, uint32_t Set, uint32_t DescriptorSet, uint32_t PipelineType)

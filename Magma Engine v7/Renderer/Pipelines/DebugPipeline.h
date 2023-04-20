@@ -62,13 +62,13 @@ void DebugDraw()
 	OpenVkPushConstant(DebugLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(DebugVertexPushConstant), &DebugVertexPc);
 
 	OpenVkBindVertexBuffer(DirectionVertexBuffer);
-	OpenVkDrawVertices(ARRAY_SIZE(DirectionVertices));
+	OpenVkDrawVertices(0, ARRAY_SIZE(DirectionVertices));
 	
 	OpenVkBindPipeline(DebugPipelineThinLine, OPENVK_PIPELINE_TYPE_GRAPHICS);
 	OpenVkPushConstant(DebugLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(DebugVertexPushConstant), &DebugVertexPc);
 	
 	OpenVkBindVertexBuffer(GridVertexBuffer);
-	OpenVkDrawVertices(ARRAY_SIZE(GridVertices));
+	OpenVkDrawVertices(0, ARRAY_SIZE(GridVertices));
 	
 	OpenVkBindIndexBuffer(CameraVertexBuffer, CameraIndexBuffer);
 	for (uint32_t i = 0; i < EntityCount; i++)
@@ -84,7 +84,7 @@ void DebugDraw()
 			DebugVertexPc.PVM = MultiplyMat4P(&PV, &Model);
 
 			OpenVkPushConstant(DebugLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(DebugVertexPushConstant), &DebugVertexPc);
-			OpenVkDrawIndices(ARRAY_SIZE(CameraIndices));
+			OpenVkDrawIndices(0, ARRAY_SIZE(CameraIndices), 0);
 		}
 	}
 }

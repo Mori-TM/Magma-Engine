@@ -161,7 +161,7 @@ void SSRDraw()
 
 		OpenVkBindDescriptorSet(SSRLayout, 0, SceneDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 		OpenVkBindDescriptorSet(SSRLayout, 1, SSRUniformDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-		OpenVkDrawVertices(3);
+		OpenVkDrawVertices(0, 3);
 	}
 	OpenVkEndRenderPass();
 }

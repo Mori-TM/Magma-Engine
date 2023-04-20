@@ -706,7 +706,7 @@ void OpenVkGUIEndRender()
 	
 		OpenVkBindDescriptorSet(OpenVkGUI.PipelineLayout, 0, OpenVkGUI.DescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 		OpenVkBindDynamicIndexBuffer(OpenVkGUI.VertexBuffer.Buffer, OpenVkGUI.IndexBuffer.Buffer);
-		OpenVkDrawIndices(IndexSize);
+		OpenVkDrawIndices(0, IndexSize, 0);
 	}
 }
 

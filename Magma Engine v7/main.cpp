@@ -193,15 +193,15 @@ int32_t main(int32_t argc, char** argv)
 //	printf("%.3f\n", 1.23342124543f);
 //	//C:/Users/Moritz Desktop/source/repos/Vulkan C99/Vulkan C99/Cube.dae
 //	WaveLoadModel("C:/Users/Moritz Desktop/source/repos/Vulkan C99/Vulkan C99/Cube.dae", 0);
-		//	uint32_t BeginTime = SDL_GetTicks();
-		//	WaveSetPath((char*)"D:/3D Models/GLTF/");
-		//	WaveModelData Data = WaveLoadModel("D:/3D Models/GLTF/CubeSep.gltf", WAVE_LOAD_MATERIAL | WAVE_GEN_NORMALS | WAVE_FLIP_UVS | WAVE_GEN_UVS | WAVE_GEN_INDICES | WAVE_PRINT_DEBUG_INOFS);
-		//	//	WaveModelData Data = WaveLoadModel("C:/Users/Moritz Desktop/source/repos/Vulkan C99/Vulkan C99/vulkan.obj", 0);
-		//	uint32_t EndTime = SDL_GetTicks();
-		//	printf("Loading time: %d\n", EndTime - BeginTime);
-		//	exit(0);
-		//
-		//	return 22;
+	//		uint32_t BeginTime = SDL_GetTicks();
+	//	//	WaveSetPath((char*)"D:/3D Models/GLTF/");
+	//		WaveModelData Data = WaveLoadModel("D:/3D Models/Sponza-Master/Sort.obj", WAVE_LOAD_MATERIAL | WAVE_GEN_NORMALS | WAVE_FLIP_UVS | WAVE_GEN_UVS | WAVE_GEN_INDICES | WAVE_REMOVE_REDUNDANT_MATERIALS | WAVE_MATERIAL_USE_MODEL_PATH | WAVE_PRINT_DEBUG_INOFS);
+	//		//	WaveModelData Data = WaveLoadModel("C:/Users/Moritz Desktop/source/repos/Vulkan C99/Vulkan C99/vulkan.obj", 0);
+	//		uint32_t EndTime = SDL_GetTicks();
+	//		printf("Loading time: %d\n", EndTime - BeginTime);
+	//		exit(0);
+	//	
+	//		return 22;
 	
 //	uint32_t BeginTime = SDL_GetTicks();
 //	WaveModelData Data = WaveLoadModel("C:/Users/Moritz Desktop/source/repos/Vulkan C99/Vulkan C99/cessna.stl", 0);

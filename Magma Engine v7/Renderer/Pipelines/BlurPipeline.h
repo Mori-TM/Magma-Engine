@@ -134,7 +134,7 @@ uint32_t BlurDraw(uint32_t DescriptorSet, float BlurScale, float BlurStrength)
 			BlurFragmentPc.BlurStrength = BlurStrength;
 			OpenVkPushConstant(BlurLayout, OPENVK_SHADER_TYPE_FRAGMENT, 0, sizeof(BlurFragmentPushConstant), &BlurFragmentPc);
 
-			OpenVkDrawVertices(3);
+			OpenVkDrawVertices(0, 3);
 		}
 		OpenVkEndRenderPass();
 	}

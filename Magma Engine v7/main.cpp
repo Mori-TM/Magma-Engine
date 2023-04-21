@@ -20,9 +20,6 @@ extern "C"
 
 #include <stb/stb_sprintf.h>
 #include <stb/dxt/stb_dxt.c>
-//#include <stb/stb_dxt.h>
-//#include <rgbcx/rgbcx.h>
-//#include <rgbcx/bc7enc.c>
 
 #include <ImGui/imconfig.h>
 #include <ImGui/imgui_tables.cpp>
@@ -72,7 +69,7 @@ void RenderThread()
 	system("./GLSLCompiler.sh");
 #endif
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_TIMER);
-	Window = SDL_CreateWindow("Magma Engine v7 ImGui " IMGUI_VERSION, 0, 0, WindowWidth, WindowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN | SDL_WINDOW_BORDERLESS);
+	Window = SDL_CreateWindow("Magma Engine v7 ImGui " IMGUI_VERSION, 0, 0, WindowWidth, WindowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN | SDL_WINDOW_BORDERLESS | SDL_WINDOW_FULLSCREEN_DESKTOP);
 	SDL_SetWindowMinimumSize(Window, 800, 540);
 	SDL_GetWindowSize(Window, (int*)&WindowWidth, (int*)&WindowHeight);
 	SDL_SetWindowPosition(Window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
@@ -224,10 +221,10 @@ int32_t main(int32_t argc, char** argv)
 //	Rendering.wait();
 //	Culling.wait();
 	std::thread t1(RenderThread);
-	std::thread t2(CullingThread);
+//	std::thread t2(CullingThread);
 
 	t1.join();
-	t2.join();
+//	t2.join();
 
 	return 0;
 }

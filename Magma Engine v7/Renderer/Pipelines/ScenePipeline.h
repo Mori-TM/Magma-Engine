@@ -558,15 +558,20 @@ void SceneDraw()
 					SceneFragmentPc.Occlusion = 1.0;
 				}
 					
-
-				OpenVkPushConstant(SceneLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(SceneVertexPushConstant), &SceneVertexPc);
-				OpenVkPushConstant(SceneLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(SceneFragmentPushConstant), &SceneFragmentPc);
-				
 				if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
 				{
 					SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
-					if (Mesh != NULL)
+					if (Mesh != NULL && Mesh->MeshCount > 0)
 					{
+						OpenVkPushConstant(SceneLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(SceneVertexPushConstant), &SceneVertexPc);
+						OpenVkPushConstant(SceneLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(SceneFragmentPushConstant), &SceneFragmentPc);
+
+						if (Mesh->IndexBuffer != OPENVK_ERROR)
+							OpenVkBindIndexBuffer(Mesh->VertexBuffer, Mesh->IndexBuffer);
+						else
+							OpenVkBindVertexBuffer(Mesh->VertexBuffer);
+							
+
 						for (uint32_t m = 0; m < Mesh->MeshCount; m++)
 						{
 							if (Mesh->MeshData[m].Render[RENDER_TYPE_DEFAULT])
@@ -610,16 +615,10 @@ void SceneDraw()
 								LastRoughnessDescriptorSet = RoughnessDescriptorSet;
 								LastOcclusionDescriptorSet = OcclusionDescriptorSet;
 
-								if (Mesh->MeshData[m].Indices == NULL)
-								{
-									OpenVkBindVertexBuffer(Mesh->MeshData[m].VertexBuffer);
-									OpenVkDrawVertices(0, Mesh->MeshData[m].VertexCount);
-								}
+								if (Mesh->IndexBuffer != OPENVK_ERROR)
+									OpenVkDrawIndices(Mesh->MeshData[m].IndexOffset, Mesh->MeshData[m].IndexCount, Mesh->MeshData[m].VertexOffset);
 								else
-								{
-									OpenVkBindIndexBuffer(Mesh->MeshData[m].VertexBuffer, Mesh->MeshData[m].IndexBuffer);
-									OpenVkDrawIndices(0, Mesh->MeshData[m].IndexCount, 0);
-								}
+									OpenVkDrawVertices(Mesh->MeshData[m].VertexOffset, Mesh->MeshData[m].VertexCount);
 							}
 						}
 					}
@@ -631,6 +630,9 @@ void SceneDraw()
 						SceneAnimation* Animation = (SceneAnimation*)CMA_GetAt(&SceneAnimations, Entities[i].Animation.AnimationIndex);
 						if (Animation != NULL)
 						{
+							OpenVkPushConstant(SceneLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(SceneVertexPushConstant), &SceneVertexPc);
+							OpenVkPushConstant(SceneLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(SceneFragmentPushConstant), &SceneFragmentPc);
+
 							if (LastAlbedoDescriptorSet != AlbedoDescriptorSet)
 								OpenVkBindDescriptorSet(SceneLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 							if (LastNormalDescriptorSet != NormalDescriptorSet)

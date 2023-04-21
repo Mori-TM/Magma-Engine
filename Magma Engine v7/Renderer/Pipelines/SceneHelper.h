@@ -93,13 +93,11 @@ typedef struct
 {
 	SceneMaterial Material;
 
+	uint32_t VertexOffset;
 	uint32_t VertexCount;
-	SceneVertex* Vertices;
-	uint32_t VertexBuffer;
 
+	uint32_t IndexOffset;
 	uint32_t IndexCount;
-	uint32_t* Indices;
-	uint32_t IndexBuffer;
 
 	AABBData AABB;
 	bool Render[5];
@@ -109,8 +107,11 @@ typedef struct
 {
 	char Name[MAX_CHAR_NAME_LENGTH];
 	char Path[MAX_CHAR_PATH_LENGTH];
-	bool Freeable;
 	uint32_t MeshCount;
+	bool Destroyable;
+
+	uint32_t VertexBuffer;
+	uint32_t IndexBuffer;
 	SceneMeshData* MeshData;
 } SceneMesh;
 
@@ -254,18 +255,18 @@ void InitScene()
 	SceneMeshes = CMA_Create(sizeof(SceneMesh));
 	SceneMesh Mesh;
 	Mesh.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
-	Mesh.Freeable = false;
 	strcpy(Mesh.Name, "None");
 	strcpy(Mesh.Path, "None");
 	Mesh.MeshCount = 0;
+	Mesh.Destroyable = false;
 	
 	SetDefaultMaterial(&Mesh.MeshData[0].Material, "MESH");
+	Mesh.MeshData[0].VertexOffset = 0;
+	Mesh.MeshData[0].IndexOffset = 0;
 	Mesh.MeshData[0].VertexCount = 0;
-	Mesh.MeshData[0].Vertices = NULL;
-	Mesh.MeshData[0].VertexBuffer = 0;
 	Mesh.MeshData[0].IndexCount = 0;
-	Mesh.MeshData[0].Indices = NULL;
-	Mesh.MeshData[0].IndexBuffer = 0;
+	Mesh.VertexBuffer = OPENVK_ERROR;
+	Mesh.IndexBuffer = OPENVK_ERROR;
 	CMA_Push(&SceneMeshes, &Mesh);
 
 	SceneAnimations = CMA_Create(sizeof(SceneAnimation));

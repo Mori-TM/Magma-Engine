@@ -247,11 +247,11 @@ void ShadowDraw()
 	BeginInfo.Height = ShadowMapHeight;
 	OpenVkBeginRenderPass(&BeginInfo);
 	{
-
+		OpenVkSetScissor(0, 0, ShadowMapWidth, ShadowMapHeight);
 		for (uint32_t j = 0; j < SHADOW_MAP_CASCADE_COUNT; j++)
 		{
 			uint32_t Offset = (ShadowMapHeight * j);
-			OpenVkSetScissor(0, 0, ShadowMapWidth, ShadowMapHeight);
+			
 			OpenVkSetViewport(Offset, 0, ShadowMapHeight, ShadowMapHeight);
 
 			uint32_t Pipeline = ShadowPipelineNoneCull;
@@ -286,8 +286,7 @@ void ShadowDraw()
 
 				ShadowVertexPc.PVM = MultiplyMat4P(&Cascades[j].ProjectionView, &Model);
 
-				OpenVkPushConstant(ShadowLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(ShadowVertexPushConstant), &ShadowVertexPc);
-
+				
 				SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Entities[i].Material.MaterialIndex);
 				if (Material == NULL)
 					Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, 0);
@@ -304,8 +303,15 @@ void ShadowDraw()
 				if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
 				{
 					SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
-					if (Mesh != NULL)
+					if (Mesh != NULL && Mesh->MeshCount > 0)
 					{
+						OpenVkPushConstant(ShadowLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(ShadowVertexPushConstant), &ShadowVertexPc);
+
+						if (Mesh->IndexBuffer != OPENVK_ERROR)
+							OpenVkBindIndexBuffer(Mesh->VertexBuffer, Mesh->IndexBuffer);
+						else
+							OpenVkBindVertexBuffer(Mesh->VertexBuffer);
+
 						for (uint32_t m = 0; m < Mesh->MeshCount; m++)
 						{
 							if (Mesh->MeshData[m].Render[j + 1])
@@ -322,16 +328,10 @@ void ShadowDraw()
 
 								LastTextureDescriptorSet = TextureDescriptorSet;
 
-								if (Mesh->MeshData[m].Indices == NULL)
-								{
-									OpenVkBindVertexBuffer(Mesh->MeshData[m].VertexBuffer);
-									OpenVkDrawVertices(0, Mesh->MeshData[m].VertexCount);
-								}
+								if (Mesh->IndexBuffer != OPENVK_ERROR)
+									OpenVkDrawIndices(Mesh->MeshData[m].IndexOffset, Mesh->MeshData[m].IndexCount, Mesh->MeshData[m].VertexOffset);								
 								else
-								{
-									OpenVkBindIndexBuffer(Mesh->MeshData[m].VertexBuffer, Mesh->MeshData[m].IndexBuffer);
-									OpenVkDrawIndices(0, Mesh->MeshData[m].IndexCount, 0);
-								}
+									OpenVkDrawVertices(Mesh->MeshData[m].VertexOffset, Mesh->MeshData[m].VertexCount);
 							}							
 						}
 					}
@@ -343,6 +343,8 @@ void ShadowDraw()
 						SceneAnimation* Animation = (SceneAnimation*)CMA_GetAt(&SceneAnimations, Entities[i].Animation.AnimationIndex);
 						if (Animation != NULL)
 						{
+							OpenVkPushConstant(ShadowLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(ShadowVertexPushConstant), &ShadowVertexPc);
+
 							UpdateAnimation(Entities[i].Animation.AnimationIndex);
 
 							if (LastTextureDescriptorSet != TextureDescriptorSet)

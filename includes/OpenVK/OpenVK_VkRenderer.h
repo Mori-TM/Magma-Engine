@@ -384,6 +384,8 @@ uint32_t VkCreateDepthImageAttachment(uint32_t Width, uint32_t Height, uint32_t 
 	return CMA_Push(&VkRenderer.ImageAttachments, &Image);
 }
 
+//This functions sucks, wtf is ResolveAttachments as pointer used for?
+//And how is it ordered with the frame buffer create function
 uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uint32_t* AttachmentFormats, uint32_t* MsaaSamples, uint32_t* ResolveAttachments, OpenVkBool Sampled)
 {
 	VkRenderer.RenderPasses = (VkRenderPass*)OpenVkRealloc(VkRenderer.RenderPasses, (VkRenderer.RenderPassCount + 1) * sizeof(VkRenderPass));
@@ -1044,6 +1046,8 @@ OpenVkBool VkDestroyDescriptorPool(uint32_t DescriptorPool)
 
 	vkDestroyDescriptorPool(VkRenderer.Device, DescriptorPoolPTR->DescriptorPool, NULL);
 
+	CMA_Destroy(&DescriptorPoolPTR->DescriptorSets);
+
 	CMA_Pop(&VkRenderer.DescriptorPools, DescriptorPool);
 
 	return OpenVkTrue;
@@ -1458,7 +1462,7 @@ uint32_t VkCreateTextureImage(unsigned char* Pixels, int32_t Width, int32_t Heig
 	
 	if (VkCreateImage(Width, Height, VkRenderer.MipLevels, VK_SAMPLE_COUNT_1_BIT, TextureImage.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &TextureImage.Image, &TextureImage.ImageMemory, &SupportsBlit) == OPENVK_ERROR)
 		return OpenVkRuntimeError("Failed to create Texture Image");
-	OpenVkRuntimeError("Supports Blit: %d", SupportsBlit);
+//	OpenVkRuntimeError("Supports Blit: %d", SupportsBlit);
 	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
 	VkSetImageLayout(CommandBuffer, TextureImage.Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VkRenderer.MipLevels, NULL);
 	VkEndSingleTimeCommandBuffer(CommandBuffer);

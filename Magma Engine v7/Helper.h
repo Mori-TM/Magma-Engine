@@ -53,7 +53,7 @@ public:
 	}
 };
 
-std::mutex Mutex;
+Mtx Mutex;
 
 float GetDeltaTime()
 {

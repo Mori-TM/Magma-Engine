@@ -12,6 +12,7 @@ bool ForceResizeEvent = false;
 bool FullScreen = false;
 bool ForceFullScreenEvent = false;
 bool RenderGamePreview = false;
+bool GamePerformanceOverlay = false;
 
 uint32_t MsaaSamples = 4;
 
@@ -49,4 +50,24 @@ void GetWindowSize(uint32_t* Width, uint32_t* Height)
 uint32_t GetMousePos(int32_t* x, int32_t* y)
 {
 	return SDL_GetMouseState(x, y);
+}
+
+//Not the best place to store this function
+void GenerateAABB(AABBData* AABB, uint32_t VertexCount, SceneVertex* Vertices)
+{
+	SceneVertex* Data = &Vertices[0];
+	AABB->Min = Vec3f(FLT_MAX);
+	AABB->Max = Vec3f(-FLT_MAX);
+
+	for (uint32_t i = 0; i < VertexCount; i++)
+	{
+		Data = &Vertices[i];
+		AABB->Max.x = MAX(AABB->Max.x, Data->Pos.x);
+		AABB->Max.y = MAX(AABB->Max.y, Data->Pos.y);
+		AABB->Max.z = MAX(AABB->Max.z, Data->Pos.z);
+
+		AABB->Min.x = MIN(AABB->Min.x, Data->Pos.x);
+		AABB->Min.y = MIN(AABB->Min.y, Data->Pos.y);
+		AABB->Min.z = MIN(AABB->Min.z, Data->Pos.z);
+	}
 }

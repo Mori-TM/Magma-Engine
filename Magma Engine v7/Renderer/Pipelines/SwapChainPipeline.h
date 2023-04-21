@@ -106,55 +106,96 @@ void SwapChainDraw()
 			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), VkRenderer.CommandBuffers[VkRenderer.ImageIndex], 1, NonAlphaTextures);
 
 		}	
-	 	
-		OpenVkGUIBeginRender(WindowWidth, WindowHeight);
+		if (GamePerformanceOverlay)
 		{
-			char String[2048];
-			sprintf(String, "%f FPS\n%f MS", FPS, MS);
-			OpenVkGUITextPos(String, ImGuiScenePosX + 20, ImGuiScenePosY + 20, 0, 0);
-			
-		//	OpenVkGUIBegin("OpenVk Window");
-		//	{
-		//		static OpenVkBool Selected = OpenVkTrue;
-		//		if (!OpenVkGUICheckbox("Rounding", &Selected))
-		//			OpenVkGUI.Rounding = 0.0;
-		//
-		//		static OpenVkBool Selected2 = OpenVkFalse;
-		//		OpenVkGUICheckbox("Check Box 2", &Selected2);
-		//
-		//		OpenVkGUIButton("Button");
-		//		OpenVkGUIText(String);				
-		//		OpenVkGUIButton("Button2");
-		//	//	static float Border = 13.2;
-		//	//	OpenVkGUISlider("Border Size", 0.0, 80.0, &Border);				
-		//	//	OpenVkGUI.Border = Border;
-		//
-		//		OpenVkGUISlider("Rounding", 0.0, 100.0, &OpenVkGUI.Rounding);
-		//		OpenVkGUISlider("Window Color", 0.0, 1.0, &OpenVkGUI.WindowColor);
-		//		OpenVkGUISlider("Color", 0.0, 1.0, &OpenVkGUI.Color);
-		//		OpenVkGUISlider("Color Selected", 0.0, 1.0, &OpenVkGUI.ColorSelected);
-		//		OpenVkGUISlider("Color Hovered", 0.0, 1.0, &OpenVkGUI.ColorHovered);
-		//		float Offset = OpenVkGUI.Offset;
-		//		OpenVkGUISlider("Offset Size", 0.0, 30.0, &Offset);
-		//		OpenVkGUI.Offset = Offset;
-		//
-		//		OpenVkGUIText("Some Text\nMultiline Text");
-		//	}
-		//	OpenVkGUIEnd();
-		//
-		//	OpenVkGUIBegin("Another Window");
-		//	{
-		//		OpenVkGUIText(String);
-		//		static OpenVkBool Selected2 = OpenVkFalse;
-		//		OpenVkGUICheckbox("Check Box", &Selected2);
-		//		static float Dummy = 2.0;
-		//		OpenVkGUISlider("Offset Size", 0.0, 30.0, &Dummy);
-		//		OpenVkGUIDragSlider("Drag Slider", 0.0, 30.0, &Dummy);
-		//	}
-		//	OpenVkGUIEnd();
-		}
-		OpenVkGUIEndRender();
-		
+			OpenVkGUIBeginRender(WindowWidth, WindowHeight);
+			{
+				//	ImGui::Text("Scene Vertices: %d", VertexCount);
+				//	ImGui::Text("Scene Indices: %d", IndexCount);
+				//	ImGui::Text("Scene Triangles: %d", IndexCount / 3);
+				//	ImGui::NewLine();
+
+				char String[2048];
+
+				//	ImGui::Text("FPS: %f MS: %f", FPS, MS);
+				//	ImGui::Text("Shadow Render Time: %f ms", ShadowRenderingTime);
+				//	ImGui::Text("Scene Render Time: %f ms", SceneRenderingTime);
+				//	ImGui::Text("SSR Render Time: %f ms", SSRRenderingTime);
+				//	ImGui::Text("SwapChain Render Time: %f ms", SwapChainRenderingTime);
+				//	ImGui::Text("Render Time: %f ms", ShadowRenderingTime + SceneRenderingTime + SSRRenderingTime + SwapChainRenderingTime);
+				//	ImGui::Text("Begin Frame Time: %f ms", BeginFrameTime);
+				//	ImGui::Text("End Frame Time: %f ms", EndFrameTime);
+				//	ImGui::Text("Frame Time: %f ms", FrameTime);
+				//	ImGui::Text("Frame: %d", SDL_GetTicks());
+				//	ImGui::Text("Used CPU Memory: %f MB", WaveGetUsedMemory() * 0.000001);
+
+
+
+				sprintf(String, "%f FPS %f MS", FPS, MS);
+				uint32_t Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, ImGuiScenePosY + 20, 0, 0);
+				sprintf(String, "Shadow Render Time: %f ms", ShadowRenderingTime);
+				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
+				sprintf(String, "Scene Render Time: %f ms", SceneRenderingTime);
+				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
+				sprintf(String, "SSR Render Time: %f ms", SSRRenderingTime);
+				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
+				sprintf(String, "SwapChain Render Time: %f ms", SwapChainRenderingTime);
+				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
+				sprintf(String, "Render Time: %f ms", ShadowRenderingTime + SceneRenderingTime + SSRRenderingTime + SwapChainRenderingTime);
+				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
+				sprintf(String, "Begin Frame Time: %f ms", BeginFrameTime);
+				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
+				sprintf(String, "End Frame Time: %f ms", EndFrameTime);
+				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
+				sprintf(String, "Frame Time: %f ms", FrameTime);
+				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
+				sprintf(String, "Frame: %d", SDL_GetTicks());
+				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
+				sprintf(String, "Used CPU Memory : % f MB", WaveGetUsedMemory() * 0.000001);
+				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
+
+				//	OpenVkGUIBegin("OpenVk Window");
+				//	{
+				//		static OpenVkBool Selected = OpenVkTrue;
+				//		if (!OpenVkGUICheckbox("Rounding", &Selected))
+				//			OpenVkGUI.Rounding = 0.0;
+				//
+				//		static OpenVkBool Selected2 = OpenVkFalse;
+				//		OpenVkGUICheckbox("Check Box 2", &Selected2);
+				//
+				//		OpenVkGUIButton("Button");
+				//		OpenVkGUIText(String);				
+				//		OpenVkGUIButton("Button2");
+				//	//	static float Border = 13.2;
+				//	//	OpenVkGUISlider("Border Size", 0.0, 80.0, &Border);				
+				//	//	OpenVkGUI.Border = Border;
+				//
+				//		OpenVkGUISlider("Rounding", 0.0, 100.0, &OpenVkGUI.Rounding);
+				//		OpenVkGUISlider("Window Color", 0.0, 1.0, &OpenVkGUI.WindowColor);
+				//		OpenVkGUISlider("Color", 0.0, 1.0, &OpenVkGUI.Color);
+				//		OpenVkGUISlider("Color Selected", 0.0, 1.0, &OpenVkGUI.ColorSelected);
+				//		OpenVkGUISlider("Color Hovered", 0.0, 1.0, &OpenVkGUI.ColorHovered);
+				//		float Offset = OpenVkGUI.Offset;
+				//		OpenVkGUISlider("Offset Size", 0.0, 30.0, &Offset);
+				//		OpenVkGUI.Offset = Offset;
+				//
+				//		OpenVkGUIText("Some Text\nMultiline Text");
+				//	}
+				//	OpenVkGUIEnd();
+				//
+				//	OpenVkGUIBegin("Another Window");
+				//	{
+				//		OpenVkGUIText(String);
+				//		static OpenVkBool Selected2 = OpenVkFalse;
+				//		OpenVkGUICheckbox("Check Box", &Selected2);
+				//		static float Dummy = 2.0;
+				//		OpenVkGUISlider("Offset Size", 0.0, 30.0, &Dummy);
+				//		OpenVkGUIDragSlider("Drag Slider", 0.0, 30.0, &Dummy);
+				//	}
+				//	OpenVkGUIEnd();
+			}
+			OpenVkGUIEndRender();
+		}		
 	}
 	OpenVkEndRenderPass();
 }

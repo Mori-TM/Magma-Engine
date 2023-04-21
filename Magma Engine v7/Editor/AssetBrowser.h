@@ -218,31 +218,28 @@ void AddScript()
 	SceneScriptCount++;
 }
 
-void GenerateAABB(SceneMeshData* Mesh)
-{
-	SceneVertex* Data = &Mesh->Vertices[0];
-	Mesh->AABB.Min = Vec3f(FLT_MAX);
-	Mesh->AABB.Max = Vec3f(-FLT_MAX);
-
-	for (uint32_t i = 0; i < Mesh->VertexCount; i++)
-	{
-		Data = &Mesh->Vertices[i];
-		Mesh->AABB.Max.x = MAX(Mesh->AABB.Max.x, Data->Pos.x);
-		Mesh->AABB.Max.y = MAX(Mesh->AABB.Max.y, Data->Pos.y);
-		Mesh->AABB.Max.z = MAX(Mesh->AABB.Max.z, Data->Pos.z);
-
-		Mesh->AABB.Min.x = MIN(Mesh->AABB.Min.x, Data->Pos.x);
-		Mesh->AABB.Min.y = MIN(Mesh->AABB.Min.y, Data->Pos.y);
-		Mesh->AABB.Min.z = MIN(Mesh->AABB.Min.z, Data->Pos.z);
-	}
-}
-
 bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshInfo)
 {
-	MeshInfo->Freeable = true;
+	MeshInfo->Destroyable = true;
 	strcpy(MeshInfo->Path, Path);
 	MeshInfo->MeshData = (SceneMeshData*)malloc(ModelData->MeshCount * sizeof(SceneMeshData));
 	MeshInfo->MeshCount = ModelData->MeshCount;
+
+	uint32_t VertexCount = 0;
+	uint32_t IndexCount = 0;
+
+	for (uint32_t i = 0; i < ModelData->MeshCount; i++)
+	{
+		WaveMeshData* WaveMesh = &ModelData->Meshes[i];
+		VertexCount += WaveMesh->VertexCount;
+		IndexCount += WaveMesh->IndexCount;
+	}
+
+	SceneVertex* Vertices = (SceneVertex*)malloc(VertexCount * sizeof(SceneVertex));
+	uint32_t* Indices = (uint32_t*)malloc(IndexCount * sizeof(uint32_t));
+
+	VertexCount = 0;
+	IndexCount = 0;
 
 	for (uint32_t i = 0; i < ModelData->MeshCount; i++)
 	{
@@ -257,9 +254,9 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 		SceneMesh->VertexCount = WaveMesh->VertexCount;
 		SceneMesh->IndexCount = WaveMesh->IndexCount;
 
-		SceneMesh->Vertices = (SceneVertex*)malloc(WaveMesh->VertexCount * sizeof(SceneVertex));
-		SceneMesh->Indices = (uint32_t*)malloc(WaveMesh->IndexCount * sizeof(uint32_t));
-
+		SceneMesh->VertexOffset = VertexCount;
+		SceneMesh->IndexOffset = IndexCount;
+		
 		SceneMesh->Material.Metallic = ModelData->Materials[i].Metallic;
 		SceneMesh->Material.Roughness = ModelData->Materials[i].Roughness;
 
@@ -288,32 +285,36 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 
 		for (uint32_t j = 0; j < SceneMesh->VertexCount; j++)
 		{
-			SceneMesh->Vertices[j].Pos.x = WaveMesh->Vertices[j].Vertices.x;
-			SceneMesh->Vertices[j].Pos.y = WaveMesh->Vertices[j].Vertices.y;
-			SceneMesh->Vertices[j].Pos.z = WaveMesh->Vertices[j].Vertices.z;
-			SceneMesh->Vertices[j].Normal.x = WaveMesh->Vertices[j].Normals.x;
-			SceneMesh->Vertices[j].Normal.y = WaveMesh->Vertices[j].Normals.y;
-			SceneMesh->Vertices[j].Normal.z = WaveMesh->Vertices[j].Normals.z;
-			SceneMesh->Vertices[j].TexCoord.x = WaveMesh->Vertices[j].TexCoords.x;
-			SceneMesh->Vertices[j].TexCoord.y = WaveMesh->Vertices[j].TexCoords.y;
+			Vertices[VertexCount].Pos.x = WaveMesh->Vertices[j].Vertices.x;
+			Vertices[VertexCount].Pos.y = WaveMesh->Vertices[j].Vertices.y;
+			Vertices[VertexCount].Pos.z = WaveMesh->Vertices[j].Vertices.z;
+			Vertices[VertexCount].Normal.x = WaveMesh->Vertices[j].Normals.x;
+			Vertices[VertexCount].Normal.y = WaveMesh->Vertices[j].Normals.y;
+			Vertices[VertexCount].Normal.z = WaveMesh->Vertices[j].Normals.z;
+			Vertices[VertexCount].TexCoord.x = WaveMesh->Vertices[j].TexCoords.x;
+			Vertices[VertexCount].TexCoord.y = WaveMesh->Vertices[j].TexCoords.y;
+			VertexCount++;
 		}
 
-		SceneMesh->VertexBuffer = OpenVkCreateVertexBuffer(SceneMesh->VertexCount * sizeof(SceneVertex), SceneMesh->Vertices);
-		if (SceneMesh->VertexBuffer == OPENVK_ERROR)
-			return false;
+		for (uint32_t j = 0; j < SceneMesh->IndexCount; j++)
+			Indices[IndexCount++] = WaveMesh->Indices[j];
+			
+		GenerateAABB(&MeshInfo->MeshData[i].AABB, SceneMesh->VertexCount, Vertices + SceneMesh->VertexOffset);
 
-		SceneMesh->IndexCount = SceneMesh->IndexCount;
-		SceneMesh->Indices = (uint32_t*)malloc(SceneMesh->IndexCount * sizeof(uint32_t));
-
-		for (uint32_t i = 0; i < SceneMesh->IndexCount; i++)
-			SceneMesh->Indices[i] = WaveMesh->Indices[i];
-
-		SceneMesh->IndexBuffer = OpenVkCreateIndexBuffer(SceneMesh->IndexCount * sizeof(uint32_t), SceneMesh->Indices);
-		if (SceneMesh->IndexBuffer == OPENVK_ERROR)
-			return false;
-
-		GenerateAABB(&MeshInfo->MeshData[i]);
+	//	VertexCount += SceneMesh->VertexCount;
+	//	IndexCount += SceneMesh->IndexCount;
 	}
+
+	MeshInfo->VertexBuffer = OpenVkCreateVertexBuffer(VertexCount * sizeof(SceneVertex), Vertices);
+	if (MeshInfo->VertexBuffer == OPENVK_ERROR)
+		return false;
+
+	MeshInfo->IndexBuffer = OpenVkCreateIndexBuffer(IndexCount * sizeof(uint32_t), Indices);
+	if (MeshInfo->IndexBuffer == OPENVK_ERROR)
+		return false;
+
+	free(Vertices);
+	free(Indices);
 }
 
 void LoadModel(uint32_t Settings, const char* FileName)
@@ -337,6 +338,8 @@ void LoadModel(uint32_t Settings, const char* FileName)
 
 	Settings |= WAVE_LOAD_MATERIAL | WAVE_GEN_NORMALS | WAVE_FLIP_UVS | WAVE_GEN_UVS | WAVE_GEN_INDICES | WAVE_MATERIAL_USE_MODEL_PATH | WAVE_REMOVE_REDUNDANT_MATERIALS | WAVE_PRINT_DEBUG_INOFS;
 	WaveModelData Model = WaveLoadModel(FileName, Settings);
+	if (Model.MeshCount == 0)
+		return;
 
 	if (LoadModelWave(FileName, &Model, &MeshInfo))
 		AddMesh(GetFileNameFromPath((char*)FileName), &MeshInfo);
@@ -457,21 +460,21 @@ void EditorAssetBrowser()
 			{
 				SceneMesh MeshInfo;
 
-				MeshInfo.Freeable = false;
+				MeshInfo.Destroyable = false;
 				strcpy(MeshInfo.Path, "Plane");
 				MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
 				MeshInfo.MeshCount = 1;
 
 				SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
 				MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(PlaneVertices);
-				MeshInfo.MeshData[0].Vertices = (SceneVertex*)&PlaneVertices;
-				MeshInfo.MeshData[0].VertexBuffer = PlaneVertexBuffer;
+				MeshInfo.MeshData[0].VertexOffset = 0;
+				MeshInfo.VertexBuffer = PlaneVertexBuffer;
 
 				MeshInfo.MeshData[0].IndexCount = ARRAY_SIZE(PlaneIndices);
-				MeshInfo.MeshData[0].Indices = (uint32_t*)&PlaneIndices;
-				MeshInfo.MeshData[0].IndexBuffer = PlaneIndexBuffer;
+				MeshInfo.MeshData[0].IndexOffset = 0;
+				MeshInfo.IndexBuffer = PlaneIndexBuffer;
 				memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
-				GenerateAABB(&MeshInfo.MeshData[0]);
+				MeshInfo.MeshData[0].AABB = PlaneAABB;
 
 				AddMesh("Plane", &MeshInfo);
 			}
@@ -480,21 +483,21 @@ void EditorAssetBrowser()
 			{
 				SceneMesh MeshInfo;
 
-				MeshInfo.Freeable = false;
+				MeshInfo.Destroyable = false;
 				strcpy(MeshInfo.Path, "Cube");
 				MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
 				MeshInfo.MeshCount = 1;
 
 				SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
 				MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(CubeVertices);
-				MeshInfo.MeshData[0].Vertices = (SceneVertex*)&CubeVertices;
-				MeshInfo.MeshData[0].VertexBuffer = CubeVertexBuffer;
+				MeshInfo.MeshData[0].VertexOffset = 0;
+				MeshInfo.VertexBuffer = CubeVertexBuffer;
 
 				MeshInfo.MeshData[0].IndexCount = 0;
-				MeshInfo.MeshData[0].Indices = NULL;
-				MeshInfo.MeshData[0].IndexBuffer = 0;
+				MeshInfo.MeshData[0].IndexOffset = 0;
+				MeshInfo.IndexBuffer = OPENVK_ERROR;
 				memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
-				GenerateAABB(&MeshInfo.MeshData[0]);
+				MeshInfo.MeshData[0].AABB = CubeAABB;
 
 				AddMesh("Cube", &MeshInfo);
 			}
@@ -503,21 +506,21 @@ void EditorAssetBrowser()
 			{
 				SceneMesh MeshInfo;
 
-				MeshInfo.Freeable = false;
+				MeshInfo.Destroyable = false;
 				strcpy(MeshInfo.Path, "Sphere");
 				MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
 				MeshInfo.MeshCount = 1;
 
 				SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
 				MeshInfo.MeshData[0].VertexCount = SphereVertexCount;
-				MeshInfo.MeshData[0].Vertices = SphereVertices;
-				MeshInfo.MeshData[0].VertexBuffer = SphereVertexBuffer;
+				MeshInfo.MeshData[0].VertexOffset = 0;
+				MeshInfo.VertexBuffer = SphereVertexBuffer;
 
 				MeshInfo.MeshData[0].IndexCount = SphereIndexCount;
-				MeshInfo.MeshData[0].Indices = SphereIndices;
-				MeshInfo.MeshData[0].IndexBuffer = SphereIndexBuffer;
+				MeshInfo.MeshData[0].IndexOffset = 0;
+				MeshInfo.IndexBuffer = SphereIndexBuffer;
 				memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
-				GenerateAABB(&MeshInfo.MeshData[0]);
+				MeshInfo.MeshData[0].AABB = SphereAABB;
 
 				AddMesh("Sphere", &MeshInfo);
 			}
@@ -526,21 +529,22 @@ void EditorAssetBrowser()
 			{
 				SceneMesh MeshInfo;
 
-				MeshInfo.Freeable = false;
+				MeshInfo.Destroyable = false;
 				strcpy(MeshInfo.Path, "Bean");
 				MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
 				MeshInfo.MeshCount = 1;
 
 				SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
 				MeshInfo.MeshData[0].VertexCount = BeanVertexCount;
-				MeshInfo.MeshData[0].Vertices = BeanVertices;
-				MeshInfo.MeshData[0].VertexBuffer = BeanVertexBuffer;
-
+				MeshInfo.MeshData[0].VertexOffset = 0;
+				MeshInfo.VertexBuffer = BeanVertexBuffer;
+				
 				MeshInfo.MeshData[0].IndexCount = BeanIndexCount;
-				MeshInfo.MeshData[0].Indices = BeanIndices;
-				MeshInfo.MeshData[0].IndexBuffer = BeanIndexBuffer;
+				MeshInfo.MeshData[0].IndexOffset = 0;
+				MeshInfo.IndexBuffer = BeanIndexBuffer;
+
 				memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
-				GenerateAABB(&MeshInfo.MeshData[0]);
+				MeshInfo.MeshData[0].AABB = BeanAABB;
 					
 				AddMesh("Bean", &MeshInfo);
 			}

@@ -109,6 +109,13 @@ void CreateRenderer()
 	InitFpsCamera();
 	EngineInitEditor();
 	OpenVkRuntimeInfo("Engine was initilaized", "");
+
+	//Set up deafult test scene
+	LoadModel(0, "D:/3D Models/Forest/Forest.obj");
+	AddEntity(COMPONENT_TYPE_MESH);
+	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, 1);
+	Entities[SelectedEntity].Mesh.MeshIndex = 1;
+	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
 }
 
 void DestroyRenderer()
@@ -116,7 +123,6 @@ void DestroyRenderer()
 	DestroyImGui();
 	DestroyScene();
 	EngineDestroyEditor();
-	DestroyBuffers();
 	OpenVkGUIDestroy();
 	OpenVkDestroyRenderer();
 	OpenVkFreeThreads();
@@ -207,6 +213,9 @@ void RendererEvent()
 		ForceResizeEvent = true;
 	}
 
+	if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_F3)
+		GamePerformanceOverlay = !GamePerformanceOverlay;
+
 	if (Event.window.event == SDL_WINDOWEVENT_RESIZED || ForceResizeEvent)
 	{
 		ForceResizeEvent = false;
@@ -287,9 +296,9 @@ void RendererRender()
 		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshToDelete);
 		if (Mesh != NULL)
 		{
-			for (uint32_t i = 0; i < Mesh->MeshCount; i++)
+			if (DeleteMeshWithTextures)
 			{
-				if (DeleteMeshWithTextures)
+				for (uint32_t i = 0; i < Mesh->MeshCount; i++)
 				{
 					SceneTextureImage* Albedo = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].Material.AlbedoIndex);
 					SceneTextureImage* Normal = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].Material.NormalIndex);
@@ -302,15 +311,15 @@ void RendererRender()
 					DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].Material.MetallicIndex);
 					DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].Material.RoughnessIndex);
 					DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].Material.OcclusionIndex);
-				}				
+				}
 
-				if (Mesh->Freeable)
+				if (Mesh->Destroyable)
 				{
-					if (Mesh->MeshData[i].Vertices != NULL)
-						OpenVkDestroyBuffer(Mesh->MeshData[i].VertexBuffer);
-					if (Mesh->MeshData[i].Indices != NULL)
-						OpenVkDestroyBuffer(Mesh->MeshData[i].IndexBuffer);
-				}				
+					if (Mesh->VertexBuffer != OPENVK_ERROR)
+						OpenVkDestroyBuffer(Mesh->VertexBuffer);
+					if (Mesh->IndexBuffer != OPENVK_ERROR)
+						OpenVkDestroyBuffer(Mesh->IndexBuffer);
+				}
 			}
 		}
 

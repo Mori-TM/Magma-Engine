@@ -111,11 +111,11 @@ void CreateRenderer()
 	OpenVkRuntimeInfo("Engine was initilaized", "");
 
 	//Set up deafult test scene
-	LoadModel(0, "D:/3D Models/Forest/Forest.obj");
-	AddEntity(COMPONENT_TYPE_MESH);
-	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, 1);
-	Entities[SelectedEntity].Mesh.MeshIndex = 1;
-	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
+//	LoadModel(0, "D:/3D Models/Forest/Forest.obj");
+//	AddEntity(COMPONENT_TYPE_MESH);
+//	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, 1);
+//	Entities[SelectedEntity].Mesh.MeshIndex = 1;
+//	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
 }
 
 void DestroyRenderer()

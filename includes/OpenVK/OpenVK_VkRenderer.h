@@ -1570,15 +1570,6 @@ OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t Src, uint32_t D
 	return OpenVkTrue;
 }
 
-//Filter
-//VK_FILTER_NEAREST = 0,
-//VK_FILTER_LINEAR = 1,
-//Address Modes
-//VK_SAMPLER_ADDRESS_MODE_REPEAT = 0,
-//VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT = 1,
-//VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE = 2,
-//VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER = 3,
-//VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE = 4,
 uint32_t VkCreateImageSampler(uint32_t Filter, uint32_t AddressMode)
 {
 //	VkRenderer.Sampler = (VkSampler*)OpenVkRealloc(VkRenderer.Sampler, (VkRenderer.SamplerCount + 1) * sizeof(VkSampler));
@@ -1590,28 +1581,23 @@ uint32_t VkCreateImageSampler(uint32_t Filter, uint32_t AddressMode)
 	SamplerInfo.magFilter = (VkFilter)Filter;
 	SamplerInfo.minFilter = (VkFilter)Filter;
 	SamplerInfo.mipmapMode = (VkSamplerMipmapMode)Filter;
-//	SamplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 	SamplerInfo.addressModeU = (VkSamplerAddressMode)AddressMode;
 	SamplerInfo.addressModeV = (VkSamplerAddressMode)AddressMode;
 	SamplerInfo.addressModeW = (VkSamplerAddressMode)AddressMode;
 	SamplerInfo.mipLodBias = 0.0;
 	SamplerInfo.anisotropyEnable = VK_TRUE;
 	SamplerInfo.maxAnisotropy = 8;
-	SamplerInfo.compareEnable = VK_TRUE;
+	SamplerInfo.compareEnable = VK_FALSE;//if this is true with VK_COMPARE_OP_ALWAYS shadows wont work
 	SamplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
 	SamplerInfo.minLod = 0.0;
 	SamplerInfo.maxLod = VkRenderer.MipLevels;
 	SamplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 	SamplerInfo.unnormalizedCoordinates = VK_FALSE;
-	
 
 	VkSampler Sampler;
 	if (vkCreateSampler(VkRenderer.Device, &SamplerInfo, NULL, &Sampler) != VK_SUCCESS)
 		return OpenVkRuntimeError("Failed to Create Sampler");
 
-//	VkRenderer.SamplerCount++;
-
-//	return VkRenderer.SamplerCount - 1;
 	return CMA_Push(&VkRenderer.Sampler, &Sampler);
 }
 

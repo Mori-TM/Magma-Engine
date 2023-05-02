@@ -98,7 +98,38 @@ void CreateSSRDescriptorSet()
 
 		SSRDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}
-	
+	/*
+	{
+		unsigned char* Pixels;
+		int32_t Width;
+		int32_t Height;
+		OpenVkLoadTexture("Data/Textures/spiaggia_di_mondello.jpg", OpenVkTrue, &Pixels, &Width, &Height, OPENVK_FORMAT_RGBA);
+		uint32_t Texture = OpenVkCreateTextureImage(Pixels, Width, Height, OPENVK_FORMAT_RGBA);
+		uint32_t Sampler = OpenVkCreateImageSampler(OPENVK_FILTER_LINEAR, OPENVK_ADDRESS_MODE_REPEAT);
+
+		uint32_t DescriptorCounts[] = { 1 };
+		uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
+		uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_TEXTURE };
+		uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT };
+		uint32_t Bindings[] = { 0 };
+
+		OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
+		DescriptorSetCreateInfo.DescriptorSetLayout = TextureDescriptorSetLayout;
+		DescriptorSetCreateInfo.DescriptorPool = DescriptorPool;
+		DescriptorSetCreateInfo.DescriptorWriteCount = 1;
+		DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
+		DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
+		DescriptorSetCreateInfo.Sampler = &Sampler;
+		DescriptorSetCreateInfo.ImageTypes = ImageTypes;
+		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
+		DescriptorSetCreateInfo.Bindings = Bindings;
+		DescriptorSetCreateInfo.Images = &Texture;
+		DescriptorSetCreateInfo.DescriptorSet = NULL;
+		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
+
+		SkyboxDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
+	}
+	*/
 	{
 		uint32_t DescriptorCounts[] = { 1 };
 		uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER };

@@ -940,6 +940,105 @@ void VkSetImageLayout(VkCommandBuffer CommandBuffer, VkImage Image, VkImageLayou
 		1, &ImageMemoryBarrier);
 }
 
+void VkSetImageLayout2(VkCommandBuffer CommandBuffer, VkImage Image, VkImageLayout OldImageLayout, VkImageLayout NewImageLayout, uint32_t MipLevels, VkImageSubresourceRange* SubresourceRange)
+{
+	VkImageMemoryBarrier ImageMemoryBarrier;
+	ImageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	ImageMemoryBarrier.pNext = NULL;
+	ImageMemoryBarrier.srcAccessMask = 0;
+	ImageMemoryBarrier.dstAccessMask = 0;
+	ImageMemoryBarrier.oldLayout = OldImageLayout;
+	ImageMemoryBarrier.newLayout = NewImageLayout;
+	ImageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	ImageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	ImageMemoryBarrier.image = Image;
+	if (SubresourceRange)
+	{
+		ImageMemoryBarrier.subresourceRange = *SubresourceRange;
+	}
+	else
+	{
+		ImageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		ImageMemoryBarrier.subresourceRange.baseMipLevel = 0;
+		ImageMemoryBarrier.subresourceRange.levelCount = MipLevels;
+		ImageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
+		ImageMemoryBarrier.subresourceRange.layerCount = 1;
+	}
+
+	switch (OldImageLayout)
+	{
+	case VK_IMAGE_LAYOUT_UNDEFINED:
+		ImageMemoryBarrier.srcAccessMask = 0;
+		break;
+
+	case VK_IMAGE_LAYOUT_PREINITIALIZED:
+		ImageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		ImageMemoryBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+		ImageMemoryBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+		ImageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+		ImageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+		ImageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		break;
+	default:
+		break;
+	}
+
+	switch (NewImageLayout)
+	{
+	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+		ImageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+		ImageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		ImageMemoryBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+		ImageMemoryBarrier.dstAccessMask = ImageMemoryBarrier.dstAccessMask | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		break;
+
+	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+		if (ImageMemoryBarrier.srcAccessMask == 0)
+			ImageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+		ImageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		break;
+	default:
+		break;
+	}
+
+
+	VkPipelineStageFlags SourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+	VkPipelineStageFlags DestinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+
+	vkCmdPipelineBarrier(
+		CommandBuffer,
+		SourceStage,
+		DestinationStage,
+		0,
+		0, NULL,
+		0, NULL,
+		1, &ImageMemoryBarrier);
+}
+
 void VkCopyBufferToImage(VkBuffer Buffer, VkImage Image, uint32_t Width, uint32_t Height)
 {
 	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
@@ -1079,4 +1178,206 @@ void VkGenerateMipmaps(VkImage Image, VkFormat ImageFormat, int32_t TextureWidth
 	vkCmdPipelineBarrier(CommandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL, 1, &Barrier);
 
 	VkEndSingleTimeCommandBuffer(CommandBuffer);
+}
+
+OpenVkBool CreateAndUploadImage(unsigned char* Pixel, int32_t Width, int32_t Height, VkFormat Format, VkImage* Image, VkDeviceMemory* Memory)
+{
+	if (!Pixel)
+		return OpenVkRuntimeError("Invalid Texture");
+
+	VkBuffer StagingBuffer;
+	VkDeviceMemory StagingBufferMemory;
+	//is only rgba
+	VkDeviceSize ImageSize = (Width / 4) * (Height / 4) * 8;
+	
+	if (VkCreateBuffer(ImageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &StagingBuffer, &StagingBufferMemory) == OPENVK_ERROR)
+		return OpenVkRuntimeError("Failed to create Texture Buffer");
+
+	void* Data;
+	vkMapMemory(VkRenderer.Device, StagingBufferMemory, 0, ImageSize, 0, &Data);
+	memcpy(Data, Pixel, ImageSize);
+	vkUnmapMemory(VkRenderer.Device, StagingBufferMemory);
+
+	//	OpenVkFree(Pixels);
+
+	OpenVkBool SupportsBlit = OpenVkFalse;
+
+	if (VkCreateImage(Width, Height, 1, VK_SAMPLE_COUNT_1_BIT, Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Image, Memory, &SupportsBlit) == OPENVK_ERROR)
+		return OpenVkRuntimeError("Failed to create Texture Image");
+	//	OpenVkRuntimeError("Supports Blit: %d", SupportsBlit);
+	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
+	VkSetImageLayout(CommandBuffer, *Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1, NULL);
+	VkEndSingleTimeCommandBuffer(CommandBuffer);
+
+	VkCopyBufferToImage(StagingBuffer, *Image, Width, Height);
+
+	vkDestroyBuffer(VkRenderer.Device, StagingBuffer, NULL);
+	vkFreeMemory(VkRenderer.Device, StagingBufferMemory, NULL);
+	
+	return OpenVkTrue;
+}
+
+typedef struct
+{
+	VkImage Image;
+	VkDeviceMemory Memory;
+} ImageTest;
+
+void VkUploadMipmaps(unsigned char** Pixels, VkImage Image, VkFormat ImageFormat, int32_t TextureWidth, int32_t TextureHeight, uint32_t MipLevels, OpenVkBool SupportsBlit)
+{
+	
+	VkFormatProperties FormatProperties;
+	vkGetPhysicalDeviceFormatProperties(VkRenderer.PhysicalDevice, ImageFormat, &FormatProperties);
+	if (!(FormatProperties.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
+		return;
+
+	//	OpenVkRuntimeError("Supports Blit: %d", SupportsBlit);
+
+
+	int32_t MipWidth = TextureWidth;
+	int32_t MipHeight = TextureHeight;
+
+	ImageTest Images[32];
+
+	for (uint32_t i = 1; i < MipLevels; i++)
+	{
+		VkImage SrcImage = VK_NULL_HANDLE;
+		VkDeviceMemory SrcMemory = VK_NULL_HANDLE;
+
+		CreateAndUploadImage(Pixels[i], MipWidth > 1 ? MipWidth / 2 : 1, MipHeight > 1 ? MipHeight / 2 : 1, ImageFormat, &SrcImage, &SrcMemory);
+
+		if (MipWidth > 1) MipWidth /= 2;
+		if (MipHeight > 1) MipHeight /= 2;
+
+		Images[i].Image = SrcImage;
+		Images[i].Memory = SrcMemory;
+	}
+
+	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
+
+	VkImageMemoryBarrier Barrier;
+	Barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	Barrier.pNext = NULL;
+	Barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	Barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	Barrier.image = Image;
+	Barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	Barrier.subresourceRange.levelCount = 1;
+	Barrier.subresourceRange.baseArrayLayer = 0;
+	Barrier.subresourceRange.layerCount = 1;
+
+
+	MipWidth = TextureWidth;
+	MipHeight = TextureHeight;
+
+	for (uint32_t i = 1; i < MipLevels; i++)
+	{
+		VkImage SrcImage = Images[i].Image;
+		VkDeviceMemory SrcMemory = Images[i].Memory;
+
+		Barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		Barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		Barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		Barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		Barrier.subresourceRange.baseMipLevel = i - 1;
+
+		vkCmdPipelineBarrier(CommandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, &Barrier);
+
+		if (SupportsBlit)
+		{
+			VkImageBlit Blit;
+			Blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			Blit.srcSubresource.mipLevel = i - 1;
+			Blit.srcSubresource.baseArrayLayer = 0;
+			Blit.srcSubresource.layerCount = 1;
+			Blit.srcOffsets[0].x = 0;
+			Blit.srcOffsets[0].y = 0;
+			Blit.srcOffsets[0].z = 0;
+			Blit.srcOffsets[1].x = MipWidth;
+			Blit.srcOffsets[1].y = MipHeight;
+			Blit.srcOffsets[1].z = 1;
+			Blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			Blit.dstSubresource.mipLevel = i;
+			Blit.dstSubresource.baseArrayLayer = 0;
+			Blit.dstSubresource.layerCount = 1;
+			Blit.dstOffsets[0].x = 0;
+			Blit.dstOffsets[0].y = 0;
+			Blit.dstOffsets[0].z = 0;
+			Blit.dstOffsets[1].x = MipWidth > 1 ? MipWidth / 2 : 1;
+			Blit.dstOffsets[1].y = MipHeight > 1 ? MipHeight / 2 : 1;
+			Blit.dstOffsets[1].z = 1;
+
+			vkCmdBlitImage(CommandBuffer, Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &Blit, VK_FILTER_LINEAR);
+		}
+		else
+		{
+			
+			VkImageCopy Copy;
+			memset(&Copy, 0, sizeof(VkImageCopy));
+			Copy.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			Copy.srcSubresource.mipLevel = 0;
+			Copy.srcSubresource.baseArrayLayer = 0;
+			Copy.srcSubresource.layerCount = 1;
+			//	Copy.srcOffsets[0].x = 0;
+			//	Copy.srcOffsets[0].y = 0;
+			//	Copy.srcOffsets[0].z = 0;
+			//	Copy.srcOffset.x = MipWidth;
+			//	Copy.srcOffset.y = MipHeight;
+			//	Copy.srcOffset.z = 0;
+			Copy.extent.width = MipWidth > 1 ? MipWidth / 2 : 1;
+			Copy.extent.height = MipHeight > 1 ? MipHeight / 2 : 1;
+			Copy.extent.depth = 1;
+			Copy.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			Copy.dstSubresource.mipLevel = i;
+			Copy.dstSubresource.baseArrayLayer = 0;
+			Copy.dstSubresource.layerCount = 1;
+			//	Copy.dstOffsets[0].x = 0;
+			//	Copy.dstOffsets[0].y = 0;
+			//	Copy.dstOffsets[0].z = 0;
+			//	Copy.dstOffset.x = 0;
+			//	Copy.dstOffset.y = 0;
+			//	Copy.dstOffset.z = 0;
+
+			//	if (MipWidth > 4) MipWidth /= 2;
+			//	if (MipHeight > 4) MipHeight /= 2;
+
+			vkCmdCopyImage(CommandBuffer, SrcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &Copy);
+//			VkSetImageLayout2(CommandBuffer, SrcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, NULL);
+		}
+
+		Barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		Barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		Barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		Barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+		vkCmdPipelineBarrier(CommandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL, 1, &Barrier);
+
+		if (MipWidth > 1) MipWidth /= 2;
+		if (MipHeight > 1) MipHeight /= 2;
+
+	//	vkDestroyImage(VkRenderer.Device, SrcImage, NULL);
+	//	vkFreeMemory(VkRenderer.Device, SrcMemory, NULL);
+
+	//	exit(0);
+	}
+
+	Barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	Barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	Barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	Barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	Barrier.subresourceRange.baseMipLevel = MipLevels - 1;
+
+	vkCmdPipelineBarrier(CommandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL, 1, &Barrier);
+
+	for (uint32_t i = 1; i < MipLevels; i++)
+		VkSetImageLayout2(CommandBuffer, Images[i].Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1, NULL);
+
+	VkEndSingleTimeCommandBuffer(CommandBuffer);
+
+	for (uint32_t i = 1; i < MipLevels; i++)
+	{
+		vkDestroyImage(VkRenderer.Device, Images[i].Image, NULL);
+		vkFreeMemory(VkRenderer.Device, Images[i].Memory, NULL);
+	}
+//	exit(0);
 }

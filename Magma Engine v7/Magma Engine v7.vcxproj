@@ -144,14 +144,17 @@
   <ItemGroup>
     <ClInclude Include="Editor\AssetBrowser.h" />
     <ClInclude Include="Editor\Editor.h" />
+    <ClInclude Include="Editor\EditorUI.h" />
     <ClInclude Include="Editor\EntityManager.h" />
     <ClInclude Include="Editor\Inspector.h" />
     <ClInclude Include="Editor\SceneManager.h" />
     <ClInclude Include="Engine\AudioEngine.h" />
+    <ClInclude Include="Engine\ECS.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="Engine\FpsCamera.h" />
     <ClInclude Include="Engine\FrustumCulling.h" />
     <ClInclude Include="Engine\ImageCompression.h" />
+    <ClInclude Include="Engine\Scene.h" />
     <ClInclude Include="Engine\ScriptEngine.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="Renderer\Helper\Buffers.h" />

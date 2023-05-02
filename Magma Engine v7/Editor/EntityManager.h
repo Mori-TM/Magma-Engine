@@ -7,7 +7,6 @@ void ResetEntityMesh(EntityInfo* Entity)
 void ResetEntityMaterial(EntityInfo* Entity)
 {
 	Entity->Material.MaterialIndex = 0;
-	Entity->Material.Color = Vec3f(1.0);
 	strcpy(Entity->Material.Name, "None");
 }
 

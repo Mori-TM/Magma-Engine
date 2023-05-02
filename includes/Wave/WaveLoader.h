@@ -1464,8 +1464,9 @@ char WaveGetJsonDataType(size_t* Index, char* Buffer)
 
 typedef struct
 {
-	char Array;
-	char Name[64];
+	char IsArray;
+	char* Name;
+	uint32_t Index;
 	void* PrevObject;
 } WaveGLTFObject;
 
@@ -1484,9 +1485,12 @@ typedef struct
 	WaveGLTFObject* CurObject;
 } WaveGLTFInfo;
 
+/*
 void ParseRecursion(WaveGLTFInfo* Inf)
 {
 //	printf("Hey\n");
+	uint32_t Allignment = 0;
+
 	for (Inf->i; Inf->i < Inf->Length; Inf->i++)
 	{
 		if (Inf->Buffer[Inf->i] == '"')
@@ -1511,13 +1515,23 @@ void ParseRecursion(WaveGLTFInfo* Inf)
 			char IsInArray = Inf->CurObject->Array;
 			
 			Inf->CurObject = &Inf->Objects[Inf->ObjectCount++];
+			
 
-			Inf->CurObject->PrevObject = &Inf->Objects[Inf->ObjectCount - 1];
+		//	Inf->CurObject->Index = Inf->ObjectCount - 1;
+			if (Inf->ObjectCount > 1)
+				Inf->CurObject->PrevObject = &Inf->Objects[Inf->ObjectCount - 1];
+			else
+				Inf->CurObject->PrevObject = NULL;
 			if (IsInArray)
 				strcpy(Inf->CurObject->Name, "Default");
 			else
 				strcpy(Inf->CurObject->Name, Inf->NextName);
+
+			for (uint32_t k = 0; k < Allignment; k++)
+				printf("\t");
 			printf("Object %d: %s\n", (Inf->ObjectCount - 1), Inf->CurObject->Name);
+
+			Allignment++;
 		}
 		else if (Inf->Buffer[Inf->i] == '[')
 		{
@@ -1525,9 +1539,16 @@ void ParseRecursion(WaveGLTFInfo* Inf)
 			Inf->CurObject = &Inf->Objects[Inf->ObjectCount++];
 
 			Inf->CurObject->Array = 1;
+		//	Inf->CurObject->Index = Inf->ObjectCount - 1;
 			Inf->CurObject->PrevObject = &Inf->Objects[Inf->ObjectCount - 1];
 			strcpy(Inf->CurObject->Name, Inf->NextName);
+			
+
+			for (uint32_t k = 0; k < Allignment; k++)
+				printf("\t");
 			printf("Array %d: %s\n", (Inf->ObjectCount - 1), Inf->CurObject->Name);
+
+			Allignment++;
 		}
 		else if (Inf->Buffer[Inf->i] == '}' ||
 				 Inf->Buffer[Inf->i] == ']')
@@ -1537,8 +1558,11 @@ void ParseRecursion(WaveGLTFInfo* Inf)
 			if (Inf->CurObject->PrevObject == NULL)
 				break; //Json parsing finished or something wrong
 
+		//	Inf->CurObject->Index
 			WaveGLTFObject* ObjTmp = (WaveGLTFObject*)Inf->CurObject->PrevObject;
 			Inf->CurObject = ObjTmp;
+			if (Allignment > 0)
+				Allignment--;
 		}
 	//	else if (Inf->Buffer[Inf->i] == 't' || Inf->Buffer[Inf->i] == 'f')
 	//	{
@@ -1548,77 +1572,196 @@ void ParseRecursion(WaveGLTFInfo* Inf)
 	}
 }
 
-size_t WaveParseJson(const char* Buffer, size_t Length)
+size_t WaveParseJson(char* Buffer, size_t Length)
 {
 	WaveGLTFInfo Inf;
 
+	Inf.i = 0;
+	for (Inf.i; Inf.i < Length; Inf.i++)
+	{
+		if (Buffer[Inf.i] == '{')
+		{
+		//	Inf.i++;
+			break;
+		}
+	}
+
+	for (size_t i = Length - 1; i > 0; i--)
+	{
+		if (Buffer[Inf.i] == '}')
+		{
+			Buffer[Inf.i + 1] = '\0';
+			Length = Inf.i + 1;
+			break;
+		}
+	}
+
 	Inf.Length = Length;
 	Inf.Buffer = Buffer;
-	Inf.ObjectCount = 1;
+	Inf.ObjectCount = 0;
 	Inf.ObjectSize = WAVE_GLTF_ALLOCATION_COUNT;
 	Inf.Objects = (WaveGLTFObject*)malloc(Inf.ObjectSize * sizeof(WaveGLTFObject));
 
 	Inf.CurObject = &Inf.Objects[0];
 
-	Inf.i = 0;
-	for (Inf.i; Inf.i < Length; Inf.i++)
-	{
-		if (Buffer[Inf.i] != '{')
-		{
-			Inf.i++;
-			break;
-		}
-	}
+	
 			
-
+	printf("%s\n", Buffer + Inf.i);
 	//Init first default object
-	Inf.CurObject->Array = 0;
-	strcpy(Inf.CurObject->Name, "Default");
-	Inf.CurObject->PrevObject = NULL;
+//	Inf.CurObject->Array = 0;
+//	strcpy(Inf.CurObject->Name, "Default");
+//	Inf.CurObject->PrevObject = NULL;
 
 	ParseRecursion(&Inf);
 //	printf("%s\n", Buffer + Inf.i);
-	/*
-	* for (i; i < Length; i++)
-	{
-		if (Buffer[i] == '"')
-		{
-			//Get name for next object or string
-			uint16_t j = 0;
-			for (i++; i < 64; i++)
-			{
-				if (Buffer[i] == '"')
-					break;
-				NextName[j++] = Buffer[i];
-			}
-				
-		}
-		else if (Buffer[i] == '{')
-		{
-			//Add new Object and make this current
-		}
-		else if (Buffer[i] == '}')
-		{
-			//Make previous object current;
-			printf("wtf\n");
-			if (CurObject->PrevObject == NULL)
-				break; //Json parsing finished or something wrong
-
-			WaveGLTFObject* ObjTmp = (WaveGLTFObject*)CurObject->PrevObject;
-			CurObject = ObjTmp;
-		}
-		else if (Buffer[i] == 't' || Buffer[i] == 'f')
-		{
-			//Add boolean to current object
-		}
-		
-	}
-	*/
+	
+//	for (i; i < Length; i++)
+//	{
+//		if (Buffer[i] == '"')
+//		{
+//			//Get name for next object or string
+//			uint16_t j = 0;
+//			for (i++; i < 64; i++)
+//			{
+//				if (Buffer[i] == '"')
+//					break;
+//				NextName[j++] = Buffer[i];
+//			}
+//				
+//		}
+//		else if (Buffer[i] == '{')
+//		{
+//			//Add new Object and make this current
+//		}
+//		else if (Buffer[i] == '}')
+//		{
+//			//Make previous object current;
+//			printf("wtf\n");
+//			if (CurObject->PrevObject == NULL)
+//				break; //Json parsing finished or something wrong
+//
+//			WaveGLTFObject* ObjTmp = (WaveGLTFObject*)CurObject->PrevObject;
+//			CurObject = ObjTmp;
+//		}
+//		else if (Buffer[i] == 't' || Buffer[i] == 'f')
+//		{
+//			//Add boolean to current object
+//		}
+//		
+//	}
+	
 
 	return Inf.i;
 }
+*/
+
+size_t WaveParseJson(char* Buffer, size_t Length)
+{
+	size_t i = 0;
+	for (i; i < Length; i++)
+		if (Buffer[i] == '{')
+			break;
+
+	size_t BufferStart = i + 1;
+
+	for (i = Length - 1; i > 0; i--)
+	{
+		if (Buffer[i] == '}')
+		{
+			Buffer[i] = '\0';
+			Length = i;
+			break;
+		}
+	}
+
+	size_t BufferEnd = i;
+
+	uint32_t ObjectCount = 1;
+	uint32_t ObjectSize = WAVE_GLTF_ALLOCATION_COUNT;
+	WaveGLTFObject* Objects = (WaveGLTFObject*)malloc(ObjectSize * sizeof(WaveGLTFObject));
+	WaveGLTFObject* ObjectsCur = &Objects[0];
+
+	Objects[0].Index = 0;
+	Objects[0].IsArray = 0;
+	Objects[0].PrevObject = NULL;
+	Objects[0].Name = NULL;
+
+	uint32_t StringCurSize = 0;
+	uint32_t StringSize = WAVE_GLTF_ALLOCATION_COUNT;
+	char* StringTmp = (char*)malloc(StringSize);
+
+	for (i = BufferStart; i < BufferEnd; i++)
+	{
+		if (Buffer[i] == '\"')
+		{
+			StringCurSize = 0;
+
+			while (Buffer[++i] != '\"')
+			{
+				StringTmp[StringCurSize] = Buffer[i];
+				StringCurSize++;
+				if (StringCurSize + 1 >= StringSize)
+				{
+					StringSize += WAVE_GLTF_ALLOCATION_COUNT;
+					StringTmp = (char*)realloc(StringTmp, StringSize);
+				}
+			}
+			StringTmp[StringCurSize++] = '\0';
+
+		//	printf("%s\n", StringTmp);
+		}
+
+		else 
+		if (Buffer[i] == '{' ||
+			Buffer[i] == '[')
+		{
+			if (Buffer[i] == '[')
+				Objects[ObjectCount].IsArray = 1;
+			else
+				Objects[ObjectCount].IsArray = 0;
+			Objects[ObjectCount].Index = 0;			
+			Objects[ObjectCount].PrevObject = (WaveGLTFObject*)&Objects[ObjectCount - 1];
+			if (ObjectsCur->IsArray == 1)
+			{
+				Objects[ObjectCount].Name = NULL;
+			}
+			else
+			{
+				Objects[ObjectCount].Name = (char*)malloc(StringCurSize);
+				memcpy(Objects[ObjectCount].Name, StringTmp, StringCurSize);
+			}
+			ObjectsCur = &Objects[ObjectCount];
+
+			ObjectCount++;
+
+			if (ObjectCount >= ObjectSize)
+			{
+				ObjectSize += WAVE_GLTF_ALLOCATION_COUNT;
+				Objects = (WaveGLTFObject*)realloc(Objects, ObjectSize * sizeof(WaveGLTFObject));
+			}
+
+			if (Objects[ObjectCount - 1].Name != NULL)
+				printf("%s\n", Objects[ObjectCount - 1].Name);
+		}
+
+		else
+		if (Buffer[i] == '}' ||
+			Buffer[i] == ']')
+		{
+			WaveGLTFObject* Prev = (WaveGLTFObject*)ObjectsCur->PrevObject;
+			ObjectsCur = Prev;
+		}
+	}
+
+	return 0;
+}
 
 void WaveParseBas64(const char* Buffer, size_t Length)
+{
+
+}
+
+void WaveParseGLTF(WaveGLTFObject* Objects)
 {
 
 }
@@ -1633,16 +1776,17 @@ WaveModelData WaveLoadGLTF(const char* FilePath, size_t Length, char* Buffer, ui
 	
 	size_t JsonLength = Length;
 	char* JsonPTR = Buffer;
-	/*
+	
 	if (Buffer[0] == 'g' &&
 		Buffer[1] == 'l' &&
 		Buffer[2] == 'T' &&
 		Buffer[3] == 'F')
 	{
-		JsonPTR = Buffer + 16;
-		JsonLength -= 16;
+		JsonPTR = Buffer + 20;
+		JsonLength -= 20;
 	}
-	*/
+	
+//	printf("%s\n", JsonPTR);
 
 	size_t Offset = WaveParseJson(JsonPTR, JsonLength);
 //	if (Offset < Length)

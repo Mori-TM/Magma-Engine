@@ -382,7 +382,7 @@ STBIRDEF int stbir_resize_region(  const void *input_pixels , int input_w , int 
 
 
 
-
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
 
 #ifdef STB_IMAGE_RESIZE_IMPLEMENTATION
 

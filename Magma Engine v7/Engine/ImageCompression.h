@@ -25,7 +25,7 @@ void ImageToRGB(unsigned char** RGBA, int Width, int Height)
 	*RGBA = Data;
 }
 
-void compress_image(unsigned char* rgba_data, int width, int height, unsigned char** bc1_data, size_t* bc1_size, uint32_t Format) 
+void CompressImage(unsigned char* rgba_data, int width, int height, unsigned char** bc1_data, size_t* bc1_size, uint32_t Format, bool TextureCompressedHQ)
 {
 	const int num_blocks = (width / 4) * (height / 4);
 	const size_t block_size = sizeof(unsigned char) * 64;
@@ -38,7 +38,7 @@ void compress_image(unsigned char* rgba_data, int width, int height, unsigned ch
 	if (Format == OPENVK_FORMAT_BC4_RGBA)
 		compress_pixelsBC4(*bc1_data, rgba_data, width, height, 0);
 	else
-		compress_pixels(*bc1_data, rgba_data, width, height, 0);
+		compress_pixels(*bc1_data, rgba_data, width, height, 0, TextureCompressedHQ);
 	/*
 	const int num_blocks = (width / 4) * (height / 4);
     const size_t block_size = sizeof(unsigned char) * 8;

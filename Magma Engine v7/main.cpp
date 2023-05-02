@@ -20,6 +20,7 @@ extern "C"
 
 #include <stb/stb_sprintf.h>
 #include <stb/dxt/stb_dxt.c>
+#include <stb/stb_image_resize.h>
 
 #include <ImGui/imconfig.h>
 #include <ImGui/imgui_tables.cpp>
@@ -69,7 +70,7 @@ void RenderThread()
 	system("./GLSLCompiler.sh");
 #endif
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_TIMER);
-	Window = SDL_CreateWindow("Magma Engine v7 ImGui " IMGUI_VERSION, 0, 0, WindowWidth, WindowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN | SDL_WINDOW_BORDERLESS | SDL_WINDOW_FULLSCREEN_DESKTOP);
+	Window = SDL_CreateWindow("Magma Engine v7 ImGui " IMGUI_VERSION, 0, 0, WindowWidth, WindowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_VULKAN | SDL_WINDOW_BORDERLESS);
 	SDL_SetWindowMinimumSize(Window, 800, 540);
 	SDL_GetWindowSize(Window, (int*)&WindowWidth, (int*)&WindowHeight);
 	SDL_SetWindowPosition(Window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
@@ -190,15 +191,15 @@ int32_t main(int32_t argc, char** argv)
 //	printf("%.3f\n", 1.23342124543f);
 //	//C:/Users/Moritz Desktop/source/repos/Vulkan C99/Vulkan C99/Cube.dae
 //	WaveLoadModel("C:/Users/Moritz Desktop/source/repos/Vulkan C99/Vulkan C99/Cube.dae", 0);
-	//		uint32_t BeginTime = SDL_GetTicks();
-	//	//	WaveSetPath((char*)"D:/3D Models/GLTF/");
-	//		WaveModelData Data = WaveLoadModel("D:/3D Models/Sponza-Master/Sort.obj", WAVE_LOAD_MATERIAL | WAVE_GEN_NORMALS | WAVE_FLIP_UVS | WAVE_GEN_UVS | WAVE_GEN_INDICES | WAVE_REMOVE_REDUNDANT_MATERIALS | WAVE_MATERIAL_USE_MODEL_PATH | WAVE_PRINT_DEBUG_INOFS);
-	//		//	WaveModelData Data = WaveLoadModel("C:/Users/Moritz Desktop/source/repos/Vulkan C99/Vulkan C99/vulkan.obj", 0);
-	//		uint32_t EndTime = SDL_GetTicks();
-	//		printf("Loading time: %d\n", EndTime - BeginTime);
-	//		exit(0);
-	//	
-	//		return 22;
+		//	uint32_t BeginTime = SDL_GetTicks();
+		////	WaveSetPath((char*)"D:/3D Models/GLTF/");
+		//	WaveModelData Data = WaveLoadModel("D:/3D Models/GLTF/CubeSep.gltf", WAVE_LOAD_MATERIAL | WAVE_GEN_NORMALS | WAVE_FLIP_UVS | WAVE_GEN_UVS | WAVE_GEN_INDICES | WAVE_REMOVE_REDUNDANT_MATERIALS | WAVE_MATERIAL_USE_MODEL_PATH | WAVE_PRINT_DEBUG_INOFS);
+		//	//	WaveModelData Data = WaveLoadModel("C:/Users/Moritz Desktop/source/repos/Vulkan C99/Vulkan C99/vulkan.obj", 0);
+		//	uint32_t EndTime = SDL_GetTicks();
+		//	printf("Loading time: %d\n", EndTime - BeginTime);
+		//	exit(0);
+		//
+		//	return 22;
 	
 //	uint32_t BeginTime = SDL_GetTicks();
 //	WaveModelData Data = WaveLoadModel("C:/Users/Moritz Desktop/source/repos/Vulkan C99/Vulkan C99/cessna.stl", 0);

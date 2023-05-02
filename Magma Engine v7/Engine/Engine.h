@@ -1,75 +1,3 @@
-#define COMPONENT_COUNT 5
-
-typedef enum
-{
-	COMPONENT_TYPE_MESH = 0,
-	COMPONENT_TYPE_MATERIAL = 1,
-	COMPONENT_TYPE_CAMERA = 2,
-	COMPONENT_TYPE_AUDIO = 3,
-	COMPONENT_TYPE_ANIMATION = 4,
-} ComponentTypes;
-
-typedef struct
-{
-	char Name[MAX_CHAR_NAME_LENGTH];
-	uint32_t MeshIndex;
-} MeshComponent;
-
-typedef struct
-{
-	char Name[MAX_CHAR_NAME_LENGTH];
-	uint32_t MaterialIndex;
-	vec3 Color;
-} MaterialComponent;
-
-typedef struct
-{
-	char Name[MAX_CHAR_NAME_LENGTH];
-	float FOV;
-	float NearPlane;
-	float FarPlane;
-} CameraComponent;
-
-typedef struct  
-{
-	char Name[MAX_CHAR_NAME_LENGTH];
-	SoLoud::Wav Audio;
-	SoLoud::handle Handle;
-} AudioComponent;
-
-typedef struct
-{
-	char Name[MAX_CHAR_NAME_LENGTH];
-	uint32_t AnimationIndex;
-} AnimationComponent;
-
-typedef struct
-{
-	char Name[MAX_CHAR_NAME_LENGTH];
-	vec3 Translate;
-	vec3 Rotate;
-	vec3 Scale;
-	bool Selected;
-
-	bool UsedComponents[COMPONENT_COUNT];
-	MeshComponent Mesh;
-	MaterialComponent Material;
-	CameraComponent Camera;
-	AudioComponent Audio;
-	AnimationComponent Animation;
-} EntityInfo;
-
-uint32_t SelectedEntity = 0;
-uint32_t SelectedTexture = 0;
-uint32_t SelectedMaterial = 0;
-uint32_t SelectedMesh = 0;
-uint32_t SelectedAudio = 0;
-uint32_t SelectedAnimation = 0;
-uint32_t SelectedScript = 0;
-
-uint32_t EntityCount = 0;
-EntityInfo* Entities = NULL;
-
 bool IsEditorActive = false;
 bool GameMode = false;
 bool LuaOnStart = true;
@@ -120,31 +48,6 @@ void PushEventSDL(UINT32 Type, UINT32 Key)
 	Event.type = Type;
 	Event.key.keysym.sym = Key;
 	SDL_PushEvent(&Event);
-}
-
-typedef enum
-{
-	ICON_BUTTON_TYPE_LARGE = 0x0,
-	ICON_BUTTON_TYPE_SMALL = 0x1,
-	ICON_BUTTON_TYPE_EXT = 0x2,
-} IconButtonTypes;
-
-bool ImGuiIconButton(const char* Icon, const char* ID, uint32_t IconType, const ImVec2& Size = ImVec2(0, 0))
-{
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
-	if (IconType == ICON_BUTTON_TYPE_LARGE)
-		ImGui::PushFont(IconFontLarge);
-	else if (IconType == ICON_BUTTON_TYPE_SMALL)
-		ImGui::PushFont(IconFontSmall);
-	else if (IconType == ICON_BUTTON_TYPE_EXT)
-		ImGui::PushFont(IconFontExt);
-	ImGui::PushID(ID);
-	bool Value = ImGui::Button(Icon, Size);
-	ImGui::PopID();
-	ImGui::PopFont();
-	ImGui::PopStyleColor();
-
-	return Value;
 }
  
 //template <typename T>
@@ -208,4 +111,14 @@ void MeasureFPS()
 
 		MS = 1000 / FPS;
 	}
+}
+
+void EngineInit()
+{
+
+}
+
+void EngineDestroy()
+{
+	
 }

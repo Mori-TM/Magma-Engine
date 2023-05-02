@@ -14,16 +14,19 @@
 #include "Helper/GUI.h"
 
 #include "../Engine/Engine.h"
+#include "../Engine/ImageCompression.h"
+#include "../Engine/ECS.h"
+#include "../Engine/Scene.h"
 #include "../Engine/FpsCamera.h"
 #include "../Engine/ScriptEngine.h"
 #include "../Engine/FrustumCulling.h"
-#include "../Engine/ImageCompression.h"
 
+#include "../Editor/Editor.h"
 #include "../Editor/SceneManager.h"
 #include "../Editor/AssetBrowser.h"
 #include "../Editor/EntityManager.h"
 #include "../Editor/Inspector.h"
-#include "../Editor/Editor.h"
+#include "../Editor/EditorUI.h"
 
 #include "Pipelines/BlurPipeline.h"
 #include "Pipelines/DebugPipeline.h"
@@ -104,10 +107,12 @@ void CreateRenderer()
 	CreateImGuiDescriptorPool();
 	CreateDescriptors();
 
-	InitScene();
+	SceneInit();
+	EngineInit();
+	EngineInitEditor();
 	InitImGui();
 	InitFpsCamera();
-	EngineInitEditor();
+
 	OpenVkRuntimeInfo("Engine was initilaized", "");
 
 	//Set up deafult test scene
@@ -121,7 +126,8 @@ void CreateRenderer()
 void DestroyRenderer()
 {
 	DestroyImGui();
-	DestroyScene();
+	SceneDestroy();
+	EngineDestroy();
 	EngineDestroyEditor();
 	OpenVkGUIDestroy();
 	OpenVkDestroyRenderer();

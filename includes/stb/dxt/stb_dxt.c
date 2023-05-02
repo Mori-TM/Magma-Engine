@@ -641,7 +641,7 @@ uint64_t get_compress_pixels_dst_size_bytes(uint64_t w, uint64_t h, bool is_rgba
   return 0;
 }
 
-bool compress_pixels(unsigned char* dst, const unsigned char* src, uint64_t w, uint64_t h, bool is_rgba) {
+bool compress_pixels(unsigned char* dst, const unsigned char* src, uint64_t w, uint64_t h, bool is_rgba, bool TextureCompressedHQ) {
 
   // Cannot compress really small images or images that
   // do not have lengths that are a multiple of 4.
@@ -652,7 +652,7 @@ bool compress_pixels(unsigned char* dst, const unsigned char* src, uint64_t w, u
   for(y = 0; y < h; y += 4){
     for(x = 0; x < w; x += 4){
       extract_block(src, x, y, w, h, block);
-      stb_compress_dxt_block(dst, block, is_rgba, STB_DXT_HIGHQUAL);
+      stb_compress_dxt_block(dst, block, is_rgba, TextureCompressedHQ ? STB_DXT_HIGHQUAL : STB_DXT_NORMAL);
       dst += is_rgba ? 16 : 8; //advance pointer to next block
     }
   }

@@ -1442,49 +1442,17 @@ uint32_t VkCreateTextureImage(unsigned char* Pixels, int32_t Width, int32_t Heig
 		VkRenderer.MipLevels = floorf(log2f(MAX(Width, Height))) + 1;		
 	}
 
-	if (!Pixels)
-		return OpenVkRuntimeError("Invalid Texture");
-
-	VkBuffer StagingBuffer;
-	VkDeviceMemory StagingBufferMemory;
-
-	if (VkCreateBuffer(ImageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &StagingBuffer, &StagingBufferMemory) == OPENVK_ERROR)
-		return OpenVkRuntimeError("Failed to create Texture Buffer");
-
-	void* Data;
-	vkMapMemory(VkRenderer.Device, StagingBufferMemory, 0, ImageSize, 0, &Data);
-	memcpy(Data, Pixels, ImageSize);
-	vkUnmapMemory(VkRenderer.Device, StagingBufferMemory);
-
-//	OpenVkFree(Pixels);
-
 	OpenVkBool SupportsBlit = OpenVkFalse;
-	
-	if (VkCreateImage(Width, Height, VkRenderer.MipLevels, VK_SAMPLE_COUNT_1_BIT, TextureImage.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &TextureImage.Image, &TextureImage.ImageMemory, &SupportsBlit) == OPENVK_ERROR)
-		return OpenVkRuntimeError("Failed to create Texture Image");
-//	OpenVkRuntimeError("Supports Blit: %d", SupportsBlit);
-	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
-	VkSetImageLayout(CommandBuffer, TextureImage.Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VkRenderer.MipLevels, NULL);
-	VkEndSingleTimeCommandBuffer(CommandBuffer);
+	VkCreateAndUploadImage(Pixels, Width, Height, ImageSize, VkRenderer.MipLevels, &SupportsBlit, TextureImage.Format, &TextureImage.Image, &TextureImage.ImageMemory);
 
-	VkCopyBufferToImage(StagingBuffer, TextureImage.Image, Width, Height);
-	
 	if (VkRenderer.MipLevels > 1)
 		VkGenerateMipmaps(TextureImage.Image, TextureImage.Format, Width, Height, VkRenderer.MipLevels, SupportsBlit);
 	else
 	{
-		CommandBuffer = VkBeginSingleTimeCommands();
+		VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
 		VkSetImageLayout(CommandBuffer, TextureImage.Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VkRenderer.MipLevels, NULL);
 		VkEndSingleTimeCommandBuffer(CommandBuffer);
 	}
-	
-
-		//	CommandBuffer = VkBeginSingleTimeCommands();
-		//	VkSetImageLayout(CommandBuffer, TextureImage.Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VkRenderer.MipLevels, NULL);
-		//	VkEndSingleTimeCommandBuffer(CommandBuffer);
-
-	vkDestroyBuffer(VkRenderer.Device, StagingBuffer, NULL);
-	vkFreeMemory(VkRenderer.Device, StagingBufferMemory, NULL);
 
 	TextureImage.ImageView = VkCreateImageView(TextureImage.Image, TextureImage.Format, VK_IMAGE_ASPECT_COLOR_BIT, VkRenderer.MipLevels);
 
@@ -1493,19 +1461,8 @@ uint32_t VkCreateTextureImage(unsigned char* Pixels, int32_t Width, int32_t Heig
 
 uint32_t VkCreateTextureImageMips(unsigned char** Pixels, int32_t Width, int32_t Height, uint32_t Format)
 {
-	//	VkRenderer.TextureImageMemories = (VkDeviceMemory*)OpenVkRealloc(VkRenderer.TextureImageMemories, (VkRenderer.TextureImageCount + 1) * sizeof(VkDeviceMemory));
-	//	VkRenderer.Images = (VkImage*)OpenVkRealloc(VkRenderer.Images, (VkRenderer.TextureImageCount + 1) * sizeof(VkImage));
-	//	VkRenderer.TextureImageViews = (VkImageView*)OpenVkRealloc(VkRenderer.TextureImageViews, (VkRenderer.TextureImageCount + 1) * sizeof(VkImageView));
-
 	VkImageInfo TextureImage;
 	TextureImage.Format = VkGetOpenVkFormat(Format);//VK_FORMAT_R8G8B8A8_UNORM;
-
-//	int32_t TextureWidth;
-//	int32_t TextureHeight;
-//	int32_t TextureChannels;
-//
-//	stbi_set_flip_vertically_on_load(FlipVertical);
-//	unsigned char* Pixel = stbi_load(Path, &TextureWidth, &TextureHeight, &TextureChannels, STBI_rgb_alpha);
 
 	OpenVkBool UsesCompression = OpenVkTrue;
 
@@ -1524,47 +1481,12 @@ uint32_t VkCreateTextureImageMips(unsigned char** Pixels, int32_t Width, int32_t
 		UsesCompression = OpenVkFalse;
 	}
 
-	if (!Pixels[0])
-		return OpenVkRuntimeError("Invalid Texture");
-
-	VkBuffer StagingBuffer;
-	VkDeviceMemory StagingBufferMemory;
-
-	if (VkCreateBuffer(ImageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &StagingBuffer, &StagingBufferMemory) == OPENVK_ERROR)
-		return OpenVkRuntimeError("Failed to create Texture Buffer");
-
-	void* Data;
-	vkMapMemory(VkRenderer.Device, StagingBufferMemory, 0, ImageSize, 0, &Data);
-	memcpy(Data, Pixels[0], ImageSize);
-	vkUnmapMemory(VkRenderer.Device, StagingBufferMemory);
-
-	//	OpenVkFree(Pixels);
+	//Check if all mip level image size are above the minimum size
 
 	OpenVkBool SupportsBlit = OpenVkFalse;
-
-	if (VkCreateImage(Width, Height, VkRenderer.MipLevels, VK_SAMPLE_COUNT_1_BIT, TextureImage.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &TextureImage.Image, &TextureImage.ImageMemory, &SupportsBlit) == OPENVK_ERROR)
-		return OpenVkRuntimeError("Failed to create Texture Image");
-	//	OpenVkRuntimeError("Supports Blit: %d", SupportsBlit);
-	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
-	VkSetImageLayout(CommandBuffer, TextureImage.Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VkRenderer.MipLevels, NULL);
-	VkEndSingleTimeCommandBuffer(CommandBuffer);
-
-	VkCopyBufferToImage(StagingBuffer, TextureImage.Image, Width, Height);
-
-	if (UsesCompression == OpenVkFalse)
-		VkGenerateMipmaps(TextureImage.Image, TextureImage.Format, Width, Height, VkRenderer.MipLevels, SupportsBlit);
-	else
-	{
-		VkUploadMipmaps(Pixels, TextureImage.Image, TextureImage.Format, Width, Height, VkRenderer.MipLevels, SupportsBlit);
-	}
-
-
-	//	CommandBuffer = VkBeginSingleTimeCommands();
-	//	VkSetImageLayout(CommandBuffer, TextureImage.Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VkRenderer.MipLevels, NULL);
-	//	VkEndSingleTimeCommandBuffer(CommandBuffer);
-
-	vkDestroyBuffer(VkRenderer.Device, StagingBuffer, NULL);
-	vkFreeMemory(VkRenderer.Device, StagingBufferMemory, NULL);
+	VkCreateAndUploadImage(Pixels[0], Width, Height, ImageSize, VkRenderer.MipLevels, &SupportsBlit, TextureImage.Format, &TextureImage.Image, &TextureImage.ImageMemory);
+	
+	VkUploadMipmaps(Pixels, TextureImage.Image, Width, Height, ImageSize, VkRenderer.MipLevels, &SupportsBlit, TextureImage.Format);
 
 	TextureImage.ImageView = VkCreateImageView(TextureImage.Image, TextureImage.Format, VK_IMAGE_ASPECT_COLOR_BIT, VkRenderer.MipLevels);
 

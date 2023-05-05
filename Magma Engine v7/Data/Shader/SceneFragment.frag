@@ -52,6 +52,7 @@ const mat4 BiasMat = mat4
 	0.5, 0.5, 0.0, 1.0 
 );
 
+/*
 float TextureProjection(vec4 ShadowCoord, vec2 Offset, uint CascadeIndex, float Ambient)
 {
 	float Shadow = 0.0;
@@ -74,6 +75,7 @@ float FilterPCF(vec4 ShadowCoord, int Range, float Scale, uint CascadeIndex, flo
 {
 	ivec2 TextureDimension = textureSize(ShadowMap, 0).yy;
 
+
 	float DX = Scale / float(TextureDimension.x);
 	float DY = Scale / float(TextureDimension.y);
 
@@ -92,15 +94,117 @@ float FilterPCF(vec4 ShadowCoord, int Range, float Scale, uint CascadeIndex, flo
 
 	return ShadowFactor / Count;
 }
+*/
+
+vec2 poissonDisk[16] = vec2[](
+	vec2(-0.94201624, -0.39906216),
+	vec2(0.94558609, -0.76890725),
+	vec2(-0.094184101, -0.92938870),
+	vec2(0.34495938, 0.29387760),
+	vec2(-0.91588581, 0.45771432),
+	vec2(-0.81544232, -0.87912464),
+	vec2(-0.38277543, 0.27676845),
+	vec2(0.97484398, 0.75648379),
+	vec2(0.44323325, -0.97511554),
+	vec2(0.53742981, -0.47373420),
+	vec2(-0.26496911, -0.41893023),
+	vec2(-0.79197514, 0.19090188),
+	vec2(-0.24188840, 0.99706507),
+	vec2(-0.81409955, 0.91437590),
+	vec2(0.19984126, 0.78641367),
+	vec2(0.14383161, -0.14100790)
+);
+
+/*
+vec4 TextureProjection(vec4 ShadowCoord, vec2 Offset, uint CascadeIndex, float Ambient)
+{
+	vec3 proj = worldPos - projDir * dot(worldPos, projDir);
+	vec2 texCoord = vec2(0.5) + vec2(proj.x, proj.y) / proj.z * vec2(0.5);
+	vec2 texelSize = vec2(1.0) / texSize;
+	vec4 color = vec4(0.0);
+	for (int x = -1; x <= 1; x++)
+	{
+		for (int y = -1; y <= 1; y++)
+		{
+			vec2 offset = vec2(x, y) * texelSize;
+			color += texelFetch(tex, ivec2(texCoord * texSize + offset), 0);
+		}
+	}
+	return color / 9.0;
+}
+*/
+
+float TextureProjection(vec4 ShadowCoord, vec2 Offset, uint CascadeIndex, float Ambient)
+{
+	float Shadow = 0.0;
+	
+	float Bias = UBO.CascadeBias[CascadeIndex];
+
+	if (ShadowCoord.z > -1.0 && ShadowCoord.z < 1.0) 
+	{
+		float Dist = texture(ShadowMap, ShadowCoord.st + Offset).r;
+		if (ShadowCoord.w > 0.0 && Dist < ShadowCoord.z - Bias) //0.003
+		{
+			Shadow = Ambient;
+		}
+	}
+
+	return Shadow;
+}
+
+float FilterPCF(vec4 ShadowCoord, int Range, float Scale, uint CascadeIndex, float Ambient)
+{
+	ivec2 TextureDimension = textureSize(ShadowMap, 0).yy;
+
+
+	float DX = Scale / float(TextureDimension.x);
+	float DY = Scale / float(TextureDimension.y);
+
+	float sum = 0.0;
+
+	int numSamples = Range * Range * Range * Range;
+
+	for (int i = 0; i < numSamples; i++)
+	{
+		sum += TextureProjection(ShadowCoord, poissonDisk[i] * vec2(DX, DY), CascadeIndex, Ambient);
+	}
+	return sum / float(numSamples);
+}
 
 const float PI = 3.14159265359;
 
+vec4 TextureCustom(sampler2D Tex, vec2 Coord)
+{
+//	vec2 Size = vec2(textureSize(Tex, 1));
+//
+//	ivec2 texelCoord = ivec2(clamp(Coord * Size, vec2(0), vec2(Size.x - 1, Size.y - 1)));
+//	vec4 texel = texelFetch(Tex, texelCoord, 1);
+//	return texel;
+	return texture(Tex, Coord);
+//	return textureLod(Tex, Coord, 0);
+}
+
 vec3 GetNormalFromMap()
 {
-	vec3 Normal = texture(NormalMap, FragTexCoord).xyz;
+	vec3 Normal = TextureCustom(NormalMap, FragTexCoord).xyz;
+
+//	vec3 Normal = texelFetch(NormalMap, ivec2(FragTexCoord * vec2(textureSize(NormalMap, 0))), 0).xyz;
+	
 
 	if (Normal.x == 1.0 &&	Normal.y == 1.0 &&	Normal.z == 1.0)
-		return FragNormal;
+		return normalize(FragNormal);
+/*
+	vec3 tangentNormal = Normal * 2.0 - 1.0;
+
+	vec3 N = FragNormal;
+	vec3 Q1 = dFdx(FragWorldPos.xyz);
+	vec3 Q2 = dFdy(FragWorldPos.xyz);
+	vec2 st1 = dFdx(FragTexCoord);
+	vec2 st2 = dFdy(FragTexCoord);
+	mat3 TBN = mat3(normalize(Q1*st2.t - Q2*st1.t), normalize(cross(N, Q1*st2.t - Q2*st1.t)), N);
+
+	return normalize(TBN * tangentNormal);
+	*/
 
 	vec3 tangentNormal = Normal * 2.0 - 1.0;
 
@@ -109,12 +213,13 @@ vec3 GetNormalFromMap()
 	vec2 st1 = dFdx(FragTexCoord);
 	vec2 st2 = dFdy(FragTexCoord);
 
-	vec3 N = FragNormal;
+	vec3 N = normalize(FragNormal);
 	vec3 T = normalize(Q1*st2.t - Q2*st1.t);
 	vec3 B = -normalize(cross(N, T));
 	mat3 TBN = mat3(T, B, N);
 
 	return normalize(TBN * tangentNormal);
+	
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -166,31 +271,14 @@ float GetShadow(float Ambient)
 			 
 	vec4 ShadowCoord = (BiasMat * UBO.CascadeProjectionView[CascadeIndex]) * FragWorldPos;	
 
-		ShadowCoord.x /= SHADOW_MAP_CASCADE_COUNT;
-		ShadowCoord.x += (1.0 / SHADOW_MAP_CASCADE_COUNT) * float(CascadeIndex); 
-//	ShadowCoord.x *= 2;
-	
-//	ShadowCoord.x += (float(ShadowMapWidth) * float(CascadeIndex));
-//	ShadowCoord.s = float(CascadeIndex + 1);
+	ShadowCoord.x /= SHADOW_MAP_CASCADE_COUNT;
+	ShadowCoord.x += (1.0 / SHADOW_MAP_CASCADE_COUNT) * float(CascadeIndex); 
 
 	float Shadow = 0.0;
 	if (UBO.CascadeRange[CascadeIndex] > 0.1)
 		Shadow = FilterPCF(ShadowCoord / ShadowCoord.w, int(UBO.CascadeRange[CascadeIndex]), UBO.CascadeScale[CascadeIndex], CascadeIndex, Ambient);
 	else
 		Shadow = TextureProjection(ShadowCoord / ShadowCoord.w, vec2(0.0), CascadeIndex, Ambient);
-	/*
-	if (CascadeIndex == 2)
-	//	Shadow = TextureProjection(ShadowCoord / ShadowCoord.w, vec2(0.0), CascadeIndex, Ambient);
-		Shadow = FilterPCF(ShadowCoord / ShadowCoord.w, 2, 0.6, CascadeIndex, Ambient);
-	else if (CascadeIndex == 1)
-		Shadow = FilterPCF(ShadowCoord / ShadowCoord.w, 2, 0.6, CascadeIndex, Ambient);
-	else
-		Shadow = FilterPCF(ShadowCoord / ShadowCoord.w, 2, 1.0, CascadeIndex, Ambient);
-	*/
-//	Shadow = TextureProjection(ShadowCoord / ShadowCoord.w, vec2(0.0), CascadeIndex, Ambient);
-
-//	float Shadow = FilterPCF(ShadowCoord / ShadowCoord.w, CascadeIndex, Ambient);
-//	float Shadow = TextureProjection(ShadowCoord / ShadowCoord.w, vec2(0.0), CascadeIndex, Ambient);
 
 	return Shadow;
 }
@@ -218,33 +306,22 @@ vec3 AcesTonemap(vec3 x)
 
 void main() 
 {
+//	float Shadow1 = GetShadow(0.5);
+
+//	OutLightPass = vec4(vec3(texture(ShadowMap, FragTexCoord).r), 1.0);
+//	
+//	return;
 	vec4 Color = PushConst.Color;
 	if (Color.w == 0.0)	Color.w = 1.0;
 	vec4 AlbedoTexture = texture(AlbedoMap, FragTexCoord);
+
+//	vec4 AlbedoTexture = texelFetch(AlbedoMap, ivec2(FragTexCoord * vec2(textureSize(AlbedoMap, 0))), 0);
 	vec3 Albedo = pow(AlbedoTexture.rgb * Color.rgb, vec3(2.2));
 //	vec3 Albedo = AlbedoTexture.rgb * Color.rgb;
 	vec3 Normal = GetNormalFromMap();
-	float Metallic = texture(MetallicMap, FragTexCoord).r * PushConst.Metallic;
-	float Roughness = texture(RoughnessMap, FragTexCoord).r * PushConst.Roughness;
-	float Occlusion = texture(OcclusionMap, FragTexCoord).r * PushConst.Occlusion;
-//	float Metallic = 1.0;
-//	float Roughness = 1.0;
-//	float Occlusion = 1.0;
-
-	/*
-	vec3 N = normalize(FragNormal);
-	vec3 L = normalize(-UBO.LightDirection);
-	
-	vec3 Diffuse = vec3(max(dot(N, L), 0.0)) * 1.5;
-	
-	vec4 Color = PushConst.Color;
-	if (Color.w == 0.0)
-		Color.w = 1.0;
-	vec4 Tex = texture(AlbedoMap, FragTexCoord);
-	OutColor = vec4((Ambient + (Ambient - Shadow) * Diffuse), 1.0) * Color * Tex;
-	if (Tex.a < 0.9)
-		discard;
-	*/
+	float Metallic = TextureCustom(MetallicMap, FragTexCoord).r * PushConst.Metallic;
+	float Roughness = TextureCustom(RoughnessMap, FragTexCoord).r * PushConst.Roughness;
+	float Occlusion = TextureCustom(OcclusionMap, FragTexCoord).r * PushConst.Occlusion;
 
 	vec3 N = Normal;
 					//Upload Camera Pos
@@ -281,95 +358,33 @@ void main()
 	float Ambient = 0.6 * Occlusion;
 	
 	float Shadow = GetShadow(Ambient);
-//	OutColor.rgb = (Ambient + (Ambient - Shadow)) * Albedo + Lo;
-//	OutColor.rgb = vec3((Ambient + (Ambient - Shadow))) * Albedo;
 
-//	OutColor.rgb = (Ambient + (Ambient - Shadow)) * Albedo + (Lo * (1.0 - Shadow));
-		//	OutColor.rgb = Albedo + (Lo * (Ambient + (Ambient - Shadow)));
-//	OutColor.rgb = vec3(Ambient + (Ambient - Shadow));
-	
-	
-	//OutColor.rgb = Lo;
-			OutLightPass.rgb = Ambient * Albedo + ((Ambient - Shadow) * Lo);
-	
-	
-	
-	//	OutColor.rgb = (Ambient + (Ambient - Shadow) * Diffuse) * Albedo;
-		//	OutColor.rgb = (Ambient - Shadow) * Albedo + Lo;
-//	OutColor.rgb = vec3(Ambient);
-//	OutColor.rgb = Ambient * Albedo + Lo;
+	OutLightPass.rgb = Ambient * Albedo + ((Ambient - Shadow) * Lo);
 
-//	float Shadow = GetShadow(Ambient);
-//	OutColor.rgb = vec3((Ambient + (Ambient - Shadow) + Lo)) * Albedo;
-//	OutColor.rgb = (Ambient + Lo) * Albedo;
-
-	//OutColor = vec4((Ambient + (Ambient - Shadow) * Diffuse), 1.0) * Color * Tex;
-	//combine shadows with pbr
-//	vec3 color = ambient;
-//	color /= Shadow;
-//	OutColor.rgb = color + Lo;
-
-
-//	OutColor.rgb = (ambient + (ambient - Shadow) + Lo);
-
-	//	OutColor.rgb = OutColor.rgb / (OutColor.rgb + vec3(1.0));
-									//2.2
-//	OutColor.rgb = pow(OutColor.rgb, vec3(1.0/2.2)); 
 
 	float Exposure = UBO.Exposure;
 	float Gamma = UBO.Gamma;//1.3
+
 	OutLightPass.rgb = Uncharted2Tonemap(OutLightPass.rgb * Exposure);
-	OutLightPass.rgb = OutLightPass.rgb * (1.0f / Uncharted2Tonemap(vec3(11.2f)));	
-	// Gamma correction
+
+	const vec3 Uncharted2TonemapConst = (1.0f / Uncharted2Tonemap(vec3(11.2f)));
+	OutLightPass.rgb = OutLightPass.rgb * Uncharted2TonemapConst;	
 	OutLightPass.rgb = pow(OutLightPass.rgb, vec3(1.0f / Gamma));
 
-//	vec3 mapped = OutColor.rgb / (OutColor.rgb + vec3(1.0));
-//	vec3 mapped = vec3(1.0) - exp(-OutColor.rgb * 1.65);
-//	OutColor.rgb = mapped;
-  // gamma correction 
-//    mapped = pow(mapped, vec3(1.0 / gamma));
+	/*
+	OutLightPass.rgb = pow(OutLightPass.rgb, vec3(1.0 / Gamma));	
+	OutLightPass.rgb = AcesTonemap(OutLightPass.rgb * Exposure);
+//	OutLightPass.rgb = OutLightPass.rgb * (1.0f / AcesTonemap(vec3(11.2f)));	
+	// Gamma correction
+	*/	
 
 	OutLightPass.a = AlbedoTexture.a * Color.a;
-//	OutLightPass = vec4(Albedo, 1.0);
 	OutNormalMap = vec4((Normal).xyz * mat3((UBO.View)), Roughness);
-//	OutNormalMap = vec4(vec4(Normal, 0.0).xyz, Roughness);
 
 	OutDepthPosition = vec4(FragPosRelToCam.xyz, gl_FragCoord.z);
-//	OutDepthPosition = vec4(gl_FragCoord.z);
-//	OutDepthPosition = vec4(FragWorldPos);
-	
+
 	OutPBRMap = vec4(Metallic, Roughness, 1.0, 1.0);
 
 	if (AlbedoTexture.a < 0.9)
 		discard;
-//	OutColor = texture(NormalMap, FragTexCoord);
-//	vec3 mapped = OutColor.rgb / (OutColor.rgb + vec3(1.0));
-//	vec3 mapped = vec3(1.0) - exp(-OutColor.rgb * 1.65);
-  // gamma correction 
-//    mapped = pow(mapped, vec3(1.0 / gamma));
-  
-//    OutColor.rgb = mapped;
-
-//	OutColor.xyz = abs(FragNormal);
-
-	/*
-	switch(CascadeIndex) 
-	{
-		case 0 : 
-			OutColor.rgb *= vec3(1.0f, 0.25f, 0.25f);
-			break;
-		case 1 : 
-			OutColor.rgb *= vec3(0.25f, 1.0f, 0.25f);
-			break;
-		case 2 : 
-			OutColor.rgb *= vec3(0.25f, 0.25f, 1.0f);
-			break;
-		case 3 : 
-			OutColor.rgb *= vec3(1.0f, 1.0f, 0.25f);
-			break;
-	}
-	*/
-
-//	float depthValue = texture(ShadowMap[0], FragTexCoord).r;
-//    OutColor = vec4(vec3(depthValue), 1.0);
 }

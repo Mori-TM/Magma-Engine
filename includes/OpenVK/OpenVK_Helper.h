@@ -235,6 +235,17 @@ typedef struct
 
 typedef struct
 {
+	unsigned char**	Pixels; 
+	int32_t			Width; 
+	int32_t			Height; 
+	uint32_t		Format;
+	uint32_t		MipLevels; //Set to 0 to automaticaly calc the mip levels
+	OpenVkBool		GenerateMipmaps;
+	OpenVkBool		UseCustomMipmaps;
+} OpenVkTextureCreateInfo;
+
+typedef struct
+{
 	uint32_t	PushConstantCount;
 	uint32_t*	PushConstantShaderTypes;
 	uint32_t*	PushConstantOffsets;

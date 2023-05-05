@@ -653,6 +653,7 @@ vec3 hash(vec3 a)
 }
 */
 
+
 vec4 resolve(sampler2DMS tex, vec2 inUv)
 {
 	ivec2 attDim = textureSize(tex);
@@ -689,12 +690,24 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0);
 
 vec3 hash(vec3 a);
 
+const float PI = 3.141592653589793238;
+const float PI2 = 6.28318530718;
+
+float atan2(in float y, in float x)
+{
+    bool s = (abs(x) > abs(y));
+    return mix(PI/2.0 - atan(x,y), atan(y,x), s);
+}
+
 void main()
 {
 //	OutColor = vec4(texture(DepthPosition, FragTexCoord).rgb, 1.0);
 //	return;
-//	OutColor = vec4(vec3(texture(LightPass, FragTexCoord).rgb), 1.0);
-//    return;
+
+	vec3 Color = resolve(LightPass, FragTexCoord).rgb;
+
+	OutColor = vec4(Color, 1.0);
+    return;
 
 	vec2 PBR = resolve(PBRMap, FragTexCoord).rg;
 	Metallic = PBR.r;

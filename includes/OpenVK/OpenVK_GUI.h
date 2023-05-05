@@ -467,7 +467,16 @@ void OpenVkGUIInit(uint32_t Width, uint32_t Height, uint32_t RenderPass, uint32_
 
 		stbtt_PackEnd(&context);
 
-	OpenVkGUI.Texture = OpenVkCreateTextureImage(Bitmap, OpenVkGUI.AtlasWidth, OpenVkGUI.AtlasHeight, OPENVK_FORMAT_R);
+	OpenVkTextureCreateInfo TextureCreateInfo;
+	TextureCreateInfo.Pixels = &Bitmap;
+	TextureCreateInfo.Width = OpenVkGUI.AtlasWidth;
+	TextureCreateInfo.Height = OpenVkGUI.AtlasHeight;
+	TextureCreateInfo.Format = OPENVK_FORMAT_R;
+	TextureCreateInfo.MipLevels = 5;
+	TextureCreateInfo.GenerateMipmaps = OpenVkTrue;
+	TextureCreateInfo.UseCustomMipmaps = OpenVkFalse;
+	OpenVkGUI.Texture = OpenVkCreateTexture(&TextureCreateInfo);
+
 	OpenVkGUI.TextureSampler = OpenVkCreateImageSampler(OPENVK_FILTER_LINEAR, OPENVK_ADDRESS_MODE_REPEAT);
 	OpenVkFree(Bitmap);
 

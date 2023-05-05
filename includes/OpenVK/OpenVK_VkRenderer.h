@@ -341,13 +341,13 @@ uint32_t VkCreateColorImageAttachment(uint32_t Width, uint32_t Height, uint32_t 
 
 	if (Sampled)
 	{
-		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory, NULL) == OPENVK_ERROR)
+		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
 			return OpenVkRuntimeError("Failed to Create Sampled Attachment Image");
 		Image.ImageView = VkCreateImageView(Image.Image, ColorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 	}
 	else
 	{
-		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory, NULL) == OPENVK_ERROR)
+		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
 			return OpenVkRuntimeError("Failed to Create Msaa Attachment Image");
 		Image.ImageView = VkCreateImageView(Image.Image, ColorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 	}
@@ -370,13 +370,13 @@ uint32_t VkCreateDepthImageAttachment(uint32_t Width, uint32_t Height, uint32_t 
 
 	if (Sampled)
 	{
-		if (VkCreateImage(Width, Height, 1, Samples, DepthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory, NULL) == OPENVK_ERROR)
+		if (VkCreateImage(Width, Height, 1, Samples, DepthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
 			return OpenVkRuntimeError("Failed to Create Depth Sampled Attachment Image");
 		Image.ImageView = VkCreateImageView(Image.Image, DepthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 	}
 	else
 	{
-		if (VkCreateImage(Width, Height, 1, Samples, DepthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory, NULL) == OPENVK_ERROR)
+		if (VkCreateImage(Width, Height, 1, Samples, DepthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
 			return OpenVkRuntimeError("Failed to Create Depth Attachment Image");
 		Image.ImageView = VkCreateImageView(Image.Image, DepthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 	}	
@@ -1409,44 +1409,54 @@ void VkEndRenderPass()
 	vkCmdEndRenderPass(VkRenderer.CommandBuffers[VkRenderer.ImageIndex]);
 }
 
-uint32_t VkCreateTextureImage(unsigned char* Pixels, int32_t Width, int32_t Height, uint32_t Format)
+uint32_t VkCreateTexture(OpenVkTextureCreateInfo* Info)
 {
-//	VkRenderer.TextureImageMemories = (VkDeviceMemory*)OpenVkRealloc(VkRenderer.TextureImageMemories, (VkRenderer.TextureImageCount + 1) * sizeof(VkDeviceMemory));
-//	VkRenderer.Images = (VkImage*)OpenVkRealloc(VkRenderer.Images, (VkRenderer.TextureImageCount + 1) * sizeof(VkImage));
-//	VkRenderer.TextureImageViews = (VkImageView*)OpenVkRealloc(VkRenderer.TextureImageViews, (VkRenderer.TextureImageCount + 1) * sizeof(VkImageView));
-
 	VkImageInfo TextureImage;
-	TextureImage.Format = VkGetOpenVkFormat(Format);//VK_FORMAT_R8G8B8A8_UNORM;
+	TextureImage.Format = VkGetOpenVkFormat(Info->Format);//VK_FORMAT_R8G8B8A8_UNORM;
 
-//	int32_t TextureWidth;
-//	int32_t TextureHeight;
-//	int32_t TextureChannels;
-//
-//	stbi_set_flip_vertically_on_load(FlipVertical);
-//	unsigned char* Pixel = stbi_load(Path, &TextureWidth, &TextureHeight, &TextureChannels, STBI_rgb_alpha);
-	
-	VkRenderer.MipLevels = 1;
+	OpenVkBool UsesCompression = OpenVkTrue;
 
 	VkDeviceSize ImageSize;
-	if (Format == OPENVK_FORMAT_BC7_RGBA)
-		ImageSize = (Width * Height * 4) / 4;
-	else if (Format == OPENVK_FORMAT_BC4_RGBA)
-		ImageSize = (Width * Height * 4) / 8;
-	else if (Format == OPENVK_FORMAT_BC1_RGB)
-		ImageSize = (Width / 4) * (Height / 4) * 8;
-	else if (Format == OPENVK_FORMAT_BC1_RGBA)
-		ImageSize = (Width / 4) * (Height / 4) * 16;
+	if (Info->Format == OPENVK_FORMAT_BC7_RGBA)
+		ImageSize = (Info->Width * Info->Height * 4) / 4;
+	else if (Info->Format == OPENVK_FORMAT_BC4_RGBA)
+		ImageSize = (Info->Width * Info->Height * 4) / 8;
+	else if (Info->Format == OPENVK_FORMAT_BC1_RGB)
+		ImageSize = (Info->Width / 4) * (Info->Height / 4) * 8;
+	else if (Info->Format == OPENVK_FORMAT_BC1_RGBA)
+		ImageSize = (Info->Width / 4) * (Info->Height / 4) * 16;
 	else
 	{
-		ImageSize = Width * Height * Format;
-		VkRenderer.MipLevels = floorf(log2f(MAX(Width, Height))) + 1;		
+		ImageSize = Info->Width * Info->Height * Info->Format;
+		UsesCompression = OpenVkFalse;
 	}
 
-	OpenVkBool SupportsBlit = OpenVkFalse;
-	VkCreateAndUploadImage(Pixels, Width, Height, ImageSize, VkRenderer.MipLevels, &SupportsBlit, TextureImage.Format, &TextureImage.Image, &TextureImage.ImageMemory);
+	if (Info->GenerateMipmaps == OpenVkTrue)
+	{
+		VkRenderer.MipLevels = floorf(log2f(MAX(Info->Width, Info->Height))) + 1;
 
-	if (VkRenderer.MipLevels > 1)
-		VkGenerateMipmaps(TextureImage.Image, TextureImage.Format, Width, Height, VkRenderer.MipLevels, SupportsBlit);
+		if (Info->MipLevels != 0 && Info->MipLevels < VkRenderer.MipLevels)
+			VkRenderer.MipLevels = Info->MipLevels;
+	}		
+	else
+		VkRenderer.MipLevels = 1;
+
+
+	//Check if all mip level image size are above the minimum size
+
+	OpenVkBool SupportsBlit = VkIsBlittingSupported(TextureImage.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+	if (SupportsBlit == OpenVkFalse && Info->UseCustomMipmaps == OpenVkFalse)
+		VkRenderer.MipLevels = 1;
+
+	VkCreateAndUploadImage(Info->Pixels[0], Info->Width, Info->Height, ImageSize, VkRenderer.MipLevels, TextureImage.Format, &TextureImage.Image, &TextureImage.ImageMemory);
+	
+	if (VkRenderer.MipLevels > 1 && Info->GenerateMipmaps == OpenVkTrue)
+	{
+		if (Info->UseCustomMipmaps)
+			VkUploadMipmaps(Info->Pixels, TextureImage.Image, Info->Width, Info->Height, ImageSize, VkRenderer.MipLevels, TextureImage.Format);
+		else
+			VkGenerateMipmaps(TextureImage.Image, TextureImage.Format, Info->Width, Info->Height, VkRenderer.MipLevels);		
+	}
 	else
 	{
 		VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
@@ -1456,39 +1466,7 @@ uint32_t VkCreateTextureImage(unsigned char* Pixels, int32_t Width, int32_t Heig
 
 	TextureImage.ImageView = VkCreateImageView(TextureImage.Image, TextureImage.Format, VK_IMAGE_ASPECT_COLOR_BIT, VkRenderer.MipLevels);
 
-	return CMA_Push(&VkRenderer.Images, &TextureImage);
-}
-
-uint32_t VkCreateTextureImageMips(unsigned char** Pixels, int32_t Width, int32_t Height, uint32_t Format)
-{
-	VkImageInfo TextureImage;
-	TextureImage.Format = VkGetOpenVkFormat(Format);//VK_FORMAT_R8G8B8A8_UNORM;
-
-	OpenVkBool UsesCompression = OpenVkTrue;
-
-	VkDeviceSize ImageSize;
-	if (Format == OPENVK_FORMAT_BC7_RGBA)
-		ImageSize = (Width * Height * 4) / 4;
-	else if (Format == OPENVK_FORMAT_BC4_RGBA)
-		ImageSize = (Width * Height * 4) / 8;
-	else if (Format == OPENVK_FORMAT_BC1_RGB)
-		ImageSize = (Width / 4) * (Height / 4) * 8;
-	else if (Format == OPENVK_FORMAT_BC1_RGBA)
-		ImageSize = (Width / 4) * (Height / 4) * 16;
-	else
-	{
-		ImageSize = Width * Height * Format;
-		UsesCompression = OpenVkFalse;
-	}
-
-	//Check if all mip level image size are above the minimum size
-
-	OpenVkBool SupportsBlit = OpenVkFalse;
-	VkCreateAndUploadImage(Pixels[0], Width, Height, ImageSize, VkRenderer.MipLevels, &SupportsBlit, TextureImage.Format, &TextureImage.Image, &TextureImage.ImageMemory);
-	
-	VkUploadMipmaps(Pixels, TextureImage.Image, Width, Height, ImageSize, VkRenderer.MipLevels, &SupportsBlit, TextureImage.Format);
-
-	TextureImage.ImageView = VkCreateImageView(TextureImage.Image, TextureImage.Format, VK_IMAGE_ASPECT_COLOR_BIT, VkRenderer.MipLevels);
+	Info->MipLevels = VkRenderer.MipLevels;
 
 	return CMA_Push(&VkRenderer.Images, &TextureImage);
 }
@@ -1497,7 +1475,7 @@ uint32_t VkCreateStorageImage(uint32_t Width, uint32_t Height, uint32_t Format)
 {
 	VkImageInfo Image;
 	Image.Format = VkGetOpenVkFormat(Format);
-	VkCreateImage(Width, Height, 1, VK_SAMPLE_COUNT_1_BIT, Image.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory, NULL);
+	VkCreateImage(Width, Height, 1, VK_SAMPLE_COUNT_1_BIT, Image.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory);
 	Image.ImageView = VkCreateImageView(Image.Image, Image.Format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 
 	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();

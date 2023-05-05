@@ -103,9 +103,11 @@ void AddMaterial(const char* Name)
 	SelectedMaterial = CMA_Push(&SceneMaterials, &Material);
 }
 
-bool LoadTextureCompressed = true;
+bool LoadTextureCompressed = false;
 bool TextureCompressedHQ = false;
-bool GenerateCompressedMipMaps = true;
+bool GenerateMipMaps = false;
+bool UseCustomMipLevels = false;
+uint32_t CustomMipLevels = 5;
 
 typedef struct
 {
@@ -168,9 +170,10 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 
 			Image->Components = OPENVK_FORMAT_BC1_RGB;
 
-			if (LoadTextureCompressed)
+			if (GenerateMipMaps)
 			{
 				uint32_t MipLevels = floorf(log2f(MAX(Image->Width, Image->Height))) + 1;
+				if (UseCustomMipLevels) MipLevels = CustomMipLevels;
 
 				unsigned char** Blocks = (unsigned char**)malloc(MipLevels * sizeof(unsigned char*));
 				size_t BlockSize = 0;
@@ -201,10 +204,20 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 
 				free(ResizeData);
 
-				VkRenderer.MipLevels = MipLevels;
+			
 				//Upload Mips here
-				Image->TextureImage = VkCreateTextureImageMips((unsigned char**)Blocks, Image->Width, Image->Height, Image->Components);
-				Image->MipLevels = VkRenderer.MipLevels;
+
+				OpenVkTextureCreateInfo TextureCreateInfo;
+				TextureCreateInfo.Pixels = Blocks;
+				TextureCreateInfo.Width = Image->Width;
+				TextureCreateInfo.Height = Image->Height;
+				TextureCreateInfo.Format = Image->Components;
+				TextureCreateInfo.MipLevels = MipLevels;
+				TextureCreateInfo.GenerateMipmaps = OpenVkTrue;
+				TextureCreateInfo.UseCustomMipmaps = OpenVkTrue;
+				Image->TextureImage = OpenVkCreateTexture(&TextureCreateInfo);
+
+				Image->MipLevels = TextureCreateInfo.MipLevels;
 
 				for (uint32_t i = 0; i < MipLevels; i++)
 				{
@@ -221,10 +234,19 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 				unsigned char* Block;
 				CompressImage(Pixels, Image->Width, Image->Height, &Block, &BlockSize, Image->Components, TextureCompressedHQ);
 
+				OpenVkTextureCreateInfo TextureCreateInfo;
+				TextureCreateInfo.Pixels = &Block;
+				TextureCreateInfo.Width = Image->Width;
+				TextureCreateInfo.Height = Image->Height;
+				TextureCreateInfo.Format = Image->Components;
+				TextureCreateInfo.MipLevels = 0;
+				TextureCreateInfo.GenerateMipmaps = OpenVkFalse;
+				TextureCreateInfo.UseCustomMipmaps = OpenVkFalse;
+				Image->TextureImage = OpenVkCreateTexture(&TextureCreateInfo);
+				Image->MipLevels = TextureCreateInfo.MipLevels;
 
-
-				Image->TextureImage = OpenVkCreateTextureImage((unsigned char*)Block, Image->Width, Image->Height, Image->Components);
-				Image->MipLevels = VkRenderer.MipLevels;
+			//	Image->TextureImage = OpenVkCreateTextureImage((unsigned char*)Block, Image->Width, Image->Height, Image->Components);
+			//	Image->MipLevels = VkRenderer.MipLevels;
 				OpenVkFree(Block);
 			}
 
@@ -240,8 +262,19 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 		}
 		else
 		{
-			Image->TextureImage = OpenVkCreateTextureImage(Pixels, Image->Width, Image->Height, OPENVK_FORMAT_RGBA);
-			Image->MipLevels = VkRenderer.MipLevels;
+			OpenVkTextureCreateInfo TextureCreateInfo;
+			TextureCreateInfo.Pixels = &Pixels;
+			TextureCreateInfo.Width = Image->Width;
+			TextureCreateInfo.Height = Image->Height;
+			TextureCreateInfo.Format = Image->Components;
+			TextureCreateInfo.MipLevels = UseCustomMipLevels ? CustomMipLevels : 0;
+			TextureCreateInfo.GenerateMipmaps = GenerateMipMaps ? OpenVkTrue : OpenVkFalse;
+			TextureCreateInfo.UseCustomMipmaps = OpenVkFalse;
+			Image->TextureImage = OpenVkCreateTexture(&TextureCreateInfo);
+			Image->MipLevels = TextureCreateInfo.MipLevels;
+
+		//	Image->TextureImage = OpenVkCreateTextureImage(Pixels, Image->Width, Image->Height, OPENVK_FORMAT_RGBA);
+		//	Image->MipLevels = VkRenderer.MipLevels;
 			OpenVkFree(Pixels);
 		}
 

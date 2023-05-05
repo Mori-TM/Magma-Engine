@@ -15,7 +15,7 @@ OpenVkBool	(*OpenVkBeginFrame					)();
 OpenVkBool	(*OpenVkEndFrame					)();
 void		(*OpenVkBeginRenderPass				)(OpenVkBeginRenderPassInfo* Info);
 void		(*OpenVkEndRenderPass				)();
-uint32_t	(*OpenVkCreateTextureImage			)(unsigned char* Pixels, int32_t Width, int32_t Height, uint32_t Format);
+uint32_t	(*OpenVkCreateTexture				)(OpenVkTextureCreateInfo* Info);
 uint32_t	(*OpenVkCreateStorageImage			)(uint32_t Width, uint32_t Height, uint32_t Format);
 void		(*OpenVkDestroyImage				)(uint32_t InImage);
 OpenVkBool	(*OpenVkCopyImage					)(uint32_t Width, uint32_t Height, uint32_t Src, uint32_t Dst);
@@ -82,7 +82,7 @@ uint32_t OpenVkCreateRenderer(uint32_t RendererFlags, const char** (*GetExtensio
 		OpenVkEndFrame = VkEndFrame;
 		OpenVkBeginRenderPass = VkBeginRenderPass;
 		OpenVkEndRenderPass = VkEndRenderPass;
-		OpenVkCreateTextureImage = VkCreateTextureImage;
+		OpenVkCreateTexture = VkCreateTexture;
 		OpenVkCreateStorageImage = VkCreateStorageImage;
 		OpenVkDestroyImage = VkDestroyImage;
 		OpenVkCopyImage = VkCopyImage;

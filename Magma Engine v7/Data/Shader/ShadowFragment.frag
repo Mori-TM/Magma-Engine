@@ -9,6 +9,6 @@ void main()
 {
 	gl_FragDepth = gl_FragCoord.z;
 
-	if (texture(Texture, FragTexCoord).a < 0.9)
+	if (textureLod(Texture, FragTexCoord, 2).a < 0.9)
 		discard;
 }

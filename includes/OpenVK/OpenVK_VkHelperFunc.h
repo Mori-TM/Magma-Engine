@@ -577,24 +577,24 @@ void VkDestroyDynamicBuffer(uint32_t Buffer)
 	OpenVkRuntimeError("Failed To Find Dynamic Destroy Buffer");
 }
 
-OpenVkBool VkCreateImage(uint32_t Width, uint32_t Height, uint32_t MipLevels, VkSampleCountFlagBits NumSamples, VkFormat Format, VkImageTiling Tiling, VkImageUsageFlags Usage, VkMemoryPropertyFlags Properties, VkImage* Image, VkDeviceMemory* ImageMemory, OpenVkBool* SupportsBlit)
+OpenVkBool VkIsBlittingSupported(VkFormat Format, VkImageTiling Tiling, VkImageUsageFlags Usage)
 {
 	VkImageFormatProperties ImageProperties;
 	vkGetPhysicalDeviceImageFormatProperties(VkRenderer.PhysicalDevice, Format, VK_IMAGE_TYPE_2D,
 											 Tiling, Usage,
 											 VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT, &ImageProperties);
 
-	if (SupportsBlit != NULL)
-		*SupportsBlit = OpenVkTrue;
 	VkFormatProperties FormatProperties;
 	vkGetPhysicalDeviceFormatProperties(VkRenderer.PhysicalDevice, Format, &FormatProperties);
 	if (!(FormatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_SRC_BIT) ||
-		!(FormatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_DST_BIT)) 
-	{
-		if (SupportsBlit != NULL)
-			*SupportsBlit = OpenVkFalse;
-	}
+		!(FormatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_DST_BIT))
+			return OpenVkFalse;
 
+	return OpenVkTrue;
+}
+
+OpenVkBool VkCreateImage(uint32_t Width, uint32_t Height, uint32_t MipLevels, VkSampleCountFlagBits NumSamples, VkFormat Format, VkImageTiling Tiling, VkImageUsageFlags Usage, VkMemoryPropertyFlags Properties, VkImage* Image, VkDeviceMemory* ImageMemory)
+{
 	VkImageCreateInfo ImageInfo;
 	ImageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	ImageInfo.pNext = NULL;
@@ -1084,7 +1084,7 @@ void VkCopyBufferToImage(VkBuffer Buffer, VkImage Image, uint32_t Width, uint32_
 	VkEndSingleTimeCommandBuffer(CommandBuffer);
 }
 
-void VkGenerateMipmaps(VkImage Image, VkFormat ImageFormat, int32_t TextureWidth, int32_t TextureHeight, uint32_t MipLevels, OpenVkBool SupportsBlit)
+void VkGenerateMipmaps(VkImage Image, VkFormat ImageFormat, int32_t TextureWidth, int32_t TextureHeight, uint32_t MipLevels)
 {
 	VkFormatProperties FormatProperties;
 	vkGetPhysicalDeviceFormatProperties(VkRenderer.PhysicalDevice, ImageFormat, &FormatProperties);
@@ -1116,68 +1116,32 @@ void VkGenerateMipmaps(VkImage Image, VkFormat ImageFormat, int32_t TextureWidth
 		Barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 		Barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 		Barrier.subresourceRange.baseMipLevel = i - 1;
-
+		//Use VkSetImageLayout
 		vkCmdPipelineBarrier(CommandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, &Barrier);
 
-		if (SupportsBlit)
-		{
-			VkImageBlit Blit;
-			Blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			Blit.srcSubresource.mipLevel = i - 1;
-			Blit.srcSubresource.baseArrayLayer = 0;
-			Blit.srcSubresource.layerCount = 1;
-			Blit.srcOffsets[0].x = 0;
-			Blit.srcOffsets[0].y = 0;
-			Blit.srcOffsets[0].z = 0;
-			Blit.srcOffsets[1].x = MipWidth;
-			Blit.srcOffsets[1].y = MipHeight;
-			Blit.srcOffsets[1].z = 1;
-			Blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			Blit.dstSubresource.mipLevel = i;
-			Blit.dstSubresource.baseArrayLayer = 0;
-			Blit.dstSubresource.layerCount = 1;
-			Blit.dstOffsets[0].x = 0;
-			Blit.dstOffsets[0].y = 0;
-			Blit.dstOffsets[0].z = 0;
-			Blit.dstOffsets[1].x = MipWidth > 1 ? MipWidth / 2 : 1;
-			Blit.dstOffsets[1].y = MipHeight > 1 ? MipHeight / 2 : 1;
-			Blit.dstOffsets[1].z = 1;
+		VkImageBlit Blit;
+		Blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		Blit.srcSubresource.mipLevel = i - 1;
+		Blit.srcSubresource.baseArrayLayer = 0;
+		Blit.srcSubresource.layerCount = 1;
+		Blit.srcOffsets[0].x = 0;
+		Blit.srcOffsets[0].y = 0;
+		Blit.srcOffsets[0].z = 0;
+		Blit.srcOffsets[1].x = MipWidth;
+		Blit.srcOffsets[1].y = MipHeight;
+		Blit.srcOffsets[1].z = 1;
+		Blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		Blit.dstSubresource.mipLevel = i;
+		Blit.dstSubresource.baseArrayLayer = 0;
+		Blit.dstSubresource.layerCount = 1;
+		Blit.dstOffsets[0].x = 0;
+		Blit.dstOffsets[0].y = 0;
+		Blit.dstOffsets[0].z = 0;
+		Blit.dstOffsets[1].x = MipWidth > 1 ? MipWidth / 2 : 1;
+		Blit.dstOffsets[1].y = MipHeight > 1 ? MipHeight / 2 : 1;
+		Blit.dstOffsets[1].z = 1;
 
-			vkCmdBlitImage(CommandBuffer, Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &Blit, VK_FILTER_LINEAR);
-		}
-		else
-		{
-			VkImageCopy Copy;
-			memset(&Copy, 0, sizeof(VkImageCopy));
-			Copy.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			Copy.srcSubresource.mipLevel = 0;
-			Copy.srcSubresource.baseArrayLayer = 0;
-			Copy.srcSubresource.layerCount = 1;
-		//	Copy.srcOffsets[0].x = 0;
-		//	Copy.srcOffsets[0].y = 0;
-		//	Copy.srcOffsets[0].z = 0;
-		//	Copy.srcOffset.x = MipWidth;
-		//	Copy.srcOffset.y = MipHeight;
-		//	Copy.srcOffset.z = 0;
-			Copy.extent.width = MipWidth;
-			Copy.extent.height = MipHeight;
-			Copy.extent.depth = 1;
-			Copy.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			Copy.dstSubresource.mipLevel = i;
-			Copy.dstSubresource.baseArrayLayer = 0;
-			Copy.dstSubresource.layerCount = 1;
-		//	Copy.dstOffsets[0].x = 0;
-		//	Copy.dstOffsets[0].y = 0;
-		//	Copy.dstOffsets[0].z = 0;
-		//	Copy.dstOffset.x = 0;
-		//	Copy.dstOffset.y = 0;
-		//	Copy.dstOffset.z = 0;
-
-		//	if (MipWidth > 4) MipWidth /= 2;
-		//	if (MipHeight > 4) MipHeight /= 2;
-
-			vkCmdCopyImage(CommandBuffer, Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &Copy);
-		}
+		vkCmdBlitImage(CommandBuffer, Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &Blit, VK_FILTER_LINEAR);
 		
 		Barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 		Barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
@@ -1201,7 +1165,7 @@ void VkGenerateMipmaps(VkImage Image, VkFormat ImageFormat, int32_t TextureWidth
 	VkEndSingleTimeCommandBuffer(CommandBuffer);
 }
 
-OpenVkBool VkCreateAndUploadImage(unsigned char* Pixel, int32_t Width, int32_t Height, VkDeviceSize ImageSize, uint32_t MipLevels, OpenVkBool* SupportsBlit, VkFormat Format, VkImage* Image, VkDeviceMemory* Memory)
+OpenVkBool VkCreateAndUploadImage(unsigned char* Pixel, int32_t Width, int32_t Height, VkDeviceSize ImageSize, uint32_t MipLevels, VkFormat Format, VkImage* Image, VkDeviceMemory* Memory)
 {
 	if (!Pixel)
 		return OpenVkRuntimeError("Texture Data is NULL");
@@ -1217,7 +1181,7 @@ OpenVkBool VkCreateAndUploadImage(unsigned char* Pixel, int32_t Width, int32_t H
 	memcpy(Data, Pixel, ImageSize);
 	vkUnmapMemory(VkRenderer.Device, StagingBufferMemory);
 
-	if (VkCreateImage(Width, Height, MipLevels, VK_SAMPLE_COUNT_1_BIT, Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Image, Memory, SupportsBlit) == OPENVK_ERROR)
+	if (VkCreateImage(Width, Height, MipLevels, VK_SAMPLE_COUNT_1_BIT, Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Image, Memory) == OPENVK_ERROR)
 		return OpenVkRuntimeError("Failed to create Texture Image");
 	
 	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
@@ -1232,7 +1196,7 @@ OpenVkBool VkCreateAndUploadImage(unsigned char* Pixel, int32_t Width, int32_t H
 	return OpenVkTrue;
 }
 
-void VkUploadMipmaps(unsigned char** Pixels, VkImage Image, int32_t TextureWidth, int32_t TextureHeight, VkDeviceSize ImageSize, uint32_t MipLevels, OpenVkBool* SupportsBlit, VkFormat ImageFormat)
+void VkUploadMipmaps(unsigned char** Pixels, VkImage Image, int32_t TextureWidth, int32_t TextureHeight, VkDeviceSize ImageSize, uint32_t MipLevels, VkFormat ImageFormat)
 {	
 	VkFormatProperties FormatProperties;
 	vkGetPhysicalDeviceFormatProperties(VkRenderer.PhysicalDevice, ImageFormat, &FormatProperties);
@@ -1244,17 +1208,15 @@ void VkUploadMipmaps(unsigned char** Pixels, VkImage Image, int32_t TextureWidth
 
 	VkImage* Images = (VkImage*)OpenVkMalloc((MipLevels - 1) * sizeof(VkImage));
 	VkDeviceMemory* ImageMemories = (VkDeviceMemory*)OpenVkMalloc((MipLevels - 1) * sizeof(VkDeviceMemory));
-	
+
 	for (uint32_t i = 1; i < MipLevels; i++)
 	{
-		VkCreateAndUploadImage(Pixels[i], MipWidth > 1 ? MipWidth / 2 : 1, MipHeight > 1 ? MipHeight / 2 : 1, ImageSize > 1 ? ImageSize / 2 : 1, 1, SupportsBlit, ImageFormat, &Images[i], &ImageMemories[i]);
+		VkCreateAndUploadImage(Pixels[i], MipWidth > 1 ? MipWidth / 2 : 1, MipHeight > 1 ? MipHeight / 2 : 1, ImageSize > 1 ? ImageSize / 2 : 1, 1, ImageFormat, &Images[i], &ImageMemories[i]);
 	
 		if (MipWidth > 1) MipWidth /= 2;
 		if (MipHeight > 1) MipHeight /= 2;
-		if (ImageSize > 1) ImageSize /= 2;
-	}
-
-	
+		if (ImageSize > 1) ImageSize /= 4;
+	}	
 
 	VkCommandBuffer CommandBuffer = VkBeginSingleTimeCommands();
 

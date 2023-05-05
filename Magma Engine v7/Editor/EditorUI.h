@@ -169,7 +169,17 @@ void EditorSettingsWindow()
 			case EDITOR_SETTING_TEXTURE:
 				ImGui::Checkbox("Use BC1 Compression", &LoadTextureCompressed);
 				ImGui::Checkbox("Use HQ Compression", &TextureCompressedHQ);
-				ImGui::Checkbox("Generate Compressed MipMaps", &GenerateCompressedMipMaps);
+				ImGui::Checkbox("Generate MipMaps", &GenerateMipMaps);
+				if (GenerateMipMaps)
+				{
+					ImGui::Checkbox("Use Custom Mip Levels", &UseCustomMipLevels);
+					if (UseCustomMipLevels)
+					{
+						ImGui::SliderInt("Custom Mip Levels", (int32_t*)&CustomMipLevels, 2, 32);
+					}
+				}
+				else
+					UseCustomMipLevels = false;
 				//	if (ImGui::BeginCombo("Compression Methode"))
 				//	{
 				//	//	for (uint32_t i = 0; i < SceneMeshes.Size; i++)

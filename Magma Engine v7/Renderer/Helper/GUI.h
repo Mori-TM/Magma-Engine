@@ -319,7 +319,17 @@ ifd::ImageData CreateImGuiTexture(uint8_t* Data, int w, int h, char Format)
 //	unsigned char TmpData[128 * 2 * 4];
 //	memset(&TmpData, 0, 128 * 2 * 4);
 
-	uint32_t Image = OpenVkCreateTextureImage(Data, w, h, OPENVK_FORMAT_RGBA);
+	OpenVkTextureCreateInfo TextureCreateInfo;
+	TextureCreateInfo.Pixels = &Data;
+	TextureCreateInfo.Width = w;
+	TextureCreateInfo.Height = h;
+	TextureCreateInfo.Format = OPENVK_FORMAT_RGBA;
+	TextureCreateInfo.MipLevels = 5;
+	TextureCreateInfo.GenerateMipmaps = OpenVkTrue;
+	TextureCreateInfo.UseCustomMipmaps = OpenVkFalse;
+	uint32_t Image = OpenVkCreateTexture(&TextureCreateInfo);
+
+//	uint32_t Image = OpenVkCreateTextureImage(Data, w, h, OPENVK_FORMAT_RGBA);
 	uint32_t Sampler = OpenVkCreateImageSampler(OPENVK_FILTER_LINEAR, OPENVK_ADDRESS_MODE_REPEAT);
 
 	uint32_t DescriptorCounts[] = { 1 };

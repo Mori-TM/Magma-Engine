@@ -102,7 +102,7 @@ void EditorAssetBrowser()
 
 			if (ImGui::Selectable("Add Material"))
 			{
-				AddMaterial("Material");
+				AddMaterial();
 				ImGui::SetWindowFocus("Material Inspector");
 			}
 
@@ -203,16 +203,19 @@ void EditorAssetBrowser()
 				ImGui::SetWindowFocus("Mesh Inspector");
 			}
 
-			if (ImGui::BeginMenu("Load Model"))
-			{
-				if (ImGui::MenuItem("Default")) ifd::FileDialog::Instance().Open("LoadDefaultModel", "Open Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", true);
-				if (ImGui::MenuItem("Gen Smooth Normals")) ifd::FileDialog::Instance().Open("LoadSmoothModel", "Open Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", true);
-				if (ImGui::MenuItem("Gen Flat Normals")) ifd::FileDialog::Instance().Open("LoadFlatModel", "Open Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", true);
-				ImGui::EndMenu();
-			}
+		//	if (ImGui::BeginMenu("Load Model"))
+		//	{
+		//		if (ImGui::MenuItem("Default")) ifd::FileDialog::Instance().Open("LoadDefaultModel", "Open Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", true);
+		//		if (ImGui::MenuItem("Gen Smooth Normals")) ifd::FileDialog::Instance().Open("LoadSmoothModel", "Open Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", true);
+		//		if (ImGui::MenuItem("Gen Flat Normals")) ifd::FileDialog::Instance().Open("LoadFlatModel", "Open Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", true);
+		//		ImGui::EndMenu();
+		//	}
+
+			if (ImGui::Selectable("Load Model"))
+				ifd::FileDialog::Instance().Open("LoadModel", "Load Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", true);
 
 			if (ImGui::Selectable("Load Texture"))
-				ifd::FileDialog::Instance().Open("LoadTexture", "Load Texture", "Image file (*.png;*.jpg;*.tga;*.jpeg;*.hdr;*.psd;*.bmp){.png,.jpg,.tga,.jpeg,.hdr,.psd,.bmp},.*", true);
+				ifd::FileDialog::Instance().Open("LoadTexture", "Load Texture", "Image files (*.png;*.jpg;*.tga;*.jpeg;*.hdr;*.psd;*.bmp){.png,.jpg,.tga,.jpeg,.hdr,.psd,.bmp},.*", true);
 
 			if (ImGui::Selectable("Load Animation"))
 				ifd::FileDialog::Instance().Open("LoadAnimation", "Load Animation", "Quake Models (*.md2;*.bin){.md2,.bin},.*", true);

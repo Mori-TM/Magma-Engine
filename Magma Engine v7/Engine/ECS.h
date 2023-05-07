@@ -69,13 +69,19 @@ uint32_t SelectedScript = 0;
 uint32_t EntityCount = 0;
 EntityInfo* Entities = NULL;
 
+char MaterialName[MAX_CHAR_NAME_LENGTH] = "Material";
+vec4 MaterialColor = Vec4f(1.0f);
+float MaterialMetallic = 0.0;
+float MaterialRoughness = 1.0;
+float MaterialOcclusion = 1.0;
+
 void SetDefaultMaterial(SceneMaterial* Material, const char* Name)
 {
 	strcpy(Material->Name, Name);
-	Material->Color = Vec4f(1.0);
-	Material->Metallic = 0.0;
-	Material->Roughness = 1.0;
-	Material->Occlusion = 1.0;
+	Material->Color = MaterialColor;
+	Material->Metallic = MaterialMetallic;
+	Material->Roughness = MaterialRoughness;
+	Material->Occlusion = MaterialOcclusion;
 
 	Material->AlbedoIndex = 0;
 	Material->NormalIndex = 0;
@@ -93,19 +99,19 @@ void AddMesh(const char* Name, SceneMesh* MeshInfo)
 	Mutex.unlock();
 }
 
-void AddMaterial(const char* Name)
+void AddMaterial()
 {
 	SceneMaterial Material;
-	SetDefaultMaterial(&Material, Name);
+	SetDefaultMaterial(&Material, MaterialName);
 
-	CheckForSameNames(&SceneMaterials, Name, Material.Name);
+	CheckForSameNames(&SceneMaterials, MaterialName, Material.Name);
 
 	SelectedMaterial = CMA_Push(&SceneMaterials, &Material);
 }
 
 bool LoadTextureCompressed = false;
 bool TextureCompressedHQ = false;
-bool GenerateMipMaps = false;
+bool GenerateMipMaps = true;
 bool UseCustomMipLevels = false;
 uint32_t CustomMipLevels = 5;
 
@@ -117,58 +123,19 @@ typedef struct
 
 uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 {
-	//	LoadTextureCompressed = true;
-
 	printf("%s\n", Path);
 	OpenVkDeviceWaitIdle();
 
 	unsigned char* Pixels = NULL;
-	Image->Components = OPENVK_FORMAT_RGBA;
-
-	//	LoadTextureCompressed = true;
+	Image->Format = OPENVK_FORMAT_RGBA;
 
 	if (OpenVkLoadTexture(Path, false, &Pixels, &Image->Width, &Image->Height, OPENVK_FORMAT_RGBA) == OpenVkTrue)
 	{
-	//	if (Image->Width % 4 != 0 ||
-	//		Image->Height % 4 != 0)
-	//		LoadTextureCompressed = false;
-
 		if (LoadTextureCompressed &&
 			Image->Width % 4 == 0 &&
 			Image->Height % 4 == 0)
 		{
-			/*
-			int32_t Size = Image->Width * Image->Height;
-
-			void* Block = malloc(Size);
-
-			bc7enc_compress_block_init();
-			bc7enc_compress_block_params Para;
-			Para.m_max_partitions_mode = BC7ENC_MAX_PARTITIONS1 / 2;
-			Para.m_mode_partition_estimation_filterbank = 1;
-			Para.m_perceptual = 0;
-			Para.m_try_least_squares = 0;//
-			Para.m_uber_level = BC7ENC_MAX_UBER_LEVEL / 2;
-			Para.m_use_mode7_for_alpha = 1;
-			Para.m_weights[0] = 1;
-			Para.m_weights[1] = 1;
-			Para.m_weights[2] = 1;
-			Para.m_weights[3] = 1;
-			bc7enc_compress_block_params_init(&Para);
-			int i = bc7enc_compress_block(Block, Pixels, &Para);
-
-			Image->TextureImage = OpenVkCreateTextureImage((unsigned char*)Block, Image->Width, Image->Height, OPENVK_FORMAT_BC7_RGBA);
-			OpenVkFree(Pixels);
-			OpenVkFree(Block);
-			*/
-
-			//	int32_t Size = (Image->Width / 4) * (Image->Height / 4) * 8;
-
-			//	unsigned char* Block = (unsigned char*)malloc(Size);
-
-			//	stb_compress_dxt_block(Block, Pixels, 1, STB_DXT_HIGHQUAL);
-
-			Image->Components = OPENVK_FORMAT_BC1_RGB;
+			Image->Format = OPENVK_FORMAT_BC1_RGB;
 
 			if (GenerateMipMaps)
 			{
@@ -177,7 +144,7 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 
 				unsigned char** Blocks = (unsigned char**)malloc(MipLevels * sizeof(unsigned char*));
 				size_t BlockSize = 0;
-				CompressImage(Pixels, Image->Width, Image->Height, &Blocks[0], &BlockSize, Image->Components, TextureCompressedHQ);
+				CompressImage(Pixels, Image->Width, Image->Height, &Blocks[0], &BlockSize, Image->Format, TextureCompressedHQ);
 
 				int32_t MipWidth = Image->Width;
 				int32_t MipHeight = Image->Height;
@@ -188,7 +155,7 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 				for (uint32_t i = 1; i < MipLevels; i++)
 				{
 					stbir_resize_uint8(Pixels, Image->Width, Image->Height, 0, ResizeData, MipWidth > 1 ? MipWidth / 2 : 1, MipHeight > 1 ? MipHeight / 2 : 1, 0, 4);
-					CompressImage(ResizeData, MipWidth > 1 ? MipWidth / 2 : 1, MipHeight > 1 ? MipHeight / 2 : 1, &Blocks[i], &BlockSize, Image->Components, TextureCompressedHQ);
+					CompressImage(ResizeData, MipWidth > 1 ? MipWidth / 2 : 1, MipHeight > 1 ? MipHeight / 2 : 1, &Blocks[i], &BlockSize, Image->Format, TextureCompressedHQ);
 
 					printf("%d\n", BlockSize);
 
@@ -204,14 +171,11 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 
 				free(ResizeData);
 
-			
-				//Upload Mips here
-
 				OpenVkTextureCreateInfo TextureCreateInfo;
 				TextureCreateInfo.Pixels = Blocks;
 				TextureCreateInfo.Width = Image->Width;
 				TextureCreateInfo.Height = Image->Height;
-				TextureCreateInfo.Format = Image->Components;
+				TextureCreateInfo.Format = Image->Format;
 				TextureCreateInfo.MipLevels = MipLevels;
 				TextureCreateInfo.GenerateMipmaps = OpenVkTrue;
 				TextureCreateInfo.UseCustomMipmaps = OpenVkTrue;
@@ -232,32 +196,23 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 			{
 				size_t BlockSize = 0;
 				unsigned char* Block;
-				CompressImage(Pixels, Image->Width, Image->Height, &Block, &BlockSize, Image->Components, TextureCompressedHQ);
+				CompressImage(Pixels, Image->Width, Image->Height, &Block, &BlockSize, Image->Format, TextureCompressedHQ);
 
 				OpenVkTextureCreateInfo TextureCreateInfo;
 				TextureCreateInfo.Pixels = &Block;
 				TextureCreateInfo.Width = Image->Width;
 				TextureCreateInfo.Height = Image->Height;
-				TextureCreateInfo.Format = Image->Components;
+				TextureCreateInfo.Format = Image->Format;
 				TextureCreateInfo.MipLevels = 0;
 				TextureCreateInfo.GenerateMipmaps = OpenVkFalse;
 				TextureCreateInfo.UseCustomMipmaps = OpenVkFalse;
 				Image->TextureImage = OpenVkCreateTexture(&TextureCreateInfo);
 				Image->MipLevels = TextureCreateInfo.MipLevels;
 
-			//	Image->TextureImage = OpenVkCreateTextureImage((unsigned char*)Block, Image->Width, Image->Height, Image->Components);
-			//	Image->MipLevels = VkRenderer.MipLevels;
 				OpenVkFree(Block);
 			}
-
-		//	size_t BlockSize = 0;
-		//	unsigned char* Block;
-		//	CompressImage(Pixels, Image->Width, Image->Height, &Block, &BlockSize, Image->Components, TextureCompressedHQ);
-
-
 			
 			OpenVkFree(Pixels);
-		//	OpenVkFree(Block);
 			printf("Its compressed\n");
 		}
 		else
@@ -266,15 +221,13 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 			TextureCreateInfo.Pixels = &Pixels;
 			TextureCreateInfo.Width = Image->Width;
 			TextureCreateInfo.Height = Image->Height;
-			TextureCreateInfo.Format = Image->Components;
+			TextureCreateInfo.Format = Image->Format;
 			TextureCreateInfo.MipLevels = UseCustomMipLevels ? CustomMipLevels : 0;
 			TextureCreateInfo.GenerateMipmaps = GenerateMipMaps ? OpenVkTrue : OpenVkFalse;
 			TextureCreateInfo.UseCustomMipmaps = OpenVkFalse;
 			Image->TextureImage = OpenVkCreateTexture(&TextureCreateInfo);
 			Image->MipLevels = TextureCreateInfo.MipLevels;
 
-		//	Image->TextureImage = OpenVkCreateTextureImage(Pixels, Image->Width, Image->Height, OPENVK_FORMAT_RGBA);
-		//	Image->MipLevels = VkRenderer.MipLevels;
 			OpenVkFree(Pixels);
 		}
 
@@ -384,6 +337,21 @@ void AddScript()
 	SceneScriptCount++;
 }
 
+bool ModelLoadAlbedo = true;
+bool ModelLoadNormal = true;
+bool ModelLoadMetallic = true;
+bool ModelLoadRoughness = true;
+bool ModelLoadOcclusion = true;
+vec4  ModelColor = Vec4f(1.0);
+float ModelMetallic = 0.0;
+float ModelRoughness = 1.0;
+float ModelOcclusion = 1.0;
+bool ModelLoadMaterials = true;
+bool ModelGenFlatNormals = false;
+bool ModelGenSmoothNormals = false;
+bool ModelFlipUVs = true;
+//uint32_t ModelSettings = WAVE_LOAD_MATERIAL | WAVE_GEN_NORMALS | WAVE_FLIP_UVS | WAVE_GEN_UVS | WAVE_GEN_INDICES | WAVE_MATERIAL_USE_MODEL_PATH | WAVE_REMOVE_REDUNDANT_MATERIALS | WAVE_PRINT_DEBUG_INOFS;
+
 bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshInfo)
 {
 	MeshInfo->Destroyable = true;
@@ -426,22 +394,27 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 		SceneMesh->Material.Metallic = ModelData->Materials[i].Metallic;
 		SceneMesh->Material.Roughness = ModelData->Materials[i].Roughness;
 
-		if (strcmp(ModelData->Materials[i].DiffuseTexture, "NoTexture") != 0)
+		if (ModelLoadAlbedo && strcmp(ModelData->Materials[i].DiffuseTexture, "NoTexture") != 0)
 			SceneMesh->Material.AlbedoIndex = AddTexture(ModelData->Materials[i].DiffuseTexture, false);
 
-		if (strcmp(ModelData->Materials[i].NormalTexture, "NoTexture") != 0)
-			SceneMesh->Material.NormalIndex = AddTexture(ModelData->Materials[i].NormalTexture, false);
-		else if (strcmp(ModelData->Materials[i].DisplacmentTexture, "NoTexture") != 0)
-			SceneMesh->Material.NormalIndex = AddTexture(ModelData->Materials[i].DisplacmentTexture, false);
-		else if (strcmp(ModelData->Materials[i].BumpTexture, "NoTexture") != 0)
-			SceneMesh->Material.NormalIndex = AddTexture(ModelData->Materials[i].BumpTexture, false);
-
-		if (strcmp(ModelData->Materials[i].RoughnessTexture, "NoTexture") != 0)
-			SceneMesh->Material.RoughnessIndex = AddTexture(ModelData->Materials[i].RoughnessTexture, false);
-		else if (strcmp(ModelData->Materials[i].SpecularTexture, "NoTexture") != 0)
-			SceneMesh->Material.RoughnessIndex = AddTexture(ModelData->Materials[i].SpecularTexture, false);
-
-		if (strcmp(ModelData->Materials[i].MetallicTexture, "NoTexture") != 0)
+		if (ModelLoadNormal)
+		{
+			if (strcmp(ModelData->Materials[i].NormalTexture, "NoTexture") != 0)
+				SceneMesh->Material.NormalIndex = AddTexture(ModelData->Materials[i].NormalTexture, false);
+			else if (strcmp(ModelData->Materials[i].DisplacmentTexture, "NoTexture") != 0)
+				SceneMesh->Material.NormalIndex = AddTexture(ModelData->Materials[i].DisplacmentTexture, false);
+			else if (strcmp(ModelData->Materials[i].BumpTexture, "NoTexture") != 0)
+				SceneMesh->Material.NormalIndex = AddTexture(ModelData->Materials[i].BumpTexture, false);
+		}
+		if (ModelLoadRoughness)
+		{
+			if (strcmp(ModelData->Materials[i].RoughnessTexture, "NoTexture") != 0)
+				SceneMesh->Material.RoughnessIndex = AddTexture(ModelData->Materials[i].RoughnessTexture, false);
+			else if (strcmp(ModelData->Materials[i].SpecularTexture, "NoTexture") != 0)
+				SceneMesh->Material.RoughnessIndex = AddTexture(ModelData->Materials[i].SpecularTexture, false);
+		}
+		
+		if (ModelLoadMetallic && strcmp(ModelData->Materials[i].MetallicTexture, "NoTexture") != 0)
 			SceneMesh->Material.MetallicIndex = AddTexture(ModelData->Materials[i].MetallicTexture, false);
 
 		SceneMesh->Material.Color.x = ModelData->Materials[i].DiffuseColor.x;
@@ -495,14 +468,28 @@ void LoadModel(uint32_t Settings, const char* FileName)
 			break;
 		}
 
-	//	WaveGetPath(LastPath);
-	//	WaveSetPath(Path);
-
 	SceneMesh MeshInfo;
 
 	uint32_t LastTexture = SelectedTexture;
 
-	Settings |= WAVE_LOAD_MATERIAL | WAVE_GEN_NORMALS | WAVE_FLIP_UVS | WAVE_GEN_UVS | WAVE_GEN_INDICES | WAVE_MATERIAL_USE_MODEL_PATH | WAVE_REMOVE_REDUNDANT_MATERIALS | WAVE_PRINT_DEBUG_INOFS;
+	memcpy(&WaveEmptyMaterial.DiffuseColor, &ModelColor, sizeof(WaveVec3));
+	WaveEmptyMaterial.Dissolve = ModelColor.w;
+	WaveEmptyMaterial.Metallic = ModelMetallic;
+	WaveEmptyMaterial.Roughness = ModelRoughness;
+	WaveEmptyMaterial.SpecularColor.x = ModelRoughness;
+	WaveEmptyMaterial.SpecularColor.y = ModelRoughness;
+	WaveEmptyMaterial.SpecularColor.z = ModelRoughness;
+
+//	Settings |= WAVE_LOAD_MATERIAL | WAVE_GEN_NORMALS | WAVE_FLIP_UVS | WAVE_GEN_UVS | WAVE_GEN_INDICES | WAVE_MATERIAL_USE_MODEL_PATH | WAVE_REMOVE_REDUNDANT_MATERIALS | WAVE_PRINT_DEBUG_INOFS;
+
+	Settings = WAVE_GEN_UVS | WAVE_GEN_NORMALS | WAVE_GEN_INDICES | WAVE_MATERIAL_USE_MODEL_PATH | WAVE_REMOVE_REDUNDANT_MATERIALS | WAVE_PRINT_DEBUG_INOFS;
+
+	if (ModelLoadMaterials)		Settings |= WAVE_LOAD_MATERIAL;
+	if (ModelGenFlatNormals)	Settings |= WAVE_FORCE_GEN_NORMALS;
+	if (ModelGenSmoothNormals)	Settings |= WAVE_GEN_SMOOTH_NORMALS;
+	if (ModelFlipUVs)			Settings |= WAVE_FLIP_UVS;
+
+
 	WaveModelData Model = WaveLoadModel(FileName, Settings);
 	if (Model.MeshCount == 0)
 		return;
@@ -513,5 +500,4 @@ void LoadModel(uint32_t Settings, const char* FileName)
 	WaveFreeModel(&Model);
 
 	SelectedTexture = LastTexture;
-	//	WaveSetPath(LastPath);
 }

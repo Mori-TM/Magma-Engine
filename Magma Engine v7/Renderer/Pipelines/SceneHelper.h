@@ -45,7 +45,7 @@ typedef struct
 	bool ShowInAssetBrowser;
 	int32_t Width;
 	int32_t Height;
-	int32_t Components;//Rename to Format
+	int32_t Format;
 	int32_t MipLevels;
 	uint32_t TextureImage;
 	uint32_t TextureSampler;

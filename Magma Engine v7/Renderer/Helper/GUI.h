@@ -8,6 +8,8 @@ ImVec4 ColorFromBytes(uint8_t r, uint8_t g, uint8_t b)
 	return ImVec4((float)r / 255.0, (float)g / 255.0, (float)b / 255.0, 1.0);
 };
 
+int32_t UIStyleIndex = 6;
+
 void SetStyleImGui(uint32_t Style)
 {
 	if (Style == 0)
@@ -449,7 +451,7 @@ void InitImGui()
 	vkDeviceWaitIdle(VkRenderer.Device);
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 	*/
-	SetStyleImGui(3);	
+	SetStyleImGui(UIStyleIndex - 3);
 //	ImGui::InitFileDialog();
 }
 

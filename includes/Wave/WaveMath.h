@@ -5,23 +5,80 @@
 //vector
 typedef struct
 {
-	float x;
-	float y;
+	union
+	{
+		float x;
+		float u;
+		float s;
+		float r;
+	};
+
+	union
+	{
+		float y;
+		float t;
+		float v;
+		float g;
+	};
 } vec2;
 
 typedef struct
 {
-	float x;
-	float y;
-	float z;
+	union
+	{
+		float x;
+		float u;
+		float s;
+		float r;
+	};
+
+	union
+	{
+		float y;
+		float v;
+		float t;
+		float g;
+	};
+
+	union
+	{
+		float z;
+		float p;
+		float b;
+	};
 } vec3;
 
 typedef struct
 {
-	float x;
-	float y;
-	float z;
-	float w;
+	union
+	{
+		float x;
+		float u;
+		float s;
+		float r;
+	};
+
+	union
+	{
+		float y;
+		float v;
+		float t;
+		float g;
+	};
+
+	union
+	{
+		float z;
+		float p;
+		float b;
+	};
+
+	union
+	{
+		float w;
+		float q;
+		float a;
+	};
 } vec4;
 
 float FastInverseSqrt(float number)

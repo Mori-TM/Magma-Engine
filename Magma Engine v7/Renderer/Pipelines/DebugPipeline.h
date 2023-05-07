@@ -19,9 +19,14 @@ void CreateDebugPipeline()
 	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGB32F, OPENVK_FORMAT_RGB32F };
 	uint32_t ShaderAttributeOffsets[] = { 0, 12 };
 
+	OpenVkFile VertexShader = OpenVkReadFile("Data/Shader/DebugVertex.spv");
+	OpenVkFile FragmentShader = OpenVkReadFile("Data/Shader/DebugFragment.spv");
+	VertexShader.Freeable = OpenVkFalse;
+	FragmentShader.Freeable = OpenVkFalse;
+
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
-	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/DebugVertex.spv");
-	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/DebugFragment.spv");
+	GraphicsPipelineCreateInfo.VertexShader = VertexShader;
+	GraphicsPipelineCreateInfo.FragmentShader = FragmentShader;
 	GraphicsPipelineCreateInfo.BindingStride = sizeof(DebugVertex);
 	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 2;
 	GraphicsPipelineCreateInfo.ShaderAttributeFormats = ShaderAttributeFormats;
@@ -46,9 +51,12 @@ void CreateDebugPipeline()
 	DebugPipelineThinLine = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 	
 	GraphicsPipelineCreateInfo.LineWidth = 3.0;
-	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/DebugVertex.spv");
-	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/DebugFragment.spv");
+	GraphicsPipelineCreateInfo.VertexShader = VertexShader;
+	GraphicsPipelineCreateInfo.FragmentShader = FragmentShader;
 	DebugPipelineFatLine = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
+
+	free(FragmentShader.Data);
+	free(VertexShader.Data);
 }
 
 void DebugDraw()

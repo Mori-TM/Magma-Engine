@@ -13,6 +13,8 @@ struct
 	float LastTime;
 
 	bool FirstInit;
+
+	float Speed;
 } CameraInfo;
 
 void InitFpsCamera()
@@ -26,6 +28,7 @@ void InitFpsCamera()
 	CameraInfo.DeltaTime = 0.0;
 	CameraInfo.LastTime = 0.0;
 	CameraInfo.FirstInit = true;
+	CameraInfo.Speed = 0.5;
 }
 
 void UpdateFpsCamera(vec3* CameraPos, vec3* CameraFront, vec3* CameraUp)
@@ -43,9 +46,11 @@ void UpdateFpsCamera(vec3* CameraPos, vec3* CameraFront, vec3* CameraUp)
 	uint32_t MouseState = SDL_GetMouseState(&MouseX, &MouseY);
 
 	if (State[SDL_SCANCODE_LSHIFT])
-		CameraInfo.DeltaTime *= 0.03;
+		CameraInfo.DeltaTime *= 0.06 * CameraInfo.Speed;
+	else if (State[SDL_SCANCODE_LCTRL])
+		CameraInfo.DeltaTime *= 0.01 * CameraInfo.Speed;
 	else
-		CameraInfo.DeltaTime *= 0.01;
+		CameraInfo.DeltaTime *= 0.03 * CameraInfo.Speed;
 
 	vec3 CamerSpeed = { CameraInfo.DeltaTime, CameraInfo.DeltaTime, CameraInfo.DeltaTime };
 

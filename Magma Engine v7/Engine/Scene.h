@@ -45,23 +45,23 @@ void SceneInit()
 	//	LoadTextureCompressed = true;
 	//	GenerateMipMaps = true;
 	//	Image.ShowInAssetBrowser = true;
-	//	Image.TextureDescriptorSet = LoadTexture((char*)"Data/Textures/OrangeTex.png", &Image);
+	//	Image.TextureDescriptorSet = LoadTexture((char*)"Data/Textures/Default2.png", &Image);
 	//	strcpy(Image.Name, "UvGrid");
 	//	strcpy(Image.Path, "None");
 	//	CMA_Push(&SceneTextures, &Image);
 	//
 	//	LoadTextureCompressed = true;
-	//	GenerateMipMaps = false;
+	//	GenerateMipMaps = true;
 	//	Image.ShowInAssetBrowser = true;
-	//	Image.TextureDescriptorSet = LoadTexture((char*)"Data/Textures/OrangeTex.png", &Image);
+	//	Image.TextureDescriptorSet = LoadTexture((char*)"Data/Textures/Default2.png", &Image);
 	//	strcpy(Image.Name, "UvGrid");
 	//	strcpy(Image.Path, "None");
 	//	CMA_Push(&SceneTextures, &Image);
 	//
-	//	LoadTextureCompressed = false;
-	//	GenerateMipMaps = false;
+	//	LoadTextureCompressed = true;
+	//	GenerateMipMaps = true;
 	//	Image.ShowInAssetBrowser = true;
-	//	Image.TextureDescriptorSet = LoadTexture((char*)"Data/Textures/OrangeTex.png", &Image);
+	//	Image.TextureDescriptorSet = LoadTexture((char*)"Data/Textures/WoodFloor.jpg", &Image);
 	//	strcpy(Image.Name, "UvGrid");
 	//	strcpy(Image.Path, "None");
 	//	CMA_Push(&SceneTextures, &Image);
@@ -69,7 +69,7 @@ void SceneInit()
 	//	LoadTextureCompressed = false;
 	//	GenerateMipMaps = true;
 	//	Image.ShowInAssetBrowser = true;
-	//	Image.TextureDescriptorSet = LoadTexture((char*)"Data/Textures/OrangeTex.png", &Image);
+	//	Image.TextureDescriptorSet = LoadTexture((char*)"Data/Textures/WoodFloor.jpg", &Image);
 	//	strcpy(Image.Name, "UvGrid");
 	//	strcpy(Image.Path, "None");
 	//	CMA_Push(&SceneTextures, &Image);

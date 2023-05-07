@@ -279,7 +279,7 @@ void EditorTextureInspector()
 				ImGui::Text("Aspect: %f", ((float)Image->Width / (float)Image->Height));
 				ImGui::Text("Mip Levels: %d", Image->MipLevels);
 
-				switch (Image->Components)
+				switch (Image->Format)
 				{
 				case OPENVK_FORMAT_RGB:
 					ImGui::Text("Format: RGB");

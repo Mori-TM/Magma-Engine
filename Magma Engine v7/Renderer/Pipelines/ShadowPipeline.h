@@ -29,9 +29,14 @@ void CreateShadowPipeline()
 	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGB32F, OPENVK_FORMAT_RG32F };
 	uint32_t ShaderAttributeOffsets[] = { 0, 12 };
 
+	OpenVkFile VertexShader = OpenVkReadFile("Data/Shader/ShadowVertex.spv");
+	OpenVkFile FragmentShader = OpenVkReadFile("Data/Shader/ShadowFragment.spv");
+	VertexShader.Freeable = OpenVkFalse;
+	FragmentShader.Freeable = OpenVkFalse;
+
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
-	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/ShadowVertex.spv");
-	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/ShadowFragment.spv");
+	GraphicsPipelineCreateInfo.VertexShader = VertexShader;
+	GraphicsPipelineCreateInfo.FragmentShader = FragmentShader;
 	GraphicsPipelineCreateInfo.BindingStride = sizeof(SceneVertex);
 	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 2;
 	GraphicsPipelineCreateInfo.ShaderAttributeFormats = ShaderAttributeFormats;
@@ -55,14 +60,17 @@ void CreateShadowPipeline()
 	ShadowPipelineNoneCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_BACK;
-	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/ShadowVertex.spv");
-	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/ShadowFragment.spv");
+	GraphicsPipelineCreateInfo.VertexShader = VertexShader;
+	GraphicsPipelineCreateInfo.FragmentShader = FragmentShader;
 	ShadowPipelineBackCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_FRONT;
-	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/ShadowVertex.spv");
-	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/ShadowFragment.spv");
+	GraphicsPipelineCreateInfo.VertexShader = VertexShader;
+	GraphicsPipelineCreateInfo.FragmentShader = FragmentShader;
 	ShadowPipelineFrontCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
+
+	free(FragmentShader.Data);
+	free(VertexShader.Data);
 }
 
 void CreateShadowFramebuffers()

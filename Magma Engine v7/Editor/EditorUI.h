@@ -91,9 +91,11 @@ void EditorSettingsWindow()
 			ImGui::BeginChild("##preferences", ImVec2(0, 0), false, ImGuiWindowFlags_None);
 
 			const float total_width = ImGui::GetWindowWidth() - ImGui::GetStyle().ScrollbarSize - ImGui::GetStyle().WindowPadding.x * 2.0f;
-			const float first_column_width = total_width * 0.25f;
+			const float first_column_width = total_width * 0.3f;
 
 			ImGui::Columns(2, "##preferences_columns", true);
+
+			ImGui::SetColumnWidth(0, first_column_width);
 
 			// First column
 			// 
@@ -113,8 +115,8 @@ void EditorSettingsWindow()
 				EditorSelectedSetting = EDITOR_SETTING_OTHER;
 
 			
-
-		//	ImGui::SetColumnWidth(0, first_column_width);
+		
+			
 			/*
 			if (ImGui::Button("Textures##ES-Tex", ImVec2(-1, 0))) 
 			{
@@ -198,27 +200,48 @@ void EditorSettingsWindow()
 				//	}
 				break;
 			case EDITOR_SETTING_MODEL_IMPORTER:
-				//Bool-Load Albedo
-				//Bool-Load Normal
-				//Bool-Load Metallic
-				//Bool-Load Roughness
-				//Bool-Load Occlusion
-				//Drop Down- Gen Normals, Gen Smooth Normals, flip uvs
+				ImGui::Checkbox("Import Albedo Texture", &ModelLoadAlbedo);
+				ImGui::Checkbox("Import Normal Texture", &ModelLoadNormal);
+				ImGui::Checkbox("Import Metallic Texture", &ModelLoadMetallic);
+				ImGui::Checkbox("Import Roughness Texture", &ModelLoadRoughness);
+				ImGui::Checkbox("Import Occlusion Texture", &ModelLoadOcclusion);
+				ImGui::ColorEdit4("Default Color", (float*)&ModelColor);
+				ImGui::SliderFloat("Default Metallic Strength", &ModelMetallic, 0.0, 1.0);
+				ImGui::SliderFloat("Default Roughness Strength", &ModelRoughness, 0.0, 1.0);
+				ImGui::SliderFloat("Default Occlusion Strength", &ModelOcclusion, 0.0, 1.0);
+				ImGui::Separator();
+				ImGui::Checkbox("Import Materials", &ModelLoadMaterials);
+				ImGui::Checkbox("Generate Flat Normals", &ModelGenFlatNormals);
+				ImGui::Checkbox("Generate Smooth Normals", &ModelGenSmoothNormals);
+				ImGui::Checkbox("Flip UVs", &ModelFlipUVs);
 				break;
 			case EDITOR_SETTING_MATERIAL:
-				//Input Text-Default Material Name
-				//Color Picker-Default Color
-				//float slider-Dfault metallic srength
-				//float slider-Dfault roughness srength
-				//float slider-Dfault occlusion srength
+				ImGui::InputText("Default Name", MaterialName, MAX_CHAR_NAME_LENGTH);
+				ImGui::ColorEdit4("Default Color", (float*)&MaterialColor);
+				ImGui::SliderFloat("Default Metallic Strength", &MaterialMetallic, 0.0, 1.0);
+				ImGui::SliderFloat("Default Roughness Strength", &MaterialRoughness, 0.0, 1.0);
+				ImGui::SliderFloat("Default Occlusion Strength", &MaterialOcclusion, 0.0, 1.0);
 				break;
 			case EDITOR_SETTING_THEME:
 				//Drop down- Default themes
 				//Imgui theme editor
+				
+				if (ImGui::Combo("Theme##Selector", &UIStyleIndex, "Dark\0Light\0Classic\0Magma0\0Magma1\0Magma2\0Magma3\0"))
+				{
+					switch (UIStyleIndex)
+					{
+					case 0: ImGui::StyleColorsDark(); break;
+					case 1: ImGui::StyleColorsLight(); break;
+					case 2: ImGui::StyleColorsClassic(); break;
+					default: SetStyleImGui(UIStyleIndex - 3); break;
+					}
+				}
+				ImGui::ShowStyleEditor();
 				break;
 			case EDITOR_SETTING_CAMERA:
-				//float drag-Camera speed
-				//float drag-Camera fov
+				ImGui::DragFloat("Camera Speed", &CameraInfo.Speed, 0.01, 0.01, 10.0);
+				ImGui::DragFloat("Camera FOV", &CameraNormalFOV, 0.1, 5.0, 179.0);
+				ImGui::DragFloat("Camera Zoom FOV", &CameraZoomFOV, 0.01, 5.0, 179.0);
 				break;
 			case EDITOR_SETTING_EDITOR:
 				//vec3-Font Color
@@ -388,27 +411,35 @@ void EngineDrawEditor()
 	EditorAssetBrowser();
 
 	//Make this code block shorter/ more readable
-	if (ifd::FileDialog::Instance().IsDone("LoadDefaultModel"))
+//	if (ifd::FileDialog::Instance().IsDone("LoadDefaultModel"))
+//	{
+//		if (ifd::FileDialog::Instance().HasResult())
+//			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
+//				LoadModel(0, (const char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
+//		ifd::FileDialog::Instance().Close();
+//		ImGui::SetWindowFocus("Mesh Inspector");
+//	}
+//	if (ifd::FileDialog::Instance().IsDone("LoadSmoothModel"))
+//	{
+//		if (ifd::FileDialog::Instance().HasResult())
+//			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
+//				LoadModel(WAVE_GEN_SMOOTH_NORMALS, (const char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
+//		ifd::FileDialog::Instance().Close();
+//		ImGui::SetWindowFocus("Mesh Inspector");
+//	}
+//	if (ifd::FileDialog::Instance().IsDone("LoadFlatModel"))
+//	{
+//		if (ifd::FileDialog::Instance().HasResult())
+//			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
+//				LoadModel(WAVE_FORCE_GEN_NORMALS, (const char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
+//		ifd::FileDialog::Instance().Close();
+//		ImGui::SetWindowFocus("Mesh Inspector");
+//	}
+	if (ifd::FileDialog::Instance().IsDone("LoadModel"))
 	{
 		if (ifd::FileDialog::Instance().HasResult())
 			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
 				LoadModel(0, (const char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
-		ifd::FileDialog::Instance().Close();
-		ImGui::SetWindowFocus("Mesh Inspector");
-	}
-	if (ifd::FileDialog::Instance().IsDone("LoadSmoothModel"))
-	{
-		if (ifd::FileDialog::Instance().HasResult())
-			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
-				LoadModel(WAVE_GEN_SMOOTH_NORMALS, (const char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
-		ifd::FileDialog::Instance().Close();
-		ImGui::SetWindowFocus("Mesh Inspector");
-	}
-	if (ifd::FileDialog::Instance().IsDone("LoadFlatModel"))
-	{
-		if (ifd::FileDialog::Instance().HasResult())
-			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
-				LoadModel(WAVE_FORCE_GEN_NORMALS, (const char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
 		ifd::FileDialog::Instance().Close();
 		ImGui::SetWindowFocus("Mesh Inspector");
 	}

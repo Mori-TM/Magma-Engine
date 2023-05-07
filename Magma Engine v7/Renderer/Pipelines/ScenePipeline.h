@@ -52,9 +52,14 @@ void CreateScenePipeline()
 	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGB32F, OPENVK_FORMAT_RG32F, OPENVK_FORMAT_RGB32F };
 	uint32_t ShaderAttributeOffsets[] = { 0, 12, 20 };
 
+	OpenVkFile VertexShader = OpenVkReadFile("Data/Shader/SceneVertex.spv");
+	OpenVkFile FragmentShader = OpenVkReadFile("Data/Shader/SceneFragment.spv");
+	VertexShader.Freeable = OpenVkFalse;
+	FragmentShader.Freeable = OpenVkFalse;
+
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
-	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/SceneVertex.spv");
-	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/SceneFragment.spv");
+	GraphicsPipelineCreateInfo.VertexShader = VertexShader;
+	GraphicsPipelineCreateInfo.FragmentShader = FragmentShader;
 	GraphicsPipelineCreateInfo.BindingStride = sizeof(SceneVertex);
 	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 3;
 	GraphicsPipelineCreateInfo.ShaderAttributeFormats = ShaderAttributeFormats;
@@ -77,15 +82,18 @@ void CreateScenePipeline()
 	GraphicsPipelineCreateInfo.RenderPass = SceneRenderPass;
 	ScenePipelineNoneCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 
-	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/SceneVertex.spv");
-	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/SceneFragment.spv");
+	GraphicsPipelineCreateInfo.VertexShader = VertexShader;
+	GraphicsPipelineCreateInfo.FragmentShader = FragmentShader;
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_BACK;
 	ScenePipelineBackCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 
-	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/SceneVertex.spv");
-	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/SceneFragment.spv");
+	GraphicsPipelineCreateInfo.VertexShader = VertexShader;
+	GraphicsPipelineCreateInfo.FragmentShader = FragmentShader;
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_FRONT;
 	ScenePipelineFrontCull = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
+
+	free(FragmentShader.Data);
+	free(VertexShader.Data);
 
 	for (uint32_t i = 0; i < RIGID_BODY_COUNT; i++)
 	{

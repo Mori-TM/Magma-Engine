@@ -1,6 +1,6 @@
 float CameraFOV = 75.0;
-const float CameraZoomFOV = 10.0;
-const float CameraNormalFOV = 75.0;
+float CameraZoomFOV = 10.0;
+float CameraNormalFOV = 75.0;
 float CameraNearZ = 0.01;
 float CameraFarZ = 1000.0;
 vec3 CameraPos = { 0.0, 2.0, 5.0 };

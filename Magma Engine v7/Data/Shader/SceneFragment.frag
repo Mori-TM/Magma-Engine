@@ -380,6 +380,7 @@ void main()
 
 	OutLightPass.a = AlbedoTexture.a * Color.a;
 	OutNormalMap = vec4((Normal).xyz * mat3((UBO.View)), Roughness);
+//	OutNormalMap = vec4((Normal).xyz * mat3(inverse(UBO.View)), Roughness);
 
 	OutDepthPosition = vec4(FragPosRelToCam.xyz, gl_FragCoord.z);
 

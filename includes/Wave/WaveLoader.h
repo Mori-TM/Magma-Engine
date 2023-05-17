@@ -18,7 +18,7 @@ int WaveLoadingStatus;
 int WaveLoadingStatus;
 #endif // WAVE_NO_MULTI_THREDED_LOADING
 
-#define WAVE_MAX_ALLOCATION_SIZE 388608
+#define WAVE_MAX_ALLOCATION_SIZE 100000//388608
 
 #ifndef WAVE_BASIC_MATH
 #define WAVE_BASIC_MATH

@@ -9,9 +9,13 @@ void EditorEntityInspector()
 
 			if (ImGui::CollapsingHeader("TRANSFORM"))
 			{
-				ImGui::DragFloat3("Translation", (float*)&Entities[SelectedEntity].Translate, 0.1, -10000.0, 10000.0);
-				ImGui::DragFloat3("Rotation", (float*)&Entities[SelectedEntity].Rotate, 0.1, -10000.0, 10000.0);
-				ImGui::DragFloat3("Scale", (float*)&Entities[SelectedEntity].Scale, 0.1, -10000.0, 10000.0);
+				ImGuiVec3Control("Translation", &Entities[SelectedEntity].Translate, 0.0, 120.0);
+				ImGuiVec3Control("Rotation", &Entities[SelectedEntity].Rotate, 0.0, 120.0);
+				ImGuiVec3Control("Scale", &Entities[SelectedEntity].Scale, 1.0, 120.0);
+				
+			//	ImGui::DragFloat3("Translation", (float*)&Entities[SelectedEntity].Translate, 0.1, -10000.0, 10000.0);
+			//	ImGui::DragFloat3("Rotation", (float*)&Entities[SelectedEntity].Rotate, 0.1, -10000.0, 10000.0);
+			//	ImGui::DragFloat3("Scale", (float*)&Entities[SelectedEntity].Scale, 0.1, -10000.0, 10000.0);
 			}
 
 			if (Entities[SelectedEntity].UsedComponents[COMPONENT_TYPE_MESH] == true)

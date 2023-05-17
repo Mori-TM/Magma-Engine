@@ -246,6 +246,8 @@ void EditorSettingsWindow()
 			case EDITOR_SETTING_EDITOR:
 				//vec3-Font Color
 				//vec3-Icon Color
+				
+				ImGui::DragFloat("Font Size", &GImGui->IO.FontGlobalScale, 0.005, 0.1, 5.0, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 				break;
 			case EDITOR_SETTING_OTHER:
 				//bool-Frustum culling

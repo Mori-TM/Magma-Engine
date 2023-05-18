@@ -13,7 +13,7 @@ uint32_t SSRRenderPass;
 uint32_t SSRColorAttachment;
 uint32_t SSRFramebuffer;
 uint32_t SSRUniformBuffer;
-uint32_t SSRUniformDescriptorSet;
-uint32_t SSRDescriptorSet;
+uint32_t SSRInputDescriptorSet;
+uint32_t SSROutputDescriptorSet;
 
 SSRUniformBufferObject SSRFragmentUBO;

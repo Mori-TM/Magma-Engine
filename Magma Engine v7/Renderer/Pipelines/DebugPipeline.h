@@ -41,12 +41,12 @@ void CreateDebugPipeline()
 	GraphicsPipelineCreateInfo.LineWidth = 1.0;
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_BACK;
 	GraphicsPipelineCreateInfo.FrontFace = OPENVK_FRONT_FACE_COUNTER_CLOCK_WISE;
-	GraphicsPipelineCreateInfo.MsaaSamples = MsaaSamples;
-	GraphicsPipelineCreateInfo.AlphaBlending = true;
+	GraphicsPipelineCreateInfo.MsaaSamples = 1;
+	GraphicsPipelineCreateInfo.AlphaBlendings = NULL;
 	GraphicsPipelineCreateInfo.ColorBlendAttachments = 4;
 	GraphicsPipelineCreateInfo.PipelineLayout = DebugLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = true;
-	GraphicsPipelineCreateInfo.RenderPass = SceneRenderPass;
+	GraphicsPipelineCreateInfo.RenderPass = GBufferRenderPass;
 
 	DebugPipelineThinLine = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 	
@@ -62,7 +62,7 @@ void CreateDebugPipeline()
 void DebugDraw()
 {
 	Mutex.lock();
-	mat4 PV = MultiplyMat4P(&SceneVertexUBO.Projection, &SceneVertexUBO.View);
+	mat4 PV = MultiplyMat4P(&GBufferVertexUBO.Projection, &GBufferVertexUBO.View);
 	Mutex.unlock();
 	DebugVertexPc.PVM = PV;
 	

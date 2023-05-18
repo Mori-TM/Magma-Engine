@@ -637,11 +637,11 @@ void EngineDrawEditor()
 		ImGui::Checkbox("Render Shadows", &RenderShadows);
 
 		const char* CullingOptions[] = { "No Culling", "Back Face Culling", "Front Face Culling" };
-		if (ImGui::BeginCombo("Scene Face Culling", CullingOptions[SceneCullMode]))
+		if (ImGui::BeginCombo("Scene Face Culling", CullingOptions[GBufferCullMode]))
 		{
 			for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
 				if (ImGui::Button(CullingOptions[i]))
-					SceneCullMode = i;
+					GBufferCullMode = i;
 			ImGui::EndCombo();
 		}
 

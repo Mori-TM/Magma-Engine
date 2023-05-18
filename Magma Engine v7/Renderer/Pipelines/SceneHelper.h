@@ -135,11 +135,12 @@ uint32_t SceneScaling = 100;
 
 uint32_t SceneCullMode = CULL_MODE_BACK;
 uint32_t SceneLayout;
-uint32_t ScenePipelineNoneCull;
-uint32_t ScenePipelineBackCull;
-uint32_t ScenePipelineFrontCull;
+uint32_t ScenePipeline;
 uint32_t SceneRenderPass;
 uint32_t SceneFramebuffer;
+uint32_t SceneAttachment;
+
+
 uint32_t SceneMsaaAttachment;
 uint32_t SceneDepthAttachment;
 
@@ -148,7 +149,8 @@ uint32_t SceneDepthPositionAttachment;
 uint32_t SceneNormalMapAttachment;
 uint32_t ScenePBRMapAttachment;
 
-uint32_t SceneDescriptorSet;
+uint32_t SceneInputDescriptorSet;
+uint32_t SceneOutputDescriptorSet;
 
 uint32_t SceneShadowMapDescriptorSet;
 

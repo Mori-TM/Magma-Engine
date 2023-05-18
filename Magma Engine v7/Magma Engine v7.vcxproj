@@ -168,10 +168,16 @@
     <ClInclude Include="Renderer\Pipelines\BlurPipeline.h" />
     <ClInclude Include="Renderer\Pipelines\DebugHelper.h" />
     <ClInclude Include="Renderer\Pipelines\DebugPipeline.h" />
+    <ClInclude Include="Renderer\Pipelines\GBufferHelper.h" />
+    <ClInclude Include="Renderer\Pipelines\GBufferPipeline.h" />
     <ClInclude Include="Renderer\Pipelines\SceneHelper.h" />
     <ClInclude Include="Renderer\Pipelines\ScenePipeline.h" />
     <ClInclude Include="Renderer\Pipelines\ShadowHelper.h" />
     <ClInclude Include="Renderer\Pipelines\ShadowPipeline.h" />
+    <ClInclude Include="Renderer\Pipelines\SSAOBlurHelper.h" />
+    <ClInclude Include="Renderer\Pipelines\SSAOBlurPipeline.h" />
+    <ClInclude Include="Renderer\Pipelines\SSAOHelper.h" />
+    <ClInclude Include="Renderer\Pipelines\SSAOPipeline.h" />
     <ClInclude Include="Renderer\Pipelines\SSRHelper.h" />
     <ClInclude Include="Renderer\Pipelines\SSRPipeline.h" />
     <ClInclude Include="Renderer\Pipelines\SwapChainHelper.h" />
@@ -180,6 +186,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Shader\BlurFragment.frag" />
+    <None Include="Data\Shader\GBufferFragment.frag" />
+    <None Include="Data\Shader\GBufferVertex.vert" />
     <None Include="Data\Shader\OffscreenVertex.vert" />
     <None Include="Data\Shader\DebugFragment.frag" />
     <None Include="Data\Shader\DebugVertex.vert" />
@@ -189,6 +197,8 @@
     <None Include="Data\Shader\SceneVertex.vert" />
     <None Include="Data\Shader\ShadowFragment.frag" />
     <None Include="Data\Shader\ShadowVertex.vert" />
+    <None Include="Data\Shader\SSAOBlurFragment.frag" />
+    <None Include="Data\Shader\SSAOFragment.frag" />
     <None Include="Data\Shader\SSRFragment.frag" />
     <None Include="Data\Shader\SwapChainFragment.frag" />
   </ItemGroup>

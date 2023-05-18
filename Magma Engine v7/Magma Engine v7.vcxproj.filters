@@ -50,9 +50,6 @@
     <ClInclude Include="Renderer\Pipelines\ShadowPipeline.h">
       <Filter>Header Files\Renderer\Pipelines</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\Renderer.h">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Editor\AssetBrowser.h">
       <Filter>Header Files\Editor</Filter>
     </ClInclude>
@@ -140,6 +137,27 @@
     <ClInclude Include="Engine\Scene.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\GBufferHelper.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\GBufferPipeline.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\SSAOHelper.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\SSAOPipeline.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Renderer.h">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\SSAOBlurHelper.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\SSAOBlurPipeline.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Shader\BlurFragment.frag">
@@ -176,6 +194,18 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Data\Shader\SSRFragment.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\GBufferFragment.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\GBufferVertex.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\SSAOFragment.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\SSAOBlurFragment.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

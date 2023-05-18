@@ -258,6 +258,7 @@ uint32_t VkCreateRenderer(const char**(*GetExtensions)(uint32_t* ExtensionCount)
 	DeviceFeatures.fillModeNonSolid = VK_TRUE;
 	DeviceFeatures.wideLines = VK_TRUE;
 	DeviceFeatures.depthClamp = VK_TRUE;
+	DeviceFeatures.independentBlend = VK_TRUE;
 
 	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
@@ -333,7 +334,7 @@ uint32_t VkCreateRenderer(const char**(*GetExtensions)(uint32_t* ExtensionCount)
 
 uint32_t VkCreateColorImageAttachment(uint32_t Width, uint32_t Height, uint32_t MsaaSamples, OpenVkBool Sampled, uint32_t Format)
 {
-	VkFormat ColorFormat = VkGetOpenVkFormat(Format);
+	VkFormat ColorFormat = VkGetOpenVkFormat(Format, NULL);
 
 	VkSampleCountFlagBits Samples = (VkSampleCountFlagBits)(VkRenderer.MsaaSamples < MsaaSamples ? VkRenderer.MsaaSamples : MsaaSamples);
 	VkImageInfo Image;
@@ -361,7 +362,7 @@ uint32_t VkCreateDepthImageAttachment(uint32_t Width, uint32_t Height, uint32_t 
 	if (Format == OPENVK_FORMAT_DEFAULT)
 		DepthFormat = VkFindDepthFormat();
 	else
-		DepthFormat = VkGetOpenVkFormat(Format);
+		DepthFormat = VkGetOpenVkFormat(Format, NULL);
 
 	VkImageInfo Image;
 	Image.Format = DepthFormat;
@@ -386,7 +387,7 @@ uint32_t VkCreateDepthImageAttachment(uint32_t Width, uint32_t Height, uint32_t 
 
 //This functions sucks, wtf is ResolveAttachments as pointer used for?
 //And how is it ordered with the frame buffer create function
-uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uint32_t* AttachmentFormats, uint32_t* MsaaSamples, uint32_t* ResolveAttachments, OpenVkBool Sampled)
+uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uint32_t* AttachmentFormats, uint32_t* MsaaSamples, uint32_t RenderPassOptions)
 {
 	VkRenderer.RenderPasses = (VkRenderPass*)OpenVkRealloc(VkRenderer.RenderPasses, (VkRenderer.RenderPassCount + 1) * sizeof(VkRenderPass));
 
@@ -414,14 +415,14 @@ uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uin
 	if (ColorAttachmentCount != 0)
 	{
 		ColorAttachmentReferences = (VkAttachmentReference*)OpenVkMalloc(ColorAttachmentCount * sizeof(VkAttachmentReference));
-		if (ResolveAttachments != NULL)
+		if (RenderPassOptions & OPENVK_RENDER_PASS_RESOLVE_ATTACHMENTS)
 			ColorAttachmentResolveReferences =	(VkAttachmentReference*)OpenVkMalloc(ColorAttachmentCount * sizeof(VkAttachmentReference));
 
 		HasColorAttachment = OpenVkTrue;
 	}
 
 	uint32_t AttachmentDescriptionIndex = 0;
-	uint32_t AttachmentDescriptionCount = (ColorAttachmentCount * (ResolveAttachments != NULL ? 2 : 1)) + HasDepthAttachment;
+	uint32_t AttachmentDescriptionCount = (ColorAttachmentCount * (RenderPassOptions & OPENVK_RENDER_PASS_RESOLVE_ATTACHMENTS ? 2 : 1)) + HasDepthAttachment;
 	if (AttachmentDescriptionCount < 1)
 		return OpenVkRuntimeError("Not enough attachments");
 	ColorAttachmentCount = 0;
@@ -436,32 +437,32 @@ uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uin
 
 			VkAttachmentDescription* Attachment = &AttachmentDescriptions[AttachmentDescriptionIndex++];
 			Attachment->flags = 0;
-			Attachment->format = VkGetOpenVkFormat(AttachmentFormats[i]);
+			Attachment->format = VkGetOpenVkFormat(AttachmentFormats[i], NULL);
 			Attachment->samples = Samples;
 			Attachment->loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 			Attachment->storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 			Attachment->stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			Attachment->stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 			Attachment->initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			Attachment->finalLayout = ((Samples > 1) ? (ResolveAttachments != NULL ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) : (Sampled ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR));
+			Attachment->finalLayout = ((Samples > 1) ? (RenderPassOptions & OPENVK_RENDER_PASS_RESOLVE_ATTACHMENTS ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) : (RenderPassOptions & OPENVK_RENDER_PASS_SAMPLED ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR));
 			ColorAttachmentReferences[ColorAttachmentCount].attachment = AttachmentDescriptionIndex - 1;
 			ColorAttachmentReferences[ColorAttachmentCount].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-			if (ResolveAttachments != NULL)
+			if (RenderPassOptions & OPENVK_RENDER_PASS_RESOLVE_ATTACHMENTS)
 			{			
 				Attachment = &AttachmentDescriptions[AttachmentDescriptionIndex++];
 				ColorAttachmentResolveReferences[ColorAttachmentCount].attachment = (Samples > 1) ? AttachmentDescriptionIndex - 1 : VK_ATTACHMENT_UNUSED;
 				ColorAttachmentResolveReferences[ColorAttachmentCount].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 				Attachment->flags = 0;
-				Attachment->format = VkGetOpenVkFormat(AttachmentFormats[i]);
+				Attachment->format = VkGetOpenVkFormat(AttachmentFormats[i], NULL);
 				Attachment->samples = VK_SAMPLE_COUNT_1_BIT;
 				Attachment->loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				Attachment->storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 				Attachment->stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				Attachment->stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 				Attachment->initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-				Attachment->finalLayout = (Sampled ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+				Attachment->finalLayout = (RenderPassOptions & OPENVK_RENDER_PASS_SAMPLED ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 			}
 
 			ColorAttachmentCount++;
@@ -472,7 +473,7 @@ uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uin
 
 			VkAttachmentDescription* Attachment = &AttachmentDescriptions[AttachmentDescriptionIndex++];
 			Attachment->flags = 0;
-			Attachment->format = AttachmentFormats[i] == OPENVK_FORMAT_DEFAULT ? VkFindDepthFormat() : VkGetOpenVkFormat(AttachmentFormats[i]);
+			Attachment->format = AttachmentFormats[i] == OPENVK_FORMAT_DEFAULT ? VkFindDepthFormat() : VkGetOpenVkFormat(AttachmentFormats[i], NULL);
 			Attachment->samples = Samples;
 			Attachment->loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 			Attachment->storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -505,23 +506,23 @@ uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uin
 	VkSubpassDependency Dependencies[2];
 	Dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
 	Dependencies[0].dstSubpass = 0;
-	Dependencies[0].srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	Dependencies[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	Dependencies[0].srcStageMask = RenderPassOptions & OPENVK_RENDER_PASS_BOTTOM_OF_PIPE ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	Dependencies[0].srcAccessMask = RenderPassOptions & OPENVK_RENDER_PASS_MEMORY_READ ? VK_ACCESS_MEMORY_READ_BIT : VK_ACCESS_SHADER_READ_BIT;
 	Dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
 	Dependencies[1].srcSubpass = 0;
 	Dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-	Dependencies[1].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	Dependencies[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	Dependencies[1].dstStageMask = RenderPassOptions & OPENVK_RENDER_PASS_BOTTOM_OF_PIPE ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	Dependencies[1].dstAccessMask = RenderPassOptions & OPENVK_RENDER_PASS_MEMORY_READ ? VK_ACCESS_MEMORY_READ_BIT : VK_ACCESS_SHADER_READ_BIT;
 	Dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
 	if (ColorAttachmentCount > 0)
 	{
 		Dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		Dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
+		Dependencies[0].dstAccessMask = RenderPassOptions & OPENVK_RENDER_PASS_COLOR_ACCESS_READ_AND_WRITE ? VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		
 		Dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		Dependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		Dependencies[1].srcAccessMask = RenderPassOptions & OPENVK_RENDER_PASS_COLOR_ACCESS_READ_AND_WRITE ? VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 	}
 	else
 	{
@@ -549,7 +550,7 @@ uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uin
 	if (ColorAttachmentCount != 0)
 	{
 		OpenVkFree(ColorAttachmentReferences);
-		if (ResolveAttachments != NULL)
+		if (RenderPassOptions & OPENVK_RENDER_PASS_RESOLVE_ATTACHMENTS)
 			OpenVkFree(ColorAttachmentResolveReferences);
 	}
 
@@ -659,7 +660,7 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 	{
 		AttributeDescriptions[i].location = i;
 		AttributeDescriptions[i].binding = 0;
-		AttributeDescriptions[i].format = VkGetOpenVkFormat(Info->ShaderAttributeFormats[i]);
+		AttributeDescriptions[i].format = VkGetOpenVkFormat(Info->ShaderAttributeFormats[i], NULL);
 	//	if (Info->ShaderAttributeFormats[i] == 1) AttributeDescriptions[i].format = VK_FORMAT_R32_SFLOAT;
 	//	if (Info->ShaderAttributeFormats[i] == 2) AttributeDescriptions[i].format = VK_FORMAT_R32G32_SFLOAT;
 	//	if (Info->ShaderAttributeFormats[i] == 3) AttributeDescriptions[i].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -740,7 +741,7 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 	DepthStencilState.flags = 0;
 	DepthStencilState.depthTestEnable = VK_TRUE;
 	DepthStencilState.depthWriteEnable = VK_TRUE;
-	DepthStencilState.depthCompareOp = VK_COMPARE_OP_LESS;
+	DepthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 	DepthStencilState.depthBoundsTestEnable = VK_FALSE;
 	DepthStencilState.stencilTestEnable = VK_FALSE;
 	DepthStencilState.front.failOp = (VkStencilOp)VK_NULL_HANDLE;
@@ -763,7 +764,7 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 	VkPipelineColorBlendAttachmentState* ColorBlendAttachmentStates = (VkPipelineColorBlendAttachmentState*)OpenVkMalloc(Info->ColorBlendAttachments * sizeof(VkPipelineColorBlendAttachmentState));
 	for (uint32_t i = 0; i < Info->ColorBlendAttachments; i++)
 	{
-		ColorBlendAttachmentStates[i].blendEnable = Info->AlphaBlending;
+		ColorBlendAttachmentStates[i].blendEnable = Info->AlphaBlendings != NULL ? Info->AlphaBlendings[i] : VK_FALSE;
 		ColorBlendAttachmentStates[i].srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
 		ColorBlendAttachmentStates[i].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 		ColorBlendAttachmentStates[i].colorBlendOp = VK_BLEND_OP_ADD;
@@ -1412,11 +1413,13 @@ void VkEndRenderPass()
 uint32_t VkCreateTexture(OpenVkTextureCreateInfo* Info)
 {
 	VkImageInfo TextureImage;
-	TextureImage.Format = VkGetOpenVkFormat(Info->Format);//VK_FORMAT_R8G8B8A8_UNORM;
+	uint32_t SizeFormat;
+	TextureImage.Format = VkGetOpenVkFormat(Info->Format, &SizeFormat);//VK_FORMAT_R8G8B8A8_UNORM;
 
 	OpenVkBool UsesCompression = OpenVkTrue;
 
 	VkDeviceSize ImageSize;
+
 	if (Info->Format == OPENVK_FORMAT_BC7_RGBA)
 		ImageSize = (Info->Width * Info->Height * 4) / 4;
 	else if (Info->Format == OPENVK_FORMAT_BC4_RGBA)
@@ -1427,7 +1430,7 @@ uint32_t VkCreateTexture(OpenVkTextureCreateInfo* Info)
 		ImageSize = (Info->Width / 4) * (Info->Height / 4) * 16;
 	else
 	{
-		ImageSize = Info->Width * Info->Height * Info->Format;
+		ImageSize = Info->Width * Info->Height * SizeFormat;
 		UsesCompression = OpenVkFalse;
 	}
 
@@ -1474,7 +1477,7 @@ uint32_t VkCreateTexture(OpenVkTextureCreateInfo* Info)
 uint32_t VkCreateStorageImage(uint32_t Width, uint32_t Height, uint32_t Format)
 {
 	VkImageInfo Image;
-	Image.Format = VkGetOpenVkFormat(Format);
+	Image.Format = VkGetOpenVkFormat(Format, NULL);
 	VkCreateImage(Width, Height, 1, VK_SAMPLE_COUNT_1_BIT, Image.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory);
 	Image.ImageView = VkCreateImageView(Image.Image, Image.Format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 
@@ -1565,7 +1568,7 @@ uint32_t VkCreateImageSampler(uint32_t Filter, uint32_t AddressMode)
 	SamplerInfo.addressModeV = (VkSamplerAddressMode)AddressMode;
 	SamplerInfo.addressModeW = (VkSamplerAddressMode)AddressMode;
 	SamplerInfo.mipLodBias = 0.0;
-	SamplerInfo.anisotropyEnable = VK_TRUE;
+	SamplerInfo.anisotropyEnable = VK_FALSE;
 	SamplerInfo.maxAnisotropy = 8;
 	SamplerInfo.compareEnable = VK_FALSE;//if this is true with VK_COMPARE_OP_ALWAYS shadows wont work
 	SamplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;

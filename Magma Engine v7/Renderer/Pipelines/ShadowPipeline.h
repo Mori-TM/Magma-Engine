@@ -5,7 +5,7 @@ void CreateShadowRenderPass()
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_DEPTH };
 	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_DEFAULT };
 	uint32_t MsaaSamples[] = { 1 };
-	ShadowRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, NULL, true);
+	ShadowRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
 }
 
 void CreateShadowLayout()
@@ -52,7 +52,7 @@ void CreateShadowPipeline()
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_NONE;
 	GraphicsPipelineCreateInfo.FrontFace = OPENVK_FRONT_FACE_COUNTER_CLOCK_WISE;
 	GraphicsPipelineCreateInfo.MsaaSamples = 1;
-	GraphicsPipelineCreateInfo.AlphaBlending = false;
+	GraphicsPipelineCreateInfo.AlphaBlendings = NULL;
 	GraphicsPipelineCreateInfo.ColorBlendAttachments = 0;
 	GraphicsPipelineCreateInfo.PipelineLayout = ShadowLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = true;
@@ -84,6 +84,31 @@ void CreateShadowFramebuffers()
 	FramebufferCreateInfo.Width = ShadowMapWidth;
 	FramebufferCreateInfo.Height = ShadowMapHeight;
 	ShadowFramebuffer = OpenVkCreateFramebuffer(&FramebufferCreateInfo);
+}
+
+void CreateShadowDescriptorSet()
+{
+//	uint32_t DescriptorCounts[] = { 1 };
+//	uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
+//	uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_ATTACHMENT };
+//	uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_DEPTH_OUTPUT };
+//	uint32_t Bindings[] = { 0 };
+//
+//	OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
+//	DescriptorSetCreateInfo.DescriptorSetLayout = TextureDescriptorSetLayout;
+//	DescriptorSetCreateInfo.DescriptorPool = DescriptorPool;
+//	DescriptorSetCreateInfo.DescriptorWriteCount = 1;
+//	DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
+//	DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
+//	DescriptorSetCreateInfo.Sampler = &ShadowSampler;
+//	DescriptorSetCreateInfo.ImageTypes = ImageTypes;
+//	DescriptorSetCreateInfo.Images = &ShadowDepthAttachment;
+//	DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
+//	DescriptorSetCreateInfo.Bindings = Bindings;
+//	DescriptorSetCreateInfo.DescriptorSet = NULL;
+//	DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
+//
+//	ShadowMapDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 }
 
 float CascadeSplits[SHADOW_MAP_CASCADE_COUNT];

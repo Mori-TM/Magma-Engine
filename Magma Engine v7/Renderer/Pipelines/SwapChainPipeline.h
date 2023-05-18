@@ -3,7 +3,7 @@ void CreateSwapChainRenderPass()
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR };
 	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_DEFAULT };
 	uint32_t MsaaSamples[] = { 1 };
-	SwapChainRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, NULL, OpenVkFalse);
+	SwapChainRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_BOTTOM_OF_PIPE | OPENVK_RENDER_PASS_MEMORY_READ | OPENVK_RENDER_PASS_COLOR_ACCESS_READ_AND_WRITE);
 }
 
 void CreateSwapChainLayout()
@@ -38,7 +38,7 @@ void CreateSwapChainPipeline()
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_FRONT;
 	GraphicsPipelineCreateInfo.FrontFace = OPENVK_FRONT_FACE_COUNTER_CLOCK_WISE;
 	GraphicsPipelineCreateInfo.MsaaSamples = 1;
-	GraphicsPipelineCreateInfo.AlphaBlending = false;
+	GraphicsPipelineCreateInfo.AlphaBlendings = NULL;
 	GraphicsPipelineCreateInfo.ColorBlendAttachments = 1;
 	GraphicsPipelineCreateInfo.PipelineLayout = SwapChainLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = false;
@@ -88,7 +88,7 @@ void SwapChainDraw()
 			OpenVkSetViewport(0, 0, WindowWidth, WindowHeight);
 
 			OpenVkBindPipeline(SwapChainPipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
-			OpenVkBindDescriptorSet(SwapChainLayout, 0, SSRDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+			OpenVkBindDescriptorSet(SwapChainLayout, 0, SSROutputDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 			OpenVkDrawVertices(0, 3);
 		}
 		else
@@ -100,7 +100,7 @@ void SwapChainDraw()
 
 			ImTextureID NonAlphaTextures[1] =
 			{
-				(ImTextureID*)&GetDescriptorSet(SSRDescriptorSet)[VkRenderer.CurrentFrame]
+				(ImTextureID*)&GetDescriptorSet(SSROutputDescriptorSet)[VkRenderer.CurrentFrame]
 			};
 
 			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), VkRenderer.CommandBuffers[VkRenderer.ImageIndex], 1, NonAlphaTextures);

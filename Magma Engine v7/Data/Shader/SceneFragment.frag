@@ -3,32 +3,18 @@
 
 #define SHADOW_MAP_CASCADE_COUNT 3
 
-layout(location = 0) out vec4 OutDepthPosition;
-layout(location = 1) out vec4 OutNormalMap;
-layout(location = 2) out vec4 OutPBRMap;
-layout(location = 3) out vec4 OutLightPass;
+layout(location = 0) out vec4 OutColor;
 
-layout(location = 0) in vec3 FragNormal;
-layout(location = 1) in vec2 FragTexCoord;
-layout(location = 2) in vec4 FragPosRelToCam;
-layout(location = 3) in vec4 FragWorldPos;
+layout(location = 0) in vec2 FragTexCoord;
 
-layout(set = 0, binding = 0) uniform sampler2D AlbedoMap;
-layout(set = 1, binding = 0) uniform sampler2D NormalMap;
-layout(set = 2, binding = 0) uniform sampler2D MetallicMap;
-layout(set = 3, binding = 0) uniform sampler2D RoughnessMap;
-layout(set = 4, binding = 0) uniform sampler2D OcclusionMap;
-layout(set = 5, binding = 0) uniform sampler2D ShadowMap;
+layout(set = 0, binding = 0) uniform sampler2D SamplerPosition;
+layout(set = 0, binding = 1) uniform sampler2D SamplerNormal;
+layout(set = 0, binding = 2) uniform sampler2D SamplerAlbedo;
+layout(set = 0, binding = 3) uniform sampler2D SamplerPBR;
+layout(set = 0, binding = 4) uniform sampler2D SamplerSSAO;
+layout(set = 0, binding = 5) uniform sampler2D ShadowMap;
 
-layout(push_constant) uniform PushConstants
-{
-	layout(offset = 64) vec4 Color;
-	layout(offset = 80) float Metallic;
-	layout(offset = 84) float Roughness;
-	layout(offset = 88) float Occlusion;
-} PushConst;
-
-layout(set = 6, binding = 0) uniform UniformBufferObject
+layout(set = 0, binding = 6) uniform UniformBufferObject
 {
 	vec4 CascadeSplits;
 	vec4 CascadeRange;
@@ -173,55 +159,6 @@ float FilterPCF(vec4 ShadowCoord, int Range, float Scale, uint CascadeIndex, flo
 
 const float PI = 3.14159265359;
 
-vec4 TextureCustom(sampler2D Tex, vec2 Coord)
-{
-//	vec2 Size = vec2(textureSize(Tex, 1));
-//
-//	ivec2 texelCoord = ivec2(clamp(Coord * Size, vec2(0), vec2(Size.x - 1, Size.y - 1)));
-//	vec4 texel = texelFetch(Tex, texelCoord, 1);
-//	return texel;
-	return texture(Tex, Coord);
-//	return textureLod(Tex, Coord, 0);
-}
-
-vec3 GetNormalFromMap()
-{
-	vec3 Normal = TextureCustom(NormalMap, FragTexCoord).xyz;
-
-//	vec3 Normal = texelFetch(NormalMap, ivec2(FragTexCoord * vec2(textureSize(NormalMap, 0))), 0).xyz;
-	
-
-	if (Normal.x == 1.0 &&	Normal.y == 1.0 &&	Normal.z == 1.0)
-		return normalize(FragNormal);
-/*
-	vec3 tangentNormal = Normal * 2.0 - 1.0;
-
-	vec3 N = FragNormal;
-	vec3 Q1 = dFdx(FragWorldPos.xyz);
-	vec3 Q2 = dFdy(FragWorldPos.xyz);
-	vec2 st1 = dFdx(FragTexCoord);
-	vec2 st2 = dFdy(FragTexCoord);
-	mat3 TBN = mat3(normalize(Q1*st2.t - Q2*st1.t), normalize(cross(N, Q1*st2.t - Q2*st1.t)), N);
-
-	return normalize(TBN * tangentNormal);
-	*/
-
-	vec3 tangentNormal = Normal * 2.0 - 1.0;
-
-	vec3 Q1 = dFdx(FragWorldPos.xyz);
-	vec3 Q2 = dFdy(FragWorldPos.xyz);
-	vec2 st1 = dFdx(FragTexCoord);
-	vec2 st2 = dFdy(FragTexCoord);
-
-	vec3 N = normalize(FragNormal);
-	vec3 T = normalize(Q1*st2.t - Q2*st1.t);
-	vec3 B = -normalize(cross(N, T));
-	mat3 TBN = mat3(T, B, N);
-
-	return normalize(TBN * tangentNormal);
-	
-}
-
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
 	float a = roughness*roughness;
@@ -261,7 +198,7 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 {
 	return F0 + (1.0 - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
 }
-
+/*
 float GetShadow(float Ambient)
 {
 	uint CascadeIndex = 0;
@@ -282,7 +219,7 @@ float GetShadow(float Ambient)
 
 	return Shadow;
 }
-
+*/
 vec3 Uncharted2Tonemap(vec3 x)
 {
 	const float A = 0.15;
@@ -306,26 +243,21 @@ vec3 AcesTonemap(vec3 x)
 
 void main() 
 {
-//	float Shadow1 = GetShadow(0.5);
-
-//	OutLightPass = vec4(vec3(texture(ShadowMap, FragTexCoord).r), 1.0);
-//	
-//	return;
-	vec4 Color = PushConst.Color;
-	if (Color.w == 0.0)	Color.w = 1.0;
-	vec4 AlbedoTexture = texture(AlbedoMap, FragTexCoord);
+/*
+	vec4 AlbedoTexture = texture(SamplerAlbedo, FragTexCoord);
 
 //	vec4 AlbedoTexture = texelFetch(AlbedoMap, ivec2(FragTexCoord * vec2(textureSize(AlbedoMap, 0))), 0);
-	vec3 Albedo = pow(AlbedoTexture.rgb * Color.rgb, vec3(2.2));
+	vec3 Albedo = pow(AlbedoTexture.rgb, vec3(2.2));
 //	vec3 Albedo = AlbedoTexture.rgb * Color.rgb;
-	vec3 Normal = GetNormalFromMap();
-	float Metallic = TextureCustom(MetallicMap, FragTexCoord).r * PushConst.Metallic;
-	float Roughness = TextureCustom(RoughnessMap, FragTexCoord).r * PushConst.Roughness;
-	float Occlusion = TextureCustom(OcclusionMap, FragTexCoord).r * PushConst.Occlusion;
+	vec3 Normal = normalize(texture(SamplerNormal, FragTexCoord).rgb * 2.0 - 1.0);
+	float Metallic = texture(SamplerPBR, FragTexCoord).r;
+	float Roughness = texture(SamplerPBR, FragTexCoord).g;
+	float Occlusion = texture(SamplerPBR, FragTexCoord).b;
 
 	vec3 N = Normal;
 					//Upload Camera Pos
-	vec3 V = normalize(UBO.CameraPosition.xyz - FragWorldPos.xyz);
+//	vec3 V = normalize(UBO.CameraPosition.xyz - FragWorldPos.xyz);
+	vec3 V = texture(SamplerPosition, FragTexCoord).rgb;
 
 	vec3 F0 = vec3(0.04); 
 	F0 = mix(F0, Albedo, Metallic);
@@ -357,35 +289,67 @@ void main()
 
 	float Ambient = 0.6 * Occlusion;
 	
-	float Shadow = GetShadow(Ambient);
+//	float Shadow = GetShadow(Ambient);
 
-	OutLightPass.rgb = Ambient * Albedo + ((Ambient - Shadow) * Lo);
-
+	float Shadow = 0.0;
+	OutColor.rgb = Ambient * Albedo + ((Ambient - Shadow) * Lo);
+	
+	float ssao = texture(SamplerSSAO, FragTexCoord).r;
+	
 
 	float Exposure = UBO.Exposure;
 	float Gamma = UBO.Gamma;//1.3
 
-	OutLightPass.rgb = Uncharted2Tonemap(OutLightPass.rgb * Exposure);
+	OutColor.rgb = Uncharted2Tonemap(OutColor.rgb * Exposure);
 
 	const vec3 Uncharted2TonemapConst = (1.0f / Uncharted2Tonemap(vec3(11.2f)));
-	OutLightPass.rgb = OutLightPass.rgb * Uncharted2TonemapConst;	
-	OutLightPass.rgb = pow(OutLightPass.rgb, vec3(1.0f / Gamma));
+	OutColor.rgb = OutColor.rgb * Uncharted2TonemapConst;	
+	OutColor.rgb = pow(OutColor.rgb, vec3(1.0f / Gamma));
 
-	/*
-	OutLightPass.rgb = pow(OutLightPass.rgb, vec3(1.0 / Gamma));	
-	OutLightPass.rgb = AcesTonemap(OutLightPass.rgb * Exposure);
-//	OutLightPass.rgb = OutLightPass.rgb * (1.0f / AcesTonemap(vec3(11.2f)));	
-	// Gamma correction
-	*/	
+	OutColor.rgb *= ssao.rrr;
 
-	OutLightPass.a = AlbedoTexture.a * Color.a;
-	OutNormalMap = vec4((Normal).xyz * mat3((UBO.View)), Roughness);
-//	OutNormalMap = vec4((Normal).xyz * mat3(inverse(UBO.View)), Roughness);
 
-	OutDepthPosition = vec4(FragPosRelToCam.xyz, gl_FragCoord.z);
-
-	OutPBRMap = vec4(Metallic, Roughness, 1.0, 1.0);
+	OutColor.a = AlbedoTexture.a;
 
 	if (AlbedoTexture.a < 0.9)
 		discard;
+*/
+	
+	vec4 NormalTex = texture(SamplerNormal, FragTexCoord);
+	vec3 normal = normalize(NormalTex.rgb);
+	vec3 fragPos = texture(SamplerPosition, FragTexCoord).rgb;
+	vec4 albedo = texture(SamplerAlbedo, FragTexCoord);
+
+	if (NormalTex.w < 0.9)
+	{
+		OutColor = albedo;
+		return;
+	}
+	
+	 
+	float ssao = texture(SamplerSSAO, FragTexCoord).r;
+
+	vec3 lightPos = vec3(0.0);
+//	vec3 L = normalize(-UBO.LightDirection.xyz);
+	
+	vec3 L = normalize(lightPos - fragPos);
+	vec3 diffuse = max(0.5, dot(normal, L)) * albedo.xyz;
+//	vec3 diffuse = max(dot(normal, L), 0.0) * albedo.xyz * vec3(1.0);
+//	vec3 halfwayDir = normalize(L + viewDir);
+//	float spec = pow(max(dot(Normal, halfwayDir), 0.0), 8.0);
+//	vec3 specular = dirLight.Color * spec;
+
+//	float NdotL = max(0.5, dot(normal, L));
+//
+//	vec3 baseColor = albedo.rgb * max(dot(normal, L), 0.0);
+	OutColor.a = 1.0;
+//	OutColor.rgb = vec3(ssao, 0, 0);
+//	OutColor.rgba = vec4(ssao.rr, 0.5, 1.0); 
+	
+	OutColor.rgb = vec3(1.0);
+	OutColor.rgb = ssao.rrr;
+	OutColor.rgb *= diffuse;
+//OutColor.rgb = baseColor;
+//	OutColor.rgb = albedo.rgb;
+//	OutColor.rgb = texture(ShadowMap, FragTexCoord).rrr;
 }

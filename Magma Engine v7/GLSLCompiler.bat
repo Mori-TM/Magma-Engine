@@ -13,6 +13,11 @@ glslc.exe Data/Shader/DebugFragment.frag -o Data/Shader/DebugFragment.spv
 glslc.exe Data/Shader/GUIVertex.vert -o Data/Shader/GUIVertex.spv
 glslc.exe Data/Shader/GUIFragment.frag -o Data/Shader/GUIFragment.spv
 
+glslc.exe Data/Shader/GBufferVertex.vert -o Data/Shader/GBufferVertex.spv
+glslc.exe Data/Shader/GBufferFragment.frag -o Data/Shader/GBufferFragment.spv
+
 glslc.exe Data/Shader/SwapChainFragment.frag -o Data/Shader/SwapChainFragment.spv
 glslc.exe Data/Shader/BlurFragment.frag -o Data/Shader/BlurFragment.spv
 glslc.exe Data/Shader/SSRFragment.frag -o Data/Shader/SSRFragment.spv
+glslc.exe Data/Shader/SSAOFragment.frag -o Data/Shader/SSAOFragment.spv
+glslc.exe Data/Shader/SSAOBlurFragment.frag -o Data/Shader/SSAOBlurFragment.spv

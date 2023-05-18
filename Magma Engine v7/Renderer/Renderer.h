@@ -1,6 +1,9 @@
 #include "Pipelines/DebugHelper.h"
 #include "Pipelines/ShadowHelper.h"
 #include "Pipelines/BlurHelper.h"
+#include "Pipelines/GBufferHelper.h"
+#include "Pipelines/SSAOHelper.h"
+#include "Pipelines/SSAOBlurHelper.h"
 #include "Pipelines/SSRHelper.h"
 #include "Pipelines/SceneHelper.h"
 #include "Pipelines/SwapChainHelper.h"
@@ -31,6 +34,9 @@
 #include "Pipelines/BlurPipeline.h"
 #include "Pipelines/DebugPipeline.h"
 #include "Pipelines/ShadowPipeline.h"
+#include "Pipelines/GBufferPipeline.h"
+#include "Pipelines/SSAOPipeline.h"
+#include "Pipelines/SSAOBlurPipeline.h"
 #include "Pipelines/ScenePipeline.h"
 #include "Pipelines/SSRPipeline.h"
 #include "Pipelines/SwapChainPipeline.h"
@@ -39,6 +45,9 @@ void CreateRenderPasses()
 {
 	CreateBlurRenderPass();
 	CreateShadowRenderPass();
+	CreateGBufferRenderPass();
+	CreateSSAORenderPass();
+	CreateSSAOBlurRenderPass();
 	CreateSceneRenderPass();
 	CreateSSRRenderPass();
 	CreateSwapChainRenderPass();
@@ -47,19 +56,26 @@ void CreateRenderPasses()
 void CreatePipelineLayouts()
 {
 	CreateBlurLayout();
-	CreateDebugLayout();
 	CreateShadowLayout();
+	CreateGBufferLayout();
+	CreateSSAOLayout();
+	CreateSSAOBlurLayout();
 	CreateSceneLayout();
+	CreateDebugLayout();
 	CreateSSRLayout();
 	CreateSwapChainLayout();
+	
 }
 
 void CreateGraphicsPipelines()
 {
 	CreateBlurPipeline();
-	CreateDebugPipeline();	
 	CreateShadowPipeline();	
+	CreateGBufferPipeline();
+	CreateSSAOPipeline();
+	CreateSSAOBlurPipeline();
 	CreateScenePipeline();
+	CreateDebugPipeline();	
 	CreateSSRPipeline();
 	CreateSwapChainPipeline();
 }
@@ -68,6 +84,9 @@ void CreateFramebuffers()
 {
 	CreateBlurFramebuffers();
 	CreateShadowFramebuffers();
+	CreateGBufferFramebuffer();
+	CreateSSAOFramebuffer();
+	CreateSSAOBlurFramebuffer();
 	CreateSceneFramebuffer();
 	CreateSSRFramebuffer();
 	CreateSwapChainFramebuffer();
@@ -77,8 +96,12 @@ void CreateDescriptors()
 {
 	CreateDescriptorPool();
 	CreateBlurDescriptorSets();
-	CreateSSRDescriptorSet();
+	CreateShadowDescriptorSet();
+	CreateGBufferDescriptorSet();
+	CreateSSAODescriptorSets();
+	CreateSSAOBlurDescriptorSets();
 	CreateSceneDescriptorSets();
+	CreateSSRDescriptorSet();
 }
 
 void CreateRenderer()
@@ -93,6 +116,7 @@ void CreateRenderer()
 	*/
 	OpenVkGUIInit(WindowWidth, WindowHeight, SwapChainRenderPass, 1, 30, "Data/Fonts/Roboto-Medium.TTF", GetMousePos);
 	CreateDescriptorSetLayout();
+	CreateSSAONoiseImage();
 	CreatePipelineLayouts();
 	CreateGraphicsPipelines();
 	
@@ -101,6 +125,8 @@ void CreateRenderer()
 	CreateImageSampler();
 	CreateBuffers();
 
+	CreateGBufferUniformBuffer();
+	CreateSSAOUniformBuffer();
 	CreateSceneUniformBuffer();
 	CreateSSRUniformBuffer();
 	
@@ -114,9 +140,10 @@ void CreateRenderer()
 	InitFpsCamera();
 
 	OpenVkRuntimeInfo("Engine was initilaized", "");
-
+//	exit(2);
 	//Set up deafult test scene
-//	LoadModel(0, "D:/3D Models/Forest/Forest.obj");
+//	LoadModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
+//	LoadModel(0, "D:/3D Models/Sponza-master/Sponza3.obj");
 //	AddEntity(COMPONENT_TYPE_MESH);
 //	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, 1);
 //	Entities[SelectedEntity].Mesh.MeshIndex = 1;
@@ -153,7 +180,10 @@ void RendererUpdate()
 	if (RenderShadows || EffectFrame == 2)
 		UpdateCascades();
 
+	GBufferUpdateUniformBuffer();
+	SSAOUpdateUniformBuffer();
 	SceneUpdateUniformBuffer();
+	SSRUpdateUniformBuffer();
 	/*
 	Mutex.lock();
 	mat4 ViewProj = MultiplyMat4P(&SceneVertexUBO.Projection, &SceneVertexUBO.View);
@@ -168,7 +198,7 @@ void RendererUpdate()
 		RunFrustumCulling(ViewProj, i + 1);
 	}
 	*/
-	SSRUpdateUniform();	
+//	SSRUpdateUniform();	
 }
 
 
@@ -177,13 +207,11 @@ void RendererDraw()
 {
 	BeginFrameTime = GetExecutionTimeOpenVkBool(OpenVkBeginFrame);
 	{
-		if (RenderShadows || EffectFrame == UINT32_MAX)
+		if (RenderShadows)
 			ShadowRenderingTime = GetExecutionTime(ShadowDraw);
-
-		EffectFrame++;
-		if (EffectFrame >= SHADOW_MAP_CASCADE_COUNT)
-			EffectFrame = 0;
-
+		GBufferDraw();
+		SSAODraw();
+		SSAOBlurDraw();
 		SceneRenderingTime = GetExecutionTime(SceneDraw);
 		SSRRenderingTime = GetExecutionTime(SSRDraw);
 		
@@ -367,4 +395,5 @@ void RendererRender()
 	GetDeltaTime();
 //	OpenVkDrawFrame(RendererDraw, RendererResize, RendererUpdate);
 	FrameTime = GetExecutionTimeOpenVkRender(OpenVkDrawFrame, RendererDraw, RendererResize, RendererUpdate);
+//	exit(22);
 }

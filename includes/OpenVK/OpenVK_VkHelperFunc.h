@@ -733,49 +733,62 @@ VkDescriptorType VkGetOpenVkDescriptorType(uint32_t DescriptorType)
 }
 
 //get the vulkan color format from openvk
-VkFormat VkGetOpenVkFormat(uint32_t Format)
+VkFormat VkGetOpenVkFormat(uint32_t Format, uint32_t* Size)
 {
 	VkFormat ColorFormat = VkRenderer.SwapChainImageFormat;
 
+	if (Size) *Size = UINT32_MAX;
 	switch (Format)
 	{
 	case OPENVK_FORMAT_R:
 		ColorFormat = VK_FORMAT_R8_UNORM;
+		if (Size) *Size = 1;
 		break;
 	case OPENVK_FORMAT_RG:
 		ColorFormat = VK_FORMAT_R8G8_UNORM;
+		if (Size) *Size = 2;
 		break;
 	case OPENVK_FORMAT_RGB:
 		ColorFormat = VK_FORMAT_R8G8B8_UNORM;
+		if (Size) *Size = 3;
 		break;
 	case OPENVK_FORMAT_RGBA:
 		ColorFormat = VK_FORMAT_R8G8B8A8_UNORM;
+		if (Size) *Size = 4;
 		break;
 
 	case OPENVK_FORMAT_R16F:
 		ColorFormat = VK_FORMAT_R16_SFLOAT;
+		if (Size) *Size = 2;
 		break;
 	case OPENVK_FORMAT_RG16F:
 		ColorFormat = VK_FORMAT_R16G16_SFLOAT;
+		if (Size) *Size = 4;
 		break;
 	case OPENVK_FORMAT_RGB16F:
 		ColorFormat = VK_FORMAT_R16G16B16_SFLOAT;
+		if (Size) *Size = 6;
 		break;
 	case OPENVK_FORMAT_RGBA16F:
 		ColorFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+		if (Size) *Size = 8;
 		break;
 
 	case OPENVK_FORMAT_R32F:
 		ColorFormat = VK_FORMAT_R32_SFLOAT;
+		if (Size) *Size = 4;
 		break;
 	case OPENVK_FORMAT_RG32F:
 		ColorFormat = VK_FORMAT_R32G32_SFLOAT;
+		if (Size) *Size = 8;
 		break;
 	case OPENVK_FORMAT_RGB32F:
 		ColorFormat = VK_FORMAT_R32G32B32_SFLOAT;
+		if (Size) *Size = 12;
 		break;
 	case OPENVK_FORMAT_RGBA32F:
 		ColorFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
+		if (Size) *Size = 16;
 		break;
 
 	case OPENVK_FORMAT_R_UINT:

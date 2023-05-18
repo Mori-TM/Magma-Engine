@@ -22,6 +22,7 @@ uint32_t ShadowPipelineFrontCull;
 uint32_t ShadowRenderPass;
 uint32_t ShadowFramebuffer;
 uint32_t ShadowDepthAttachment;
+uint32_t ShadowMapDescriptorSet;
 
 ShadowVertexPushConstant ShadowVertexPc;
 

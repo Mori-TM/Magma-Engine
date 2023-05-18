@@ -3,15 +3,15 @@
 
 layout(location = 0) in vec3 FragColor;
 
-layout(location = 0) out vec4 OutDepthPosition;
-layout(location = 1) out vec4 OutNormalMap;
-layout(location = 2) out vec4 OutPBRMap;
-layout(location = 3) out vec4 OutLightPass;
+layout (location = 0) out vec4 OutPosition;
+layout (location = 1) out vec4 OutNormal;
+layout (location = 2) out vec4 OutAlbedo;
+layout (location = 3) out vec4 OutPBR;
 
 void main()
 {
-	OutLightPass = vec4(FragColor, 1.0);
-	OutDepthPosition = vec4(gl_FragCoord.z);
-	OutNormalMap = vec4(0.0);
-	OutPBRMap = vec4(0.0);
+	OutAlbedo = vec4(FragColor, 1.0);
+	OutPosition = vec4(gl_FragCoord.z);
+	OutNormal = vec4(0.0);
+	OutPBR = vec4(0.0);
 }

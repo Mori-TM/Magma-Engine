@@ -308,7 +308,7 @@ uint32_t VkCreateRaytracingGeometry(OpenVkRaytracingGeometryCreateInfo* Info)
 	AccelerationStructureGeometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
 	AccelerationStructureGeometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
 	AccelerationStructureGeometry.geometry.triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
-	AccelerationStructureGeometry.geometry.triangles.vertexFormat = VkGetOpenVkFormat(Info->VertexFormat);
+	AccelerationStructureGeometry.geometry.triangles.vertexFormat = VkGetOpenVkFormat(Info->VertexFormat, NULL);
 	AccelerationStructureGeometry.geometry.triangles.vertexData = VertexBufferDeviceAddress;
 	AccelerationStructureGeometry.geometry.triangles.maxVertex = Info->VertexCount;
 	AccelerationStructureGeometry.geometry.triangles.vertexStride = Info->VertexSize;

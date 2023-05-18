@@ -510,6 +510,7 @@ void OpenVkGUIInit(uint32_t Width, uint32_t Height, uint32_t RenderPass, uint32_
 	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RG32F, OPENVK_FORMAT_RG32F, OPENVK_FORMAT_RGBA32F };
 	uint32_t ShaderAttributeOffsets[] = { 0, 8, 16 };
 
+	OpenVkBool Blending = OpenVkTrue;
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
 //	GraphicsPipelineCreateInfo.VertexShader.Size = sizeof(OpenVkGUIVertexShader);
 //	GraphicsPipelineCreateInfo.VertexShader.Data = (char*)OpenVkGUIVertexShader;
@@ -534,7 +535,7 @@ void OpenVkGUIInit(uint32_t Width, uint32_t Height, uint32_t RenderPass, uint32_
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_NONE;
 	GraphicsPipelineCreateInfo.FrontFace = OPENVK_FRONT_FACE_COUNTER_CLOCK_WISE;
 	GraphicsPipelineCreateInfo.MsaaSamples = MsaaSamples;
-	GraphicsPipelineCreateInfo.AlphaBlending = OpenVkTrue;
+	GraphicsPipelineCreateInfo.AlphaBlendings = &Blending;
 	GraphicsPipelineCreateInfo.ColorBlendAttachments = 1;
 	GraphicsPipelineCreateInfo.PipelineLayout = OpenVkGUI.PipelineLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = OpenVkFalse;
@@ -560,6 +561,7 @@ void OpenVkGUIRecreatePipeline()
 	uint32_t ShaderAttributeOffsets[] = { 0, 8, 16 };
 
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
+	OpenVkBool Blending = OpenVkTrue;
 	//	GraphicsPipelineCreateInfo.VertexShader.Size = sizeof(OpenVkGUIVertexShader);
 	//	GraphicsPipelineCreateInfo.VertexShader.Data = (char*)OpenVkGUIVertexShader;
 	//	GraphicsPipelineCreateInfo.VertexShader.Freeable = OpenVkFalse;
@@ -583,7 +585,7 @@ void OpenVkGUIRecreatePipeline()
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_NONE;
 	GraphicsPipelineCreateInfo.FrontFace = OPENVK_FRONT_FACE_COUNTER_CLOCK_WISE;
 	GraphicsPipelineCreateInfo.MsaaSamples = OpenVkGUI.MsaaSamples;
-	GraphicsPipelineCreateInfo.AlphaBlending = OpenVkTrue;
+	GraphicsPipelineCreateInfo.AlphaBlendings = &Blending;
 	GraphicsPipelineCreateInfo.ColorBlendAttachments = 1;
 	GraphicsPipelineCreateInfo.PipelineLayout = OpenVkGUI.PipelineLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = OpenVkFalse;

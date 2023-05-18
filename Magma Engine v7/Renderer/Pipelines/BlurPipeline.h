@@ -1,12 +1,12 @@
 void CreateBlurRenderPass()
 {
-	BlurColorAttachments[0] = OpenVkCreateColorImageAttachment(BLUR_PASS_SIZE, BLUR_PASS_SIZE, 1, true, OPENVK_FORMAT_DEFAULT);
-	BlurColorAttachments[1] = OpenVkCreateColorImageAttachment(BLUR_PASS_SIZE, BLUR_PASS_SIZE, 1, true, OPENVK_FORMAT_DEFAULT);
+	BlurColorAttachments[0] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_DEFAULT);
+	BlurColorAttachments[1] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_DEFAULT);
 
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR };
 	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_DEFAULT };
 	uint32_t MsaaSamples[] = { 1 };
-	BlurRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, NULL, true);
+	BlurRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
 }
 
 void CreateBlurLayout()
@@ -37,15 +37,15 @@ void CreateBlurPipeline()
 	GraphicsPipelineCreateInfo.PrimitiveTopology = OPENVK_PRIMITIVE_TOPOLOGY_TRIANGLE;
 	GraphicsPipelineCreateInfo.x = 0;
 	GraphicsPipelineCreateInfo.y = 0;
-	GraphicsPipelineCreateInfo.Width = BLUR_PASS_SIZE;
-	GraphicsPipelineCreateInfo.Height = BLUR_PASS_SIZE;
+	GraphicsPipelineCreateInfo.Width = SceneWidth;
+	GraphicsPipelineCreateInfo.Height = SceneHeight;
 	GraphicsPipelineCreateInfo.DepthClamp = false;
 	GraphicsPipelineCreateInfo.PolygonMode = OPENVK_POLYGON_MODE_FILL;
 	GraphicsPipelineCreateInfo.LineWidth = 1.0;
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_FRONT;
 	GraphicsPipelineCreateInfo.FrontFace = OPENVK_FRONT_FACE_COUNTER_CLOCK_WISE;
 	GraphicsPipelineCreateInfo.MsaaSamples = 1;
-	GraphicsPipelineCreateInfo.AlphaBlending = true;
+	GraphicsPipelineCreateInfo.AlphaBlendings = NULL;
 	GraphicsPipelineCreateInfo.ColorBlendAttachments = 1;
 	GraphicsPipelineCreateInfo.PipelineLayout = BlurLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = false;
@@ -64,8 +64,8 @@ void CreateBlurFramebuffers()
 		FramebufferCreateInfo.AttachmentCount = ARRAY_SIZE(Attachments);
 		FramebufferCreateInfo.Attachments = Attachments;
 		FramebufferCreateInfo.RenderPass = BlurRenderPass;
-		FramebufferCreateInfo.Width = BLUR_PASS_SIZE;
-		FramebufferCreateInfo.Height = BLUR_PASS_SIZE;
+		FramebufferCreateInfo.Width = SceneWidth;
+		FramebufferCreateInfo.Height = SceneHeight;
 		BlurFramebuffers[i] = OpenVkCreateFramebuffer(&FramebufferCreateInfo);
 	}	
 }
@@ -100,8 +100,8 @@ void CreateBlurDescriptorSets()
 
 uint32_t BlurDraw(uint32_t DescriptorSet, float BlurScale, float BlurStrength)
 {
-	OpenVkSetScissor(0, 0, BLUR_PASS_SIZE, BLUR_PASS_SIZE);
-	OpenVkSetViewport(0, 0, BLUR_PASS_SIZE, BLUR_PASS_SIZE);
+	OpenVkSetScissor(0, 0, SceneWidth, SceneHeight);
+	OpenVkSetViewport(0, 0, SceneWidth, SceneHeight);
 
 	for (uint32_t i = 0; i < 2; i++)
 	{
@@ -116,8 +116,8 @@ uint32_t BlurDraw(uint32_t DescriptorSet, float BlurScale, float BlurStrength)
 		BeginInfo.Framebuffer = BlurFramebuffers[i];
 		BeginInfo.x = 0;
 		BeginInfo.y = 0;
-		BeginInfo.Width = BLUR_PASS_SIZE;
-		BeginInfo.Height = BLUR_PASS_SIZE;
+		BeginInfo.Width = SceneWidth;
+		BeginInfo.Height = SceneHeight;
 		OpenVkBeginRenderPass(&BeginInfo);
 		{
 			OpenVkBindPipeline(BlurPipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);

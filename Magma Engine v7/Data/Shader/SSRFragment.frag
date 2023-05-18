@@ -5,12 +5,12 @@ layout(location = 0) out vec4 OutColor;
 
 layout(location = 0) in vec2 FragTexCoord;
 
-layout(set = 0, binding = 0) uniform sampler2DMS DepthPosition;
-layout(set = 0, binding = 1) uniform sampler2DMS NormalMap;
-layout(set = 0, binding = 2) uniform sampler2DMS PBRMap;//Metall, Roughness
-layout(set = 0, binding = 3) uniform sampler2DMS LightPass;
+layout(set = 0, binding = 0) uniform sampler2D SamplerPosition;
+layout(set = 0, binding = 1) uniform sampler2D SamplerNormal;
+layout(set = 0, binding = 2) uniform sampler2D SamplerAlbedo;
+layout(set = 0, binding = 3) uniform sampler2D SamplerPBR;
 
-layout(set = 1, binding = 0) uniform UniformBufferObject
+layout(set = 0, binding = 4) uniform UniformBufferObject
 {
 	mat4 Projection;
 	mat4 InvProjection;
@@ -653,7 +653,7 @@ vec3 hash(vec3 a)
 }
 */
 
-
+/*
 vec4 resolve(sampler2DMS tex, vec2 inUv)
 {
 	ivec2 attDim = textureSize(tex);
@@ -668,144 +668,19 @@ vec4 resolve(sampler2DMS tex, vec2 inUv)
 	// Average resolved samples
 	return result / float(UBO.MsaaSamples);
 }
+*/
 
-const float rayStep = 0.25;
-const float minRayStep = 0.1;
-const float maxSteps = 20;
-const float searchDist = 5;
-const float searchDistInv = 0.2;
-const int numBinarySearchSteps = 5;
-const float maxDDepth = 1.0;
-const float maxDDepthInv = 1.0;
-
-
-const float reflectionSpecularFalloffExponent = 3.0;
-
-
-vec3 BinarySearch(vec3 dir, inout vec3 hitCoord, out float dDepth)
+vec4 resolve(sampler2D tex, vec2 inUv)
 {
-    float depth;
-
-
-    for(int i = 0; i < numBinarySearchSteps; i++)
-    {
-        vec4 projectedCoord = UBO.Projection * vec4(hitCoord, 1.0);
-        projectedCoord.xy /= projectedCoord.w;
-        projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
-
-
-        depth = resolve(DepthPosition, FragTexCoord).z;
-
-
-        dDepth = hitCoord.z - depth;
-
-
-        if(dDepth > 0.0)
-            hitCoord += dir;
-
-
-        dir *= 0.5;
-        hitCoord -= dir;    
-    }
-
-
-    vec4 projectedCoord = UBO.Projection * vec4(hitCoord, 1.0); 
-    projectedCoord.xy /= projectedCoord.w;
-    projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
-
-
-    return vec3(projectedCoord.xy, depth);
+	return texture(tex, inUv);
 }
 
 
-vec4 RayCast(vec3 dir, inout vec3 hitCoord, out float dDepth)
-{
-    dir *= rayStep;
 
-
-    float depth;
-
-
-    for(int i = 0; i < maxSteps; i++)
-    {
-        hitCoord += dir;
-
-
-        vec4 projectedCoord = UBO.Projection * vec4(hitCoord, 1.0);
-        projectedCoord.xy /= projectedCoord.w;
-        projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
-
-
-        depth = resolve(DepthPosition, FragTexCoord).z;
-
-
-        dDepth = hitCoord.z - depth;
-
-
-        if(dDepth < 0.0)
-            return vec4(BinarySearch(dir, hitCoord, dDepth), 1.0);
-    }
-
-
-    return vec4(0.0, 0.0, 0.0, 0.0);
-}
-
-
-void main()
-{
-OutColor = resolve(LightPass, FragTexCoord);
-        return;
-   // vec2 gTexCoord = gl_FragCoord.xy * vec2(1010, 721);
-	
-	vec2 gTexCoord = FragTexCoord;
-
-    // Samples
-    float specular = resolve(PBRMap, FragTexCoord).g;
-
-
-    if(specular == 0.0)
-    {
-     //   OutColor = vec4(0.0, 0.0, 0.0, 0.0);
-		OutColor = resolve(LightPass, FragTexCoord);
-        return;
-    }
-
-
-    vec3 viewNormal = resolve(NormalMap, FragTexCoord).rgb;
-    vec3 viewPos = resolve(DepthPosition, FragTexCoord).rgb;
-
-
-    // Reflection vector
-    vec3 reflected = normalize(reflect(normalize(viewPos), normalize(viewNormal)));
-
-
-    // Ray cast
-    vec3 hitPos = viewPos;
-    float dDepth;
-
-
-    vec4 coords = RayCast(reflected * max(minRayStep, -viewPos.z), hitPos, dDepth);
-
-
-    vec2 dCoords = abs(vec2(0.5, 0.5) - coords.xy);
-
-
-    float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
-
-
-    // Get color
-    OutColor = vec4(resolve(LightPass, FragTexCoord).rgb,
-        pow(specular, reflectionSpecularFalloffExponent) *
-        screenEdgefactor * clamp(-reflected.z, 0.0, 1.0) *
-        clamp((searchDist - length(viewPos - hitPos)) * searchDistInv, 0.0, 1.0) * coords.w);
-}
-
-
-/*
 
 const float step = 0.1;
 const float minRayStep = 0.1;
-const float maxSteps = 30;
+const float maxSteps = 90;
 const int numBinarySearchSteps = 5;
 const float reflectionSpecularFalloffExponent = 3.0;
 
@@ -840,23 +715,23 @@ void main()
 	switch(Mode)
 	{
 	case 0:
-		OutColor = vec4(resolve(DepthPosition, FragTexCoord).rgb, 1.0);
+		OutColor = vec4(resolve(SamplerPosition, FragTexCoord).rgb, 1.0);
 		return;
 		break;
 	case 1:
-		OutColor = vec4(PositionFromDepth(resolve(DepthPosition, FragTexCoord).w), 1.0);
+		OutColor = vec4(resolve(SamplerPosition, FragTexCoord).www, 1.0);//PositionFromDepth unnscessary
 		return;
 		break;
 	case 2:
-		OutColor = vec4(vec2(resolve(PBRMap, FragTexCoord).rg), 0.0, 1.0);
+		OutColor = vec4(vec2(resolve(SamplerPBR, FragTexCoord).rg), 0.0, 1.0);
 		return;
 		break;
 	case 3:
-		OutColor = vec4(resolve(NormalMap, FragTexCoord).rgb, 1.0);
+		OutColor = vec4(resolve(SamplerNormal, FragTexCoord).rgb, 1.0);
 		return;
 		break;
 	case 4:
-		OutColor = vec4(resolve(LightPass, FragTexCoord).rgb, 1.0);
+		OutColor = vec4(resolve(SamplerAlbedo, FragTexCoord).rgb, 1.0);
 		return;
 		break;
 	default:
@@ -866,43 +741,46 @@ void main()
 //	OutColor = vec4(texture(DepthPosition, FragTexCoord).rgb, 1.0);
 //	return;
 
-	vec3 Color = resolve(LightPass, FragTexCoord).rgb;
+	vec3 Color = resolve(SamplerAlbedo, FragTexCoord).rgb;
 
 	OutColor = vec4(Color, 1.0);
 //    return;
 
-	vec2 PBR = resolve(PBRMap, FragTexCoord).rg;
+	vec2 PBR = resolve(SamplerPBR, FragTexCoord).rg;
 	Metallic = PBR.r;
 //	Metallic = 1.0;
 
 	if(Metallic < 0.01)
 	{
-		OutColor = resolve(LightPass, FragTexCoord);
+		OutColor = resolve(SamplerAlbedo, FragTexCoord);
 		return;
 	}
 	//    discard;
  
-	vec3 viewNormal = resolve(NormalMap, FragTexCoord).xyz;
+//	vec3 viewNormal = resolve(SamplerNormal, FragTexCoord).xyz;
+	vec4 NormalTex = texture(SamplerNormal, FragTexCoord);
+	vec3 viewNormal = normalize(NormalTex.rgb);
 //	vec3 viewPos = textureLod(DepthPosition, FragTexCoord, 2).xyz;
 //	vec3 viewPos = PositionFromDepth(resolve(DepthPosition, FragTexCoord).w);
-    vec3 viewPos = resolve(DepthPosition, FragTexCoord).xyz;
-	vec3 albedo = resolve(LightPass, FragTexCoord).rgb;
+    vec3 viewPos = resolve(SamplerPosition, FragTexCoord).xyz;
+	vec3 viewPosNormalized = normalize(viewPos);
+	vec3 albedo = resolve(SamplerAlbedo, FragTexCoord).rgb;
 
-	float spec = resolve(NormalMap, FragTexCoord).w;
+	float spec = PBR.g;
 
 	vec3 F0 = vec3(0.04); 
 	F0      = mix(F0, albedo, Metallic);
-	vec3 Fresnel = fresnelSchlick(max(dot(normalize(viewNormal), normalize(viewPos)), 0.0), F0);
+	vec3 Fresnel = fresnelSchlick(max(dot(viewNormal, viewPosNormalized), 0.0), F0);
 
 	// Reflection vector
-	vec3 reflected = normalize(reflect(normalize(viewPos), normalize(viewNormal)));
+	vec3 reflected = normalize(reflect(viewPosNormalized, viewNormal));
 
 
 	vec3 hitPos = viewPos;
 	float dDepth;
  
-	vec3 wp = vec3(vec4(viewPos, 1.0) * UBO.InvView);
-	vec3 jitt = mix(vec3(0.0), vec3(hash(wp)), spec);
+//	vec3 wp = vec3(vec4(viewPos, 1.0) * UBO.InvView);
+	vec3 jitt = mix(vec3(-spec / 2), vec3(hash(albedo)), spec/ 2);
 	vec4 coords = RayMarch((vec3(jitt) + reflected * max(minRayStep, -viewPos.z)), hitPos, dDepth);
  
  
@@ -916,8 +794,8 @@ void main()
 				-reflected.z;
  
 	// Get color
-	const float strength = 0.3;
-	vec4 SSR = vec4(resolve(LightPass, coords.xy).rgb, clamp(ReflectionMultiplier * Fresnel * strength, 0.0, 0.9));  
+	const float strength = 0.6;
+	vec4 SSR = vec4(resolve(SamplerAlbedo, coords.xy).rgb, clamp(ReflectionMultiplier * Fresnel * strength, 0.0, 0.9));  
 	vec3 blending =  SSR.rgb * SSR.a + albedo * (1.0 - SSR.a);
 	OutColor = vec4(blending, 1.0);
 }
@@ -947,7 +825,7 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
 		projectedCoord.xy /= projectedCoord.w;
 		projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
  
-		depth = resolve(DepthPosition, projectedCoord.xy).z;
+		depth = resolve(SamplerPosition, projectedCoord.xy).z;
 
  
 		dDepth = hitCoord.z - depth;
@@ -985,7 +863,7 @@ vec4 RayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth)
 		projectedCoord.xy /= projectedCoord.w;
 		projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
  
-		depth = resolve(DepthPosition, projectedCoord.xy).z;
+		depth = resolve(SamplerPosition, projectedCoord.xy).z;
 		if(depth > 1000.0)
 			continue;
  
@@ -1022,18 +900,77 @@ vec3 hash(vec3 a)
 	return fract((a.xxy + a.yxx)*a.zyx);
 }
 
+
+
+
+
+
+
+/*
+
+const int NUM_SAMPLES = 8;
+const float SAMPLE_SPACING = 3.0f;
+const float SAMPLE_TOLLERANCE = SAMPLE_SPACING*5.0f;
+const float SAMPLE_RANDOMISE = 0.02f;
+
+// Method to generate a falloff coefficient for the edge of the screen
+// So reflections get faded out as they come close to the edge
+float edgeFalloff(vec2 uv)
+{
+	vec2 s = pow(abs(uv*2-1), vec2(6,4));
+	return 1-max(0, min(1, s.x+s.y));
+}
+
+void main()
+{
+	vec3 normal = texture(SamplerNormal, FragTexCoord).xyz*2-1;
+
+
+	vec3 world = texture(uTexWorld, FragTexCoord).xyz;
+
+
+	vec3 eye = normalize(uCameraPosition – world);
+
+
+	vec3 ray = reflect(-eye, normal);
+
+	float fresnel = pow(1-max(0, dot(eye, normal)), 2);
+
+
+	vec3 rand = texture(uTexNoise, vTexCoord*vec2(1.6,1)*4).xyz*2-1;
+	float n = rand.x*0.5+1;
+
+	vec3 col = vec3(0);
+	for (int i=0; i<NUM_SAMPLES; i++)
+	{
+	// Pick a point on the ray
+	vec3 raysamp = world + rand*SAMPLE_RANDOMISE + ray*(i+n)*SAMPLE_SPACING;
+
+	// Put ray into screenspace
+	vec4 vssamp = uProjViewMatrix * vec4(raysamp, 1);
+	vssamp /= vssamp.w; // Now its between -1 and 1
+	vssamp = vssamp*0.5+0.5; // Now its between 0 and 1
+
+	// World space sample position
+	vec3 p = texture(uTexWorld, vssamp.xy).xyz;
+
+	// Colour of world space sample position
+	vec3 c = texture(uTexSource, vssamp.xy).xyz * edgeFalloff(vssamp.xy);
+
+	// Calculate the blend amount for the sample 
+	float b = max(0, 0.5-length(raysamp-p)/SAMPLE_TOLLERANCE);
+
+	// Add the colour to the output
+	col += c * b;
+}
+
+// Send across the colour to the blend shader which blends it with the source colour based on the w component
+// The w component consists of Fresnel and perhaps shininess or metalness etc…
+oColor = vec4(col, 0.3*fresnel);
+}
+
+
 */
-
-
-
-
-
-
-
-
-
-
-
 
 
 

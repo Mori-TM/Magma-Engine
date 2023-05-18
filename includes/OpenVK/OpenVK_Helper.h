@@ -221,6 +221,15 @@ typedef enum
 	OPENVK_PIPELINE_TYPE_RAYTRACING = 0x1,
 } OpenVkPipelineTypes;
 
+typedef enum
+{
+	OPENVK_RENDER_PASS_RESOLVE_ATTACHMENTS = 0x1,
+	OPENVK_RENDER_PASS_SAMPLED = 0x2,
+	OPENVK_RENDER_PASS_BOTTOM_OF_PIPE = 0x4,
+	OPENVK_RENDER_PASS_MEMORY_READ = 0x8,
+	OPENVK_RENDER_PASS_COLOR_ACCESS_READ_AND_WRITE = 0x10,
+} OpenVkRenderPassOptions;
+
 typedef struct
 {
 	float Matrix[3][4];
@@ -273,7 +282,7 @@ typedef struct
 	uint32_t	CullMode;
 	uint32_t	FrontFace;
 	uint32_t	MsaaSamples;
-	OpenVkBool	AlphaBlending;
+	OpenVkBool*	AlphaBlendings;
 	uint32_t	ColorBlendAttachments;
 	OpenVkBool	DepthStencil;
 	uint32_t	PipelineLayout;

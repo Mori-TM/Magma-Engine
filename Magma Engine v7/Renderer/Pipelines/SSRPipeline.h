@@ -5,24 +5,18 @@ void CreateSSRRenderPass()
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR };
 	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_DEFAULT };
 	uint32_t MsaaSamples[] = { 1 };
-	SSRRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, NULL, true);
+	SSRRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED | OPENVK_RENDER_PASS_BOTTOM_OF_PIPE | OPENVK_RENDER_PASS_MEMORY_READ | OPENVK_RENDER_PASS_COLOR_ACCESS_READ_AND_WRITE);
 }
 
 void CreateSSRLayout()
 {
-	uint32_t DescriptorSetLayouts[] =
-	{
-		SceneDescriptorSetLayout,
-		FragmentUniformDescriptorSetLayout
-	};
-
 	OpenVkPipelineLayoutCreateInfo Layout;
 	Layout.PushConstantCount = 0;
 	Layout.PushConstantShaderTypes = NULL;
 	Layout.PushConstantOffsets = 0;
 	Layout.PushConstantSizes = 0;
-	Layout.DescriptorSetLayoutCount = ARRAY_SIZE(DescriptorSetLayouts);
-	Layout.DescriptorSetLayouts = DescriptorSetLayouts;
+	Layout.DescriptorSetLayoutCount = 1;
+	Layout.DescriptorSetLayouts = &SSRDescriptorSetLayout;
 	SSRLayout = OpenVkCreatePipelineLayout(&Layout);
 }
 
@@ -46,7 +40,7 @@ void CreateSSRPipeline()
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_FRONT;
 	GraphicsPipelineCreateInfo.FrontFace = OPENVK_FRONT_FACE_COUNTER_CLOCK_WISE;
 	GraphicsPipelineCreateInfo.MsaaSamples = 1;
-	GraphicsPipelineCreateInfo.AlphaBlending = true;
+	GraphicsPipelineCreateInfo.AlphaBlendings = NULL;
 	GraphicsPipelineCreateInfo.ColorBlendAttachments = 1;
 	GraphicsPipelineCreateInfo.PipelineLayout = SSRLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = false;
@@ -76,6 +70,36 @@ void CreateSSRUniformBuffer()
 void CreateSSRDescriptorSet()
 {
 	{
+		uint32_t DescriptorCounts[] = { 1, 1, 1, 1, 1 };
+		uint32_t Attachments[] = { GBufferAttachments[0], GBufferAttachments[1], SceneAttachment, GBufferAttachments[3] };
+		uint32_t Sampler[] = { GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler };
+		uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT };
+		uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT };
+		uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER };
+		uint32_t UniformBuffers[] = { SSRUniformBuffer };
+		size_t UniformSizes[] = { sizeof(SSRUniformBufferObject) };
+		uint32_t Bindings[] = { 0, 1, 2, 3, 4 };
+
+		OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
+		DescriptorSetCreateInfo.DescriptorSetLayout = SSRDescriptorSetLayout;
+		DescriptorSetCreateInfo.DescriptorPool = DescriptorPool;
+		DescriptorSetCreateInfo.DescriptorWriteCount = 5;
+		DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
+		DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
+		DescriptorSetCreateInfo.Sampler = Sampler;
+		DescriptorSetCreateInfo.ImageTypes = ImageTypes;
+		DescriptorSetCreateInfo.Images = Attachments;
+		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
+		DescriptorSetCreateInfo.Buffers = UniformBuffers;
+		DescriptorSetCreateInfo.BufferSizes = UniformSizes;
+		DescriptorSetCreateInfo.Bindings = Bindings;
+		DescriptorSetCreateInfo.DescriptorSet = NULL;
+		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
+
+		SSRInputDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
+	}
+
+	{
 		uint32_t DescriptorCounts[] = { 1 };
 		uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
 		uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_ATTACHMENT };
@@ -96,71 +120,18 @@ void CreateSSRDescriptorSet()
 		DescriptorSetCreateInfo.DescriptorSet = NULL;
 		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
-		SSRDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
+		SSROutputDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}
-	/*
-	{
-		unsigned char* Pixels;
-		int32_t Width;
-		int32_t Height;
-		OpenVkLoadTexture("Data/Textures/spiaggia_di_mondello.jpg", OpenVkTrue, &Pixels, &Width, &Height, OPENVK_FORMAT_RGBA);
-		uint32_t Texture = OpenVkCreateTextureImage(Pixels, Width, Height, OPENVK_FORMAT_RGBA);
-		uint32_t Sampler = OpenVkCreateImageSampler(OPENVK_FILTER_LINEAR, OPENVK_ADDRESS_MODE_REPEAT);
-
-		uint32_t DescriptorCounts[] = { 1 };
-		uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
-		uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_TEXTURE };
-		uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT };
-		uint32_t Bindings[] = { 0 };
-
-		OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
-		DescriptorSetCreateInfo.DescriptorSetLayout = TextureDescriptorSetLayout;
-		DescriptorSetCreateInfo.DescriptorPool = DescriptorPool;
-		DescriptorSetCreateInfo.DescriptorWriteCount = 1;
-		DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
-		DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
-		DescriptorSetCreateInfo.Sampler = &Sampler;
-		DescriptorSetCreateInfo.ImageTypes = ImageTypes;
-		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
-		DescriptorSetCreateInfo.Bindings = Bindings;
-		DescriptorSetCreateInfo.Images = &Texture;
-		DescriptorSetCreateInfo.DescriptorSet = NULL;
-		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
-
-		SkyboxDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
-	}
-	*/
-	{
-		uint32_t DescriptorCounts[] = { 1 };
-		uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER };
-		uint32_t UniformBuffers[] = { SSRUniformBuffer };
-		size_t UniformSizes[] = { sizeof(SSRUniformBufferObject) };
-		uint32_t Bindings[] = { 0 };
-
-		OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
-		DescriptorSetCreateInfo.DescriptorSetLayout = FragmentUniformDescriptorSetLayout;
-		DescriptorSetCreateInfo.DescriptorPool = DescriptorPool;
-		DescriptorSetCreateInfo.DescriptorWriteCount = 1;
-		DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
-		DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
-		DescriptorSetCreateInfo.Buffers = UniformBuffers;
-		DescriptorSetCreateInfo.BufferSizes = UniformSizes;
-		DescriptorSetCreateInfo.Bindings = Bindings;
-		DescriptorSetCreateInfo.DescriptorSet = NULL;
-		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
-
-		SSRUniformDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
-	}	
 }
 
-void SSRUpdateUniform()
+void SSRUpdateUniformBuffer()
 {
 	Mutex.lock();
-	SSRFragmentUBO.Projection = SceneVertexUBO.Projection;
-	SSRFragmentUBO.View = SceneVertexUBO.View;
+	SSRFragmentUBO.Projection = GBufferVertexUBO.Projection;
+	SSRFragmentUBO.View = GBufferVertexUBO.View;
 	
-	SSRFragmentUBO.InvProjection = InverseMat4(SceneVertexUBO.Projection);
-	SSRFragmentUBO.InvView = InverseMat4(SceneVertexUBO.View);
+	SSRFragmentUBO.InvProjection = InverseMat4(GBufferVertexUBO.Projection);
+	SSRFragmentUBO.InvView = InverseMat4(GBufferVertexUBO.View);
 	Mutex.unlock();
 
 	SSRFragmentUBO.MsaaSamples = MsaaSamples;
@@ -190,8 +161,7 @@ void SSRDraw()
 	{
 		OpenVkBindPipeline(SSRPipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
-		OpenVkBindDescriptorSet(SSRLayout, 0, SceneDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-		OpenVkBindDescriptorSet(SSRLayout, 1, SSRUniformDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+		OpenVkBindDescriptorSet(SSRLayout, 0, SSRInputDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 		OpenVkDrawVertices(0, 3);
 	}
 	OpenVkEndRenderPass();

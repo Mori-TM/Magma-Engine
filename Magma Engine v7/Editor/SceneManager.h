@@ -72,7 +72,7 @@ void EditorDrawScene()
 			ImGuiSceneWidth = WindowSize.x;
 			ImGuiSceneHeight = WindowSize.y;
 
-			ImGui::Image(&GetDescriptorSet(SSRDescriptorSet)[VkRenderer.CurrentFrame], WindowSize);
+			ImGui::Image(&GetDescriptorSet(SSROutputDescriptorSet)[VkRenderer.CurrentFrame], WindowSize);
 		}
 		ImGui::EndChild();
 

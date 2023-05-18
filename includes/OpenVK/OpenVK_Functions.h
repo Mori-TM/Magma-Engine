@@ -1,7 +1,7 @@
 void		(*OpenVkDestroyRenderer				)();
 void		(*OpenVkDeviceWaitIdle				)();
 void		(*OpenVkRecreateSwapChain			)(uint32_t* Width, uint32_t* Height);
-uint32_t	(*OpenVkCreateRenderPass			)(uint32_t AttachmentCount, uint32_t* Attachments, uint32_t* AttachmentFormats, uint32_t* MsaaSamples, uint32_t* ResolveAttachments, OpenVkBool Sampled);
+uint32_t	(*OpenVkCreateRenderPass			)(uint32_t AttachmentCount, uint32_t* Attachments, uint32_t* AttachmentFormats, uint32_t* MsaaSamples, uint32_t RenderPassOptions);
 uint32_t	(*OpenVkCreateGraphicsPipeline		)(OpenVkGraphicsPipelineCreateInfo* Info);
 uint32_t	(*OpenVkCreatePipelineLayout		)(OpenVkPipelineLayoutCreateInfo* Info);
 uint32_t	(*OpenVkCreateFramebuffer			)(OpenVkFramebufferCreateInfo* Info);

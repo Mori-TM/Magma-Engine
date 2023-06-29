@@ -2,14 +2,17 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 layout (location = 0) out vec4 OutPosition;
-layout (location = 1) out vec4 OutNormal;
+layout (location = 1) out vec4 OutViewNormal;
 layout (location = 2) out vec4 OutAlbedo;
 layout (location = 3) out vec4 OutPBR;
+layout (location = 4) out vec4 OutWorldPos;
+layout (location = 5) out float OutNormal;
 
-layout(location = 0) in vec3 FragNormal;
-layout(location = 1) in vec2 FragTexCoord;
-layout(location = 2) in vec4 FragPosRelToCam;
-layout(location = 3) in vec4 FragWorldPos;
+layout(location = 0) in vec3 FragViewNormal;
+layout(location = 1) in vec3 FragNormal;
+layout(location = 2) in vec2 FragTexCoord;
+layout(location = 3) in vec4 FragPosRelToCam;
+layout(location = 4) in vec4 FragWorldPos;
 
 layout(set = 0, binding = 0) uniform sampler2D AlbedoMap;
 layout(set = 1, binding = 0) uniform sampler2D NormalMap;
@@ -58,11 +61,17 @@ vec3 GetNormalFromMap()
 
 void main() 
 {
+	vec3 Normal = GetNormalFromMap();//normalize(FragNormal);
 	OutPosition = vec4(FragPosRelToCam.xyz, LinearDepth(gl_FragCoord.z));
-	OutNormal = vec4(normalize(FragNormal), 1.0);				//use GetNormalFromMap
+	OutViewNormal = vec4(normalize(FragViewNormal), Normal.x);				//use GetNormalFromMap
 	OutAlbedo = texture(AlbedoMap, FragTexCoord) * PushConst.Color;
 	OutPBR.r = texture(MetallicMap, FragTexCoord).r * PushConst.Metallic;
 	OutPBR.g = texture(RoughnessMap, FragTexCoord).r * PushConst.Roughness;
 	OutPBR.b = texture(OcclusionMap, FragTexCoord).r * PushConst.Occlusion;
-	OutPBR.a = 1.0;
+	OutPBR.a = Normal.y;
+	OutWorldPos.x = FragWorldPos.x;
+	OutWorldPos.y = FragWorldPos.y;
+	OutWorldPos.z = FragWorldPos.z;
+	OutWorldPos.w = FragWorldPos.w;
+	OutNormal = Normal.z;
 }

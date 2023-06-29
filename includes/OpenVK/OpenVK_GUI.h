@@ -54,7 +54,7 @@ typedef struct
 	uint32_t Texture;
 	uint32_t TextureSampler;
 	uint32_t DescriptorSet;
-	uint32_t Width; 
+	uint32_t Width;
 	uint32_t Height;
 	uint32_t MsaaSamples;
 
@@ -122,16 +122,16 @@ void OpenVkGUIResizeBuffer(OpenVkGUIBuffer* Buffer, OpenVkBool VertexBuffer)
 			Buffer->Data = realloc(Buffer->Data, Buffer->AllocatedSize * sizeof(OpenVkGUIVertex));
 			OpenVkRuntimeInfo("Vertex Resize", "");
 		}
-			
+
 		else
 		{
 			Buffer->Buffer = OpenVkCreateDynamicIndexBuffer(Buffer->AllocatedSize * sizeof(uint32_t));
 			Buffer->Data = realloc(Buffer->Data, Buffer->AllocatedSize * sizeof(uint32_t));
 			OpenVkRuntimeInfo("Index Resize", "");
 		}
-			
+
 	}
-		
+
 
 
 }
@@ -147,7 +147,7 @@ OpenVkGUIGlyph OpenVkGUIMakeGlyph(uint32_t Character, float OffsetX, float Offse
 	stbtt_aligned_quad Quad;
 
 	stbtt_GetPackedQuad(OpenVkGUI.Chars, OpenVkGUI.AtlasWidth, OpenVkGUI.AtlasHeight, Character, &OffsetX, &OffsetY, &Quad, 1);
-	
+
 	OpenVkGUIGlyph Info;
 	Info.Offset[0] = OffsetX;
 	Info.Offset[1] = OffsetY;
@@ -160,7 +160,7 @@ OpenVkGUIGlyph OpenVkGUIMakeGlyph(uint32_t Character, float OffsetX, float Offse
 	Info.Vertices[0].Color[1] = 1.0;
 	Info.Vertices[0].Color[2] = 1.0;
 	Info.Vertices[0].Color[3] = 1.0;
-	
+
 	Info.Vertices[1].Pos[0] = Quad.x0;
 	Info.Vertices[1].Pos[1] = Quad.y0;
 	Info.Vertices[1].UV[0] = Quad.s0;
@@ -178,7 +178,7 @@ OpenVkGUIGlyph OpenVkGUIMakeGlyph(uint32_t Character, float OffsetX, float Offse
 	Info.Vertices[2].Color[1] = 1.0;
 	Info.Vertices[2].Color[2] = 1.0;
 	Info.Vertices[2].Color[3] = 1.0;
-	
+
 	Info.Vertices[3].Pos[0] = Quad.x1;
 	Info.Vertices[3].Pos[1] = Quad.y1;
 	Info.Vertices[3].UV[0] = Quad.s1;
@@ -219,7 +219,7 @@ uint32_t Indi[] =
 };
 
 const uint32_t OpenVkGUIFragmentShader[] =
-{	
+{
 	// 1011.6.0
 	0x07230203,0x00010000,0x0008000a,0x00000094,0x00000000,0x00020011,0x00000001,0x0006000b,
 	0x00000001,0x4c534c47,0x6474732e,0x3035342e,0x00000000,0x0003000e,0x00000000,0x00000001,
@@ -374,10 +374,10 @@ const uint32_t OpenVkGUIVertexShader[] =
 OpenVkGUIWindow OpenVkGUIWindowInit(uint32_t i)
 {
 	OpenVkGUIWindow Win;
-//	Win.x = 10;
-//	Win.y = 10;
-//	Win.w = 60;
-//	Win.h = 60;
+	//	Win.x = 10;
+	//	Win.y = 10;
+	//	Win.w = 60;
+	//	Win.h = 60;
 	Win.x = 560 + (i * 40);
 	Win.y = 100 + (i * 40);
 	Win.sx = 60;
@@ -395,7 +395,7 @@ OpenVkGUIWindow OpenVkGUIWindowInit(uint32_t i)
 	return Win;
 }
 
-void OpenVkGUIInit(uint32_t Width, uint32_t Height, uint32_t RenderPass, uint32_t MsaaSamples, float FontSize, const char* Font, uint32_t (*GetMousePos)(int32_t* x, int32_t* y))
+void OpenVkGUIInit(uint32_t Width, uint32_t Height, uint32_t RenderPass, uint32_t MsaaSamples, float FontSize, const char* Font, uint32_t(*GetMousePos)(int32_t* x, int32_t* y))
 {
 	OpenVkGetMousePos = GetMousePos;
 
@@ -429,7 +429,7 @@ void OpenVkGUIInit(uint32_t Width, uint32_t Height, uint32_t RenderPass, uint32_
 	OpenVkGUI.WindowSize = OPENVK_GUI_ALLOCATE_BLOCK;
 	OpenVkGUI.Windows = NULL;
 	OpenVkGUI.Window = NULL;
-	
+
 	OpenVkGUI.MouseItemCollision = OpenVkFalse;
 	OpenVkGUI.sx = 0;
 	OpenVkGUI.sy = 0;
@@ -445,7 +445,7 @@ void OpenVkGUIInit(uint32_t Width, uint32_t Height, uint32_t RenderPass, uint32_
 	OpenVkGUI.DescriptorPool = OpenVkCreateDescriptorPool(OPENVK_DESCRIPTOR_POOL_DEFAULT, 1, DescriptorTypes, DescriptorCounts);
 
 
-		OpenVkFile File = OpenVkReadFile(Font);
+	OpenVkFile File = OpenVkReadFile(Font);
 	//	stbtt_fontinfo info;
 	//	if (!stbtt_InitFont(&info, (unsigned char*)File.Data, 0))
 	//	{
@@ -453,19 +453,19 @@ void OpenVkGUIInit(uint32_t Width, uint32_t Height, uint32_t RenderPass, uint32_
 	//	}
 
 		/* create a bitmap for the phrase */
-		unsigned char* Bitmap = (unsigned char*)calloc(OpenVkGUI.AtlasWidth * OpenVkGUI.AtlasHeight, sizeof(unsigned char));
+	unsigned char* Bitmap = (unsigned char*)calloc(OpenVkGUI.AtlasWidth * OpenVkGUI.AtlasHeight, sizeof(unsigned char));
 
 	//	font_.charInfo = std::make_unique<stbtt_packedchar[]>(font_.charCount);
 
-		stbtt_pack_context context;
-		if (!stbtt_PackBegin(&context, Bitmap, OpenVkGUI.AtlasWidth, OpenVkGUI.AtlasHeight, 0, 1, NULL))
-			printf("Failed to initialize font\n");
+	stbtt_pack_context context;
+	if (!stbtt_PackBegin(&context, Bitmap, OpenVkGUI.AtlasWidth, OpenVkGUI.AtlasHeight, 0, 1, NULL))
+		printf("Failed to initialize font\n");
 
-		stbtt_PackSetOversampling(&context, OpenVkGUI.OverSample[0], OpenVkGUI.OverSample[1]);
-		if (!stbtt_PackFontRange(&context, (unsigned char*)File.Data, 0, OpenVkGUI.Size, 0, OPENVK_GUI_MAX_CHAR_COUNT, OpenVkGUI.Chars))
-			printf("Failed to pack font\n");
+	stbtt_PackSetOversampling(&context, OpenVkGUI.OverSample[0], OpenVkGUI.OverSample[1]);
+	if (!stbtt_PackFontRange(&context, (unsigned char*)File.Data, 0, OpenVkGUI.Size, 0, OPENVK_GUI_MAX_CHAR_COUNT, OpenVkGUI.Chars))
+		printf("Failed to pack font\n");
 
-		stbtt_PackEnd(&context);
+	stbtt_PackEnd(&context);
 
 	OpenVkTextureCreateInfo TextureCreateInfo;
 	TextureCreateInfo.Pixels = &Bitmap;
@@ -512,12 +512,12 @@ void OpenVkGUIInit(uint32_t Width, uint32_t Height, uint32_t RenderPass, uint32_
 
 	OpenVkBool Blending = OpenVkTrue;
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
-//	GraphicsPipelineCreateInfo.VertexShader.Size = sizeof(OpenVkGUIVertexShader);
-//	GraphicsPipelineCreateInfo.VertexShader.Data = (char*)OpenVkGUIVertexShader;
-//	GraphicsPipelineCreateInfo.VertexShader.Freeable = OpenVkFalse;
-//	GraphicsPipelineCreateInfo.FragmentShader.Size = sizeof(OpenVkGUIFragmentShader);
-//	GraphicsPipelineCreateInfo.FragmentShader.Data = (char*)OpenVkGUIFragmentShader;
-//	GraphicsPipelineCreateInfo.FragmentShader.Freeable = OpenVkFalse;
+	//	GraphicsPipelineCreateInfo.VertexShader.Size = sizeof(OpenVkGUIVertexShader);
+	//	GraphicsPipelineCreateInfo.VertexShader.Data = (char*)OpenVkGUIVertexShader;
+	//	GraphicsPipelineCreateInfo.VertexShader.Freeable = OpenVkFalse;
+	//	GraphicsPipelineCreateInfo.FragmentShader.Size = sizeof(OpenVkGUIFragmentShader);
+	//	GraphicsPipelineCreateInfo.FragmentShader.Data = (char*)OpenVkGUIFragmentShader;
+	//	GraphicsPipelineCreateInfo.FragmentShader.Freeable = OpenVkFalse;
 	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/GUIVertex.spv");
 	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/GUIFragment.spv");
 	GraphicsPipelineCreateInfo.BindingStride = sizeof(OpenVkGUIVertex);
@@ -551,8 +551,8 @@ void OpenVkGUIInit(uint32_t Width, uint32_t Height, uint32_t RenderPass, uint32_
 	for (uint32_t i = 0; i < OpenVkGUI.WindowSize; i++)
 		OpenVkGUI.Windows[i] = OpenVkGUIWindowInit(i);
 
-//	OpenVkGUI.VertexBuffer = OpenVkCreateDynamicVertexBuffer(4 * sizeof(OpenVkGUIVertex));
-//	OpenVkGUI.IndexBuffer = OpenVkCreateDynamicIndexBuffer(6 * sizeof(uint32_t));
+	//	OpenVkGUI.VertexBuffer = OpenVkCreateDynamicVertexBuffer(4 * sizeof(OpenVkGUIVertex));
+	//	OpenVkGUI.IndexBuffer = OpenVkCreateDynamicIndexBuffer(6 * sizeof(uint32_t));
 }
 
 void OpenVkGUIRecreatePipeline()
@@ -595,7 +595,7 @@ void OpenVkGUIRecreatePipeline()
 
 void OpenVkGUIDestroy()
 {
-	
+
 }
 
 void OpenVkGUIBeginRender(uint32_t Width, uint32_t Height)
@@ -610,11 +610,11 @@ void OpenVkGUIBeginRender(uint32_t Width, uint32_t Height)
 	mat4 Proj = OrthoMat4(0.0, Width, Height, 0.0, -1.0, 1.0);
 	for (uint32_t i = 0; i < 4; i++)
 	{
-		vec4 Pos = 
+		vec4 Pos =
 		{
 			Glyph.Vertices[i].Pos[0] * 2,
 			Glyph.Vertices[i].Pos[1] * 2 + 80,
-			0.0, 
+			0.0,
 			1.0
 		};
 
@@ -629,7 +629,7 @@ void OpenVkGUIBeginRender(uint32_t Width, uint32_t Height)
 	*/
 
 	OpenVkGUI.LastMouse = OpenVkGUI.CurMouse;
-	
+
 	OpenVkGUI.CurMouse.State = OpenVkGetMousePos(&OpenVkGUI.CurMouse.x, &OpenVkGUI.CurMouse.y);
 	if (OpenVkGUI.CurMouse.State == 1 && OpenVkGUI.LastMouse.State != 1)
 	{
@@ -660,7 +660,7 @@ void OpenVkGUIBeginRender(uint32_t Width, uint32_t Height)
 	OpenVkGUI.WindowCount = 0;
 	OpenVkGUI.Window = NULL;
 
-//	OpenVkGUI.Rounding = 120.0 * sinf(SDL_GetTicks() * 0.0025) + 120.0;
+	//	OpenVkGUI.Rounding = 120.0 * sinf(SDL_GetTicks() * 0.0025) + 120.0;
 
 	OpenVkSetScissor(0, 0, Width, Height);
 	OpenVkSetViewport(0, 0, Width, Height);
@@ -683,7 +683,7 @@ void OpenVkGUITransformVertices(float Left, float Right, float Bottom, float Top
 
 	for (uint32_t j = 0; j < OpenVkGUI.VertexBuffer.Size; j++)
 	{
-		
+
 		OpenVkGUIVertex* V = (OpenVkGUIVertex*)OpenVkGUI.VertexBuffer.Data;
 		V[j].Pos[1] = OpenVkGUI.Height - V[j].Pos[1];
 		float Pos[2] =
@@ -700,21 +700,31 @@ void OpenVkGUITransformVertices(float Left, float Right, float Bottom, float Top
 	}
 }
 
+void OpenVkGUISortIndices()
+{
+	for (uint32_t i = 0; i < OpenVkGUI.WindowCount; i++)
+	{
+		OpenVkGUIWindow* Wnd = &OpenVkGUI.Windows[i];
+
+	}
+}
+
 void OpenVkGUIEndRender()
 {
 	if (OpenVkGUI.IndexBuffer.Size > 0 && OpenVkGUI.VertexBuffer.Size < OpenVkGUI.VertexBuffer.AllocatedSize && OpenVkGUI.IndexBuffer.Size < OpenVkGUI.IndexBuffer.AllocatedSize)
 	{
-		uint32_t VertexSize = OpenVkGUI.VertexBuffer.Size;		
+		uint32_t VertexSize = OpenVkGUI.VertexBuffer.Size;
 		uint32_t IndexSize = OpenVkGUI.IndexBuffer.Size;
 
-	//	if (OpenVkGUI.Window != NULL)
-	//		OpenVkSetScissor(OpenVkGUI.Window->x, OpenVkGUI.Window->y, OpenVkGUI.Window->w, OpenVkGUI.Window->h);
+		//	if (OpenVkGUI.Window != NULL)
+		//		OpenVkSetScissor(OpenVkGUI.Window->x, OpenVkGUI.Window->y, OpenVkGUI.Window->w, OpenVkGUI.Window->h);
 
+		OpenVkGUISortIndices();
 		OpenVkGUITransformVertices(0.0, OpenVkGUI.Width, OpenVkGUI.Height, 0.0, -1.0, 1.0);
 
 		OpenVkUpdateDynamicBuffer(VertexSize * sizeof(OpenVkGUIVertex), OpenVkGUI.VertexBuffer.Data, OpenVkGUI.VertexBuffer.Buffer);
 		OpenVkUpdateDynamicBuffer(IndexSize * sizeof(uint32_t), OpenVkGUI.IndexBuffer.Data, OpenVkGUI.IndexBuffer.Buffer);
-	
+
 		OpenVkBindDescriptorSet(OpenVkGUI.PipelineLayout, 0, OpenVkGUI.DescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 		OpenVkBindDynamicIndexBuffer(OpenVkGUI.VertexBuffer.Buffer, OpenVkGUI.IndexBuffer.Buffer);
 		OpenVkDrawIndices(0, IndexSize, 0);
@@ -729,16 +739,16 @@ void OpenVkGUIAddVertices(uint32_t Count, OpenVkGUIVertex* Vertices)
 	{
 		Vertex += OpenVkGUI.VertexBuffer.Size;
 		for (uint32_t i = 0; i < Count; i++)
-		{			
-			
-			Vertex[i] = Vertices[i];
-		//	Vertex[i].Color[0] = sinf(OpenVkGUI.VertexBuffer.Size + i * SDL_GetTicks() * 0.003) + 0.5;
-		//	Vertex[i].Color[1] = cosf(OpenVkGUI.VertexBuffer.Size + i * SDL_GetTicks() * 0.001) + 0.5;
-		//	Vertex[i].Color[2] = sinf(OpenVkGUI.VertexBuffer.Size + i * SDL_GetTicks() * 0.002) + 0.5;
+		{
 
-		//	Normalize3P((vec3*)&Vertex[i].Color);
+			Vertex[i] = Vertices[i];
+			//	Vertex[i].Color[0] = sinf(OpenVkGUI.VertexBuffer.Size + i * SDL_GetTicks() * 0.003) + 0.5;
+			//	Vertex[i].Color[1] = cosf(OpenVkGUI.VertexBuffer.Size + i * SDL_GetTicks() * 0.001) + 0.5;
+			//	Vertex[i].Color[2] = sinf(OpenVkGUI.VertexBuffer.Size + i * SDL_GetTicks() * 0.002) + 0.5;
+
+			//	Normalize3P((vec3*)&Vertex[i].Color);
 		}
-			
+
 	}
 
 	OpenVkGUI.VertexBuffer.Size += Count;
@@ -771,13 +781,13 @@ char OpenVkClipQuad(OpenVkGUIVertex* Vertices)
 		Vertices[2].Pos[0] > WinX &&
 		Vertices[3].Pos[0] > WinX)
 		return 0;
-		
+
 	if (Vertices[0].Pos[1] > WinY &&
 		Vertices[1].Pos[1] > WinY &&
 		Vertices[2].Pos[1] > WinY &&
 		Vertices[3].Pos[1] > WinY)
 		return 0;
-		
+
 
 	//clipping
 
@@ -799,12 +809,12 @@ char OpenVkClipQuad(OpenVkGUIVertex* Vertices)
 			MinYV = Vertices[i].Pos[1];
 			MinY = i;
 		}
-			
+
 	}
 
 	for (uint32_t i = 0; i < 4; i++)
 	{
-		
+
 
 		if (Vertices[i].Pos[0] > WinX)
 		{
@@ -839,9 +849,9 @@ char OpenVkClipQuad(OpenVkGUIVertex* Vertices)
 
 uint32_t OpenVkGUITextPos(const char* Title, uint32_t x, uint32_t y, uint32_t MaxWidth, uint32_t MaxLength)
 {
-//	y = OpenVkGUI.Height - y;
+	//	y = OpenVkGUI.Height - y;
 	y += OpenVkGUI.Size / 1.75;
-//	MaxWidth += x;
+	//	MaxWidth += x;
 
 	float OffsetX = 0;
 	float OffsetY = 0;
@@ -869,66 +879,66 @@ uint32_t OpenVkGUITextPos(const char* Title, uint32_t x, uint32_t y, uint32_t Ma
 
 		float t = OffsetX + OpenVkGUI.Size / 1.75;
 
-	//	if (MaxLength != 0 && t >= MaxLength)
-	//		return y + OffsetY;
+		//	if (MaxLength != 0 && t >= MaxLength)
+		//		return y + OffsetY;
 
 		if (Title[i] != ' ' && MaxWidth > 0 && t >= MaxWidth)
 		{
 			OffsetX = 0;
 			OffsetY += OpenVkGUI.Size;
-		}	
+		}
 
 		OpenVkGUIGlyph Glyph = OpenVkGUIMakeGlyph(Title[i], OffsetX, OffsetY);
 		OffsetX = Glyph.Offset[0];
 		OffsetY = Glyph.Offset[1];
 
-	//	mat4 Proj = OrthoMat4(0.0, OpenVkGUI.Width, OpenVkGUI.Height, 0.0, -1.0, 1.0);
-	//	for (uint32_t j = 0; j < 4; j++)
-	//	{
-	//		vec4 Pos =
-	//		{
-	//			Glyph.Vertices[j].Pos[0] + x,
-	//			Glyph.Vertices[j].Pos[1] + y,
-	//			0.0,
-	//			1.0
-	//		};
-	//
-	//		vec4 P = MultiplyVec4Mat4P(&Pos, &Proj);
-	//
-	//		Glyph.Vertices[j].Pos[0] = P.x;
-	//		Glyph.Vertices[j].Pos[1] = P.y;
-	//	}
+		//	mat4 Proj = OrthoMat4(0.0, OpenVkGUI.Width, OpenVkGUI.Height, 0.0, -1.0, 1.0);
+		//	for (uint32_t j = 0; j < 4; j++)
+		//	{
+		//		vec4 Pos =
+		//		{
+		//			Glyph.Vertices[j].Pos[0] + x,
+		//			Glyph.Vertices[j].Pos[1] + y,
+		//			0.0,
+		//			1.0
+		//		};
+		//
+		//		vec4 P = MultiplyVec4Mat4P(&Pos, &Proj);
+		//
+		//		Glyph.Vertices[j].Pos[0] = P.x;
+		//		Glyph.Vertices[j].Pos[1] = P.y;
+		//	}
 		for (uint32_t j = 0; j < 4; j++)
 		{
 			Glyph.Vertices[j].Pos[0] += x;
 			Glyph.Vertices[j].Pos[1] += y;
 
-		//	Glyph.Vertices[j].Color[0] = sinf(OpenVkGUI.VertexBuffer.Size + (j) * SDL_GetTicks() * 0.003) + 0.5;
-		//	Glyph.Vertices[j].Color[1] = cosf(OpenVkGUI.VertexBuffer.Size + (j) * SDL_GetTicks() * 0.001) + 0.5;
-		//	Glyph.Vertices[j].Color[2] = sinf(OpenVkGUI.VertexBuffer.Size + (j) * SDL_GetTicks() * 0.002) + 0.5;
+			//	Glyph.Vertices[j].Color[0] = sinf(OpenVkGUI.VertexBuffer.Size + (j) * SDL_GetTicks() * 0.003) + 0.5;
+			//	Glyph.Vertices[j].Color[1] = cosf(OpenVkGUI.VertexBuffer.Size + (j) * SDL_GetTicks() * 0.001) + 0.5;
+			//	Glyph.Vertices[j].Color[2] = sinf(OpenVkGUI.VertexBuffer.Size + (j) * SDL_GetTicks() * 0.002) + 0.5;
 		}
 
-	//	char RenderGlyph = 1;
-	//
-	//	if (OpenVkGUI.Window != NULL)
-	//	{
-	//		for (uint32_t i = 0; i < 4; i++)
-	//		{
-	//			if (Glyph.Vertices[i].Pos[0] > OpenVkGUI.Window->w + OpenVkGUI.Window->x)
-	//			{
-	//				RenderGlyph = 0;
-	//				break;
-	//			}
-	//			if (Glyph.Vertices[i].Pos[1] > OpenVkGUI.Window->h + OpenVkGUI.Window->y)
-	//			{
-	//				RenderGlyph = 0;
-	//				break;
-	//			}
-	//
-	//		}
-	//	}
-	//	
-	//	if (RenderGlyph)
+		//	char RenderGlyph = 1;
+		//
+		//	if (OpenVkGUI.Window != NULL)
+		//	{
+		//		for (uint32_t i = 0; i < 4; i++)
+		//		{
+		//			if (Glyph.Vertices[i].Pos[0] > OpenVkGUI.Window->w + OpenVkGUI.Window->x)
+		//			{
+		//				RenderGlyph = 0;
+		//				break;
+		//			}
+		//			if (Glyph.Vertices[i].Pos[1] > OpenVkGUI.Window->h + OpenVkGUI.Window->y)
+		//			{
+		//				RenderGlyph = 0;
+		//				break;
+		//			}
+		//
+		//		}
+		//	}
+		//	
+		//	if (RenderGlyph)
 		if (OpenVkClipQuad(Glyph.Vertices))
 		{
 			OpenVkGUIAddVertices(4, Glyph.Vertices);
@@ -943,7 +953,7 @@ uint32_t OpenVkGUITextPos(const char* Title, uint32_t x, uint32_t y, uint32_t Ma
 			OpenVkGUIAddIndices(6, Indices);
 
 			OpenVkGUI.LastIndex += 4;
-		}		
+		}
 	}
 
 	OpenVkGUI.EntityCount++;
@@ -1005,15 +1015,15 @@ OpenVkBool OpenVkGUICollision(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 
 typedef struct
 {
-	int32_t x; 
-	int32_t y; 
-	int32_t w; 
-	int32_t h; 
-	float Rounding; 
-	float Color; 
+	int32_t x;
+	int32_t y;
+	int32_t w;
+	int32_t h;
+	float Rounding;
+	float Color;
 	float ColorSelected;
 	float ColorHovered;
-	int32_t LastX; 
+	int32_t LastX;
 	int32_t LastY;
 	int32_t LastW;
 	int32_t LastH;
@@ -1035,7 +1045,7 @@ void OpenVkGUIQuadPosExt(OpenVkGUIQuad* Quad)
 		{ { Quad->x,		   Quad->y			 },	{ 999.0,  999.0},   {Quad->w, Quad->h, Quad->Rounding, Quad->Color} },
 		{ { Quad->x,		   Quad->y + Quad->h },	{ 999.0, 1001.0},  {Quad->w, Quad->h, Quad->Rounding, Quad->Color} },
 	};
-	
+
 	if (!OpenVkClipQuad(Vertices))
 		return;
 
@@ -1086,7 +1096,7 @@ void OpenVkGUIBegin(const char* Title)
 				break;
 			}
 		}
-	}	
+	}
 
 	if (Selectable)
 	{
@@ -1095,7 +1105,7 @@ void OpenVkGUIBegin(const char* Title)
 		if (TmpCollision != OpenVkTrue && OpenVkGUI.CurMouse.State != 1)
 			OpenVkGUI.Window->Selected = OpenVkFalse;
 
-		
+
 		if (OpenVkGUI.Window->Selected == OpenVkTrue)
 		{
 			OpenVkGUI.Window->x = OpenVkGUI.Window->sx + (OpenVkGUI.CurMouse.x - OpenVkGUI.LastPressedMouse.x);
@@ -1132,89 +1142,89 @@ void OpenVkGUIBegin(const char* Title)
 	uint32_t y = OpenVkGUI.Window->y;
 	uint32_t w = OpenVkGUI.Window->w;
 	uint32_t h = OpenVkGUI.Window->h;
-/*
-	static uint32_t x = 60;
-	static uint32_t y = 40;
-
-	static uint32_t tx = 60;
-	static uint32_t ty = 40;
-	uint32_t w = 560;
-	uint32_t h = 600;
-
-	static OpenVkBool Collision = OpenVkFalse;
-	OpenVkBool TmpCollision = OpenVkGUICollision(x, y, w, h);
-
-//	if (TmpCollision && !Collision)
-//	{
-//		tx = x;
-//		ty = y;
-//	}
-	if (!TmpCollision && Collision)
-	{
-		tx = x;
-		ty = y;
-	}
-
-	x = tx;
-	y = ty;
-
-	
-	if (TmpCollision && !Collision)
-		Collision = OpenVkTrue;
-	if (!TmpCollision && OpenVkGUI.CurMouse.State != 1)
-		Collision = OpenVkFalse;
-
-
-
-	if (Collision)
-	{
-		x += OpenVkGUI.CurMouse.x - OpenVkGUI.LastPressedMouse.x;
-		y += OpenVkGUI.CurMouse.y - OpenVkGUI.LastPressedMouse.y;
-	//	tx = x;
-	//	ty = y;
-	}
-	else
-	{
-		
-		
-		//	x = OpenVkGUI.LastPressedMouse.x;
-		//	y = OpenVkGUI.LastPressedMouse.y;
-	}
-
-//	if (Collision && OpenVkGUI.CurMouse.x != OpenVkGUI.LastMouse.x && OpenVkGUI.CurMouse.y != OpenVkGUI.LastMouse.y)
-	
-	*/
 	/*
-	static int32_t MouseX = 60;
-	static int32_t MouseY = 40;
-	
+		static uint32_t x = 60;
+		static uint32_t y = 40;
 
-	OpenVkBool Collision = OpenVkGUICollision(x, y, w, h);
+		static uint32_t tx = 60;
+		static uint32_t ty = 40;
+		uint32_t w = 560;
+		uint32_t h = 600;
 
-	if (Collision)
-	{
-		int32_t TmpMouseX;
-		int32_t TmpMouseY;
-		uint32_t MouseState = OpenVkGetMousePos(&TmpMouseX, &TmpMouseY);
-		x = TmpMouseX - MouseX;
-		y = TmpMouseY - MouseY;
-	}
-	else
-	{
-	//	MouseX = x;
-	//	MouseY = y;
-	}
-	*/
-	/*
-	* Close alligment
-	* uint32_t WindowTitleBorder = OpenVkGUI.Size / 4;
-	* uint32_t WindowTitleSize = OpenVkGUI.Size;
-	* Wide alligment
-	* uint32_t WindowTitleBorder = OpenVkGUI.Size / 2;
-	* uint32_t WindowTitleSize = OpenVkGUI.Size + WindowTitleBorder;
-	*/
+		static OpenVkBool Collision = OpenVkFalse;
+		OpenVkBool TmpCollision = OpenVkGUICollision(x, y, w, h);
 
-	//window bg
+	//	if (TmpCollision && !Collision)
+	//	{
+	//		tx = x;
+	//		ty = y;
+	//	}
+		if (!TmpCollision && Collision)
+		{
+			tx = x;
+			ty = y;
+		}
+
+		x = tx;
+		y = ty;
+
+
+		if (TmpCollision && !Collision)
+			Collision = OpenVkTrue;
+		if (!TmpCollision && OpenVkGUI.CurMouse.State != 1)
+			Collision = OpenVkFalse;
+
+
+
+		if (Collision)
+		{
+			x += OpenVkGUI.CurMouse.x - OpenVkGUI.LastPressedMouse.x;
+			y += OpenVkGUI.CurMouse.y - OpenVkGUI.LastPressedMouse.y;
+		//	tx = x;
+		//	ty = y;
+		}
+		else
+		{
+
+
+			//	x = OpenVkGUI.LastPressedMouse.x;
+			//	y = OpenVkGUI.LastPressedMouse.y;
+		}
+
+	//	if (Collision && OpenVkGUI.CurMouse.x != OpenVkGUI.LastMouse.x && OpenVkGUI.CurMouse.y != OpenVkGUI.LastMouse.y)
+
+		*/
+		/*
+		static int32_t MouseX = 60;
+		static int32_t MouseY = 40;
+
+
+		OpenVkBool Collision = OpenVkGUICollision(x, y, w, h);
+
+		if (Collision)
+		{
+			int32_t TmpMouseX;
+			int32_t TmpMouseY;
+			uint32_t MouseState = OpenVkGetMousePos(&TmpMouseX, &TmpMouseY);
+			x = TmpMouseX - MouseX;
+			y = TmpMouseY - MouseY;
+		}
+		else
+		{
+		//	MouseX = x;
+		//	MouseY = y;
+		}
+		*/
+		/*
+		* Close alligment
+		* uint32_t WindowTitleBorder = OpenVkGUI.Size / 4;
+		* uint32_t WindowTitleSize = OpenVkGUI.Size;
+		* Wide alligment
+		* uint32_t WindowTitleBorder = OpenVkGUI.Size / 2;
+		* uint32_t WindowTitleSize = OpenVkGUI.Size + WindowTitleBorder;
+		*/
+
+		//window bg
 	OpenVkGUIQuadPos(x, y + 1, w, h - 1, OpenVkGUI.Rounding, OpenVkGUI.WindowColor);
 	//window title bar round
 	OpenVkGUI.Window->LastY = OpenVkGUIQuadPos(x, y, w, WindowTitleSize, OpenVkGUI.Rounding, Color) + (OpenVkGUI.Border - OpenVkGUI.Offset);
@@ -1224,8 +1234,8 @@ void OpenVkGUIBegin(const char* Title)
 	OpenVkGUITextPos(Title, WindowTitleBorder + x, WindowTitleBorder + y, w - WindowTitleBorder, w - WindowTitleBorder);// + WindowTitleBorder;
 
 	//	OpenVkGUIQuadPos(OpenVkGUI.Window->x + OpenVkGUI.Window->w - 14, OpenVkGUI.Window->y + OpenVkGUI.Window->h - 14, 14, 14, 0.0, 1.8);	
-	
-	
+
+
 //	//Slider
 //	OpenVkGUIQuadPos(OpenVkGUI.Border + x, OpenVkGUI.Border + PosY, w - OpenVkGUI.Border * 2, OpenVkGUI.Size + 10, OpenVkGUI.Rounding, 0.55);
 //	PosY = OpenVkGUIQuadPos(OpenVkGUI.Border + x + 20, OpenVkGUI.Border + PosY + 5, OpenVkGUI.Size / 2, OpenVkGUI.Size, OpenVkGUI.Rounding / 2, 0.2);
@@ -1250,11 +1260,11 @@ void OpenVkGUIText(const char* Text)
 	uint32_t w = OpenVkGUI.Window->w;
 	uint32_t h = OpenVkGUI.Window->h;
 	OpenVkGUI.Window->LastY = OpenVkGUITextPos(Text, OpenVkGUI.Border + x,
-												OpenVkGUI.Offset + OpenVkGUI.Window->LastY,
-											   OpenVkGUI.Window->w - OpenVkGUI.Border, w - (OpenVkGUI.Window->LastW + OpenVkGUI.Border + OpenVkGUI.SizeQuater)); //Max Length cut off doesnt work
+		OpenVkGUI.Offset + OpenVkGUI.Window->LastY,
+		OpenVkGUI.Window->w - OpenVkGUI.Border, w - (OpenVkGUI.Window->LastW + OpenVkGUI.Border + OpenVkGUI.SizeQuater)); //Max Length cut off doesnt work
 
 	OpenVkGUI.Window->LastX = x;
-//	OpenVkGUI.Window->LastY = 0;
+	//	OpenVkGUI.Window->LastY = 0;
 	OpenVkGUI.Window->LastW = 0;
 	OpenVkGUI.Window->LastH = OpenVkGUI.Size;
 }
@@ -1267,8 +1277,8 @@ void OpenVkGUITextSameLine(const char* Text)
 	uint32_t w = OpenVkGUI.Window->w;
 	uint32_t h = OpenVkGUI.Window->h;
 	OpenVkGUITextPos(Text, OpenVkGUI.Offset + OpenVkGUI.Window->LastX,
-												    (OpenVkGUI.Window->LastY - OpenVkGUI.Window->LastH / 2) - OpenVkGUI.SizeQuater,
-											   0, w - (OpenVkGUI.Window->LastW + OpenVkGUI.Border + OpenVkGUI.SizeQuater)); //Max Length cut off doesnt work
+		(OpenVkGUI.Window->LastY - OpenVkGUI.Window->LastH / 2) - OpenVkGUI.SizeQuater,
+		0, w - (OpenVkGUI.Window->LastW + OpenVkGUI.Border + OpenVkGUI.SizeQuater)); //Max Length cut off doesnt work
 }
 
 OpenVkBool OpenVkGUIButton(const char* Name)
@@ -1294,7 +1304,7 @@ OpenVkBool OpenVkGUIButton(const char* Name)
 	OpenVkGUI.Window->LastY = Quad.LastY;
 	OpenVkGUI.Window->LastW = Quad.LastW;
 	OpenVkGUI.Window->LastH = Quad.LastH;
-	
+
 	OpenVkGUITextSameLine(Name);
 
 	return (Quad.Selected && (OpenVkGUI.MousePressed == OpenVkTrue));
@@ -1309,9 +1319,9 @@ OpenVkBool OpenVkGUICheckbox(const char* Name, OpenVkBool* State)
 	uint32_t w = OpenVkGUI.Window->w;
 	uint32_t h = OpenVkGUI.Window->h;
 
-//	uint32_t LastX = 0;
-//	uint32_t LastY = 0;
-//	OpenVkBool Collision = OpenVkGUIQuadPosExt(OpenVkGUI.Border + x, OpenVkGUI.Border + OpenVkGUI.Window->LastY, OpenVkGUI.ToolSize, OpenVkGUI.ToolSize, OpenVkGUI.Rounding, OpenVkGUI.Color, OpenVkGUI.ColorSelected, &LastX, &LastY);
+	//	uint32_t LastX = 0;
+	//	uint32_t LastY = 0;
+	//	OpenVkBool Collision = OpenVkGUIQuadPosExt(OpenVkGUI.Border + x, OpenVkGUI.Border + OpenVkGUI.Window->LastY, OpenVkGUI.ToolSize, OpenVkGUI.ToolSize, OpenVkGUI.Rounding, OpenVkGUI.Color, OpenVkGUI.ColorSelected, &LastX, &LastY);
 
 	OpenVkGUIQuad Quad;
 	Quad.x = OpenVkGUI.Border + x;
@@ -1323,16 +1333,16 @@ OpenVkBool OpenVkGUICheckbox(const char* Name, OpenVkBool* State)
 	Quad.ColorSelected = OpenVkGUI.ColorSelected;
 	Quad.ColorHovered = OpenVkGUI.ColorHovered;
 	OpenVkGUIQuadPosExt(&Quad);
-	
+
 	if (Quad.Selected && OpenVkGUI.MousePressed)
 		Selected = !Selected;
 
 	if (Selected == OpenVkFalse)
-		OpenVkGUIQuadPos(OpenVkGUI.Border + x + OpenVkGUI.SizeEigth, 
-						 OpenVkGUI.Offset + OpenVkGUI.Window->LastY + OpenVkGUI.SizeEigth, 
-						 OpenVkGUI.ToolSize-OpenVkGUI.SizeQuater + 1.5, 
-						 OpenVkGUI.ToolSize-OpenVkGUI.SizeQuater + 1.5, 
-						 OpenVkGUI.Rounding, OpenVkGUI.WindowColor);
+		OpenVkGUIQuadPos(OpenVkGUI.Border + x + OpenVkGUI.SizeEigth,
+			OpenVkGUI.Offset + OpenVkGUI.Window->LastY + OpenVkGUI.SizeEigth,
+			OpenVkGUI.ToolSize - OpenVkGUI.SizeQuater + 1.5,
+			OpenVkGUI.ToolSize - OpenVkGUI.SizeQuater + 1.5,
+			OpenVkGUI.Rounding, OpenVkGUI.WindowColor);
 
 	OpenVkGUI.Window->LastW = Quad.LastW;
 	OpenVkGUI.Window->LastH = Quad.LastH;
@@ -1340,7 +1350,7 @@ OpenVkBool OpenVkGUICheckbox(const char* Name, OpenVkBool* State)
 	OpenVkGUI.Window->LastY = Quad.LastY;
 
 	OpenVkGUITextSameLine(Name);
-	
+
 	*State = Selected;
 
 	return Selected;
@@ -1366,7 +1376,7 @@ void OpenVkGUISlider(const char* Name, float Min, float Max, float* Value)
 	OpenVkGUIQuadPosExt(&Quad);
 	OpenVkGUI.Window->LastW = Quad.LastW;
 	OpenVkGUI.Window->LastH = Quad.LastH;
-//	OpenVkGUI.Window->LastX = Quad.LastX;
+	//	OpenVkGUI.Window->LastX = Quad.LastX;
 	OpenVkGUI.Window->LastY = Quad.LastY;
 
 	//text
@@ -1389,20 +1399,20 @@ void OpenVkGUISlider(const char* Name, float Min, float Max, float* Value)
 	if (Quad.Selected != OpenVkTrue && OpenVkGUI.CurMouse.State != 1)
 		OpenVkGUI.SelectedEntity = 0;
 
-//	if (Quad.Selected == OpenVkTrue)
-//		OpenVkGUI.MouseItemCollision = OpenVkTrue;
-//	if (Quad.Selected != OpenVkTrue && OpenVkGUI.CurMouse.State != 1)
-//		OpenVkGUI.MouseItemCollision = OpenVkFalse;
-//
-//
-//	if (OpenVkGUI.MouseItemCollision == OpenVkTrue)
+	//	if (Quad.Selected == OpenVkTrue)
+	//		OpenVkGUI.MouseItemCollision = OpenVkTrue;
+	//	if (Quad.Selected != OpenVkTrue && OpenVkGUI.CurMouse.State != 1)
+	//		OpenVkGUI.MouseItemCollision = OpenVkFalse;
+	//
+	//
+	//	if (OpenVkGUI.MouseItemCollision == OpenVkTrue)
 	if (OpenVkGUI.SelectedEntity == OpenVkGUI.EntityCount)
 	{
 		Quad.w -= OpenVkGUI.ToolSize;
 		Quad.x += OpenVkGUI.ToolSizeHalf;
 
-	//	float M = OpenVkGUI.CurMouse.x / OpenVkGUI.Window->w;//Mouse in scren 0.0-1.0
-	//	float M = ((((float)OpenVkGUI.CurMouse.x) / (fabsf((float)x) + (float)x + (float)w)) - (float)x);//Mouse in window 0.0-1.0
+		//	float M = OpenVkGUI.CurMouse.x / OpenVkGUI.Window->w;//Mouse in scren 0.0-1.0
+		//	float M = ((((float)OpenVkGUI.CurMouse.x) / (fabsf((float)x) + (float)x + (float)w)) - (float)x);//Mouse in window 0.0-1.0
 		float M = ((float)OpenVkGUI.CurMouse.x / (Quad.w)) - ((float)Quad.x / Quad.w);//Mouse in window 0.0-1.0
 
 		if (M < 0.0)
@@ -1428,13 +1438,13 @@ void OpenVkGUISlider(const char* Name, float Min, float Max, float* Value)
 	}
 	else
 	{
-	//	Quad.w += OpenVkGUI.ToolSizeHalf;
-		//	OpenVkGUI.sx = Quad.x;
-		//	OpenVkGUI.sy = Quad.y;
+		//	Quad.w += OpenVkGUI.ToolSizeHalf;
+			//	OpenVkGUI.sx = Quad.x;
+			//	OpenVkGUI.sy = Quad.y;
 	}
 
-//	Quad.w -= OpenVkGUI.ToolSize;
-//	float SliderX = (((*Value) / (fabsf(Min) + Max)) - Min) * (Quad.w - OpenVkGUI.ToolSize) + OpenVkGUI.ToolSizeHalf;
+	//	Quad.w -= OpenVkGUI.ToolSize;
+	//	float SliderX = (((*Value) / (fabsf(Min) + Max)) - Min) * (Quad.w - OpenVkGUI.ToolSize) + OpenVkGUI.ToolSizeHalf;
 	float SliderX = (((*Value) / (fabsf(Min) + Max)) - Min) * (Quad.w - OpenVkGUI.ToolSize);
 	float T = (OpenVkGUI.ToolSizeHalf / 6);
 
@@ -1442,30 +1452,30 @@ void OpenVkGUISlider(const char* Name, float Min, float Max, float* Value)
 	Quad.w = OpenVkGUI.ToolSizeHalf;
 	Quad.h = OpenVkGUI.ToolSize - T * 2;
 	Quad.x = OpenVkGUI.Border + x + SliderX + OpenVkGUI.ToolSizeHalf - (Quad.w / 2);
-//	Quad.x = OpenVkGUI.Border + x + SliderX;
+	//	Quad.x = OpenVkGUI.Border + x + SliderX;
 	Quad.y += T;
 	Quad.Rounding = OpenVkGUI.Rounding / 2;
 	Quad.Color = OpenVkGUI.WindowColor;
 	Quad.ColorHovered = OpenVkGUI.ColorSelected + OpenVkGUI.WindowColor;
 	Quad.ColorSelected = Quad.ColorHovered - 0.1;
-	
+
 	OpenVkGUIQuadPosExt(&Quad);
 
-	
 
-//	if (Quad.Selected == OpenVkTrue)
-//	{
-//
-//	}
+
+	//	if (Quad.Selected == OpenVkTrue)
+	//	{
+	//
+	//	}
 
 	OpenVkGUITextSameLine(Name);
 
-	
+
 
 	/*OpenVkGUIQuadPos(OpenVkGUI.Border + x, OpenVkGUI.Border + PosY, w - OpenVkGUI.Border * 2, OpenVkGUI.Size + 10, OpenVkGUI.Rounding, 0.55);
 //	PosY = OpenVkGUIQuadPos(OpenVkGUI.Border + x + 20, OpenVkGUI.Border + PosY + 5, OpenVkGUI.Size / 2, OpenVkGUI.Size, OpenVkGUI.Rounding / 2, 0.2);
 	*/
-	
+
 }
 
 void OpenVkGUIDragSlider(const char* Name, float Min, float Max, float* Value)
@@ -1486,7 +1496,7 @@ void OpenVkGUIDragSlider(const char* Name, float Min, float Max, float* Value)
 	Quad.ColorSelected = OpenVkGUI.ColorSelected;
 	Quad.ColorHovered = OpenVkGUI.ColorHovered;
 	OpenVkGUIQuadPosExt(&Quad);
-	
+
 
 	OpenVkGUI.Window->LastW = Quad.LastW;
 	OpenVkGUI.Window->LastH = Quad.LastH;
@@ -1497,9 +1507,47 @@ void OpenVkGUIDragSlider(const char* Name, float Min, float Max, float* Value)
 
 	//text
 	char Str[16];
-	sprintf(Str, "%.4f", *Value);
+	snprintf(Str, 16, "%.4f", *Value);
 
 	OpenVkGUI.Window->LastX = Quad.x + Quad.w / 2 - (OpenVkGUIGetTextWidth(Str) / 2);
 	OpenVkGUITextSameLine(Str);
 	OpenVkGUI.Window->LastX = Quad.LastX;
+}
+
+void OpenVkInputText(size_t* Length, char* Text, const char* KeyWords)
+{
+	uint32_t Lines = 0;
+	size_t LastOffset = 0;
+	size_t TextCurLength = strlen(Text);
+	for (size_t i = 0; i < TextCurLength; i++)
+	{
+		while (Text[i] == '\r' || Text[i] == '\n')
+		{
+			//	char 
+			//	OpenVkGUITextSameLine()
+			//	ImGui::Text("%d   ", Lines + 1);
+			//	ImGui::SameLine();
+			char Tmp = Text[i];
+			Text[i] = '\0';
+
+			size_t LineLength = i - LastOffset + 1;
+			OpenVkGUIText(Text + LastOffset);
+			//	ImGui::Text("%s", Text + LastOffset);
+			Text[i] = Tmp;
+
+			Lines++;
+
+
+
+			i++;
+			if (Text[i] == '\r' && Text[i + 1] == '\n') i++;
+			if (Text[i] == '\n' && Text[i - 1] == '\r') i++;
+
+			LastOffset = i;
+		}
+	}
+	OpenVkGUIText(Text + LastOffset);
+	//	ImGui::Text("%d   ", Lines + 1);
+	//	ImGui::SameLine();
+	//	ImGui::Text("%s", Text + LastOffset);
 }

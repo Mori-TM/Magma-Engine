@@ -1,15 +1,18 @@
 void CreateGBufferRenderPass()
 {
-	GBufferAttachments[0] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_RGBA16F);
-	GBufferAttachments[1] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_RGBA16F);
+	uint32_t Format = OPENVK_FORMAT_RGBA32F;
+	GBufferAttachments[0] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, Format);
+	GBufferAttachments[1] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, Format);
 	GBufferAttachments[2] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_RGBA);
 	GBufferAttachments[3] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_RGBA);
-	GBufferAttachments[4] = OpenVkCreateDepthImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_DEFAULT);
+	GBufferAttachments[4] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, Format);
+	GBufferAttachments[5] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_R);
+	GBufferAttachments[6] = OpenVkCreateDepthImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_DEFAULT);
 
-	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_DEPTH };
-	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_RGBA16F, OPENVK_FORMAT_RGBA16F, OPENVK_FORMAT_RGBA, OPENVK_FORMAT_RGBA, OPENVK_FORMAT_DEFAULT };
-	uint32_t MsaaSamples[] = { 1, 1, 1, 1, 1 };
-	GBufferRenderPass = OpenVkCreateRenderPass(5, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
+	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_DEPTH };
+	uint32_t AttachmentFormats[] = { Format, Format, OPENVK_FORMAT_RGBA, OPENVK_FORMAT_RGBA, Format, OPENVK_FORMAT_R, OPENVK_FORMAT_DEFAULT };
+	uint32_t MsaaSamples[] = { 1, 1, 1, 1, 1, 1, 1 };
+	GBufferRenderPass = OpenVkCreateRenderPass(G_BUFFER_ATTACHMENT_COUNT, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
 }
 
 void CreateGBufferLayout()
@@ -48,7 +51,7 @@ void CreateGBufferPipeline()
 	VertexShader.Freeable = OpenVkFalse;
 	FragmentShader.Freeable = OpenVkFalse;
 
-	OpenVkBool AlphaBlendings[] = { OpenVkFalse, OpenVkFalse, OpenVkFalse, OpenVkFalse };
+	OpenVkBool AlphaBlendings[] = { OpenVkFalse, OpenVkFalse, OpenVkFalse, OpenVkFalse, OpenVkFalse, OpenVkFalse };
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
 	GraphicsPipelineCreateInfo.VertexShader = VertexShader;
 	GraphicsPipelineCreateInfo.FragmentShader = FragmentShader;
@@ -68,7 +71,7 @@ void CreateGBufferPipeline()
 	GraphicsPipelineCreateInfo.FrontFace = OPENVK_FRONT_FACE_COUNTER_CLOCK_WISE;
 	GraphicsPipelineCreateInfo.MsaaSamples = 1;
 	GraphicsPipelineCreateInfo.AlphaBlendings = AlphaBlendings;
-	GraphicsPipelineCreateInfo.ColorBlendAttachments = 4;
+	GraphicsPipelineCreateInfo.ColorBlendAttachments = G_BUFFER_ATTACHMENT_COUNT - 1;
 	GraphicsPipelineCreateInfo.PipelineLayout = GBufferLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = true;
 	GraphicsPipelineCreateInfo.RenderPass = GBufferRenderPass;
@@ -199,7 +202,7 @@ void GBufferDraw()
 	BeginInfo.ClearColor[1] = ClearColor.y;
 	BeginInfo.ClearColor[2] = ClearColor.z;
 	BeginInfo.ClearColor[3] = 1.0;
-	BeginInfo.ClearColors = 4;
+	BeginInfo.ClearColors = G_BUFFER_ATTACHMENT_COUNT - 1;
 	BeginInfo.ClearDepth = true;
 	BeginInfo.RenderPass = GBufferRenderPass;
 	BeginInfo.Framebuffer = GBufferFramebuffer;

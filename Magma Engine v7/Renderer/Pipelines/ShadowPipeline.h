@@ -111,6 +111,15 @@ void CreateShadowDescriptorSet()
 //	ShadowMapDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 }
 
+
+const mat4 BiasMatrix =
+{
+	0.5, 0.0, 0.0, 0.0,
+	0.0, 0.5, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0,
+	0.5, 0.5, 0.0, 1.0
+};
+
 float CascadeSplits[SHADOW_MAP_CASCADE_COUNT];
 void UpdateCascades()
 {
@@ -131,12 +140,12 @@ void UpdateCascades()
 		CascadeSplits[i] = (d - CascadeNearClip) / ClipRange;
 	}
 	Mutex.lock();
-	mat4 TempSceneProjection = SceneVertexUBO.Projection;
+	mat4 TempSceneProjection = GBufferVertexUBO.Projection;
 
-	SceneVertexUBO.Projection.m[2][2] = CascadeFarClip / (CascadeNearClip - CascadeFarClip);
-	SceneVertexUBO.Projection.m[3][2] = (CascadeNearClip * CascadeFarClip) / (CascadeNearClip - CascadeFarClip);
+	GBufferVertexUBO.Projection.m[2][2] = CascadeFarClip / (CascadeNearClip - CascadeFarClip);
+	GBufferVertexUBO.Projection.m[3][2] = (CascadeNearClip * CascadeFarClip) / (CascadeNearClip - CascadeFarClip);
 	
-	mat4 InvCam = InverseMat4(MultiplyMat4P(&SceneVertexUBO.Projection, &SceneVertexUBO.View));
+	mat4 InvCam = InverseMat4(MultiplyMat4P(&GBufferVertexUBO.Projection, &GBufferVertexUBO.View));
 	Mutex.unlock();
 
 	float LastSplitDist = 0.0;
@@ -200,6 +209,7 @@ void UpdateCascades()
 
 		Cascades[i].SplitDepth = (CascadeNearClip + SplitDist * ClipRange) * -1.0;
 		Cascades[i].ProjectionView = MultiplyMat4P(&Projection, &View);
+		Cascades[i].ProjectionViewBias = MultiplyMat4P((mat4*)&BiasMatrix, &Cascades[i].ProjectionView);
 
 		Mutex.lock();
 		CullingCascades[i] = MultiplyMat4P(&Projection, &View);
@@ -209,7 +219,7 @@ void UpdateCascades()
 	}
 
 	Mutex.lock();
-	SceneVertexUBO.Projection = TempSceneProjection;
+	GBufferVertexUBO.Projection = TempSceneProjection;
 	Mutex.unlock();
 }
 

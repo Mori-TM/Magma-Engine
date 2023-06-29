@@ -168,7 +168,7 @@ uint32_t SceneVertexUniformBuffer;
 uint32_t SceneFragmentUniformDescriptorSet;
 uint32_t SceneFragmentUniformBuffer;
 
-SceneVertexPushConstant SceneVertexPc;
+//SceneVertexPushConstant SceneVertexPc;
 SceneFragmentPushConstant SceneFragmentPc;
-SceneVertexUniformBufferObject SceneVertexUBO;
+//SceneVertexUniformBufferObject SceneVertexUBO;
 SceneFragmentUniformBufferObject SceneFragmentUBO;

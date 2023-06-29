@@ -38,12 +38,12 @@ void CreateDebugPipeline()
 	GraphicsPipelineCreateInfo.Height = SceneHeight;
 	GraphicsPipelineCreateInfo.DepthClamp = false;
 	GraphicsPipelineCreateInfo.PolygonMode = OPENVK_POLYGON_MODE_FILL;
-	GraphicsPipelineCreateInfo.LineWidth = 1.0;
+	GraphicsPipelineCreateInfo.LineWidth = 1.5;
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_BACK;
 	GraphicsPipelineCreateInfo.FrontFace = OPENVK_FRONT_FACE_COUNTER_CLOCK_WISE;
 	GraphicsPipelineCreateInfo.MsaaSamples = 1;
 	GraphicsPipelineCreateInfo.AlphaBlendings = NULL;
-	GraphicsPipelineCreateInfo.ColorBlendAttachments = 4;
+	GraphicsPipelineCreateInfo.ColorBlendAttachments = G_BUFFER_ATTACHMENT_COUNT - 1;
 	GraphicsPipelineCreateInfo.PipelineLayout = DebugLayout;
 	GraphicsPipelineCreateInfo.DepthStencil = true;
 	GraphicsPipelineCreateInfo.RenderPass = GBufferRenderPass;
@@ -66,18 +66,19 @@ void DebugDraw()
 	Mutex.unlock();
 	DebugVertexPc.PVM = PV;
 	
+	OpenVkBindPipeline(DebugPipelineThinLine, OPENVK_PIPELINE_TYPE_GRAPHICS);
+	OpenVkPushConstant(DebugLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(DebugVertexPushConstant), &DebugVertexPc);
+
+	OpenVkBindVertexBuffer(GridVertexBuffer);
+	OpenVkDrawVertices(0, ARRAY_SIZE(GridVertices));
+
 	OpenVkBindPipeline(DebugPipelineFatLine, OPENVK_PIPELINE_TYPE_GRAPHICS);
 	OpenVkPushConstant(DebugLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(DebugVertexPushConstant), &DebugVertexPc);
 
 	OpenVkBindVertexBuffer(DirectionVertexBuffer);
-	OpenVkDrawVertices(0, ARRAY_SIZE(DirectionVertices));
+	OpenVkDrawVertices(0, ARRAY_SIZE(DirectionVertices));	
 	
 	OpenVkBindPipeline(DebugPipelineThinLine, OPENVK_PIPELINE_TYPE_GRAPHICS);
-	OpenVkPushConstant(DebugLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(DebugVertexPushConstant), &DebugVertexPc);
-	
-	OpenVkBindVertexBuffer(GridVertexBuffer);
-	OpenVkDrawVertices(0, ARRAY_SIZE(GridVertices));
-	
 	OpenVkBindIndexBuffer(CameraVertexBuffer, CameraIndexBuffer);
 	for (uint32_t i = 0; i < EntityCount; i++)
 	{

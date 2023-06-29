@@ -6,7 +6,7 @@ layout(location = 0) out vec4 OutColor;
 layout(location = 0) in vec2 FragTexCoord;
 
 layout(set = 0, binding = 0) uniform sampler2D SamplerPosition;
-layout(set = 0, binding = 1) uniform sampler2D SamplerNormal;
+layout(set = 0, binding = 1) uniform sampler2D SamplerViewNormal;
 layout(set = 0, binding = 2) uniform sampler2D SamplerAlbedo;
 layout(set = 0, binding = 3) uniform sampler2D SamplerPBR;
 
@@ -727,7 +727,7 @@ void main()
 		return;
 		break;
 	case 3:
-		OutColor = vec4(resolve(SamplerNormal, FragTexCoord).rgb, 1.0);
+		OutColor = vec4(resolve(SamplerViewNormal, FragTexCoord).rgb, 1.0);
 		return;
 		break;
 	case 4:
@@ -757,8 +757,8 @@ void main()
 	}
 	//    discard;
  
-//	vec3 viewNormal = resolve(SamplerNormal, FragTexCoord).xyz;
-	vec4 NormalTex = texture(SamplerNormal, FragTexCoord);
+//	vec3 viewNormal = resolve(SamplerViewNormal, FragTexCoord).xyz;
+	vec4 NormalTex = texture(SamplerViewNormal, FragTexCoord);
 	vec3 viewNormal = normalize(NormalTex.rgb);
 //	vec3 viewPos = textureLod(DepthPosition, FragTexCoord, 2).xyz;
 //	vec3 viewPos = PositionFromDepth(resolve(DepthPosition, FragTexCoord).w);
@@ -923,7 +923,7 @@ float edgeFalloff(vec2 uv)
 
 void main()
 {
-	vec3 normal = texture(SamplerNormal, FragTexCoord).xyz*2-1;
+	vec3 normal = texture(SamplerViewNormal, FragTexCoord).xyz*2-1;
 
 
 	vec3 world = texture(uTexWorld, FragTexCoord).xyz;

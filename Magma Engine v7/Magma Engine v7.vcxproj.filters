@@ -158,6 +158,12 @@
     <ClInclude Include="Renderer\Pipelines\SSAOBlurPipeline.h">
       <Filter>Header Files\Renderer\Pipelines</Filter>
     </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\FXAAHelper.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Pipelines\FXAAPipeline.h">
+      <Filter>Header Files\Renderer\Pipelines</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Shader\BlurFragment.frag">
@@ -206,6 +212,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Data\Shader\SSAOBlurFragment.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\FXAAFragment.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

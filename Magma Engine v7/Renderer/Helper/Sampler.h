@@ -7,5 +7,5 @@ void CreateImageSampler()
 	VkRenderer.MipLevels = 1;
 	ImageSampler = OpenVkCreateImageSampler(OPENVK_FILTER_NEAREST, OPENVK_ADDRESS_MODE_REPEAT);
 	GBufferSampler = OpenVkCreateImageSampler(OPENVK_FILTER_NEAREST, OPENVK_ADDRESS_MODE_CLAMP_TO_EDGE);
-	ShadowSampler = OpenVkCreateImageSampler(OPENVK_FILTER_NEAREST, OPENVK_ADDRESS_MODE_CLAMP_TO_BORDER);
+	ShadowSampler = OpenVkCreateImageSampler(OPENVK_FILTER_LINEAR, OPENVK_ADDRESS_MODE_CLAMP_TO_BORDER);
 } 

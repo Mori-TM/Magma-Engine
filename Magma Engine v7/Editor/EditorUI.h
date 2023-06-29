@@ -521,7 +521,7 @@ void EngineDrawEditor()
 		ImGui::Text("Image Count: %d", VkRenderer.ImageAttachments.Size);
 		ImGui::Text("Render Pass Count: %d", VkRenderer.RenderPassCount);
 		ImGui::Text("Pipeline Count: %d", VkRenderer.PipelineCount);
-		ImGui::Text("Pipeline Count: %d", VkRenderer.PipelineLayoutCount);
+		ImGui::Text("Pipeline Layout Count: %d", VkRenderer.PipelineLayoutCount);
 		ImGui::Text("Framebuffer Count: %d", VkRenderer.FramebufferCount);
 		ImGui::Text("Frames In Flight: %d", MAX_FRAMES_IN_FLIGHT);
 		ImGui::Text("Current Frame: %d", VkRenderer.CurrentFrame);
@@ -573,7 +573,7 @@ void EngineDrawEditor()
 		ImGui::SliderFloat("Exposure", &SceneFragmentUBO.Exposure, 0.01, 10.0);
 		ImGui::SliderFloat("Gamma", &SceneFragmentUBO.Gamma, 0.01, 10.0);
 		{
-			const char* ScaleOptions[] = { "0 %", "10 %", "20 %", "30 %", "40 %", "50 %", "60 %", "70 %", "80 %", "90 %", "100 %" };
+			const char* ScaleOptions[] = { "0 %", "10 %", "20 %", "30 %", "40 %", "50 %", "60 %", "70 %", "80 %", "90 %", "100 %", "110 %", "120 %", "130 %", "140 %", "150 %", "160 %", "170 %", "180 %", "190 %", "200 %" };
 			if (ImGui::BeginCombo("Scene Scaling", ScaleOptions[SceneScaling / 10]))
 			{
 				for (uint32_t i = 1; i < 11; i++)

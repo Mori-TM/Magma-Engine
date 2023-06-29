@@ -87,7 +87,7 @@ void ResetSceneSettings()
 	CascadeNearClip = 0.5;
 	CascadeFarClip = 48.0;
 
-	SceneFragmentUBO.Gamma = 1.3;
+	SceneFragmentUBO.Gamma = 0.9;
 	SceneFragmentUBO.Exposure = 4.0;
 
 	ClearColor = Vec3(0.15, 0.3, 0.7);

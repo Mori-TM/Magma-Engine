@@ -5,10 +5,11 @@ layout(location = 0) in vec3 InPosition;
 layout(location = 1) in vec2 InTexCoord;
 layout(location = 2) in vec3 InNormal;
 
-layout(location = 0) out vec3 FragNormal;
-layout(location = 1) out vec2 FragTexCoord;
-layout(location = 2) out vec4 FragPosRelToCam;
-layout(location = 3) out vec4 FragWorldPos;
+layout(location = 0) out vec3 FragViewNormal;
+layout(location = 1) out vec3 FragNormal;
+layout(location = 2) out vec2 FragTexCoord;
+layout(location = 3) out vec4 FragPosRelToCam;
+layout(location = 4) out vec4 FragWorldPos;
 
 layout(push_constant) uniform PushConstants
 {
@@ -28,8 +29,8 @@ void main()
 
 	gl_Position = UBO.Projection * PosRelToCam;
 
-	mat3 NormalMatrix = transpose(inverse(mat3(UBO.View * PushConst.Model)));
-	FragNormal = NormalMatrix * InNormal;
+	FragViewNormal = transpose(inverse(mat3(UBO.View * PushConst.Model))) * InNormal;
+	FragNormal = transpose(inverse(mat3(PushConst.Model))) * InNormal;
 	FragTexCoord = InTexCoord;
 
 	FragPosRelToCam = PosRelToCam;

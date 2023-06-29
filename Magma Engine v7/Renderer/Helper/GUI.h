@@ -357,6 +357,12 @@ ifd::ImageData CreateImGuiTexture(uint8_t* Data, int w, int h, char Format)
 	uint32_t DescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 
 	ifd::ImageData ImageData;
+	memset(&ImageData, 0, sizeof(ifd::ImageData));
+	if (DescriptorSet == OPENVK_ERROR ||
+		Sampler == OPENVK_ERROR ||
+		Image == OPENVK_ERROR)
+		return ImageData;
+
 	ImageData.DescriptorSet = DescriptorSet;
 	ImageData.Sampler = Sampler;
 	ImageData.Image = Image;

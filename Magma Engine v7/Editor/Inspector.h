@@ -408,6 +408,59 @@ void EditorMeshInspector()
 	ImGui::End();
 }
 
+void CodeEditor(size_t* Length, char* Text)
+{
+	ImDrawList* DrawList = ImGui::GetWindowDrawList();
+	DrawList->AddRect(ImVec2(0.0, 0.0), ImVec2(100.0, 100.0), IM_COL32(255, 255, 255, 255));
+	
+
+	size_t TextCurLength = strlen(Text);
+
+	char Line[4096];
+
+	uint32_t Lines = 0;
+	size_t LastOffset = 0;
+	for (size_t i = 0; i < TextCurLength; i++)
+	{
+		while (Text[i] == '\r' || Text[i] == '\n')
+		{
+			ImGui::Text("%d   ", Lines + 1);
+			ImGui::SameLine();
+			char Tmp = Text[i];
+			Text[i] = '\0';
+
+			size_t LineLength = i - LastOffset + 1;
+			memcpy(Line, Text + LastOffset, LineLength);
+		//	ImGui::InputText("", Line, LineLength);
+			ImGui::Text("%s", Text + LastOffset);
+		//	ImGui::Text("%s", Line);
+			Text[i] = Tmp;
+
+			Lines++;
+
+			
+
+			i++;
+			if (Text[i] == '\r' && Text[i + 1] == '\n') i++;
+			if (Text[i] == '\n' && Text[i - 1] == '\r') i++;
+
+			LastOffset = i;
+		}
+	}
+	ImGui::Text("%d   ", Lines + 1);
+	ImGui::SameLine();
+	ImGui::Text("%s", Text + LastOffset);
+
+	ImGui::NewLine();
+	ImGui::Text("%d Lines", Lines);
+//	for (uint32_t i = 0; i < Lines; i++)
+//	{
+//		ImGui::Text("%d   ", i);
+//		ImGui::SameLine();
+//	}
+		
+}
+
 void EditorScriptInspector()
 {
 	ImGui::Begin("Script Inspector");
@@ -433,6 +486,9 @@ void EditorScriptInspector()
 
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
 			ImVec2 Size = ImGui::GetWindowSize();
+		//	ImGui::InputTextMultiline("Code", SceneScripts[SelectedScript].Script, MAX_CHAR_SCRIPT_LENGTH, ImVec2(Size.x, Size.y - 230), ImGuiInputTextFlags_AllowTabInput);
+			CodeEditor(NULL, SceneScripts[SelectedScript].Script);
+			ImGui::NewLine();
 			ImGui::InputTextMultiline("Code", SceneScripts[SelectedScript].Script, MAX_CHAR_SCRIPT_LENGTH, ImVec2(Size.x, Size.y - 230), ImGuiInputTextFlags_AllowTabInput);
 			ImGui::PopStyleColor();
 

@@ -168,6 +168,8 @@
     <ClInclude Include="Renderer\Pipelines\BlurPipeline.h" />
     <ClInclude Include="Renderer\Pipelines\DebugHelper.h" />
     <ClInclude Include="Renderer\Pipelines\DebugPipeline.h" />
+    <ClInclude Include="Renderer\Pipelines\FXAAHelper.h" />
+    <ClInclude Include="Renderer\Pipelines\FXAAPipeline.h" />
     <ClInclude Include="Renderer\Pipelines\GBufferHelper.h" />
     <ClInclude Include="Renderer\Pipelines\GBufferPipeline.h" />
     <ClInclude Include="Renderer\Pipelines\SceneHelper.h" />
@@ -186,6 +188,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Shader\BlurFragment.frag" />
+    <None Include="Data\Shader\FXAAFragment.frag" />
     <None Include="Data\Shader\GBufferFragment.frag" />
     <None Include="Data\Shader\GBufferVertex.vert" />
     <None Include="Data\Shader\OffscreenVertex.vert" />

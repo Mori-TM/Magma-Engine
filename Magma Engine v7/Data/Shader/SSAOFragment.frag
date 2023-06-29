@@ -6,11 +6,11 @@ layout(location = 0) out float OutColor;
 layout(location = 0) in vec2 FragTexCoord;
 
 layout (binding = 0) uniform sampler2D SamplerPositionDepth;
-layout (binding = 1) uniform sampler2D SamplerNormal;
+layout (binding = 1) uniform sampler2D SamplerViewNormal;
 layout (binding = 2) uniform sampler2D SSAONoise;
 
 #define SSAO_KERNEL_SIZE 32
-#define SSAO_RADIUS 0.3f
+#define SSAO_RADIUS 0.6f
 
 layout (binding = 3) uniform UniformBufferObject
 {
@@ -18,18 +18,26 @@ layout (binding = 3) uniform UniformBufferObject
 	mat4 Projection;
 } UBO;
 
+#define MAX_SSAO_DIST 30.0
+
 void main() 
 {
 	// Get G-Buffer values
 	vec3 FragPos = texture(SamplerPositionDepth, FragTexCoord).rgb;
-//	vec3 normal = normalize(texture(SamplerNormal, FragTexCoord).rgb * 2.0 - 1.0);
-	vec4 NormalTex = texture(SamplerNormal, FragTexCoord);
-	vec3 normal = normalize(NormalTex.rgb);
-	if (NormalTex.w < 0.9)
+	if (FragPos.z > MAX_SSAO_DIST || FragPos.z < -MAX_SSAO_DIST)
 	{
 		OutColor = 1.0;
 		return;
 	}
+
+//	vec3 normal = normalize(texture(SamplerViewNormal, FragTexCoord).rgb * 2.0 - 1.0);
+	vec4 NormalTex = texture(SamplerViewNormal, FragTexCoord);
+	vec3 normal = normalize(NormalTex.rgb);
+//	if (NormalTex.w < 0.9)
+//	{
+//		OutColor = 1.0;
+//		return;
+//	}
 
 	// Get a random vector using a noise lookup
 	ivec2 texDim = textureSize(SamplerPositionDepth, 0); 
@@ -64,7 +72,8 @@ void main()
 	}
 	occlusion = 1.0 - (occlusion / float(SSAO_KERNEL_SIZE));
 	
-	OutColor = occlusion;
+	OutColor = pow(occlusion, 2.0);
+//	OutColor = occlusion;
 //	OutColor = 1.0;
 }
 

@@ -7,6 +7,7 @@ typedef struct
 {
 	float SplitDepth;
 	mat4 ProjectionView;
+	mat4 ProjectionViewBias;
 } Cascade;
 
 #define SHADOW_MAP_CASCADE_COUNT 3

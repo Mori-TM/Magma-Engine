@@ -1,14 +1,14 @@
-void CreateSSAOBlurRenderPass()
+void CreateFXAARenderPass()
 {
-	SSAOBlurColorAttachment = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_R);
+	FXAAColorAttachment = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_RGBA);
 
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR };
-	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_R };
+	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_RGBA };
 	uint32_t MsaaSamples[] = { 1 };
-	SSAOBlurRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
+	FXAARenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
 }
 
-void CreateSSAOBlurLayout()
+void CreateFXAALayout()
 {
 	OpenVkPipelineLayoutCreateInfo Layout;
 	Layout.PushConstantCount = 0;
@@ -17,14 +17,14 @@ void CreateSSAOBlurLayout()
 	Layout.PushConstantSizes = NULL;
 	Layout.DescriptorSetLayoutCount = 1;
 	Layout.DescriptorSetLayouts = &TextureDescriptorSetLayout;
-	SSAOBlurLayout = OpenVkCreatePipelineLayout(&Layout);
+	FXAALayout = OpenVkCreatePipelineLayout(&Layout);
 }
 
-void CreateSSAOBlurPipeline()
+void CreateFXAAPipeline()
 {
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
 	GraphicsPipelineCreateInfo.VertexShader = OpenVkReadFile("Data/Shader/OffscreenVertex.spv");
-	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/SSAOBlurFragment.spv");
+	GraphicsPipelineCreateInfo.FragmentShader = OpenVkReadFile("Data/Shader/FXAAFragment.spv");
 	GraphicsPipelineCreateInfo.BindingStride = 0;
 	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 0;
 	GraphicsPipelineCreateInfo.ShaderAttributeFormats = NULL;
@@ -42,25 +42,25 @@ void CreateSSAOBlurPipeline()
 	GraphicsPipelineCreateInfo.MsaaSamples = 1;
 	GraphicsPipelineCreateInfo.AlphaBlendings = NULL;
 	GraphicsPipelineCreateInfo.ColorBlendAttachments = 1;
-	GraphicsPipelineCreateInfo.PipelineLayout = SSAOBlurLayout;
+	GraphicsPipelineCreateInfo.PipelineLayout = FXAALayout;
 	GraphicsPipelineCreateInfo.DepthStencil = false;
-	GraphicsPipelineCreateInfo.RenderPass = SSAOBlurRenderPass;
+	GraphicsPipelineCreateInfo.RenderPass = FXAARenderPass;
 
-	SSAOBlurPipeline = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
+	FXAAPipeline = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 }
 
-void CreateSSAOBlurFramebuffer()
+void CreateFXAAFramebuffer()
 {
 	OpenVkFramebufferCreateInfo FramebufferCreateInfo;
 	FramebufferCreateInfo.AttachmentCount = 1;
-	FramebufferCreateInfo.Attachments = &SSAOBlurColorAttachment;
-	FramebufferCreateInfo.RenderPass = SSAOBlurRenderPass;
+	FramebufferCreateInfo.Attachments = &FXAAColorAttachment;
+	FramebufferCreateInfo.RenderPass = FXAARenderPass;
 	FramebufferCreateInfo.Width = SceneWidth;
 	FramebufferCreateInfo.Height = SceneHeight;
-	SSAOBlurFramebuffer = OpenVkCreateFramebuffer(&FramebufferCreateInfo);
+	FXAAFramebuffer = OpenVkCreateFramebuffer(&FramebufferCreateInfo);
 }
 
-void CreateSSAOBlurDescriptorSet()
+void CreateFXAADescriptorSet()
 {
 	uint32_t DescriptorCounts[] = { 1 };
 	uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
@@ -76,16 +76,16 @@ void CreateSSAOBlurDescriptorSet()
 	DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
 	DescriptorSetCreateInfo.Sampler = &ImageSampler;
 	DescriptorSetCreateInfo.ImageTypes = ImageTypes;
-	DescriptorSetCreateInfo.Images = &SSAOColorAttachment;
+	DescriptorSetCreateInfo.Images = &FXAAColorAttachment;
 	DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
 	DescriptorSetCreateInfo.Bindings = Bindings;
 	DescriptorSetCreateInfo.DescriptorSet = NULL;
 	DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
-	SSAOBlurDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
+	FXAADescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 }
 
-void SSAOBlurDraw()
+void FXAADraw()
 {
 	OpenVkSetScissor(0, 0, SceneWidth, SceneHeight);
 	OpenVkSetViewport(0, 0, SceneWidth, SceneHeight);
@@ -97,17 +97,17 @@ void SSAOBlurDraw()
 	BeginInfo.ClearColor[3] = 1.0;
 	BeginInfo.ClearColors = 1;
 	BeginInfo.ClearDepth = false;
-	BeginInfo.RenderPass = SSAOBlurRenderPass;
-	BeginInfo.Framebuffer = SSAOBlurFramebuffer;
+	BeginInfo.RenderPass = FXAARenderPass;
+	BeginInfo.Framebuffer = FXAAFramebuffer;
 	BeginInfo.x = 0;
 	BeginInfo.y = 0;
 	BeginInfo.Width = SceneWidth;
 	BeginInfo.Height = SceneHeight;
 	OpenVkBeginRenderPass(&BeginInfo);
 	{
-		OpenVkBindPipeline(SSAOBlurPipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
+		OpenVkBindPipeline(FXAAPipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
-		OpenVkBindDescriptorSet(SSAOBlurLayout, 0, SSAOBlurDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+		OpenVkBindDescriptorSet(FXAALayout, 0, SSROutputDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
 		OpenVkDrawVertices(0, 3);
 	}

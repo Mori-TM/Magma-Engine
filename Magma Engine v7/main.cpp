@@ -95,6 +95,7 @@ void RenderThread()
 		}
 		
 		RendererRender();
+		FrameCount++;
 	}
 
 	DestroyRenderer();
@@ -119,7 +120,7 @@ void CullingThread()
 
 			if (deltaTime >= frameTime) {
 				Mutex.lock();
-				mat4 ViewProj = MultiplyMat4P(&SceneVertexUBO.Projection, &SceneVertexUBO.View);
+				mat4 ViewProj = MultiplyMat4P(&GBufferVertexUBO.Projection, &GBufferVertexUBO.View);
 				Mutex.unlock();
 
 				RunFrustumCulling(ViewProj, RENDER_TYPE_DEFAULT);

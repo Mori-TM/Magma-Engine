@@ -6,6 +6,7 @@
 #include "Pipelines/SSAOBlurHelper.h"
 #include "Pipelines/SSRHelper.h"
 #include "Pipelines/SceneHelper.h"
+#include "Pipelines/FXAAHelper.h"
 #include "Pipelines/SwapChainHelper.h"
 
 #include "Helper/RendererHelper.h"
@@ -39,6 +40,7 @@
 #include "Pipelines/SSAOBlurPipeline.h"
 #include "Pipelines/ScenePipeline.h"
 #include "Pipelines/SSRPipeline.h"
+#include "Pipelines/FXAAPipeline.h"
 #include "Pipelines/SwapChainPipeline.h"
 
 void CreateRenderPasses()
@@ -50,6 +52,7 @@ void CreateRenderPasses()
 	CreateSSAOBlurRenderPass();
 	CreateSceneRenderPass();
 	CreateSSRRenderPass();
+	CreateFXAARenderPass();
 	CreateSwapChainRenderPass();
 }
 
@@ -63,6 +66,7 @@ void CreatePipelineLayouts()
 	CreateSceneLayout();
 	CreateDebugLayout();
 	CreateSSRLayout();
+	CreateFXAALayout();
 	CreateSwapChainLayout();
 	
 }
@@ -77,6 +81,7 @@ void CreateGraphicsPipelines()
 	CreateScenePipeline();
 	CreateDebugPipeline();	
 	CreateSSRPipeline();
+	CreateFXAAPipeline();
 	CreateSwapChainPipeline();
 }
 
@@ -89,6 +94,7 @@ void CreateFramebuffers()
 	CreateSSAOBlurFramebuffer();
 	CreateSceneFramebuffer();
 	CreateSSRFramebuffer();
+	CreateFXAAFramebuffer();
 	CreateSwapChainFramebuffer();
 }
 
@@ -99,9 +105,10 @@ void CreateDescriptors()
 	CreateShadowDescriptorSet();
 	CreateGBufferDescriptorSet();
 	CreateSSAODescriptorSets();
-	CreateSSAOBlurDescriptorSets();
+	CreateSSAOBlurDescriptorSet();
 	CreateSceneDescriptorSets();
 	CreateSSRDescriptorSet();
+	CreateFXAADescriptorSet();
 }
 
 void CreateRenderer()
@@ -138,12 +145,13 @@ void CreateRenderer()
 	EngineInitEditor();
 	InitImGui();
 	InitFpsCamera();
-
+	
 	OpenVkRuntimeInfo("Engine was initilaized", "");
 //	exit(2);
 	//Set up deafult test scene
 //	LoadModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
-//	LoadModel(0, "D:/3D Models/Sponza-master/Sponza3.obj");
+
+//	LoadModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
 //	AddEntity(COMPONENT_TYPE_MESH);
 //	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, 1);
 //	Entities[SelectedEntity].Mesh.MeshIndex = 1;
@@ -177,7 +185,7 @@ void RendererUpdate()
 	SceneFragmentUBO.CameraPosition.w = 0.0;
 	Normalize4P(&SceneFragmentUBO.LightDirection);
 	
-	if (RenderShadows || EffectFrame == 2)
+//	if (RenderShadows || EffectFrame == 2)
 		UpdateCascades();
 
 	GBufferUpdateUniformBuffer();
@@ -207,15 +215,14 @@ void RendererDraw()
 {
 	BeginFrameTime = GetExecutionTimeOpenVkBool(OpenVkBeginFrame);
 	{
-		if (RenderShadows)
-			ShadowRenderingTime = GetExecutionTime(ShadowDraw);
-		GBufferDraw();
-		SSAODraw();
-		SSAOBlurDraw();
+	//	if (RenderShadows)
+		ShadowRenderingTime = GetExecutionTime(ShadowDraw);
+		GBufferRenderingTime = GetExecutionTime(GBufferDraw);
+		SSAORenderingTime = GetExecutionTime(SSAODraw);
+		SSAOBlurRenderingTime = GetExecutionTime(SSAOBlurDraw);
 		SceneRenderingTime = GetExecutionTime(SceneDraw);
 		SSRRenderingTime = GetExecutionTime(SSRDraw);
-		
-		
+		FXAARenderingTime = GetExecutionTime(FXAADraw);		
 		SwapChainRenderingTime = GetExecutionTime(SwapChainDraw);
 	}
 	EndFrameTime = GetExecutionTimeOpenVkBool(OpenVkEndFrame);

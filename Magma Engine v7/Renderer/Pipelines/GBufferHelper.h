@@ -25,7 +25,8 @@ uint32_t GBufferPipelineNoneCull;
 uint32_t GBufferPipelineBackCull;
 uint32_t GBufferPipelineFrontCull;
 uint32_t GBufferRenderPass;
-uint32_t GBufferAttachments[5];
+#define G_BUFFER_ATTACHMENT_COUNT 7
+uint32_t GBufferAttachments[G_BUFFER_ATTACHMENT_COUNT];
 uint32_t GBufferFramebuffer;
 //uint32_t GBufferDescriptorSet;
 uint32_t GBufferVertexUniformDescriptorSet;

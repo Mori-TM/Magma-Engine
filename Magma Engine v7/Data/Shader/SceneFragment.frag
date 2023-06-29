@@ -8,13 +8,15 @@ layout(location = 0) out vec4 OutColor;
 layout(location = 0) in vec2 FragTexCoord;
 
 layout(set = 0, binding = 0) uniform sampler2D SamplerPosition;
-layout(set = 0, binding = 1) uniform sampler2D SamplerNormal;
+layout(set = 0, binding = 1) uniform sampler2D SamplerViewNormal;
 layout(set = 0, binding = 2) uniform sampler2D SamplerAlbedo;
 layout(set = 0, binding = 3) uniform sampler2D SamplerPBR;
-layout(set = 0, binding = 4) uniform sampler2D SamplerSSAO;
-layout(set = 0, binding = 5) uniform sampler2D ShadowMap;
+layout(set = 0, binding = 4) uniform sampler2D SamplerWorldPos;
+layout(set = 0, binding = 5) uniform sampler2D SamplerNormal;
+layout(set = 0, binding = 6) uniform sampler2D SamplerSSAO;
+layout(set = 0, binding = 7) uniform sampler2D ShadowMap;
 
-layout(set = 0, binding = 6) uniform UniformBufferObject
+layout(set = 0, binding = 8) uniform UniformBufferObject
 {
 	vec4 CascadeSplits;
 	vec4 CascadeRange;
@@ -198,15 +200,18 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 {
 	return F0 + (1.0 - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
 }
-/*
+
+vec3 PosRelToCam = vec3(0.0);
+vec4 WorldPos = vec4(0.0);
+
 float GetShadow(float Ambient)
 {
 	uint CascadeIndex = 0;
 	for (uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; i++)
-		if (FragPosRelToCam.z < UBO.CascadeSplits[i])
+		if (PosRelToCam.z < UBO.CascadeSplits[i])
 			CascadeIndex = i + 1;
 			 
-	vec4 ShadowCoord = (BiasMat * UBO.CascadeProjectionView[CascadeIndex]) * FragWorldPos;	
+	vec4 ShadowCoord = (UBO.CascadeProjectionView[CascadeIndex]) * WorldPos;	
 
 	ShadowCoord.x /= SHADOW_MAP_CASCADE_COUNT;
 	ShadowCoord.x += (1.0 / SHADOW_MAP_CASCADE_COUNT) * float(CascadeIndex); 
@@ -219,7 +224,7 @@ float GetShadow(float Ambient)
 
 	return Shadow;
 }
-*/
+
 vec3 Uncharted2Tonemap(vec3 x)
 {
 	const float A = 0.15;
@@ -315,25 +320,38 @@ void main()
 		discard;
 */
 	
-	vec4 NormalTex = texture(SamplerNormal, FragTexCoord);
-	vec3 normal = normalize(NormalTex.rgb);
-	vec3 fragPos = texture(SamplerPosition, FragTexCoord).rgb;
-	vec4 albedo = texture(SamplerAlbedo, FragTexCoord);
+	vec4 PositionTex = texture(SamplerPosition,	FragTexCoord);
+	vec4 ViewNormalTex   = texture(SamplerViewNormal,	FragTexCoord);
+	vec4 AlbedoTex   = texture(SamplerAlbedo,	FragTexCoord);
+	vec4 PBRTex		 = texture(SamplerPBR,		FragTexCoord);
+	vec4 WorldPosTex = texture(SamplerWorldPos,	FragTexCoord);
+	float NormalTex = texture(SamplerNormal,	FragTexCoord).x;
 
-	if (NormalTex.w < 0.9)
+	vec3 ViewNormal = normalize(ViewNormalTex.rgb);
+	vec3 fragPos = PositionTex.rgb;
+	PosRelToCam = fragPos;
+	vec4 Albedo = AlbedoTex;
+	WorldPos = WorldPosTex;
+
+	float Metallic = PBRTex.x;
+	float Roughness = PBRTex.y;
+	float Occlusion = PBRTex.z;
+
+	if (PositionTex.w > 900.0)
 	{
-		OutColor = albedo;
+		OutColor = Albedo;
 		return;
 	}
 	
+	vec3 Normal = normalize(vec3(ViewNormalTex.w, PBRTex.w, NormalTex));
 	 
-	float ssao = texture(SamplerSSAO, FragTexCoord).r;
-
+	float SSAO = texture(SamplerSSAO, FragTexCoord).r;
+	/*
 	vec3 lightPos = vec3(0.0);
 //	vec3 L = normalize(-UBO.LightDirection.xyz);
 	
 	vec3 L = normalize(lightPos - fragPos);
-	vec3 diffuse = max(0.5, dot(normal, L)) * albedo.xyz;
+	vec3 diffuse = max(dot(ViewNormal, L), 1.0) * Albedo.xyz ;
 //	vec3 diffuse = max(dot(normal, L), 0.0) * albedo.xyz * vec3(1.0);
 //	vec3 halfwayDir = normalize(L + viewDir);
 //	float spec = pow(max(dot(Normal, halfwayDir), 0.0), 8.0);
@@ -348,7 +366,97 @@ void main()
 	
 	OutColor.rgb = vec3(1.0);
 	OutColor.rgb = ssao.rrr;
-	OutColor.rgb *= diffuse;
+//	OutColor.rgb *= diffuse;
+	vec3 Ambient = vec3(0.5);
+//	OutColor.rgb = WorldPos.xyz;
+//	OutColor.rgb = vec3(GetShadow(1.0));
+	OutColor.rgb *= Albedo.xyz - vec3(GetShadow(Ambient.x));
+
+	OutColor.rgb = Normal;
+	*/
+
+
+
+
+
+
+
+
+
+	vec3 N = Normal;
+					//Upload Camera Pos
+	vec3 V = normalize(UBO.CameraPosition.xyz - WorldPos.xyz);
+
+	vec3 F0 = vec3(0.04); 
+	F0 = mix(F0, Albedo.xyz, Metallic);
+	vec3 Lo = vec3(0.0);
+
+	vec3 L = normalize(-UBO.LightDirection.xyz);
+	vec3 H = normalize(V + L);
+
+	vec3 LightColor = vec3(12.0);
+	vec3 Diffuse = vec3(max(dot(N, L), 0.0)) * LightColor;
+	float distance = length(-UBO.LightDirection.xyz);
+	float attenuation = 1.0 / (distance * distance);
+	vec3 radiance = LightColor * attenuation;
+
+	float NDF = DistributionGGX(N, H, Roughness);   
+	float G = GeometrySmith(N, V, L, Roughness);      
+	vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0);
+
+	vec3 nominator = NDF * G * F; 
+	float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+	vec3 specular = nominator / max(denominator, 0.001);
+
+	vec3 kS = F;
+	vec3 kD = vec3(1.0) - kS;
+	kD *= 1.0 - Metallic;
+	float NdotL = max(dot(N, L), 0.0); 
+
+	Lo += (kD * Albedo.xyz / PI + specular) * radiance * NdotL;
+
+	float Ambient = 0.6 * Occlusion;
+	
+	float Shadow = GetShadow(Ambient);
+
+	OutColor.rgb = Ambient * Albedo.xyz + ((Ambient - Shadow) * Lo);
+
+//	float Exposure = 4.0;
+//	float Gamma = 1.3;//1.3
+//	OutColor.rgb = Uncharted2Tonemap(OutColor.rgb * Exposure);
+//	OutColor.rgb = OutColor.rgb * (1.0f / Uncharted2Tonemap(vec3(11.2f)));	
+//	// Gamma correction
+//	OutColor.rgb = pow(OutColor.rgb, vec3(1.0f / Gamma));
+
+	float Exposure = UBO.Exposure;
+	float Gamma = UBO.Gamma;//1.3
+
+	OutColor.rgb = Uncharted2Tonemap(OutColor.rgb * Exposure);
+
+	const vec3 Uncharted2TonemapConst = (1.0f / Uncharted2Tonemap(vec3(11.2f)));
+	OutColor.rgb = OutColor.rgb * Uncharted2TonemapConst;	
+	OutColor.rgb = pow(OutColor.rgb, vec3(1.0f / Gamma));
+	
+
+	OutColor.rgb *= SSAO;
+
+//	vec3 mapped = OutColor.rgb / (OutColor.rgb + vec3(1.0));
+//	vec3 mapped = vec3(1.0) - exp(-OutColor.rgb * 1.65);
+//	OutColor.rgb = mapped;
+  // gamma correction 
+//    mapped = pow(mapped, vec3(1.0 / gamma));
+
+	OutColor.a = Albedo.a;
+
+	if (Albedo.a < 0.9)
+		discard;
+
+//	float Exposure = UBO.Exposure;
+//	float Gamma = UBO.Gamma;//1.3
+//	OutColor.rgb = Uncharted2Tonemap(OutColor.rgb * Exposure);
+//	const vec3 Uncharted2TonemapConst = (1.0f / Uncharted2Tonemap(vec3(11.2f)));
+//	OutColor.rgb = OutColor.rgb * Uncharted2TonemapConst;	
+//	OutColor.rgb = pow(OutColor.rgb, vec3(1.0f / Gamma));
 //OutColor.rgb = baseColor;
 //	OutColor.rgb = albedo.rgb;
 //	OutColor.rgb = texture(ShadowMap, FragTexCoord).rrr;

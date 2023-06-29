@@ -150,8 +150,11 @@ void LuaReloadFiles()
 		printf("Focus: %d\n", SDL_GetTicks());
 		for (uint32_t i = 0; i < SceneScriptCount; i++)
 		{
-			OpenVkFile File = OpenVkReadFile(SceneScripts[SelectedScript].Path);
-			strcpy(SceneScripts[SelectedScript].Script, File.Data);
+			if (strcmp(SceneScripts[SelectedScript].Path, "None") != 0)
+			{
+				OpenVkFile File = OpenVkReadFile(SceneScripts[SelectedScript].Path);
+				strcpy(SceneScripts[SelectedScript].Script, File.Data);
+			}			
 		}
 		WindowWasFocused = false;
 	}

@@ -21,3 +21,4 @@ glslc.exe Data/Shader/BlurFragment.frag -o Data/Shader/BlurFragment.spv
 glslc.exe Data/Shader/SSRFragment.frag -o Data/Shader/SSRFragment.spv
 glslc.exe Data/Shader/SSAOFragment.frag -o Data/Shader/SSAOFragment.spv
 glslc.exe Data/Shader/SSAOBlurFragment.frag -o Data/Shader/SSAOBlurFragment.spv
+glslc.exe Data/Shader/FXAAFragment.frag -o Data/Shader/FXAAFragment.spv

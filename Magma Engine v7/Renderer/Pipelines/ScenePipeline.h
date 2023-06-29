@@ -118,20 +118,31 @@ void CreateSceneDescriptorSets()
 	}
 	
 	{
-		uint32_t Attachments[] = { GBufferAttachments[0], GBufferAttachments[1], GBufferAttachments[2], GBufferAttachments[3], SSAOBlurColorAttachment, ShadowDepthAttachment };
-		uint32_t DescriptorCounts[] = { 1, 1, 1, 1, 1, 1, 1 };
-		uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER };
-		uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT };
-		uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_DEPTH_OUTPUT };
-		uint32_t Bindings[] = { 0, 1, 2, 3, 4, 5, 6 };
-		uint32_t Sampler[] = { GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler, ShadowSampler };
+		uint32_t Attachments[] = { GBufferAttachments[0], GBufferAttachments[1], GBufferAttachments[2], GBufferAttachments[3], GBufferAttachments[4], GBufferAttachments[5], SSAOBlurColorAttachment, ShadowDepthAttachment };
+		uint32_t DescriptorCounts[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+		uint32_t DescriptorTypes[] = 
+		{ 
+			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
+			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
+			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
+			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
+			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
+			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
+			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
+			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER,
+			OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER 
+		};
+		uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT };
+		uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_DEPTH_OUTPUT };
+		uint32_t Bindings[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+		uint32_t Sampler[] = { GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler, ShadowSampler };
 		uint32_t UniformBuffers[] = { SceneFragmentUniformBuffer };
 		size_t UniformSizes[] = { sizeof(SceneFragmentUniformBufferObject) };
 
 		OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
 		DescriptorSetCreateInfo.DescriptorSetLayout = SceneDescriptorSetLayout;
 		DescriptorSetCreateInfo.DescriptorPool = DescriptorPool;
-		DescriptorSetCreateInfo.DescriptorWriteCount = 7;
+		DescriptorSetCreateInfo.DescriptorWriteCount = 9;
 		DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
 		DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
 		DescriptorSetCreateInfo.Sampler = Sampler;
@@ -146,7 +157,7 @@ void CreateSceneDescriptorSets()
 		
 		SceneInputDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}
-
+	
 	{
 		uint32_t Attachments[] = { SceneAttachment };
 		uint32_t DescriptorCounts[] = { 1 };
@@ -219,23 +230,12 @@ void SceneUpdateUniformBuffer()
 	for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
 	{
 		SceneFragmentUBO.CascadeSplits[i] = Cascades[i].SplitDepth;
-		SceneFragmentUBO.CascadeProjectionView[i] = Cascades[i].ProjectionView;
+		SceneFragmentUBO.CascadeProjectionView[i] = Cascades[i].ProjectionViewBias;
 	}
-	SceneFragmentUBO.View = SceneVertexUBO.View;
+	SceneFragmentUBO.View = GBufferVertexUBO.View;
 
 	OpenVkUpdateBuffer(sizeof(SceneFragmentUniformBufferObject), &SceneFragmentUBO, SceneFragmentUniformBuffer);
 //	Mutex.unlock();
-}
-
-int EntityDistCompareFunc(const void* a, const void* b)
-{
-	EntityInfo* A = (EntityInfo*)a;
-	EntityInfo* B = (EntityInfo*)b;
-
-	float DistA = GetDistanceVec3P(&CameraPos, &A->Translate);
-	float DistB = GetDistanceVec3P(&CameraPos, &B->Translate);
-
-	return DistB - DistA;
 }
 
 void SceneDraw()
@@ -245,8 +245,8 @@ void SceneDraw()
 	BeginInfo.ClearColor[1] = 0.0;//ClearColor.y;
 	BeginInfo.ClearColor[2] = 0.0;//ClearColor.z;
 	BeginInfo.ClearColor[3] = 1.0;
-	BeginInfo.ClearColors = 4;
-	BeginInfo.ClearDepth = true;
+	BeginInfo.ClearColors = 1;
+	BeginInfo.ClearDepth = false;
 	BeginInfo.RenderPass = SceneRenderPass;
 	BeginInfo.Framebuffer = SceneFramebuffer;
 	BeginInfo.x = 0;

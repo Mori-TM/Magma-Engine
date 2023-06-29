@@ -14,6 +14,6 @@ void CreateImGuiDescriptorPool()
 {
 	uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
 	
-	uint32_t DescriptorCounts[] = { 64 };
+	uint32_t DescriptorCounts[] = { 256 };
 	ImGuiDescriptorPool = OpenVkCreateDescriptorPool(OPENVK_DESCRIPTOR_POOL_FREEABLE, 1, DescriptorTypes, DescriptorCounts);
 }

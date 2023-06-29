@@ -19,10 +19,15 @@ uint32_t MsaaSamples = 4;
 bool RenderShadows = true;
 uint32_t EffectFrame = 0;
 
+uint64_t FrameCount = 0;
 double ShadowRenderingTime = 0;
+double GBufferRenderingTime = 0;
+double SSAORenderingTime = 0;
+double SSAOBlurRenderingTime = 0;
 double SceneRenderingTime = 0;
-double SwapChainRenderingTime = 0;
 double SSRRenderingTime = 0;
+double FXAARenderingTime = 0;
+double SwapChainRenderingTime = 0;
 double BeginFrameTime = 0;
 double EndFrameTime = 0;
 double FrameTime = 0;

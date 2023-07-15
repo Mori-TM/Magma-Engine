@@ -266,7 +266,7 @@ VkPresentModeKHR VkChooseSwapPresentMode(VkPresentModeKHR* AvailablePresentModes
 							  v-sync before shown on screen
 	*/
 	for (uint32_t i = 0; i < PresentCount; i++)
-		if (AvailablePresentModes[i] == VK_PRESENT_MODE_FIFO_RELAXED_KHR)
+		if (AvailablePresentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
 			return AvailablePresentModes[i];
 
 	OpenVkRuntimeInfo("Desired present mode not supported, mode fifo will be used", "");

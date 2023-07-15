@@ -59,6 +59,50 @@ void CreateDebugPipeline()
 	free(VertexShader.Data);
 }
 
+void CreateDebugDescriptorSets()
+{
+	uint32_t Attachments[] =
+	{
+		ShadowDepthAttachment,
+		GBufferAttachments[0],
+		GBufferAttachments[1],
+		GBufferAttachments[2],
+		GBufferAttachments[3],
+		GBufferAttachments[4],
+		GBufferAttachments[5],
+		SSAOColorAttachment,
+		SSAOBlurColorAttachment,
+		SceneAttachment,
+		SSRColorAttachment,
+		FXAAColorAttachment,
+	};
+
+	for (uint32_t i = 0; i < ARRAY_SIZE(Attachments); i++)
+	{
+		uint32_t DescriptorCounts[] = { 1 };
+		uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
+		uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_ATTACHMENT };
+		uint32_t ImageLayouts[] = {i == 0 ? OPENVK_IMAGE_LAYOUT_DEPTH_OUTPUT : OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT};
+		uint32_t Bindings[] = { 0 };
+
+		OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
+		DescriptorSetCreateInfo.DescriptorSetLayout = TextureDescriptorSetLayout;
+		DescriptorSetCreateInfo.DescriptorPool = DescriptorPool;
+		DescriptorSetCreateInfo.DescriptorWriteCount = 1;
+		DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
+		DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
+		DescriptorSetCreateInfo.Sampler = &ImageSampler;
+		DescriptorSetCreateInfo.ImageTypes = ImageTypes;
+		DescriptorSetCreateInfo.Images = &Attachments[i];
+		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
+		DescriptorSetCreateInfo.Bindings = Bindings;
+		DescriptorSetCreateInfo.DescriptorSet = NULL;
+		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
+
+		DebugDescriptorSets[i] = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
+	}
+}
+
 void DebugDraw()
 {
 	Mutex.lock();

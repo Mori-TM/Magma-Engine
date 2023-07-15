@@ -83,6 +83,7 @@ void CreateFXAADescriptorSet()
 	DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
 	FXAADescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
+	SceneRenderDescriptorSet = FXAADescriptorSet;
 }
 
 void FXAADraw()
@@ -107,7 +108,11 @@ void FXAADraw()
 	{
 		OpenVkBindPipeline(FXAAPipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
-		OpenVkBindDescriptorSet(FXAALayout, 0, SSROutputDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+		uint32_t DescriptorSet;
+		if (RenderSSR)	DescriptorSet = SSROutputDescriptorSet;
+		else			DescriptorSet = SceneOutputDescriptorSet;
+
+		OpenVkBindDescriptorSet(FXAALayout, 0, DescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
 		OpenVkDrawVertices(0, 3);
 	}

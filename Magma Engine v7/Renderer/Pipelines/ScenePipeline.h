@@ -118,7 +118,7 @@ void CreateSceneDescriptorSets()
 	}
 	
 	{
-		uint32_t Attachments[] = { GBufferAttachments[0], GBufferAttachments[1], GBufferAttachments[2], GBufferAttachments[3], GBufferAttachments[4], GBufferAttachments[5], SSAOBlurColorAttachment, ShadowDepthAttachment };
+		uint32_t Attachments[] = { GBufferAttachments[0], GBufferAttachments[1], GBufferAttachments[2], GBufferAttachments[3], GBufferAttachments[4], GBufferAttachments[5], RenderSSAOBlur ? SSAOBlurColorAttachment : SSAOColorAttachment, ShadowDepthAttachment };
 		uint32_t DescriptorCounts[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 		uint32_t DescriptorTypes[] = 
 		{ 
@@ -233,6 +233,8 @@ void SceneUpdateUniformBuffer()
 		SceneFragmentUBO.CascadeProjectionView[i] = Cascades[i].ProjectionViewBias;
 	}
 	SceneFragmentUBO.View = GBufferVertexUBO.View;
+	SceneFragmentUBO.RenderShadows = RenderShadows;
+	SceneFragmentUBO.RenderSSAO = RenderSSAO;
 
 	OpenVkUpdateBuffer(sizeof(SceneFragmentUniformBufferObject), &SceneFragmentUBO, SceneFragmentUniformBuffer);
 //	Mutex.unlock();

@@ -38,7 +38,7 @@ OpenVkBool VkCreateSwapChain(uint32_t* Width, uint32_t* Height)
 	uint32_t FamilyIndices[] = { Indices.GraphicsFamily, Indices.PresentFamily };
 
 	//Don't know why to use VK_SHARING_MODE_CONCURRENT cause VK_SHARING_MODE_EXCLUSIVE is faster
-/*
+
 	if (Indices.GraphicsFamily != Indices.PresentFamily)
 	{
 		SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
@@ -46,7 +46,7 @@ OpenVkBool VkCreateSwapChain(uint32_t* Width, uint32_t* Height)
 		SwapchainCreateInfo.pQueueFamilyIndices = FamilyIndices;
 	}
 	else
-*/
+
 	{
 		SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		SwapchainCreateInfo.queueFamilyIndexCount = 0;
@@ -164,7 +164,7 @@ uint32_t VkCreateRenderer(const char**(*GetExtensions)(uint32_t* ExtensionCount)
 	if (OpenVkRendererFlags & OPENVK_RAYTRACING)
 	{
 		ExtensionCount++;
-		Extensions = (const char**)realloc(Extensions, ExtensionCount * sizeof(char*));
+		Extensions = (const char**)OpenVkRealloc(Extensions, ExtensionCount * sizeof(char*));
 		Extensions[ExtensionCount - 1] = VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME;
 	}	
 
@@ -661,10 +661,6 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 		AttributeDescriptions[i].location = i;
 		AttributeDescriptions[i].binding = 0;
 		AttributeDescriptions[i].format = VkGetOpenVkFormat(Info->ShaderAttributeFormats[i], NULL);
-	//	if (Info->ShaderAttributeFormats[i] == 1) AttributeDescriptions[i].format = VK_FORMAT_R32_SFLOAT;
-	//	if (Info->ShaderAttributeFormats[i] == 2) AttributeDescriptions[i].format = VK_FORMAT_R32G32_SFLOAT;
-	//	if (Info->ShaderAttributeFormats[i] == 3) AttributeDescriptions[i].format = VK_FORMAT_R32G32B32_SFLOAT;
-	//	if (Info->ShaderAttributeFormats[i] == 4) AttributeDescriptions[i].format = VK_FORMAT_R32G32B32A32_SFLOAT;
 		AttributeDescriptions[i].offset = Info->ShaderAttributeOffsets[i];
 	}
 
@@ -681,9 +677,9 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 	InputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	InputAssembly.pNext = NULL;
 	InputAssembly.flags = 0;
-	if (Info->PrimitiveTopology == 0) InputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
-	if (Info->PrimitiveTopology == 1) InputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
-	if (Info->PrimitiveTopology == 2) InputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	if (Info->PrimitiveTopology == OPENVK_PRIMITIVE_TOPOLOGY_POINT) InputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+	if (Info->PrimitiveTopology == OPENVK_PRIMITIVE_TOPOLOGY_LINE) InputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+	if (Info->PrimitiveTopology == OPENVK_PRIMITIVE_TOPOLOGY_TRIANGLE) InputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 	InputAssembly.primitiveRestartEnable = VK_FALSE;
 
 	VkViewport Viewport;

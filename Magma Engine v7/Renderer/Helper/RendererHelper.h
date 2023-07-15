@@ -14,10 +14,14 @@ bool ForceFullScreenEvent = false;
 bool RenderGamePreview = false;
 bool GamePerformanceOverlay = false;
 
-uint32_t MsaaSamples = 4;
+uint32_t MsaaSamples = 1;
 
 bool RenderShadows = true;
-uint32_t EffectFrame = 0;
+bool RenderSSAO = true;
+bool RenderSSAOBlur = true;
+bool RenderSSR = true;
+bool RenderFXAA = true;
+bool ForceRenderOnce = true;//Used so that after every resize there are no errors with undefined image layouts
 
 uint64_t FrameCount = 0;
 double ShadowRenderingTime = 0;

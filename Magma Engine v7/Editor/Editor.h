@@ -7,6 +7,9 @@ typedef enum
 
 vec3 ImGuiIconButtonColor = { 0.8, 0.8, 0.8 };
 
+//Gets init in the FXAA pipeline
+uint32_t SceneRenderDescriptorSet = 0;
+
 bool ImGuiIconButton(const char* Icon, const char* ID, uint32_t IconType, const ImVec2& Size = ImVec2(0, 0))
 {
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(ImGuiIconButtonColor.x * 255, ImGuiIconButtonColor.y * 255, ImGuiIconButtonColor.z * 255, 255));

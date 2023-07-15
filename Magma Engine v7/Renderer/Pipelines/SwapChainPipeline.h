@@ -106,7 +106,7 @@ void SwapChainDraw()
 
 			ImTextureID NonAlphaTextures[1] =
 			{
-				(ImTextureID*)&GetDescriptorSet(FXAADescriptorSet)[VkRenderer.CurrentFrame]
+				(ImTextureID*)&GetDescriptorSet(SceneRenderDescriptorSet)[VkRenderer.CurrentFrame]
 			};
 
 			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), VkRenderer.CommandBuffers[VkRenderer.ImageIndex], 1, NonAlphaTextures);

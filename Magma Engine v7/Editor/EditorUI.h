@@ -635,6 +635,14 @@ void EngineDrawEditor()
 		//	ImGui::Checkbox("Scene Backface Culling", &SceneBackfaceCulling);
 
 		ImGui::Checkbox("Render Shadows", &RenderShadows);
+		ImGui::Checkbox("Render SSAO", &RenderSSAO);
+		if (ImGui::Checkbox("Render SSAO Blur", &RenderSSAOBlur))
+		{
+			ForceResizeEvent = true;
+			PushEventSDL(0, 0);
+		}			
+		ImGui::Checkbox("Render SSR", &RenderSSR);
+		ImGui::Checkbox("Render FXAA", &RenderFXAA);
 
 		const char* CullingOptions[] = { "No Culling", "Back Face Culling", "Front Face Culling" };
 		if (ImGui::BeginCombo("Scene Face Culling", CullingOptions[GBufferCullMode]))
@@ -689,6 +697,49 @@ void EngineDrawEditor()
 				ImGui::PopID();
 			}
 		}
+	}
+	ImGui::End();
+
+	ImGui::Begin("Render Stages", NULL, ImGuiWindowFlags_NoScrollbar);
+	{
+		ImVec2 ImageSize = ImGui::GetWindowSize();
+		float Aspect = (float)SceneWidth / (float)SceneHeight;
+		ImageSize.y = ImageSize.x / Aspect;
+		
+		for (uint32_t i = 0; i < ARRAY_SIZE(DebugDescriptorSets); i++)
+		{
+			ImGui::Text(DebugAttachmentNames[i]);
+	//		ImGui::PushID(DebugDescriptorSets[i]);
+		//	if (ImGui::ImageButton(&GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+			ImGui::Image(&GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize);
+//			ImGui::PopID();
+		}
+
+		/*
+		ImGui::Text("SSAO Pass");
+		ImGui::PushID("SSAO Pass Texture");
+		if (ImGui::ImageButton(&GetDescriptorSet(SSAOBlurDescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+			SceneRenderDescriptorSet = SSAOBlurDescriptorSet;
+		ImGui::PopID();
+
+		ImGui::Text("Scene Pass");
+		ImGui::PushID("Scene Pass Texture");
+		if (ImGui::ImageButton(&GetDescriptorSet(SceneOutputDescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+			SceneRenderDescriptorSet = SceneOutputDescriptorSet;
+		ImGui::PopID();
+
+		ImGui::Text("SSR Pass");
+		ImGui::PushID("SSR Pass Texture");
+		if (ImGui::ImageButton(&GetDescriptorSet(SSROutputDescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+			SceneRenderDescriptorSet = SSROutputDescriptorSet;
+		ImGui::PopID();
+
+		ImGui::Text("FXAA Output");
+		ImGui::PushID("FXAA Output Texture");
+		if (ImGui::ImageButton(&GetDescriptorSet(FXAADescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+			SceneRenderDescriptorSet = FXAADescriptorSet;
+		ImGui::PopID();
+		*/
 	}
 	ImGui::End();
 

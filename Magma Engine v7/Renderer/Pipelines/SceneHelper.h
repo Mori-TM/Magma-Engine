@@ -36,6 +36,9 @@ typedef struct
 	mat4 View;
 	float Gamma;
 	float Exposure;
+
+	uint32_t RenderShadows;
+	uint32_t RenderSSAO;
 } SceneFragmentUniformBufferObject;
 
 typedef struct

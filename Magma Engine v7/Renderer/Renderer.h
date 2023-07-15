@@ -107,6 +107,7 @@ void CreateDescriptors()
 	CreateSSAODescriptorSets();
 	CreateSSAOBlurDescriptorSet();
 	CreateSceneDescriptorSets();
+	CreateDebugDescriptorSets();
 	CreateSSRDescriptorSet();
 	CreateFXAADescriptorSet();
 }
@@ -151,11 +152,11 @@ void CreateRenderer()
 	//Set up deafult test scene
 //	LoadModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
 
-//	LoadModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
-//	AddEntity(COMPONENT_TYPE_MESH);
-//	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, 1);
-//	Entities[SelectedEntity].Mesh.MeshIndex = 1;
-//	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
+	LoadModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
+	AddEntity(COMPONENT_TYPE_MESH);
+	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, 1);
+	Entities[SelectedEntity].Mesh.MeshIndex = 1;
+	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
 }
 
 void DestroyRenderer()
@@ -186,9 +187,9 @@ void RendererUpdate()
 	Normalize4P(&SceneFragmentUBO.LightDirection);
 	
 //	if (RenderShadows || EffectFrame == 2)
-		UpdateCascades();
 
 	GBufferUpdateUniformBuffer();
+	UpdateCascades();
 	SSAOUpdateUniformBuffer();
 	SceneUpdateUniformBuffer();
 	SSRUpdateUniformBuffer();
@@ -213,19 +214,27 @@ void RendererUpdate()
 
 void RendererDraw()
 {
+	if (RenderFXAA)
+		SceneRenderDescriptorSet = FXAADescriptorSet;
+	else if (!RenderFXAA && RenderSSR)
+		SceneRenderDescriptorSet = SSROutputDescriptorSet;
+	else
+		SceneRenderDescriptorSet = SceneOutputDescriptorSet;
+
 	BeginFrameTime = GetExecutionTimeOpenVkBool(OpenVkBeginFrame);
 	{
-	//	if (RenderShadows)
-		ShadowRenderingTime = GetExecutionTime(ShadowDraw);
-		GBufferRenderingTime = GetExecutionTime(GBufferDraw);
-		SSAORenderingTime = GetExecutionTime(SSAODraw);
-		SSAOBlurRenderingTime = GetExecutionTime(SSAOBlurDraw);
-		SceneRenderingTime = GetExecutionTime(SceneDraw);
-		SSRRenderingTime = GetExecutionTime(SSRDraw);
-		FXAARenderingTime = GetExecutionTime(FXAADraw);		
-		SwapChainRenderingTime = GetExecutionTime(SwapChainDraw);
+		if (ForceRenderOnce || RenderShadows)					ShadowRenderingTime = GetExecutionTime(ShadowDraw);
+																GBufferRenderingTime = GetExecutionTime(GBufferDraw);
+		if (ForceRenderOnce || RenderSSAO)						SSAORenderingTime = GetExecutionTime(SSAODraw);
+		if (ForceRenderOnce || RenderSSAO && RenderSSAOBlur)	SSAOBlurRenderingTime = GetExecutionTime(SSAOBlurDraw);
+							 									SceneRenderingTime = GetExecutionTime(SceneDraw);
+		if (ForceRenderOnce || RenderSSR)						SSRRenderingTime = GetExecutionTime(SSRDraw);
+		if (ForceRenderOnce || RenderFXAA)						FXAARenderingTime = GetExecutionTime(FXAADraw);
+											SwapChainRenderingTime = GetExecutionTime(SwapChainDraw);
 	}
 	EndFrameTime = GetExecutionTimeOpenVkBool(OpenVkEndFrame);
+
+	ForceRenderOnce = false;
 }
 
 void RendererResize()
@@ -236,6 +245,7 @@ void RendererResize()
 	CreateFramebuffers();
 	OpenVkDestroyDescriptorPool(DescriptorPool);
 	CreateDescriptors();
+	ForceRenderOnce = true;
 }
 
 void RendererEvent()

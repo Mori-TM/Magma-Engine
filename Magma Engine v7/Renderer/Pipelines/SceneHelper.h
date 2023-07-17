@@ -31,15 +31,25 @@ typedef struct
 	float CascadeScale[4];
 	float CascadeBias[4];
 	mat4 CascadeProjectionView[SHADOW_MAP_CASCADE_COUNT];
-	vec4 LightDirection;
 	vec4 CameraPosition;
 	mat4 View;
 	float Gamma;
 	float Exposure;
-
-	uint32_t RenderShadows;
+	float AmbientMultiplier;
 	uint32_t RenderSSAO;
 } SceneFragmentUniformBufferObject;
+
+#define MAX_NUMBER_OF_LIGHTS 32
+
+typedef struct
+{
+	vec4 LightPos[MAX_NUMBER_OF_LIGHTS];
+	vec4 LightColor[MAX_NUMBER_OF_LIGHTS];
+	uint32_t LightCastShadow[MAX_NUMBER_OF_LIGHTS];
+	uint32_t LightType[MAX_NUMBER_OF_LIGHTS];
+	uint32_t LightCount;
+	uint32_t Dummy;
+} SceneFragmentStorageBufferObject;
 
 typedef struct
 {
@@ -171,7 +181,11 @@ uint32_t SceneVertexUniformBuffer;
 uint32_t SceneFragmentUniformDescriptorSet;
 uint32_t SceneFragmentUniformBuffer;
 
+uint32_t SceneFragmentStorageDescriptorSet;
+uint32_t SceneFragmentStorageBuffer;
+
 //SceneVertexPushConstant SceneVertexPc;
 SceneFragmentPushConstant SceneFragmentPc;
 //SceneVertexUniformBufferObject SceneVertexUBO;
 SceneFragmentUniformBufferObject SceneFragmentUBO;
+SceneFragmentStorageBufferObject SceneFragmentSBO;

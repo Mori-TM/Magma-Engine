@@ -143,11 +143,42 @@ void EditorEntityInspector()
 					ImGui::PopStyleColor();
 				}
 			}
+
+			if (Entities[SelectedEntity].UsedComponents[COMPONENT_TYPE_LIGHT] == true)
+			{
+				if (ImGui::CollapsingHeader("LIGHT"))
+				{
+					ImGui::ColorEdit3("Color", (float*)&Entities[SelectedEntity].Light.Color);
+					ImGui::DragFloat("Strength", &Entities[SelectedEntity].Light.Strength, 0.1, 0.01, 10000.0);					
+
+					const char* Types[] = { "Point", "Directinoal", "Spot" };
+					if (ImGui::BeginCombo("Light Type", Types[Entities[SelectedEntity].Light.Type]))
+					{
+						for (uint32_t i = 0; i < ARRAY_SIZE(Types); i++)
+						{
+							if (ImGui::Button(Types[i]))
+							{
+								Entities[SelectedEntity].Light.Type = i;
+							}
+						}
+						ImGui::EndCombo();
+					}
+					if (Entities[SelectedEntity].Light.Type == 1)
+						ImGui::Checkbox("Cast Shadow", &Entities[SelectedEntity].Light.CastShadow);
+
+					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+					if (ImGui::Button("Remove Light Component"))
+					{
+						Entities[SelectedEntity].UsedComponents[COMPONENT_TYPE_LIGHT] = false;
+					}
+					ImGui::PopStyleColor();
+				}
+			}
 	
 			if (ImGui::BeginPopupContextWindow("Entity Inspector Pop Up"))
 			{				
 				ImGui::Text("Components");
-				const char* Components[] = { "Mesh", "Material", "Camera", "Audio", "Animation" };
+				const char* Components[] = { "Mesh", "Material", "Camera", "Audio", "Animation", "Light"};
 				for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
 				{
 					if (ImGui::Button(Components[i]))

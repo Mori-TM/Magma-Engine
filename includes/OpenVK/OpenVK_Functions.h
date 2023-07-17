@@ -24,6 +24,7 @@ void		(*OpenVkDestroySampler				)(uint32_t Sampler);
 uint32_t	(*OpenVkCreateColorImageAttachment	)(uint32_t Width, uint32_t Height, uint32_t MsaaSamples, OpenVkBool Sampled, uint32_t Format);
 uint32_t	(*OpenVkCreateDepthImageAttachment	)(uint32_t Width, uint32_t Height, uint32_t MsaaSamples, OpenVkBool Sampled, uint32_t Format);
 uint32_t	(*OpenVkCreateUniformBuffer			)(size_t Size);
+uint32_t	(*OpenVkCreateStorageBuffer			)(size_t Size);
 OpenVkBool	(*OpenVkUpdateBuffer				)(size_t Size, const void* BufferData, uint32_t Buffer);
 OpenVkBool	(*OpenVkUpdateDynamicBuffer			)(size_t Size, const void* Data, uint32_t Buffer);
 uint32_t	(*OpenVkCreateDynamicBuffer			)(size_t Size);
@@ -95,6 +96,7 @@ uint32_t OpenVkCreateRenderer(uint32_t RendererFlags, const char** (*GetExtensio
 		OpenVkCreateDynamicVertexBuffer = VkCreateDynamicVertexBuffer;
 		OpenVkCreateDynamicIndexBuffer = VkCreateDynamicIndexBuffer;
 		OpenVkCreateUniformBuffer = VkCreateUniformBuffer;
+		OpenVkCreateStorageBuffer = VkCreateStorageBuffer;
 		OpenVkCreateDynamicBuffer = VkCreateDynamicUniformBuffer;
 		OpenVkUpdateBuffer = VkUpdateBuffer;
 		OpenVkUpdateDynamicBuffer = VkUpdateDynamicBuffer;

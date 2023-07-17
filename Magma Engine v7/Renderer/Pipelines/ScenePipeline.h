@@ -64,6 +64,11 @@ void CreateSceneUniformBuffer()
 	SceneFragmentUniformBuffer = OpenVkCreateUniformBuffer(sizeof(SceneFragmentUniformBufferObject));
 }
 
+void CreateSceneStorageBuffer()
+{
+	SceneFragmentStorageBuffer = OpenVkCreateStorageBuffer(sizeof(SceneFragmentStorageBufferObject));
+}
+
 void CreateSceneDescriptorSets()
 {	
 	for (uint32_t i = 0; i < SceneTextures.Size; i++)
@@ -119,7 +124,7 @@ void CreateSceneDescriptorSets()
 	
 	{
 		uint32_t Attachments[] = { GBufferAttachments[0], GBufferAttachments[1], GBufferAttachments[2], GBufferAttachments[3], GBufferAttachments[4], GBufferAttachments[5], RenderSSAOBlur ? SSAOBlurColorAttachment : SSAOColorAttachment, ShadowDepthAttachment };
-		uint32_t DescriptorCounts[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+		uint32_t DescriptorCounts[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 		uint32_t DescriptorTypes[] = 
 		{ 
 			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
@@ -130,27 +135,28 @@ void CreateSceneDescriptorSets()
 			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
 			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
 			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER,
-			OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER 
+			OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER
 		};
 		uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT };
 		uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_DEPTH_OUTPUT };
-		uint32_t Bindings[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+		uint32_t Bindings[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 		uint32_t Sampler[] = { GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler, ShadowSampler };
-		uint32_t UniformBuffers[] = { SceneFragmentUniformBuffer };
-		size_t UniformSizes[] = { sizeof(SceneFragmentUniformBufferObject) };
+		uint32_t Buffers[] = { SceneFragmentUniformBuffer, SceneFragmentStorageBuffer };
+		size_t BufferSizes[] = { sizeof(SceneFragmentUniformBufferObject), sizeof(SceneFragmentStorageBufferObject) };
 
 		OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
 		DescriptorSetCreateInfo.DescriptorSetLayout = SceneDescriptorSetLayout;
 		DescriptorSetCreateInfo.DescriptorPool = DescriptorPool;
-		DescriptorSetCreateInfo.DescriptorWriteCount = 9;
+		DescriptorSetCreateInfo.DescriptorWriteCount = 10;
 		DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
 		DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
 		DescriptorSetCreateInfo.Sampler = Sampler;
 		DescriptorSetCreateInfo.ImageTypes = ImageTypes;
 		DescriptorSetCreateInfo.Images = Attachments;
 		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
-		DescriptorSetCreateInfo.Buffers = UniformBuffers;
-		DescriptorSetCreateInfo.BufferSizes = UniformSizes;
+		DescriptorSetCreateInfo.Buffers = Buffers;
+		DescriptorSetCreateInfo.BufferSizes = BufferSizes;
 		DescriptorSetCreateInfo.Bindings = Bindings;
 		DescriptorSetCreateInfo.DescriptorSet = NULL;
 		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
@@ -233,11 +239,42 @@ void SceneUpdateUniformBuffer()
 		SceneFragmentUBO.CascadeProjectionView[i] = Cascades[i].ProjectionViewBias;
 	}
 	SceneFragmentUBO.View = GBufferVertexUBO.View;
-	SceneFragmentUBO.RenderShadows = RenderShadows;
 	SceneFragmentUBO.RenderSSAO = RenderSSAO;
 
 	OpenVkUpdateBuffer(sizeof(SceneFragmentUniformBufferObject), &SceneFragmentUBO, SceneFragmentUniformBuffer);
 //	Mutex.unlock();
+}
+
+void SceneUpdateStorageBuffer()
+{
+	SceneFragmentSBO.LightCount = 0;
+	for (uint32_t i = 0; i < EntityCount; i++)
+	{
+		if (Entities[i].UsedComponents[COMPONENT_TYPE_LIGHT])
+		{
+			uint32_t j = SceneFragmentSBO.LightCount;
+			if (SceneFragmentSBO.LightCount >= MAX_NUMBER_OF_LIGHTS)
+				break;
+
+			SceneFragmentSBO.LightPos[j].x = Entities[i].Translate.x;
+			SceneFragmentSBO.LightPos[j].y = Entities[i].Translate.y;
+			SceneFragmentSBO.LightPos[j].z = Entities[i].Translate.z;
+			SceneFragmentSBO.LightPos[j].w = 1.0;
+
+			SceneFragmentSBO.LightColor[j].x = Entities[i].Light.Color.x;
+			SceneFragmentSBO.LightColor[j].y = Entities[i].Light.Color.y;
+			SceneFragmentSBO.LightColor[j].z = Entities[i].Light.Color.z;
+			SceneFragmentSBO.LightColor[j].w = Entities[i].Light.Strength;
+
+		//	memcpy(&SceneFragmentSBO.LightPos[i], &Entities[i].Translate, sizeof(vec3));
+		//	memcpy(&SceneFragmentSBO.LightColor[i], &Entities[i].Light.Color, sizeof(vec3));
+			SceneFragmentSBO.LightCastShadow[j] = Entities[i].Light.CastShadow;
+			SceneFragmentSBO.LightType[j] = Entities[i].Light.Type;
+			SceneFragmentSBO.LightCount++;
+		}
+	}
+
+	OpenVkUpdateBuffer(sizeof(SceneFragmentStorageBufferObject), &SceneFragmentSBO, SceneFragmentStorageBuffer);
 }
 
 void SceneDraw()

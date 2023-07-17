@@ -1,4 +1,4 @@
-#define COMPONENT_COUNT 5
+#define COMPONENT_COUNT 6
 
 typedef enum
 {
@@ -7,6 +7,7 @@ typedef enum
 	COMPONENT_TYPE_CAMERA = 2,
 	COMPONENT_TYPE_AUDIO = 3,
 	COMPONENT_TYPE_ANIMATION = 4,
+	COMPONENT_TYPE_LIGHT = 5,
 } ComponentTypes;
 
 typedef struct
@@ -45,6 +46,15 @@ typedef struct
 typedef struct
 {
 	char Name[MAX_CHAR_NAME_LENGTH];
+	vec3 Color;
+	float Strength;
+	uint32_t Type;
+	bool CastShadow;
+} LightComponent;
+
+typedef struct
+{
+	char Name[MAX_CHAR_NAME_LENGTH];
 	vec3 Translate;
 	vec3 Rotate;
 	vec3 Scale;
@@ -56,6 +66,7 @@ typedef struct
 	CameraComponent Camera;
 	AudioComponent Audio;
 	AnimationComponent Animation;
+	LightComponent Light;
 } EntityInfo;
 
 uint32_t SelectedEntity = 0;

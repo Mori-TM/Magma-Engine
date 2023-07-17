@@ -82,6 +82,15 @@ void ResetSceneSettings()
 	}
 	SceneFragmentUBO.CascadeBias[0] = 0.002;
 	SceneFragmentUBO.CascadeScale[0] = 1.0;
+	SceneFragmentUBO.AmbientMultiplier = 0.6;
+	SceneFragmentSBO.LightCount = 0;
+	for (uint32_t i = 0; i < MAX_NUMBER_OF_LIGHTS; i++)
+	{
+		SceneFragmentSBO.LightPos[i] = Vec4f(0.0);
+		SceneFragmentSBO.LightColor[i] = Vec4f(1.0);
+		SceneFragmentSBO.LightCastShadow[i] = 0;
+		SceneFragmentSBO.LightType[i] = 0;
+	}
 
 	CascadeSplitLambda = 0.95;
 	CascadeNearClip = 0.5;
@@ -91,7 +100,6 @@ void ResetSceneSettings()
 	SceneFragmentUBO.Exposure = 4.0;
 
 	ClearColor = Vec3(0.15, 0.3, 0.7);
-	SceneFragmentUBO.LightDirection = Vec4(0.426, -0.876, -0.225, 0.0);
 	SceneCullMode = CULL_MODE_BACK;
 	ShadowCullMode = CULL_MODE_FRONT;
 	ShadowMapHeight = ShadowMapSizeTmp;

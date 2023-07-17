@@ -136,6 +136,7 @@ void CreateRenderer()
 	CreateGBufferUniformBuffer();
 	CreateSSAOUniformBuffer();
 	CreateSceneUniformBuffer();
+	CreateSceneStorageBuffer();
 	CreateSSRUniformBuffer();
 	
 	CreateImGuiDescriptorPool();
@@ -184,7 +185,6 @@ void RendererUpdate()
 	SceneFragmentUBO.CameraPosition.y = CameraPos.y;
 	SceneFragmentUBO.CameraPosition.z = CameraPos.z;
 	SceneFragmentUBO.CameraPosition.w = 0.0;
-	Normalize4P(&SceneFragmentUBO.LightDirection);
 	
 //	if (RenderShadows || EffectFrame == 2)
 
@@ -192,7 +192,9 @@ void RendererUpdate()
 	UpdateCascades();
 	SSAOUpdateUniformBuffer();
 	SceneUpdateUniformBuffer();
+	SceneUpdateStorageBuffer();
 	SSRUpdateUniformBuffer();
+	
 	/*
 	Mutex.lock();
 	mat4 ViewProj = MultiplyMat4P(&SceneVertexUBO.Projection, &SceneVertexUBO.View);

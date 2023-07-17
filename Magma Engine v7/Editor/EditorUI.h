@@ -569,7 +569,8 @@ void EngineDrawEditor()
 	ImGui::Begin("Scene Settings");
 	{
 		ImGui::ColorEdit3("Clear Color", (float*)&ClearColor);
-		ImGui::DragFloat3("Light Direction", (float*)&SceneFragmentUBO.LightDirection, 0.01, -10000.0, 10000.0);
+	//	ImGui::DragFloat3("Light Direction", (float*)&SceneFragmentUBO.LightDirection, 0.01, -10000.0, 10000.0);
+		ImGui::SliderFloat("Ambient Multiplier", &SceneFragmentUBO.AmbientMultiplier, 0.01, 1.0);
 		ImGui::SliderFloat("Exposure", &SceneFragmentUBO.Exposure, 0.01, 10.0);
 		ImGui::SliderFloat("Gamma", &SceneFragmentUBO.Gamma, 0.01, 10.0);
 		{
@@ -634,7 +635,7 @@ void EngineDrawEditor()
 		*/
 		//	ImGui::Checkbox("Scene Backface Culling", &SceneBackfaceCulling);
 
-		ImGui::Checkbox("Render Shadows", &RenderShadows);
+	//	ImGui::Checkbox("Render Shadows", &RenderShadows);
 		ImGui::Checkbox("Render SSAO", &RenderSSAO);
 		if (ImGui::Checkbox("Render SSAO Blur", &RenderSSAOBlur))
 		{

@@ -891,7 +891,7 @@ uint32_t VkCreateFramebuffer(OpenVkFramebufferCreateInfo* Info)
 	return VkRenderer.FramebufferCount - 1;
 }
 
-//Implement multiple descriptor flags
+//Add OPENVK_DESCRIPTOR_TYPE_VERTEX_BUFFER and OPENVK_DESCRIPTOR_TYPE_INDEX_BUFFER
 uint32_t VkCreateDescriptorSetLayout(uint32_t BindingCount, uint32_t* Bindings, uint32_t* DescriptorCounts, uint32_t* DescriptorTypes, uint32_t* DescriptorFlags, uint32_t* ShaderTypes)
 {
 	VkRenderer.DescriptorSetLayouts = (VkDescriptorSetLayout*)OpenVkRealloc(VkRenderer.DescriptorSetLayouts, (VkRenderer.DescriptorSetLayoutCount + 1) * sizeof(VkDescriptorSetLayout));
@@ -951,13 +951,7 @@ uint32_t VkCreateDescriptorSetLayout(uint32_t BindingCount, uint32_t* Bindings, 
 	return VkRenderer.DescriptorSetLayoutCount++;
 }
 
-//DescriptorTypes
-//Uniform Buffer = 0
-//Dynamic Uniform Buffer = 1
-//Image Sampler = 2
-//Pool Types
-//0 = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
-//1 = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE
+//Add OPENVK_DESCRIPTOR_TYPE_VERTEX_BUFFER and OPENVK_DESCRIPTOR_TYPE_INDEX_BUFFER
 uint32_t VkCreateDescriptorPool(uint32_t DescriptorPoolType, uint32_t PoolSizeCount, uint32_t* DescriptorTypes, uint32_t* DescriptorCounts)
 {
 	uint32_t MaxSets = 0;
@@ -1107,7 +1101,8 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 					uint32_t k = m + BufferCount;
 					VkBuffer BufferVk;
 
-					if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+					if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_VERTEX_BUFFER ||
+						Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_INDEX_BUFFER)
 					{
 						VkStaticBufferInfo* Buffer = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Info->Buffers[k]);
 						if (Buffer == NULL)
@@ -1643,6 +1638,17 @@ uint32_t VkCreateUniformBuffer(size_t Size)
 			return OpenVkRuntimeError("Failed to create uniform buffer");
 
 	return CMA_Push(&VkRenderer.DynamicBuffers, &UniformBuffer);
+}
+
+uint32_t VkCreateStorageBuffer(size_t Size)
+{
+	VkDynamicBufferInfo StorageBuffer;
+
+	for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		if (VkCreateBuffer(Size, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &StorageBuffer.Buffers[i], &StorageBuffer.BufferMemories[i]) == OPENVK_ERROR)
+			return OpenVkRuntimeError("Failed to create Storage buffer");
+
+	return CMA_Push(&VkRenderer.DynamicBuffers, &StorageBuffer);
 }
 
 uint32_t VkCreateDynamicUniformBuffer(size_t Size)

@@ -24,6 +24,16 @@ void ResetEntityAnimation(EntityInfo* Entity)
 	Entity->Animation.AnimationIndex = 0;
 }
 
+
+void ResetEntityLight(EntityInfo* Entity)
+{
+	strcpy(Entity->Light.Name, "None");
+	Entity->Light.Color = Vec3f(1.0);
+	Entity->Light.Strength = 1.0;
+	Entity->Light.Type = 0;
+	Entity->Light.CastShadow = false;
+}
+
 void AddEntity(uint32_t UsedComponent)
 {
 	Mutex.lock();
@@ -38,6 +48,7 @@ void AddEntity(uint32_t UsedComponent)
 	ResetEntityMaterial(&Entity);
 	ResetEntityCamera(&Entity);
 	ResetEntityAnimation(&Entity);
+	ResetEntityLight(&Entity);
 	
 	Entity.Translate = Vec3f(0.0);
 	Entity.Rotate = Vec3f(0.0);
@@ -97,6 +108,9 @@ void EditorEntities()
 
 			if (ImGui::Selectable("Add Animation Entity"))
 				AddEntity(COMPONENT_TYPE_ANIMATION);
+
+			if (ImGui::Selectable("Add Light Entity"))
+				AddEntity(COMPONENT_TYPE_LIGHT);
 
 			ImGui::EndPopup();
 		}

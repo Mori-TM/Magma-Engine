@@ -123,6 +123,31 @@ const mat4 BiasMatrix =
 float CascadeSplits[SHADOW_MAP_CASCADE_COUNT];
 void UpdateCascades()
 {
+	vec3 LightDirection = Vec3f(1.0);
+	bool IsShadow = false;
+	for (uint32_t i = 0; i < EntityCount; i++)
+	{
+		if (Entities[i].UsedComponents[COMPONENT_TYPE_LIGHT])
+		{
+			if (Entities[i].Light.CastShadow)
+			{
+				LightDirection.x = -Entities[i].Translate.x;
+				LightDirection.y = -Entities[i].Translate.y;
+				LightDirection.z = -Entities[i].Translate.z;
+				Normalize3P(&LightDirection);
+				IsShadow = true;
+				break;
+			}
+		}
+	}
+
+	if (!IsShadow)
+	{
+		RenderShadows = false;
+		return;
+	}
+	RenderShadows = true;
+
 	float ClipRange = CascadeFarClip - CascadeNearClip;
 
 	float MinZ = CascadeNearClip;
@@ -201,7 +226,7 @@ void UpdateCascades()
 		mat4 View;
 		OrthoMat4P(MinExtents.x, MaxExtents.x, MaxExtents.y, MinExtents.y, 0.0, MaxExtents.z - MinExtents.z, &Projection);
 
-		vec3 LightDirection = { SceneFragmentUBO.LightDirection.x, SceneFragmentUBO.LightDirection.y, SceneFragmentUBO.LightDirection.z };
+	//	vec3 LightDirection = { LightDirection.x, LightDirection.y, LightDirection.z };
 		vec3 pp = Sub3(FrustumCenter, Mul3(LightDirection, Vec3f(-MinExtents.z)));
 		vec3 l = FrustumCenter;
 		vec3 u = { 0.0f, 1.0f, 0.0f };

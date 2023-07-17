@@ -6,11 +6,11 @@ void CreateGBufferRenderPass()
 	GBufferAttachments[2] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_RGBA);
 	GBufferAttachments[3] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_RGBA);
 	GBufferAttachments[4] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, Format);
-	GBufferAttachments[5] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_R);
+	GBufferAttachments[5] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_RG16F);
 	GBufferAttachments[6] = OpenVkCreateDepthImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_DEFAULT);
 
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_DEPTH };
-	uint32_t AttachmentFormats[] = { Format, Format, OPENVK_FORMAT_RGBA, OPENVK_FORMAT_RGBA, Format, OPENVK_FORMAT_R, OPENVK_FORMAT_DEFAULT };
+	uint32_t AttachmentFormats[] = { Format, Format, OPENVK_FORMAT_RGBA, OPENVK_FORMAT_RGBA, Format, OPENVK_FORMAT_RG16F, OPENVK_FORMAT_DEFAULT };
 	uint32_t MsaaSamples[] = { 1, 1, 1, 1, 1, 1, 1 };
 	GBufferRenderPass = OpenVkCreateRenderPass(G_BUFFER_ATTACHMENT_COUNT, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
 }
@@ -26,7 +26,7 @@ void CreateGBufferLayout()
 		TextureDescriptorSetLayout,
 		VertexUniformDescriptorSetLayout
 	};
-
+	
 	uint32_t PushTypes[] = { OPENVK_SHADER_TYPE_VERTEX, OPENVK_SHADER_TYPE_FRAGMENT };
 	uint32_t PushOffsets[] = { 0, 64 };
 	uint32_t PushSizes[] = { sizeof(GBufferVertexPushConstant), sizeof(GBufferFragmentPushConstant) };

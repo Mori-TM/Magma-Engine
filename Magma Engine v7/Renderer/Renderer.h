@@ -153,11 +153,11 @@ void CreateRenderer()
 	//Set up deafult test scene
 //	LoadModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
 
-	LoadModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
-	AddEntity(COMPONENT_TYPE_MESH);
-	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, 1);
-	Entities[SelectedEntity].Mesh.MeshIndex = 1;
-	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
+//	LoadModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
+//	AddEntity(COMPONENT_TYPE_MESH);
+//	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, 1);
+//	Entities[SelectedEntity].Mesh.MeshIndex = 1;
+//	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
 }
 
 void DestroyRenderer()

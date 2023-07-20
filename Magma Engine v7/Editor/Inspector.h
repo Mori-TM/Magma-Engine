@@ -192,7 +192,21 @@ void EditorEntityInspector()
 				{
 					Entities = (EntityInfo*)realloc(Entities, (EntityCount + 1) * sizeof(EntityInfo));
 					Entities[EntityCount] = Entities[SelectedEntity];
-					sprintf(Entities[EntityCount].Name, "%s Copy", Entities[EntityCount].Name);
+					if (strstr(Entities[EntityCount].Name, ")") == 0)
+					{
+						sprintf(Entities[EntityCount].Name, "%s Copy(1)", Entities[EntityCount].Name);
+					}
+					else
+					{
+						size_t Length = strlen(Entities[EntityCount].Name);
+						char* StrPtr = Entities[EntityCount].Name;
+						StrPtr += Length;
+						while (*(--StrPtr) != '(');
+						uint32_t Count = atoi(StrPtr + 1) + 1;
+						sprintf(StrPtr, "(%d)", Count);
+						
+					}
+					
 					SelectedEntity = EntityCount;
 					EntityCount++;
 				}

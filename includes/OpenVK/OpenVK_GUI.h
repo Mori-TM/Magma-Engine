@@ -110,23 +110,47 @@ void OpenVkGUIResizeBuffer(OpenVkGUIBuffer* Buffer, OpenVkBool VertexBuffer)
 {
 	if (Buffer->Size >= Buffer->AllocatedSize)
 	{
+		uint32_t OldSize = Buffer->AllocatedSize;
+
 		while (Buffer->Size >= Buffer->AllocatedSize)
 			Buffer->AllocatedSize += OPENVK_GUI_BUFFER_ALLOCATE_BLOCK;
 
-		if (Buffer->Buffer != OPENVK_ERROR)
-			OpenVkDestroyDynamicBuffer(Buffer->Buffer);
+		
 
 		if (VertexBuffer)
 		{
+			void* Data = realloc(Buffer->Data, Buffer->AllocatedSize * sizeof(OpenVkGUIVertex));
+			if (!Data)
+			{
+				OpenVkRuntimeError("Failed to Make GUI Vertex Buffer Bigger: %d", Buffer->AllocatedSize * (uint32_t)sizeof(OpenVkGUIVertex));
+				Buffer->AllocatedSize = OldSize;
+				return;
+			}
+
+			Buffer->Data = Data;
+
+			if (Buffer->Buffer != OPENVK_ERROR)
+				OpenVkDestroyDynamicBuffer(Buffer->Buffer);
 			Buffer->Buffer = OpenVkCreateDynamicVertexBuffer(Buffer->AllocatedSize * sizeof(OpenVkGUIVertex));
-			Buffer->Data = realloc(Buffer->Data, Buffer->AllocatedSize * sizeof(OpenVkGUIVertex));
+			
 			OpenVkRuntimeInfo("Vertex Resize", "");
 		}
 
 		else
 		{
+			void* Data = realloc(Buffer->Data, Buffer->AllocatedSize * sizeof(uint32_t));
+			if (!Data)
+			{
+				OpenVkRuntimeError("Failed to Make GUI Index Buffer Bigger: %d", Buffer->AllocatedSize * (uint32_t)sizeof(uint32_t));
+				Buffer->AllocatedSize = OldSize;
+				return;
+			}
+
+			Buffer->Data = Data;
+
+			if (Buffer->Buffer != OPENVK_ERROR)
+				OpenVkDestroyDynamicBuffer(Buffer->Buffer);
 			Buffer->Buffer = OpenVkCreateDynamicIndexBuffer(Buffer->AllocatedSize * sizeof(uint32_t));
-			Buffer->Data = realloc(Buffer->Data, Buffer->AllocatedSize * sizeof(uint32_t));
 			OpenVkRuntimeInfo("Index Resize", "");
 		}
 

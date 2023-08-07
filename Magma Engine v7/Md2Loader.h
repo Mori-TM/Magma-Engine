@@ -186,6 +186,11 @@ namespace Md2
 		fseek(File, 0, SEEK_SET);
 		printf("%d\n", FileLength);
 		s8* Buffer = (s8*)malloc(FileLength + 1);
+		if (!Buffer)
+		{
+			printf("[Md2 Loader]: Failed to allocate mem for model: %s\n", FileName);
+			return 0;
+		}
 		fread(Buffer, 1, FileLength, File);
 		fclose(File);
 
@@ -213,6 +218,11 @@ namespace Md2
 		}
 
 		Model->ST = (STCoord*)malloc(Header->NumST * sizeof(STCoord));
+		if (!Model->ST)
+		{
+			printf("[Md2 Loader]: Failed to allocate tex coords for model: %s\n", FileName);
+			return 0;
+		}
 		Model->NumST = Header->NumST;
 
 		STIndices = (STIndex*)&Buffer[Header->OffsetST];
@@ -223,6 +233,11 @@ namespace Md2
 		}
 
 		TriIndex = (MeshExt*)malloc(Header->NumTris * sizeof(MeshExt));
+		if (!TriIndex)
+		{
+			printf("[Md2 Loader]: Failed to allocate indices for model: %s\n", FileName);
+			return 0;
+		}
 
 		Model->NumTriangles = Header->NumTris;
 		Model->TriIndex = TriIndex;

@@ -485,6 +485,10 @@ bool ImGui_ImplVulkan_RenderDrawData(ImDrawData* DrawData, VkCommandBuffer Comma
 		ImGui_ImplVulkan_Renderer_Info.Index = 0;
 
 		ImGui_ImplVulkan_Renderer_Info.Buffers = (ImGui_ImplVulkan_Buffers*)malloc(ImGui_ImplVulkan_Renderer_Info.ImageCount * sizeof(ImGui_ImplVulkan_Buffers));
+		if (!ImGui_ImplVulkan_Renderer_Info.Buffers)
+		{
+			return ImGui_ImplVulkanPrintError("[ImGui Vulkan] Failed to Allocate Buffers");
+		}
 		memset(ImGui_ImplVulkan_Renderer_Info.Buffers, 0, ImGui_ImplVulkan_Renderer_Info.ImageCount * sizeof(ImGui_ImplVulkan_Buffers));
 	}
 

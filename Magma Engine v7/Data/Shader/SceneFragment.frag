@@ -2,6 +2,7 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 #define SHADOW_MAP_CASCADE_COUNT 3
+#define MAX_NUMBER_OF_LIGHTS 32
 
 layout(location = 0) out vec4 OutColor;
 
@@ -23,12 +24,23 @@ layout(set = 0, binding = 8) uniform UniformBufferObject
 	vec4 CascadeScale;
 	vec4 CascadeBias;
 	mat4 CascadeProjectionView[SHADOW_MAP_CASCADE_COUNT];
-	vec4 LightDirection;
 	vec4 CameraPosition;
 	mat4 View;
 	float Gamma;
 	float Exposure;
+	float AmbientMultiplier;
+	uint RenderSSAO;
 } UBO;
+
+layout(set = 0, binding = 9) buffer StorageBufferObject 
+{ 
+	vec4 LightPos[MAX_NUMBER_OF_LIGHTS];
+	vec4 LightColor[MAX_NUMBER_OF_LIGHTS];
+	uint LightCastShadow[MAX_NUMBER_OF_LIGHTS];
+	uint LightType[MAX_NUMBER_OF_LIGHTS];
+	uint LightCount;
+	uint Dummy;
+} SBO;
 
 //#define Ambient 0.6
 
@@ -325,7 +337,7 @@ void main()
 	vec4 AlbedoTex   = texture(SamplerAlbedo,	FragTexCoord);
 	vec4 PBRTex		 = texture(SamplerPBR,		FragTexCoord);
 	vec4 WorldPosTex = texture(SamplerWorldPos,	FragTexCoord);
-	float NormalTex = texture(SamplerNormal,	FragTexCoord).x;
+	vec2 NormalTex = texture(SamplerNormal,	FragTexCoord).xy;
 
 	vec3 ViewNormal = normalize(ViewNormalTex.rgb);
 	vec3 fragPos = PositionTex.rgb;
@@ -343,7 +355,7 @@ void main()
 		return;
 	}
 	
-	vec3 Normal = normalize(vec3(ViewNormalTex.w, PBRTex.w, NormalTex));
+	vec3 Normal = normalize(vec3(ViewNormalTex.w, NormalTex.x, NormalTex.y));
 	 
 	float SSAO = texture(SamplerSSAO, FragTexCoord).r;
 	/*
@@ -390,7 +402,43 @@ void main()
 	vec3 F0 = vec3(0.04); 
 	F0 = mix(F0, Albedo.xyz, Metallic);
 	vec3 Lo = vec3(0.0);
+	vec3 LoShadow = vec3(0.0);
+	/*
+	{
+		vec3 L = normalize(-UBO.LightDirection.xyz);
+		vec3 H = normalize(V + L);
 
+		vec3 LightColor = vec3(12.0);
+		vec3 Diffuse = vec3(max(dot(N, L), 0.0)) * LightColor;
+		float distance = length(-UBO.LightDirection.xyz);
+		float attenuation = 1.0 / (distance * distance);
+		vec3 radiance = LightColor * attenuation;
+
+		float NDF = DistributionGGX(N, H, Roughness);   
+		float G = GeometrySmith(N, V, L, Roughness);      
+		vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0);
+
+		vec3 nominator = NDF * G * F; 
+		float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+		vec3 specular = nominator / max(denominator, 0.001);
+
+		vec3 kS = F;
+		vec3 kD = vec3(1.0) - kS;
+		kD *= 1.0 - Metallic;
+		float NdotL = max(dot(N, L), 0.0); 
+
+		Lo += (kD * Albedo.xyz / PI + specular) * radiance * NdotL;
+	}
+
+	float Ambient = 0.1 * Occlusion;
+	
+	float Shadow = 0.0;
+	if (UBO.RenderShadows == 1)
+		Shadow = GetShadow(Ambient);
+
+	Lo = Ambient * Albedo.xyz + ((Ambient - Shadow) * Lo);
+	*/
+	/*
 	vec3 L = normalize(-UBO.LightDirection.xyz);
 	vec3 H = normalize(V + L);
 
@@ -417,9 +465,100 @@ void main()
 
 	float Ambient = 0.6 * Occlusion;
 	
-	float Shadow = GetShadow(Ambient);
+	float Shadow = 0.0;
+	if (UBO.RenderShadows == 1)
+		Shadow = GetShadow(Ambient);
+		
 
 	OutColor.rgb = Ambient * Albedo.xyz + ((Ambient - Shadow) * Lo);
+	*/
+	
+	
+	OutColor = vec4(1.0);
+
+	bool HasShadow = false;
+
+	for (uint i = 0; i < SBO.LightCount; i++)
+	{
+		
+
+		vec3 Light;
+		vec3 L;
+		if (SBO.LightType[i] == 0)
+		{
+			Light = SBO.LightPos[i].xyz - WorldPos.xyz;
+			L = normalize(Light);
+		}			
+		else
+		{
+			Light = normalize(SBO.LightPos[i].xyz);
+			L = Light;
+		}
+		 
+		vec3 H = normalize(V + L);
+
+		vec3 LightColor = SBO.LightColor[i].xyz * vec3(SBO.LightColor[i].w);
+	//	vec3 Diffuse = vec3(max(dot(N, L), 0.0)) * LightColor;
+		float distance = length(Light);
+		float attenuation = 1.0 / (distance * distance);
+		vec3 radiance = LightColor * attenuation;
+
+		float NDF = DistributionGGX(N, H, Roughness);   
+		float G = GeometrySmith(N, V, L, Roughness);      
+		vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0);
+
+		vec3 nominator = NDF * G * F; 
+		float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+		vec3 specular = nominator / denominator;
+
+		vec3 kS = F;
+		vec3 kD = vec3(1.0) - kS;
+		kD *= 1.0 - Metallic;
+		float NdotL = max(dot(N, L), 0.0); 
+
+		
+
+		if (SBO.LightCastShadow[i] == 1 && !HasShadow)
+		{
+			LoShadow += (kD * Albedo.xyz / PI + specular) * radiance * NdotL;
+		}			
+		else
+		{
+			Lo += (kD * Albedo.xyz / PI + specular) * radiance * NdotL;
+		}
+
+		if (SBO.LightCastShadow[i] == 1)
+			HasShadow = true;
+	}
+
+	float Ambient = UBO.AmbientMultiplier * Occlusion;
+	
+	float Shadow = 0.0;
+
+//	HasShadow = true;
+	if (HasShadow)
+	{
+		Shadow = GetShadow(1.0);
+		OutColor.rgb = Ambient * Albedo.xyz + ((1.0 - Shadow) * LoShadow);
+		OutColor.rgb += Lo;
+
+		/*
+		Shadow = GetShadow(Ambient);
+		OutColor.rgb = Ambient * Albedo.xyz + ((Ambient - Shadow) * LoShadow);
+		OutColor.rgb += ((Ambient) * Lo);
+		*/
+	}
+		
+	else
+		OutColor.rgb = Ambient * Albedo.xyz + ((Ambient) * Lo);
+
+//	OutColor.rgb = Ambient * Albedo.xyz + ((Ambient - Shadow) * Lo);
+
+//	vec3 ambient = vec3(0.03) * Albedo.xyz * Occlusion;
+   // OutColor.rgb = Lo;
+//	return; 
+	
+//	OutColor.rgb = Ambient * Albedo.xyz + ((Ambient - Shadow) * Lo);
 
 //	float Exposure = 4.0;
 //	float Gamma = 1.3;//1.3
@@ -437,8 +576,8 @@ void main()
 	OutColor.rgb = OutColor.rgb * Uncharted2TonemapConst;	
 	OutColor.rgb = pow(OutColor.rgb, vec3(1.0f / Gamma));
 	
-
-	OutColor.rgb *= SSAO;
+	if (UBO.RenderSSAO == 1)
+		OutColor.rgb *= SSAO;
 
 //	vec3 mapped = OutColor.rgb / (OutColor.rgb + vec3(1.0));
 //	vec3 mapped = vec3(1.0) - exp(-OutColor.rgb * 1.65);
@@ -448,8 +587,8 @@ void main()
 
 	OutColor.a = Albedo.a;
 
-	if (Albedo.a < 0.9)
-		discard;
+//	if (Albedo.a < 0.9)
+//		discard;
 
 //	float Exposure = UBO.Exposure;
 //	float Gamma = UBO.Gamma;//1.3

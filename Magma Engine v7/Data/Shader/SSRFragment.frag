@@ -763,6 +763,7 @@ void main()
 //	vec3 viewPos = textureLod(DepthPosition, FragTexCoord, 2).xyz;
 //	vec3 viewPos = PositionFromDepth(resolve(DepthPosition, FragTexCoord).w);
     vec3 viewPos = resolve(SamplerPosition, FragTexCoord).xyz;
+
 	vec3 viewPosNormalized = normalize(viewPos);
 	vec3 albedo = resolve(SamplerAlbedo, FragTexCoord).rgb;
 

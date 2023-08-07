@@ -6,7 +6,7 @@ layout (location = 1) out vec4 OutViewNormal;
 layout (location = 2) out vec4 OutAlbedo;
 layout (location = 3) out vec4 OutPBR;
 layout (location = 4) out vec4 OutWorldPos;
-layout (location = 5) out float OutNormal;
+layout (location = 5) out vec2 OutNormal;
 
 layout(location = 0) in vec3 FragViewNormal;
 layout(location = 1) in vec3 FragNormal;
@@ -65,6 +65,8 @@ void main()
 	OutPosition = vec4(FragPosRelToCam.xyz, LinearDepth(gl_FragCoord.z));
 	OutViewNormal = vec4(normalize(FragViewNormal), Normal.x);				//use GetNormalFromMap
 	OutAlbedo = texture(AlbedoMap, FragTexCoord) * PushConst.Color;
+	if (OutAlbedo.w < 0.9)
+		discard;
 	OutPBR.r = texture(MetallicMap, FragTexCoord).r * PushConst.Metallic;
 	OutPBR.g = texture(RoughnessMap, FragTexCoord).r * PushConst.Roughness;
 	OutPBR.b = texture(OcclusionMap, FragTexCoord).r * PushConst.Occlusion;
@@ -73,5 +75,6 @@ void main()
 	OutWorldPos.y = FragWorldPos.y;
 	OutWorldPos.z = FragWorldPos.z;
 	OutWorldPos.w = FragWorldPos.w;
-	OutNormal = Normal.z;
+	OutNormal.x = Normal.y;
+	OutNormal.y = Normal.z;
 }

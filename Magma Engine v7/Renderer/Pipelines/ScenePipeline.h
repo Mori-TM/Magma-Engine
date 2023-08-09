@@ -240,6 +240,10 @@ void SceneUpdateUniformBuffer()
 	}
 	SceneFragmentUBO.View = GBufferVertexUBO.View;
 	SceneFragmentUBO.RenderSSAO = RenderSSAO;
+	SceneFragmentUBO.ClearColor.r = ClearColor.r;
+	SceneFragmentUBO.ClearColor.g = ClearColor.g;
+	SceneFragmentUBO.ClearColor.b = ClearColor.b;
+	SceneFragmentUBO.ClearColor.a = 1.0;
 
 	OpenVkUpdateBuffer(sizeof(SceneFragmentUniformBufferObject), &SceneFragmentUBO, SceneFragmentUniformBuffer);
 //	Mutex.unlock();

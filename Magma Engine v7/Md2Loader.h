@@ -197,8 +197,21 @@ namespace Md2
 		Header = (ModelHeader*)Buffer;
 		printf("d: %d\n", Header->NumXYZ);
 		Model->PointList = (glVec3*)malloc(Header->NumXYZ * Header->NumFrames * sizeof(glVec3));
+		if (!Model->PointList)
+		{
+			printf("[Md2 Loader]: Failed to allocate point list for model: %s\n", FileName);
+			free(Buffer);
+			return 0;
+		}
 		//-----//
 		Model->NormalList = (glVec3*)malloc(Header->NumXYZ * Header->NumFrames * sizeof(glVec3));
+		if (!Model->NormalList)
+		{
+			printf("[Md2 Loader]: Failed to allocate normal list for model: %s\n", FileName);
+			free(Model->PointList);
+			free(Buffer);
+			return 0;
+		}
 		//-----//
 		Model->NumPoints = Header->NumXYZ;
 		Model->NumFrames = Header->NumFrames;
@@ -221,6 +234,9 @@ namespace Md2
 		if (!Model->ST)
 		{
 			printf("[Md2 Loader]: Failed to allocate tex coords for model: %s\n", FileName);
+			free(Model->NormalList);
+			free(Model->PointList);
+			free(Buffer);
 			return 0;
 		}
 		Model->NumST = Header->NumST;
@@ -236,6 +252,10 @@ namespace Md2
 		if (!TriIndex)
 		{
 			printf("[Md2 Loader]: Failed to allocate indices for model: %s\n", FileName);
+			free(Model->ST);
+			free(Model->NormalList);
+			free(Model->PointList);
+			free(Buffer);
 			return 0;
 		}
 

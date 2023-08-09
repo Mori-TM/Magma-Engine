@@ -1,4 +1,5 @@
 #define COMPONENT_COUNT 6
+#define ENTITY_ALLOCATION_COUNT 32
 
 typedef enum
 {
@@ -78,7 +79,56 @@ uint32_t SelectedAnimation = 0;
 uint32_t SelectedScript = 0;
 
 uint32_t EntityCount = 0;
+uint32_t EntityAllocatedCount = 0;
 EntityInfo* Entities = NULL;
+
+void EntitiesInit()
+{
+	EntityAllocatedCount = ENTITY_ALLOCATION_COUNT;
+	Entities = (EntityInfo*)malloc(ENTITY_ALLOCATION_COUNT * sizeof(EntityInfo));
+	if (!Entities)
+	{
+		printf("Error, your system doesn't have enough ram for %d entities, buy more than 1 mb of ram", ENTITY_ALLOCATION_COUNT);
+		exit(0);
+	}
+}
+
+void EntitiesDestroy()
+{
+	free(Entities);
+}
+
+bool EntitiesCheckForResize()
+{
+	if (EntityCount + 1 >= EntityAllocatedCount)
+	{		
+		EntityInfo* EntitiesTmp = (EntityInfo*)realloc(Entities, (EntityAllocatedCount + ENTITY_ALLOCATION_COUNT) * sizeof(EntityInfo));
+		if (!EntitiesTmp)
+		{
+			printf("Failed to allocate more entities\n");
+			return false;
+		}
+	//	printf("Curr: %d\n", EntityAllocatedCount + ENTITY_ALLOCATION_COUNT);
+		Entities = EntitiesTmp;
+		EntityAllocatedCount += ENTITY_ALLOCATION_COUNT;
+	}
+
+	else if (EntityCount > ENTITY_ALLOCATION_COUNT && 
+			 EntityCount < EntityAllocatedCount - ENTITY_ALLOCATION_COUNT)
+	{
+		EntityInfo* EntitiesTmp = (EntityInfo*)realloc(Entities, (EntityAllocatedCount - ENTITY_ALLOCATION_COUNT) * sizeof(EntityInfo));
+		if (!EntitiesTmp)
+		{
+			printf("Failed to allocate less entities\n");
+			return false;
+		}
+
+		Entities = EntitiesTmp;
+		EntityAllocatedCount -= ENTITY_ALLOCATION_COUNT;
+	}
+	
+	return true;
+}
 
 char MaterialName[MAX_CHAR_NAME_LENGTH] = "Material";
 vec4 MaterialColor = Vec4f(1.0f);
@@ -101,16 +151,111 @@ void SetDefaultMaterial(SceneMaterial* Material, const char* Name)
 	Material->OcclusionIndex = 0;
 }
 
-void AddMesh(const char* Name, SceneMesh* MeshInfo)
+void ResetEntityMesh(EntityInfo* Entity)
+{
+	Entity->Mesh.MeshIndex = 0;
+	strcpy(Entity->Mesh.Name, "None");
+}
+
+void ResetEntityMaterial(EntityInfo* Entity)
+{
+	Entity->Material.MaterialIndex = 0;
+	strcpy(Entity->Material.Name, "None");
+}
+
+void ResetEntityCamera(EntityInfo* Entity)
+{
+	strcpy(Entity->Camera.Name, "None");
+	Entity->Camera.FOV = 75.0;
+	Entity->Camera.NearPlane = 0.01;
+	Entity->Camera.FarPlane = 1000.0;
+}
+
+void ResetEntityAnimation(EntityInfo* Entity)
+{
+	strcpy(Entity->Animation.Name, "None");
+	Entity->Animation.AnimationIndex = 0;
+}
+
+
+void ResetEntityLight(EntityInfo* Entity)
+{
+	strcpy(Entity->Light.Name, "None");
+	Entity->Light.Color = Vec3f(1.0);
+	Entity->Light.Strength = 1.0;
+	Entity->Light.Type = 0;
+	Entity->Light.CastShadow = false;
+}
+
+uint32_t AddEntity(uint32_t UsedComponent)
+{
+	if (!EntitiesCheckForResize())
+		return SelectedEntity;
+
+	Mutex.lock();
+	EntityInfo Entity;
+	memset(Entity.UsedComponents, 0, ARRAY_SIZE(Entity.UsedComponents));
+//	for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
+//		Entity.UsedComponents[i] = false;
+
+	if (UsedComponent != UINT32_MAX)
+		Entity.UsedComponents[UsedComponent] = true;
+
+	ResetEntityMesh(&Entity);
+	ResetEntityMaterial(&Entity);
+	ResetEntityCamera(&Entity);
+	ResetEntityAnimation(&Entity);
+	ResetEntityLight(&Entity);
+
+	Entity.Translate = Vec3f(0.0);
+	Entity.Rotate = Vec3f(0.0);
+	Entity.Scale = Vec3f(1.0);
+	Entity.Selected = false;
+
+	uint32_t Count = 0;
+	for (uint32_t i = 0; i < EntityCount; i++)
+		if (strstr(Entities[i].Name, "Entity") != 0)
+			Count++;
+
+	if (Count > 0)
+		sprintf(Entity.Name, "Entity (%d)", Count);
+	else
+		strcpy(Entity.Name, "Entity");
+
+//	Entities = (EntityInfo*)realloc(Entities, (EntityCount + 1) * sizeof(EntityInfo));
+//	if (EntitiesCheckForResize())
+//	{
+		Entities[EntityCount] = Entity;
+		SelectedEntity = EntityCount++;
+//	}
+//	else
+//		SelectedEntity = EntityCount - 1;
+
+	Mutex.unlock();
+
+	return SelectedEntity;
+}
+
+void AddMeshToEntity(uint32_t EntityIndex, uint32_t MeshIndex)
+{
+	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshIndex);
+	
+	Entities[EntityIndex].Mesh.MeshIndex = MeshIndex;
+	strcpy(Entities[EntityIndex].Mesh.Name, Mesh->Name);
+}
+
+uint32_t AddMesh(const char* Name, SceneMesh* MeshInfo)
 {
 	Mutex.lock();
 	CheckForSameNames(&SceneMeshes, Name, MeshInfo->Name);
 
 	SelectedMesh = CMA_Push(&SceneMeshes, MeshInfo);
 	Mutex.unlock();
+
+	return SelectedMesh;
 }
 
-void AddMaterial()
+uint32_t AddMaterial()
 {
 	SceneMaterial Material;
 	SetDefaultMaterial(&Material, MaterialName);
@@ -118,6 +263,8 @@ void AddMaterial()
 	CheckForSameNames(&SceneMaterials, MaterialName, Material.Name);
 
 	SelectedMaterial = CMA_Push(&SceneMaterials, &Material);
+
+	return SelectedMesh;
 }
 
 bool LoadTextureCompressed = false;
@@ -154,19 +301,46 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 				if (UseCustomMipLevels) MipLevels = CustomMipLevels;
 
 				unsigned char** Blocks = (unsigned char**)malloc(MipLevels * sizeof(unsigned char*));
+				if (!Blocks)
+				{
+					printf("Failed to allocate blocks: %s\n", Path);
+					free(Pixels);
+					goto Error;
+				}
 				size_t BlockSize = 0;
-				CompressImage(Pixels, Image->Width, Image->Height, &Blocks[0], &BlockSize, Image->Format, TextureCompressedHQ);
+				if (!CompressImage(Pixels, Image->Width, Image->Height, &Blocks[0], &BlockSize, Image->Format, TextureCompressedHQ))
+				{
+					printf("Failed to compress block 0: %s\n", Path);
+					free(Blocks);
+					free(Pixels);
+					goto Error;
+				}
 
 				int32_t MipWidth = Image->Width;
 				int32_t MipHeight = Image->Height;
 				//Only use rgba!!
 				unsigned char* ResizeData = (unsigned char*)malloc(Image->Width * Image->Height * 4);
-				
+				if (!ResizeData)
+				{
+					printf("Failed to allocate resize data: %s\n", Path);
+					free(Blocks);
+					free(Pixels);
+					goto Error;
+				}
 
 				for (uint32_t i = 1; i < MipLevels; i++)
 				{
 					stbir_resize_uint8(Pixels, Image->Width, Image->Height, 0, ResizeData, MipWidth > 1 ? MipWidth / 2 : 1, MipHeight > 1 ? MipHeight / 2 : 1, 0, 4);
-					CompressImage(ResizeData, MipWidth > 1 ? MipWidth / 2 : 1, MipHeight > 1 ? MipHeight / 2 : 1, &Blocks[i], &BlockSize, Image->Format, TextureCompressedHQ);
+					if (!CompressImage(ResizeData, MipWidth > 1 ? MipWidth / 2 : 1, MipHeight > 1 ? MipHeight / 2 : 1, &Blocks[i], &BlockSize, Image->Format, TextureCompressedHQ))
+					{
+						printf("Failed to compress block %d: %s\n", i, Path);
+						for (uint32_t j = 0; j < i; j++)
+							free(Blocks[i]);
+
+						free(Blocks);
+						free(Pixels);
+						goto Error;
+					}
 
 					printf("%d\n", BlockSize);
 
@@ -195,19 +369,20 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 				Image->MipLevels = TextureCreateInfo.MipLevels;
 
 				for (uint32_t i = 0; i < MipLevels; i++)
-				{
 					free(Blocks[i]);
-				}
 
 				free(Blocks);
-				
-				
 			}
 			else
 			{
 				size_t BlockSize = 0;
 				unsigned char* Block;
-				CompressImage(Pixels, Image->Width, Image->Height, &Block, &BlockSize, Image->Format, TextureCompressedHQ);
+				if (!CompressImage(Pixels, Image->Width, Image->Height, &Block, &BlockSize, Image->Format, TextureCompressedHQ))
+				{
+					printf("Failed to compress image: %s\n", Path);
+					free(Pixels);
+					goto Error;
+				}
 
 				OpenVkTextureCreateInfo TextureCreateInfo;
 				TextureCreateInfo.Pixels = &Block;
@@ -251,6 +426,11 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 			Filter = OPENVK_FILTER_NEAREST;
 
 		Image->TextureSampler = OpenVkCreateImageSampler(Filter, OPENVK_ADDRESS_MODE_REPEAT);
+		if (Image->TextureSampler == OPENVK_ERROR)
+		{
+			Image->TextureSampler = ImageSampler;
+			printf("Failed to create sampler for: %s, will use default one\n");
+		}			
 	}
 	else
 	{
@@ -304,6 +484,7 @@ uint32_t AddTexture(char* Path, bool ShowInAssetBrowser)
 	return SelectedTexture;
 }
 
+//Fix memory
 uint32_t AddAnimation(char* Path, int32_t TexWidth, int32_t TexHeight)
 {
 	SceneAnimation Animation;
@@ -311,7 +492,9 @@ uint32_t AddAnimation(char* Path, int32_t TexWidth, int32_t TexHeight)
 	Animation.End = 1;
 	Animation.Speed = 25.0;
 	Animation.MeshData.NumFrames = 1;
-	Md2::Load(Path, TexWidth, TexHeight, &Animation.MeshData);
+	if (!Md2::Load(Path, TexWidth, TexHeight, &Animation.MeshData))
+		return ERROR32;
+
 	Animation.VertexBuffer = OpenVkCreateDynamicVertexBuffer(Animation.MeshData.NumTriangles * 3 * sizeof(SceneVertex));
 	Animation.Vertices = (SceneVertex*)malloc(Animation.MeshData.NumTriangles * 3 * sizeof(SceneVertex));
 	strcpy(Animation.Path, Path);
@@ -324,6 +507,7 @@ uint32_t AddAnimation(char* Path, int32_t TexWidth, int32_t TexHeight)
 	return SelectedAnimation;
 }
 
+//Fix memory
 void AddScript()
 {
 	SceneScripts = (SceneScript*)realloc(SceneScripts, (SceneScriptCount + 1) * sizeof(SceneScript));
@@ -368,6 +552,11 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 	MeshInfo->Destroyable = true;
 	strcpy(MeshInfo->Path, Path);
 	MeshInfo->MeshData = (SceneMeshData*)malloc(ModelData->MeshCount * sizeof(SceneMeshData));
+	if (!MeshInfo->MeshData)
+	{
+		printf("Failed to allocate meshes: %s\n", Path);
+		return false;
+	}
 	MeshInfo->MeshCount = ModelData->MeshCount;
 
 	uint32_t VertexCount = 0;
@@ -381,7 +570,17 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 	}
 
 	SceneVertex* Vertices = (SceneVertex*)malloc(VertexCount * sizeof(SceneVertex));
+	if (!Vertices)
+	{
+		printf("Failed to allocate Vertices: %s\n", Path);
+		return false;
+	}
 	uint32_t* Indices = (uint32_t*)malloc(IndexCount * sizeof(uint32_t));
+	if (!Indices)
+	{
+		printf("Failed to allocate Indices: %s\n", Path);
+		return false;
+	}
 
 	VertexCount = 0;
 	IndexCount = 0;
@@ -467,7 +666,7 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 	free(Indices);
 }
 
-void LoadModel(uint32_t Settings, const char* FileName)
+uint32_t AddModel(uint32_t Settings, const char* FileName)
 {
 	char LastPath[MAX_CHAR_PATH_LENGTH];
 	char Path[MAX_CHAR_PATH_LENGTH];
@@ -503,12 +702,107 @@ void LoadModel(uint32_t Settings, const char* FileName)
 
 	WaveModelData Model = WaveLoadModel(FileName, Settings);
 	if (Model.MeshCount == 0)
-		return;
+		return ERROR32;
 
+	uint32_t MeshIndex = ERROR32;
 	if (LoadModelWave(FileName, &Model, &MeshInfo))
-		AddMesh(GetFileNameFromPath((char*)FileName), &MeshInfo);
+		MeshIndex = AddMesh(GetFileNameFromPath((char*)FileName), &MeshInfo);
 
 	WaveFreeModel(&Model);
 
 	SelectedTexture = LastTexture;
+	return MeshIndex;
+}
+
+uint32_t AddPlane()
+{
+	SceneMesh MeshInfo;
+
+	MeshInfo.Destroyable = false;
+	strcpy(MeshInfo.Path, "Plane");
+	MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
+	MeshInfo.MeshCount = 1;
+
+	SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
+	MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(PlaneVertices);
+	MeshInfo.MeshData[0].VertexOffset = 0;
+	MeshInfo.VertexBuffer = PlaneVertexBuffer;
+
+	MeshInfo.MeshData[0].IndexCount = ARRAY_SIZE(PlaneIndices);
+	MeshInfo.MeshData[0].IndexOffset = 0;
+	MeshInfo.IndexBuffer = PlaneIndexBuffer;
+	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
+	MeshInfo.MeshData[0].AABB = PlaneAABB;
+
+	return AddMesh("Plane", &MeshInfo);
+}
+
+uint32_t AddCube()
+{
+	SceneMesh MeshInfo;
+
+	MeshInfo.Destroyable = false;
+	strcpy(MeshInfo.Path, "Cube");
+	MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
+	MeshInfo.MeshCount = 1;
+
+	SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
+	MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(CubeVertices);
+	MeshInfo.MeshData[0].VertexOffset = 0;
+	MeshInfo.VertexBuffer = CubeVertexBuffer;
+
+	MeshInfo.MeshData[0].IndexCount = 0;
+	MeshInfo.MeshData[0].IndexOffset = 0;
+	MeshInfo.IndexBuffer = OPENVK_ERROR;
+	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
+	MeshInfo.MeshData[0].AABB = CubeAABB;
+
+	return AddMesh("Cube", &MeshInfo);
+}
+
+uint32_t AddSphere()
+{
+	SceneMesh MeshInfo;
+
+	MeshInfo.Destroyable = false;
+	strcpy(MeshInfo.Path, "Sphere");
+	MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
+	MeshInfo.MeshCount = 1;
+
+	SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
+	MeshInfo.MeshData[0].VertexCount = SphereVertexCount;
+	MeshInfo.MeshData[0].VertexOffset = 0;
+	MeshInfo.VertexBuffer = SphereVertexBuffer;
+
+	MeshInfo.MeshData[0].IndexCount = SphereIndexCount;
+	MeshInfo.MeshData[0].IndexOffset = 0;
+	MeshInfo.IndexBuffer = SphereIndexBuffer;
+	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
+	MeshInfo.MeshData[0].AABB = SphereAABB;
+
+	return AddMesh("Sphere", &MeshInfo);
+}
+
+uint32_t AddBean()
+{
+	SceneMesh MeshInfo;
+
+	MeshInfo.Destroyable = false;
+	strcpy(MeshInfo.Path, "Bean");
+	MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
+	MeshInfo.MeshCount = 1;
+
+	SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
+	MeshInfo.MeshData[0].VertexCount = BeanVertexCount;
+	MeshInfo.MeshData[0].VertexOffset = 0;
+	MeshInfo.VertexBuffer = BeanVertexBuffer;
+
+	MeshInfo.MeshData[0].IndexCount = BeanIndexCount;
+	MeshInfo.MeshData[0].IndexOffset = 0;
+	MeshInfo.IndexBuffer = BeanIndexBuffer;
+
+	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
+	MeshInfo.MeshData[0].AABB = BeanAABB;
+
+	return AddMesh("Bean", &MeshInfo);
 }

@@ -174,10 +174,10 @@ void EditorSettingsWindow()
 				ImGui::Checkbox("Generate MipMaps", &GenerateMipMaps);
 				if (GenerateMipMaps)
 				{
-					ImGui::Checkbox("Use Custom Mip Levels", &UseCustomMipLevels);
+					ImGui::Checkbox("Use Custom Mip Count", &UseCustomMipLevels);
 					if (UseCustomMipLevels)
 					{
-						ImGui::SliderInt("Custom Mip Levels", (int32_t*)&CustomMipLevels, 2, 32);
+						ImGui::SliderInt("Custom Mip Count", (int32_t*)&CustomMipLevels, 2, 32);
 					}
 				}
 				else
@@ -441,7 +441,7 @@ void EngineDrawEditor()
 	{
 		if (ifd::FileDialog::Instance().HasResult())
 			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
-				LoadModel(0, (const char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
+				AddModel(0, (const char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
 		ifd::FileDialog::Instance().Close();
 		ImGui::SetWindowFocus("Mesh Inspector");
 	}
@@ -491,7 +491,11 @@ void EngineDrawEditor()
 					for (uint32_t j = 0; j < Mesh->MeshCount; j++)
 					{
 						VertexCount += Mesh->MeshData[j].VertexCount;
-						IndexCount += Mesh->MeshData[j].IndexCount;
+
+						if (Mesh->MeshData[j].IndexCount != 0)
+							IndexCount += Mesh->MeshData[j].IndexCount;
+						else
+							IndexCount += Mesh->MeshData[j].VertexCount;
 					}
 				}
 			}

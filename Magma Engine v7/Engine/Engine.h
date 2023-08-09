@@ -80,8 +80,21 @@ void ResetSceneSettings()
 		SceneFragmentUBO.CascadeScale[i] = 0.6;
 		SceneFragmentUBO.CascadeBias[i] = 0.0009;
 	}
+//	SceneFragmentUBO.CascadeBias[0] = 0.002;
+//	SceneFragmentUBO.CascadeScale[0] = 1.0;
+
+	SceneFragmentUBO.CascadeRange[0] = 2;
+	SceneFragmentUBO.CascadeScale[0] = 1.044;
 	SceneFragmentUBO.CascadeBias[0] = 0.002;
-	SceneFragmentUBO.CascadeScale[0] = 1.0;
+
+	SceneFragmentUBO.CascadeRange[1] = 2;
+	SceneFragmentUBO.CascadeScale[1] = 0.6;
+	SceneFragmentUBO.CascadeBias[1] = 0.0009;
+
+	SceneFragmentUBO.CascadeRange[2] = 8;
+	SceneFragmentUBO.CascadeScale[2] = 0.681;
+	SceneFragmentUBO.CascadeBias[2] = 0.0009;
+
 	SceneFragmentUBO.AmbientMultiplier = 0.6;
 	SceneFragmentSBO.LightCount = 0;
 	for (uint32_t i = 0; i < MAX_NUMBER_OF_LIGHTS; i++)
@@ -123,7 +136,7 @@ void MeasureFPS()
 
 void EngineInit()
 {
-
+	
 }
 
 void EngineDestroy()

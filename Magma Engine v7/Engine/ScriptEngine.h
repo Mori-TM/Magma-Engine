@@ -11,7 +11,7 @@ bool CheckLua(lua_State* L, int32_t r)
 
 lua_State* LuaState;
 
-void InitLua()
+void LuaInit()
 {
 	LuaState = luaL_newstate();
 	luaL_openlibs(LuaState);
@@ -208,7 +208,7 @@ void UpdateLuaScripts()
 	}
 }
 
-void DeInitLua()
+void LuaDestroy()
 {
 	lua_close(LuaState);
 }

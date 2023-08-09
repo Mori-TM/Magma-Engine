@@ -151,7 +151,7 @@ void EditorEntityInspector()
 					ImGui::ColorEdit3("Color", (float*)&Entities[SelectedEntity].Light.Color);
 					ImGui::DragFloat("Strength", &Entities[SelectedEntity].Light.Strength, 0.1, 0.01, 10000.0);					
 
-					const char* Types[] = { "Point", "Directinoal", "Spot" };
+					const char* Types[] = { "Point", "Directional", "Spot" };
 					if (ImGui::BeginCombo("Light Type", Types[Entities[SelectedEntity].Light.Type]))
 					{
 						for (uint32_t i = 0; i < ARRAY_SIZE(Types); i++)
@@ -190,25 +190,28 @@ void EditorEntityInspector()
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 0, 255));
 				if (ImGui::Button("Duplicate Entity"))
 				{
-					Entities = (EntityInfo*)realloc(Entities, (EntityCount + 1) * sizeof(EntityInfo));
-					Entities[EntityCount] = Entities[SelectedEntity];
-					if (strstr(Entities[EntityCount].Name, ")") == 0)
+				//	Entities = (EntityInfo*)realloc(Entities, (EntityCount + 1) * sizeof(EntityInfo));
+					if (EntitiesCheckForResize())
 					{
-						sprintf(Entities[EntityCount].Name, "%s Copy(1)", Entities[EntityCount].Name);
-					}
-					else
-					{
-						size_t Length = strlen(Entities[EntityCount].Name);
-						char* StrPtr = Entities[EntityCount].Name;
-						StrPtr += Length;
-						while (*(--StrPtr) != '(');
-						uint32_t Count = atoi(StrPtr + 1) + 1;
-						sprintf(StrPtr, "(%d)", Count);
-						
-					}
-					
-					SelectedEntity = EntityCount;
-					EntityCount++;
+						Entities[EntityCount] = Entities[SelectedEntity];
+						if (strstr(Entities[EntityCount].Name, ")") == 0)
+						{
+							sprintf(Entities[EntityCount].Name, "%s Copy(1)", Entities[EntityCount].Name);
+						}
+						else
+						{
+							size_t Length = strlen(Entities[EntityCount].Name);
+							char* StrPtr = Entities[EntityCount].Name;
+							StrPtr += Length;
+							while (*(--StrPtr) != '(');
+							uint32_t Count = atoi(StrPtr + 1) + 1;
+							sprintf(StrPtr, "(%d)", Count);
+
+						}
+
+						SelectedEntity = EntityCount;
+						EntityCount++;
+					}					
 				}
 				ImGui::PopStyleColor();
 
@@ -218,10 +221,12 @@ void EditorEntityInspector()
 					for (uint32_t i = SelectedEntity; i < EntityCount - 1; i++)
 						Entities[i] = Entities[i + 1];
 			
-					Entities = (EntityInfo*)realloc(Entities, (EntityCount - 1) * sizeof(EntityInfo));
+				//	Entities = (EntityInfo*)realloc(Entities, (EntityCount - 1) * sizeof(EntityInfo));
 			
 					EntityCount--;
 					SelectedEntity = EntityCount - 1;
+
+					EntitiesCheckForResize();
 				}
 				ImGui::PopStyleColor();
 				
@@ -560,7 +565,7 @@ void EditorVSInspector()
 {
 	ImGui::Begin("VS Inspector");
 	{
-		static CMA_MemoryZone points = CMA_Create(sizeof(ImVec2));
+		static CMA_MemoryZone points = CMA_Create(sizeof(ImVec2), "Magma Engine, Points");
 	//	static ImVector<ImVec2> points;
 		static ImVec2 scrolling(0.0f, 0.0f);
 		static bool opt_enable_grid = true;

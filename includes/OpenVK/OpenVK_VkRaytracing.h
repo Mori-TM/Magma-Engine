@@ -71,10 +71,10 @@ if (vkCreateDevice(VkRenderer.PhysicalDevice, &CreateInfo, NULL, &VkRenderer.Dev
 void VkGetRaytracingFeatures(VkDeviceCreateInfo* DeviceCreateInfo)
 {
 	memset(&VkRaytracer, 0, sizeof(VkRaytracerInfo));
-	VkRaytracer.Geometry = CMA_Create(sizeof(VkRaytracingGeometryInfo));
-	VkRaytracer.Instances = CMA_Create(sizeof(VkAccelerationStructureInstanceKHR));
-	VkRaytracer.BottomLevelAS = CMA_Create(sizeof(VkAccelerationStructure));
-	VkRaytracer.TopLevelAS = CMA_Create(sizeof(VkAccelerationStructure));
+	VkRaytracer.Geometry = CMA_Create(sizeof(VkRaytracingGeometryInfo), "OpenVk Raytracer, Geometry");
+	VkRaytracer.Instances = CMA_Create(sizeof(VkAccelerationStructureInstanceKHR), "OpenVk Raytracer, Instances");
+	VkRaytracer.BottomLevelAS = CMA_Create(sizeof(VkAccelerationStructure), "OpenVk Raytracer, Bottom Level AS");
+	VkRaytracer.TopLevelAS = CMA_Create(sizeof(VkAccelerationStructure), "OpenVk Raytracer, Top Level AS");
 
 	VkRaytracer.EnabledDescriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
 	VkRaytracer.EnabledDescriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;

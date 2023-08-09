@@ -313,9 +313,17 @@ void EndSingleTimeCommandBuffer(VkCommandBuffer CommandBuffer)
 
 const float FontMultiplyer = 1.25;
 
+uint32_t ImGuiUsedDescriptorPool = 0;
+
 ifd::ImageData CreateImGuiTexture(uint8_t* Data, int w, int h, char Format)
 {
-	
+	if (ImGuiUsedDescriptorPool > IMGUI_DESCRIPTOR_POOL_SIZE)
+	{
+		ifd::ImageData ImageData;
+		memset(&ImageData, 0, sizeof(ifd::ImageData));
+		return ImageData;
+	}
+
 //	OpenVkDeviceWaitIdle();
 
 //	unsigned char TmpData[128 * 2 * 4];
@@ -378,6 +386,7 @@ ifd::ImageData CreateImGuiTexture(uint8_t* Data, int w, int h, char Format)
 	ImageData.Sampler = SceneTexture->TextureSampler;
 	ImageData.Image = SceneTexture->TextureImage;
 	*/
+	ImGuiUsedDescriptorPool++;
 	return ImageData;
 }
 
@@ -392,10 +401,11 @@ void DeleteImGuiTexture(ifd::ImageData DescriptorSet)
 	if (DescriptorSet.DescriptorSet == 0)
 		return;
 	printf("Deleted Icon\n");
+	ImGuiUsedDescriptorPool--;
 	ImGuiTexturesToDelete.push_back(DescriptorSet);
 }
 
-void InitImGui()
+void ImGuiInit()
 {
 	ImGui::CreateContext();
 	ImGuiIO* IO = &ImGui::GetIO();
@@ -461,7 +471,7 @@ void InitImGui()
 //	ImGui::InitFileDialog();
 }
 
-void DestroyImGui()
+void ImGuiDestroy()
 {
 	OpenVkDeviceWaitIdle();
 //	ImGui::DeInitFileDialog();

@@ -34,17 +34,31 @@ void CreateBuffers()
 	PlaneIndexBuffer = OpenVkCreateIndexBuffer(ARRAY_SIZE(PlaneIndices) * sizeof(uint32_t), PlaneIndices);
 	GenerateAABB(&PlaneAABB, ARRAY_SIZE(PlaneVertices), (SceneVertex*)PlaneVertices);
 
-	CreateSphere(24, 24);
-	SphereVertexBuffer = OpenVkCreateVertexBuffer(SphereVertexCount * sizeof(SceneVertex), SphereVertices);
-	SphereIndexBuffer = OpenVkCreateIndexBuffer(SphereIndexCount * sizeof(uint32_t), SphereIndices);
-	GenerateAABB(&SphereAABB, SphereVertexCount, SphereVertices);
-	free(SphereVertices);
-	free(SphereIndices);
+	if (CreateSphere(24, 24))
+	{
+		SphereVertexBuffer = OpenVkCreateVertexBuffer(SphereVertexCount * sizeof(SceneVertex), SphereVertices);
+		SphereIndexBuffer = OpenVkCreateIndexBuffer(SphereIndexCount * sizeof(uint32_t), SphereIndices);
+		GenerateAABB(&SphereAABB, SphereVertexCount, SphereVertices);
+		free(SphereVertices);
+		free(SphereIndices);
+	}
+	else
+	{
+		SphereVertexBuffer = PlaneVertexBuffer;
+		SphereIndexBuffer = PlaneIndexBuffer;
+	}
 
-	CreateBean(24, 24);
-	BeanVertexBuffer = OpenVkCreateVertexBuffer(BeanVertexCount * sizeof(SceneVertex), BeanVertices);
-	BeanIndexBuffer = OpenVkCreateIndexBuffer(BeanIndexCount * sizeof(uint32_t), BeanIndices);
-	GenerateAABB(&BeanAABB, BeanVertexCount, BeanVertices);
-	free(BeanVertices);
-	free(BeanIndices);
+	if (CreateBean(24, 24))
+	{
+		BeanVertexBuffer = OpenVkCreateVertexBuffer(BeanVertexCount * sizeof(SceneVertex), BeanVertices);
+		BeanIndexBuffer = OpenVkCreateIndexBuffer(BeanIndexCount * sizeof(uint32_t), BeanIndices);
+		GenerateAABB(&BeanAABB, BeanVertexCount, BeanVertices);
+		free(BeanVertices);
+		free(BeanIndices);
+	}
+	else
+	{
+		BeanVertexBuffer = PlaneVertexBuffer;
+		BeanIndexBuffer = PlaneIndexBuffer;
+	}
 }

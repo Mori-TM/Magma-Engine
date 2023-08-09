@@ -47,14 +47,8 @@ void CreateSwapChainPipeline()
 	SwapChainPipeline = OpenVkCreateGraphicsPipeline(&GraphicsPipelineCreateInfo);
 }
 
-size_t DummyScriptLength = 2048;
-char* DummyScript;
-
 void CreateSwapChainFramebuffer()
 {
-	DummyScript = (char*)malloc(2048);
-	strcpy(DummyScript, "function Start()\nend\n\nfunction Update()\n\tx, y, z, rx, ry, rz, sx, sy, sz = GetEntity(\"Entity\")\n\tprint(x, y, z, rx, ry, rz, sx, sy, sz)\nend");
-
 	uint32_t Attachments[] = { SwapChain };
 
 	OpenVkFramebufferCreateInfo FramebufferCreateInfo;
@@ -166,7 +160,7 @@ void SwapChainDraw()
 				snprintf(String, 2048, "FXAA Render Time: %f ms", FXAARenderingTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "SwapChain Render Time: %f ms", SwapChainRenderingTime);
+				snprintf(String, 2048, "Swap Chain Render Time: %f ms", SwapChainRenderingTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
 				snprintf(String, 2048, "Render Time: %f ms", ShadowRenderingTime + GBufferRenderingTime + SSAORenderingTime + SSAOBlurRenderingTime + SceneRenderingTime + SSRRenderingTime + FXAARenderingTime + SwapChainRenderingTime);

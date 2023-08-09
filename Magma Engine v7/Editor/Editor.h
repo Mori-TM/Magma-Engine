@@ -111,12 +111,11 @@ inline void ImGuiSetPosPaddingX(float Pos)
 
 void EngineInitEditor()
 {
-	InitLua();
+	
 
 }
 
 void EngineDestroyEditor()
 {
-	free(Entities);
-	DeInitLua();
+	
 }

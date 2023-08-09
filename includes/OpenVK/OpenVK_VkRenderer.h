@@ -139,13 +139,13 @@ uint32_t VkCreateRenderer(const char**(*GetExtensions)(uint32_t* ExtensionCount)
 //	const char* DeviceExtensions[] = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 	
 	memset(&VkRenderer, 0, sizeof(VkRendererInfo));
-	VkRenderer.ImageAttachments = CMA_Create(sizeof(VkImageInfo));
-	VkRenderer.DescriptorSets = CMA_Create(sizeof(VkDescriptorSetInfo));
-	VkRenderer.Images = CMA_Create(sizeof(VkImageInfo));
-	VkRenderer.Sampler = CMA_Create(sizeof(VkSampler));
-	VkRenderer.StaticBuffers = CMA_Create(sizeof(VkStaticBufferInfo));
-	VkRenderer.DynamicBuffers = CMA_Create(sizeof(VkDynamicBufferInfo));
-	VkRenderer.DescriptorPools = CMA_Create(sizeof(VkDescriptorPoolInfo));
+	VkRenderer.ImageAttachments = CMA_Create(sizeof(VkImageInfo), "OpenVk Renderer, Image Attachments");
+	VkRenderer.DescriptorSets = CMA_Create(sizeof(VkDescriptorSetInfo), "OpenVk Renderer, Descriptor Sets");
+	VkRenderer.Images = CMA_Create(sizeof(VkImageInfo), "OpenVk Renderer, Images");
+	VkRenderer.Sampler = CMA_Create(sizeof(VkSampler), "OpenVk Renderer, Sampler");
+	VkRenderer.StaticBuffers = CMA_Create(sizeof(VkStaticBufferInfo), "OpenVk Renderer, Static Buffer");
+	VkRenderer.DynamicBuffers = CMA_Create(sizeof(VkDynamicBufferInfo), "OpenVk Renderer, Dynamic Buffer");
+	VkRenderer.DescriptorPools = CMA_Create(sizeof(VkDescriptorPoolInfo), "OpenVk Renderer, Descriptor Pools");
 	VkRenderer.BufferMemoryAlignment = 256;
 
 	//Instance
@@ -982,7 +982,7 @@ uint32_t VkCreateDescriptorPool(uint32_t DescriptorPoolType, uint32_t PoolSizeCo
 	PoolInfo.pPoolSizes = PoolSizes;
 
 	VkDescriptorPoolInfo DescriptorPool;
-	DescriptorPool.DescriptorSets = CMA_Create(sizeof(uint32_t));
+	DescriptorPool.DescriptorSets = CMA_Create(sizeof(uint32_t), "OpenVk Renderer, Descriptor Pool Descriptor Sets");
 
 	if (vkCreateDescriptorPool(VkRenderer.Device, &PoolInfo, NULL, &DescriptorPool.DescriptorPool) != VK_SUCCESS)
 	{

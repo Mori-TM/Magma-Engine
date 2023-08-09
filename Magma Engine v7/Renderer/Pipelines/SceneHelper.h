@@ -33,6 +33,7 @@ typedef struct
 	mat4 CascadeProjectionView[SHADOW_MAP_CASCADE_COUNT];
 	vec4 CameraPosition;
 	mat4 View;
+	vec4 ClearColor;
 	float Gamma;
 	float Exposure;
 	float AmbientMultiplier;

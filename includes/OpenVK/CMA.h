@@ -22,6 +22,7 @@ typedef struct
 
 typedef struct
 {
+	char Name[64];//For debugging
 	size_t Size;
 	size_t AllocateSize;
 	size_t MemSize;
@@ -36,17 +37,30 @@ void ICMA_Resize(size_t Start, CMA_MemoryZone* Zone)
 	for (size_t i = Start; i < Zone->AllocateSize; i++)
 	{
 		Zone->Mem[i].Data = malloc(Zone->MemSize);
+		if (!Zone->Mem[i].Data)
+		{
+			Zone->AllocateSize = i;
+			printf("CMA Error: Failed to allocate data for zone: %s\n", Zone->Name);
+			return;
+		}
 		Zone->Mem[i].State = ICMA_DATA_STATE_UNUSED | ICMA_DATA_STATE_ALLOCATED;
 	}
 }
 
-CMA_MemoryZone CMA_Create(size_t Size)
+CMA_MemoryZone CMA_Create(size_t Size, const char* Name)
 {
 	CMA_MemoryZone Zone;
+	strncpy(Zone.Name, Name, 64);
+	Zone.Name[63] = '\0';
 	Zone.Size = 0;
 	Zone.AllocateSize = CMA_BLOCK_SIZE;
 	Zone.MemSize = Size;
 	Zone.Mem = (CMA_Memory*)malloc(CMA_BLOCK_SIZE * sizeof(CMA_Memory));
+	if (!Zone.Mem)
+	{
+		printf("CMA Error: Failed to allocate memory for zone: %s\n", Name);
+		return Zone;
+	}
 	ICMA_Resize(0, &Zone);
 	Zone.PopCount = 0;
 	Zone.PushCountNew = 0;
@@ -75,6 +89,13 @@ void CMA_Destroy(CMA_MemoryZone* Zone)
 
 size_t CMA_Push(CMA_MemoryZone* Zone, void* Data)
 {
+	if (Zone->Mem == NULL)
+	{
+		printf("CMA Error: Failed to find zone meory: %s\n", Zone->Name);
+		return 0;
+	}
+		
+	//Check for unsued slots that can be used
 	for (size_t i = 0; i < Zone->Size; i++)
 	{
 		if (Zone->Mem[i].State & ICMA_DATA_STATE_UNUSED &&
@@ -99,11 +120,21 @@ size_t CMA_Push(CMA_MemoryZone* Zone, void* Data)
 	if (Zone->Size >= Zone->AllocateSize)
 	{
 	//	printf("CMA: Resized memory zone\n");
-		Zone->Mem = (CMA_Memory*)realloc(Zone->Mem, (Zone->AllocateSize + CMA_BLOCK_SIZE) * sizeof(CMA_Memory));
-		if (Zone->Mem == NULL)
-			printf("CMA Error: Failed to resize memory zone\n");
-		Zone->AllocateSize += CMA_BLOCK_SIZE;
-		ICMA_Resize(Zone->AllocateSize - CMA_BLOCK_SIZE, Zone);
+		CMA_Memory* Memory = (CMA_Memory*)realloc(Zone->Mem, (Zone->AllocateSize + CMA_BLOCK_SIZE) * sizeof(CMA_Memory));
+		if (Memory == NULL)
+			printf("CMA Error: Failed to resize memory zone: %s\n", Zone->Name);
+		else
+		{
+			Zone->Mem = Memory;
+			Zone->AllocateSize += CMA_BLOCK_SIZE;
+			ICMA_Resize(Zone->AllocateSize - CMA_BLOCK_SIZE, Zone);
+		}
+
+		if (Zone->Size >= Zone->AllocateSize)
+		{
+			printf("CMA Error: Failed to push your data: %s\n", Zone->Name);
+			return -1;
+		}
 	}
 
 	if (Zone->Mem[Zone->Size].State & ICMA_DATA_STATE_UNUSED &&
@@ -118,6 +149,11 @@ size_t CMA_Push(CMA_MemoryZone* Zone, void* Data)
 	{
 		Zone->Mem[Zone->Size].State = ICMA_DATA_STATE_USED | ICMA_DATA_STATE_ALLOCATED;
 		Zone->Mem[Zone->Size].Data = malloc(Zone->MemSize);
+		if (!Zone->Mem[Zone->Size].Data)
+		{
+			printf("CMA Error: Failed to allocate data for your push data: %s\n", Zone->Name);
+			return -1;
+		}
 		memcpy(Zone->Mem[Zone->Size].Data, Data, Zone->MemSize);
 		Zone->PushCountNew++;
 	}
@@ -202,8 +238,17 @@ void CMA_Pop(CMA_MemoryZone* Zone, size_t Index)
 
 		if (Zone->AllocateSize != Zone->Size)
 		{
-			Zone->AllocateSize = Zone->Size;
-			Zone->Mem = (CMA_Memory*)realloc(Zone->Mem, Zone->AllocateSize * sizeof(CMA_Memory));
+			
+			CMA_Memory* Memory = (CMA_Memory*)realloc(Zone->Mem, Zone->Size * sizeof(CMA_Memory));
+			if (!Memory)
+			{
+				printf("CMA Error: Failed to srink memory zone: %s\n", Zone->Name);
+			}
+			else
+			{
+				Zone->Mem = Memory;
+				Zone->AllocateSize = Zone->Size;
+			}				
 		}
 	}
 

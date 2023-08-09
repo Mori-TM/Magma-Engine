@@ -2156,7 +2156,7 @@ typedef struct _REPARSE_DATA_BUFFER
 template <class T>
 struct free_deleter
 {
-    void operator()(T* p) const { std::free(p); }
+    void operator()(T* p) const { free(p); }
 };
 
 GHC_INLINE std::unique_ptr<REPARSE_DATA_BUFFER, free_deleter<REPARSE_DATA_BUFFER>> getReparseData(const path& p, std::error_code& ec)

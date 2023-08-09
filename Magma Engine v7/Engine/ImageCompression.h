@@ -1,3 +1,4 @@
+/*
 void ImageToRGB(unsigned char** RGBA, int Width, int Height)
 {
 	size_t Size = Width * Height * 4;
@@ -24,8 +25,9 @@ void ImageToRGB(unsigned char** RGBA, int Width, int Height)
 	free(*RGBA);
 	*RGBA = Data;
 }
+*/
 
-void CompressImage(unsigned char* rgba_data, int width, int height, unsigned char** bc1_data, size_t* bc1_size, uint32_t Format, bool TextureCompressedHQ)
+bool CompressImage(unsigned char* rgba_data, int width, int height, unsigned char** bc1_data, size_t* bc1_size, uint32_t Format, bool TextureCompressedHQ)
 {
 	const int num_blocks = (width / 4) * (height / 4);
 	const size_t block_size = sizeof(unsigned char) * 64;
@@ -33,12 +35,14 @@ void CompressImage(unsigned char* rgba_data, int width, int height, unsigned cha
 	// Allocate memory for compressed image
 	*bc1_size = num_blocks * block_size;
 	*bc1_data = (unsigned char*)malloc(*bc1_size);
+	if (!*bc1_data)
+		return false;
 
 //	unsigned char* Data = stbi__convert_format(rgba_data, 4, 3, width, height);
 	if (Format == OPENVK_FORMAT_BC4_RGBA)
-		compress_pixelsBC4(*bc1_data, rgba_data, width, height, 0);
+		return compress_pixelsBC4(*bc1_data, rgba_data, width, height, 0);
 	else
-		compress_pixels(*bc1_data, rgba_data, width, height, 0, TextureCompressedHQ);
+		return compress_pixels(*bc1_data, rgba_data, width, height, 0, TextureCompressedHQ);
 	/*
 	const int num_blocks = (width / 4) * (height / 4);
     const size_t block_size = sizeof(unsigned char) * 8;
@@ -84,4 +88,6 @@ void CompressImage(unsigned char* rgba_data, int width, int height, unsigned cha
 
 	free(Data);
 	*/
+
+	return true;
 }

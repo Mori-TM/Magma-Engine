@@ -34,7 +34,7 @@ void SceneInit()
 	*/
 
 	//Texture
-	SceneTextures = CMA_Create(sizeof(SceneTextureImage));
+	SceneTextures = CMA_Create(sizeof(SceneTextureImage), "Magma Engine, Scene Textures");
 	SceneTextureImage Image;
 	Image.ShowInAssetBrowser = false;
 	Image.TextureDescriptorSet = LoadTexture((char*)"Data/Textures/Default.png", &Image);
@@ -75,7 +75,7 @@ void SceneInit()
 	//	CMA_Push(&SceneTextures, &Image);
 
 		//Material
-	SceneMaterials = CMA_Create(sizeof(SceneMaterial));
+	SceneMaterials = CMA_Create(sizeof(SceneMaterial), "Magma Engine, Scene Materials");
 	SceneMaterial Material;
 	strcpy(Material.Name, "None");
 	Material.Color = Vec4f(1.0);
@@ -90,7 +90,7 @@ void SceneInit()
 	Material.OcclusionIndex = 0;
 	CMA_Push(&SceneMaterials, &Material);
 	//Mesh
-	SceneMeshes = CMA_Create(sizeof(SceneMesh));
+	SceneMeshes = CMA_Create(sizeof(SceneMesh), "Magma Engine, Scene Meshes");
 	SceneMesh Mesh;
 	Mesh.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
 	strcpy(Mesh.Name, "None");
@@ -107,7 +107,7 @@ void SceneInit()
 	Mesh.IndexBuffer = OPENVK_ERROR;
 	CMA_Push(&SceneMeshes, &Mesh);
 
-	SceneAnimations = CMA_Create(sizeof(SceneAnimation));
+	SceneAnimations = CMA_Create(sizeof(SceneAnimation), "Magma Engine, Scene Animations");
 	SceneAnimation Animation;
 	Animation.Start = 0;
 	Animation.End = 1;

@@ -108,108 +108,27 @@ void EditorAssetBrowser()
 
 			if (ImGui::Selectable("Add Plane"))
 			{
-				SceneMesh MeshInfo;
-
-				MeshInfo.Destroyable = false;
-				strcpy(MeshInfo.Path, "Plane");
-				MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
-				MeshInfo.MeshCount = 1;
-
-				SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
-				MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(PlaneVertices);
-				MeshInfo.MeshData[0].VertexOffset = 0;
-				MeshInfo.VertexBuffer = PlaneVertexBuffer;
-
-				MeshInfo.MeshData[0].IndexCount = ARRAY_SIZE(PlaneIndices);
-				MeshInfo.MeshData[0].IndexOffset = 0;
-				MeshInfo.IndexBuffer = PlaneIndexBuffer;
-				memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
-				MeshInfo.MeshData[0].AABB = PlaneAABB;
-
-				AddMesh("Plane", &MeshInfo);
+				AddPlane();
 				ImGui::SetWindowFocus("Mesh Inspector");
 			}
 
 			if (ImGui::Selectable("Add Cube"))
 			{
-				SceneMesh MeshInfo;
-
-				MeshInfo.Destroyable = false;
-				strcpy(MeshInfo.Path, "Cube");
-				MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
-				MeshInfo.MeshCount = 1;
-
-				SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
-				MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(CubeVertices);
-				MeshInfo.MeshData[0].VertexOffset = 0;
-				MeshInfo.VertexBuffer = CubeVertexBuffer;
-
-				MeshInfo.MeshData[0].IndexCount = 0;
-				MeshInfo.MeshData[0].IndexOffset = 0;
-				MeshInfo.IndexBuffer = OPENVK_ERROR;
-				memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
-				MeshInfo.MeshData[0].AABB = CubeAABB;
-
-				AddMesh("Cube", &MeshInfo);
+				AddCube();
 				ImGui::SetWindowFocus("Mesh Inspector");
 			}
 
 			if (ImGui::Selectable("Add Sphere"))
 			{
-				SceneMesh MeshInfo;
-
-				MeshInfo.Destroyable = false;
-				strcpy(MeshInfo.Path, "Sphere");
-				MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
-				MeshInfo.MeshCount = 1;
-
-				SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
-				MeshInfo.MeshData[0].VertexCount = SphereVertexCount;
-				MeshInfo.MeshData[0].VertexOffset = 0;
-				MeshInfo.VertexBuffer = SphereVertexBuffer;
-
-				MeshInfo.MeshData[0].IndexCount = SphereIndexCount;
-				MeshInfo.MeshData[0].IndexOffset = 0;
-				MeshInfo.IndexBuffer = SphereIndexBuffer;
-				memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
-				MeshInfo.MeshData[0].AABB = SphereAABB;
-
-				AddMesh("Sphere", &MeshInfo);
+				AddSphere();
 				ImGui::SetWindowFocus("Mesh Inspector");
 			}
 
 			if (ImGui::Selectable("Add Bean"))
 			{
-				SceneMesh MeshInfo;
-
-				MeshInfo.Destroyable = false;
-				strcpy(MeshInfo.Path, "Bean");
-				MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
-				MeshInfo.MeshCount = 1;
-
-				SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
-				MeshInfo.MeshData[0].VertexCount = BeanVertexCount;
-				MeshInfo.MeshData[0].VertexOffset = 0;
-				MeshInfo.VertexBuffer = BeanVertexBuffer;
-				
-				MeshInfo.MeshData[0].IndexCount = BeanIndexCount;
-				MeshInfo.MeshData[0].IndexOffset = 0;
-				MeshInfo.IndexBuffer = BeanIndexBuffer;
-
-				memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
-				MeshInfo.MeshData[0].AABB = BeanAABB;
-					
-				AddMesh("Bean", &MeshInfo);
+				AddBean();
 				ImGui::SetWindowFocus("Mesh Inspector");
 			}
-
-		//	if (ImGui::BeginMenu("Load Model"))
-		//	{
-		//		if (ImGui::MenuItem("Default")) ifd::FileDialog::Instance().Open("LoadDefaultModel", "Open Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", true);
-		//		if (ImGui::MenuItem("Gen Smooth Normals")) ifd::FileDialog::Instance().Open("LoadSmoothModel", "Open Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", true);
-		//		if (ImGui::MenuItem("Gen Flat Normals")) ifd::FileDialog::Instance().Open("LoadFlatModel", "Open Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", true);
-		//		ImGui::EndMenu();
-		//	}
 
 			if (ImGui::Selectable("Load Model"))
 				ifd::FileDialog::Instance().Open("LoadModel", "Load Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", true);

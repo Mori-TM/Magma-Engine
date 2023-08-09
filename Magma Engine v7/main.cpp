@@ -222,10 +222,10 @@ int32_t main(int32_t argc, char** argv)
 //
 //	Rendering.wait();
 //	Culling.wait();
-	std::thread t1(RenderThread);
+//	std::thread t1(RenderThread);
 //	std::thread t2(CullingThread);
-
-	t1.join();
+	RenderThread();
+//	t1.join();
 //	t2.join();
 
 	return 0;

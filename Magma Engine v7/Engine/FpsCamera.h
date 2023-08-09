@@ -17,7 +17,7 @@ struct
 	float Speed;
 } CameraInfo;
 
-void InitFpsCamera()
+void FpsCameraInit()
 {
 	CameraInfo.Yaw = 270.0;
 	CameraInfo.Pitch = 0.0;

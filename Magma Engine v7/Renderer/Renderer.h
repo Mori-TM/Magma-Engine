@@ -142,18 +142,79 @@ void CreateRenderer()
 	CreateImGuiDescriptorPool();
 	CreateDescriptors();
 
+	EntitiesInit();
 	SceneInit();
+	
 	EngineInit();
 	EngineInitEditor();
-	InitImGui();
-	InitFpsCamera();
+
+	LuaInit();
+	ImGuiInit();
+	FpsCameraInit();
 	
 	OpenVkRuntimeInfo("Engine was initilaized", "");
 //	exit(2);
 	//Set up deafult test scene
-//	LoadModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
+//	SceneMesh Mesh;
+	
+	/*
+	uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_MESH);
+	uint32_t MeshIndex = AddPlane();
+	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshIndex);
+	Entities[EntityIndex].Mesh.MeshIndex = MeshIndex;
+	Entities[EntityIndex].Scale = Vec3f(8.0);
+	strcpy(Entities[EntityIndex].Mesh.Name, Mesh->Name);
 
-//	LoadModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
+
+	EntityIndex = AddEntity(COMPONENT_TYPE_MESH);
+	MeshIndex = AddCube();
+	Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshIndex);
+	Entities[EntityIndex].Mesh.MeshIndex = MeshIndex;
+	Entities[EntityIndex].Translate = Vec3(0.0, 2.0, 0.0);
+	strcpy(Entities[EntityIndex].Mesh.Name, Mesh->Name);
+	*/
+
+	uint32_t PlaneIndex = AddPlane();
+	uint32_t CubeIndex = AddBean();
+
+	SceneMesh* PlaneMesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, PlaneIndex);
+	SceneMesh* CubeMesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, CubeIndex);
+
+	int32_t Count = 8;
+
+	for (int32_t j = -Count; j < Count; j++)
+	{
+		for (int32_t i = -Count; i < Count; i++)
+		{
+			uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_MESH);
+			Entities[EntityIndex].Mesh.MeshIndex = PlaneIndex;
+			Entities[EntityIndex].Scale = Vec3f(8.0);
+			Entities[EntityIndex].Translate = Vec3((float)j * 10.0, 0.0, (float)i * 10.0);
+			strcpy(Entities[EntityIndex].Mesh.Name, PlaneMesh->Name);
+
+
+			EntityIndex = AddEntity(COMPONENT_TYPE_MESH);
+		//	printf("%d\n", EntityIndex);			
+			Entities[EntityIndex].Mesh.MeshIndex = CubeIndex;
+			Entities[EntityIndex].Translate = Vec3((float)j * 10.0, 2.0, (float)i * 10.0);
+			strcpy(Entities[EntityIndex].Mesh.Name, CubeMesh->Name);
+		}
+
+	}
+	
+	ExitLoops:
+
+	uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
+	ResetEntityLight(&Entities[EntityIndex]);
+	Entities[EntityIndex].Light.CastShadow = true;
+	Entities[EntityIndex].Light.Type = 1;
+	Entities[EntityIndex].Light.Strength = 5.8;
+	Entities[EntityIndex].Translate = Vec3(2.0, 2.5, 2.25);
+	strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
+	OpenVkRuntimeInfo("Scene was initilaized", "");
+//	AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
+
+//	AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
 //	AddEntity(COMPONENT_TYPE_MESH);
 //	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, 1);
 //	Entities[SelectedEntity].Mesh.MeshIndex = 1;
@@ -162,10 +223,14 @@ void CreateRenderer()
 
 void DestroyRenderer()
 {
-	DestroyImGui();
+	ImGuiDestroy();
 	SceneDestroy();
+	LuaDestroy();
+	EntitiesDestroy();
+
 	EngineDestroy();
 	EngineDestroyEditor();
+	
 	OpenVkGUIDestroy();
 	OpenVkDestroyRenderer();
 	OpenVkFreeThreads();
@@ -232,7 +297,7 @@ void RendererDraw()
 							 									SceneRenderingTime = GetExecutionTime(SceneDraw);
 		if (ForceRenderOnce || RenderSSR)						SSRRenderingTime = GetExecutionTime(SSRDraw);
 		if (ForceRenderOnce || RenderFXAA)						FXAARenderingTime = GetExecutionTime(FXAADraw);
-											SwapChainRenderingTime = GetExecutionTime(SwapChainDraw);
+																SwapChainRenderingTime = GetExecutionTime(SwapChainDraw);
 	}
 	EndFrameTime = GetExecutionTimeOpenVkBool(OpenVkEndFrame);
 
@@ -310,8 +375,18 @@ void DeleteMeshTexture(uint32_t TextureImage, uint32_t TextureIndex)
 		SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, TextureIndex);
 		if (Image != NULL && Image->TextureImage != 0 && Image->TextureSampler != 0)
 		{
-			OpenVkDestroyImage(Image->TextureImage);
-			OpenVkDestroySampler(Image->TextureSampler);
+			SceneTextureImage* DefaultImage = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
+			if (DefaultImage == NULL)
+			{
+				printf("WTF is the default texture?\n");
+				exit(0);
+			}
+
+			if (Image->TextureImage != DefaultImage->TextureImage)		OpenVkDestroyImage(Image->TextureImage);
+			if (Image->TextureSampler != DefaultImage->TextureSampler)  OpenVkDestroySampler(Image->TextureSampler);
+
+//			OpenVkDestroyImage(Image->TextureImage);
+//			OpenVkDestroySampler(Image->TextureSampler);
 			CMA_Pop(&SceneTextures, TextureIndex);
 		}
 	}
@@ -325,6 +400,7 @@ void RendererRender()
 
 		for (size_t i = 0; i < ImGuiTexturesToDelete.size(); i++)
 		{
+			//should check if texture is vaild
 			OpenVkFreeDescriptorSet(ImGuiDescriptorPool, ImGuiTexturesToDelete[i].DescriptorSet);
 			OpenVkDestroyImage(ImGuiTexturesToDelete[i].Image);
 			OpenVkDestroySampler(ImGuiTexturesToDelete[i].Sampler);
@@ -338,8 +414,15 @@ void RendererRender()
 	{
 		DeleteTexture = false;
 
-		OpenVkDestroyImage(TextureToDelete);
-		OpenVkDestroySampler(SamplerToDelete);
+		SceneTextureImage* DefaultImage = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
+		if (DefaultImage == NULL)
+		{ 
+			printf("WTF is the default texture?\n");
+			exit(0);
+		}
+
+		if (TextureToDelete != DefaultImage->TextureImage)	 OpenVkDestroyImage(TextureToDelete);
+		if (SamplerToDelete != DefaultImage->TextureSampler) OpenVkDestroySampler(SamplerToDelete);
 
 		RendererResize();
 	}
@@ -403,7 +486,7 @@ void RendererRender()
 		//	if (i != OpenVkGUI.Pipeline)
 				vkDestroyPipeline(VkRenderer.Device, VkRenderer.Pipelines[i], NULL);
 		}
-
+		
 		VkRenderer.PipelineCount = 0;
 		
 		OpenVkGUIRecreatePipeline();

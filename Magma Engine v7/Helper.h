@@ -8,6 +8,8 @@
 #define MAX_CHAR_PATH_LENGTH 4096
 #define MAX_CHAR_SCRIPT_LENGTH 1048576
 
+#define ERROR32 UINT32_MAX
+
 #define true 1
 #define false 0
 #ifndef __cplusplus
@@ -125,9 +127,16 @@ double GetExecutionTimeOpenVkBool(OpenVkBool(*Func)(void))
 
 	return Time;
 }
+/*
+const size_t MEMORY_POOL_SIZE = 1024 * 1024 * 100;
+size_t MemoryUsedSize = 0;
 
 void* SaveMalloc(size_t Size)
 {
+	MemoryUsedSize += Size;
+	if (MemoryUsedSize > MEMORY_POOL_SIZE)
+		return NULL;
+
 	void* Mem = malloc(Size);
 	if (Mem == NULL)
 		printf("Warning: Failed to allcoate Memory: %zu!\n", Size);
@@ -137,19 +146,24 @@ void* SaveMalloc(size_t Size)
 
 void* SaveRealloc(void* Data, size_t Size)
 {
+	MemoryUsedSize += Size;
+	if (MemoryUsedSize > MEMORY_POOL_SIZE)
+		return NULL;
+
 	void* Mem = realloc(Data, Size);	
 	if (Mem == NULL)
 		printf("Warning: Failed reallcoate Memory: %x %zu!\n", Data, Size);
 
 	return Mem;
-}
+} 
 
 void SaveFree(void* Data)
 {
 	free(Data);
 	Data = NULL;
 }
-/*
+
+//Just for testing how engine reacts if no more ram is available
 #define malloc SaveMalloc
 #define realloc SaveRealloc
 #define free SaveFree

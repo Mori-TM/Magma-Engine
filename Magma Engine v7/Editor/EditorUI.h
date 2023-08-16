@@ -382,7 +382,7 @@ void EditorDrawMainMenuBar()
 			{
 				EditorBarButtonPressed = true;
 				PushEventSDL(SDL_QUIT, 0);
-				printf("Hey there\n");
+			//	printf("Hey there\n");
 			}
 			ImGui::PopStyleColor(3);
 		}
@@ -711,12 +711,17 @@ void EngineDrawEditor()
 		float Aspect = (float)SceneWidth / (float)SceneHeight;
 		ImageSize.y = ImageSize.x / Aspect;
 		
+		ImGui::Checkbox("Render Debug View", &RenderDebugDescriptorSet);
+
 		for (uint32_t i = 0; i < ARRAY_SIZE(DebugDescriptorSets); i++)
 		{
 			ImGui::Text(DebugAttachmentNames[i]);
 	//		ImGui::PushID(DebugDescriptorSets[i]);
-		//	if (ImGui::ImageButton(&GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
-			ImGui::Image(&GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize);
+			if (ImGui::ImageButton(&GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+				SceneRenderDescriptorSet = DebugDescriptorSets[i];
+
+			ImGui::NewLine();
+		//	ImGui::Image(&GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize);
 //			ImGui::PopID();
 		}
 

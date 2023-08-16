@@ -13,7 +13,10 @@ void EditorEntities()
 			sprintf(Buffer, "%d %s\n", i, Entities[i].Name);
 
 			if (ImGui::Selectable(Buffer, Entities[i].Selected))
-				SelectedEntity = i;			
+			{
+				SelectedEntity = i;
+				ImGui::SetWindowFocus("Entity Inspector");
+			}
 		}
 		Mutex.unlock();
 

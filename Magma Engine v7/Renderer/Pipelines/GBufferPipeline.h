@@ -170,6 +170,11 @@ void GBufferUpdateUniformBuffer()
 		{
 			if (Entities[i].UsedComponents[COMPONENT_TYPE_CAMERA])
 			{
+				SceneFragmentUBO.CameraPosition.x = Entities[i].Translate.x;
+				SceneFragmentUBO.CameraPosition.y = Entities[i].Translate.y;
+				SceneFragmentUBO.CameraPosition.z = Entities[i].Translate.z;
+				SceneFragmentUBO.CameraPosition.w = 0.0;
+
 				LoadMat4IdentityP(&GBufferVertexUBO.View);
 				GBufferVertexUBO.View = RotateXMat4P(&GBufferVertexUBO.View, ToRadians(Entities[i].Rotate.x));
 				GBufferVertexUBO.View = RotateYMat4P(&GBufferVertexUBO.View, ToRadians(Entities[i].Rotate.y));
@@ -184,6 +189,11 @@ void GBufferUpdateUniformBuffer()
 	}
 	else
 	{
+		SceneFragmentUBO.CameraPosition.x = CameraPos.x;
+		SceneFragmentUBO.CameraPosition.y = CameraPos.y;
+		SceneFragmentUBO.CameraPosition.z = CameraPos.z;
+		SceneFragmentUBO.CameraPosition.w = 0.0;
+
 		vec3 t = Add3P(&CameraPos, &CameraDir);
 		GBufferVertexUBO.View = LookAtMat4P(&CameraPos, &t, &CameraUp);
 		PerspectiveMat4P(((float)SceneWidth / SceneHeight), ToRadians(CameraFOV), CameraNearZ, CameraFarZ, &GBufferVertexUBO.Projection);

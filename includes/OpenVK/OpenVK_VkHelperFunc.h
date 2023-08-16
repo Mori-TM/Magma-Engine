@@ -48,6 +48,7 @@ typedef struct
 	VkDeviceMemory BufferMemory;
 } VkStaticBufferInfo;
 
+//FIX all "Dynamic" arrays should use CMA
 typedef struct
 {
 	uint32_t DeviceExtensionCount;
@@ -1150,6 +1151,6 @@ void VkUploadMipmaps(unsigned char** Pixels, VkImage Image, int32_t TextureWidth
 		vkFreeMemory(VkRenderer.Device, ImageMemories[i], NULL);
 	}
 
-	free(ImageMemories);
-	free(Images);
+	OpenVkFree(ImageMemories);
+	OpenVkFree(Images);
 }

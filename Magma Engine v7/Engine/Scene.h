@@ -1,3 +1,50 @@
+uint32_t SceneCreateDefaultTexture(SceneTextureImage* Image)
+{
+	OpenVkDeviceWaitIdle();
+	Image->Format = OPENVK_FORMAT_RGBA;
+	Image->Width = 2;
+	Image->Height = 2;
+
+	unsigned char* Pixels = (unsigned char*)malloc(16);
+	memset(Pixels, 255, 16);
+
+	OpenVkTextureCreateInfo TextureCreateInfo;
+	TextureCreateInfo.Pixels = &Pixels;
+	TextureCreateInfo.Width = Image->Width;
+	TextureCreateInfo.Height = Image->Height;
+	TextureCreateInfo.Format = Image->Format;
+	TextureCreateInfo.MipLevels = 0;
+	TextureCreateInfo.GenerateMipmaps = OpenVkFalse;
+	TextureCreateInfo.UseCustomMipmaps = OpenVkFalse;
+	Image->TextureImage = OpenVkCreateTexture(&TextureCreateInfo);
+	free(Pixels);
+	Image->MipLevels = TextureCreateInfo.MipLevels;
+
+	Image->TextureSampler = OpenVkCreateImageSampler(OPENVK_FILTER_NEAREST, OPENVK_ADDRESS_MODE_REPEAT);
+
+	uint32_t DescriptorCounts[] = { 1 };
+	uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
+	uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_TEXTURE };
+	uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT };
+	uint32_t Bindings[] = { 0 };
+
+	OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
+	DescriptorSetCreateInfo.DescriptorSetLayout = TextureDescriptorSetLayout;
+	DescriptorSetCreateInfo.DescriptorPool = DescriptorPool;
+	DescriptorSetCreateInfo.DescriptorWriteCount = 1;
+	DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
+	DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
+	DescriptorSetCreateInfo.Sampler = &Image->TextureSampler;
+	DescriptorSetCreateInfo.ImageTypes = ImageTypes;
+	DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
+	DescriptorSetCreateInfo.Bindings = Bindings;
+	DescriptorSetCreateInfo.Images = &Image->TextureImage;
+	DescriptorSetCreateInfo.DescriptorSet = NULL;
+	DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
+
+	return OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
+}
+
 void SceneInit()
 {
 	ResetSceneSettings();
@@ -37,7 +84,7 @@ void SceneInit()
 	SceneTextures = CMA_Create(sizeof(SceneTextureImage), "Magma Engine, Scene Textures");
 	SceneTextureImage Image;
 	Image.ShowInAssetBrowser = false;
-	Image.TextureDescriptorSet = LoadTexture((char*)"Data/Textures/Default.png", &Image);
+	Image.TextureDescriptorSet = SceneCreateDefaultTexture(&Image);
 	strcpy(Image.Name, "None");
 	strcpy(Image.Path, "None");
 	CMA_Push(&SceneTextures, &Image);

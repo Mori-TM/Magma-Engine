@@ -15,6 +15,7 @@ uint32_t DebugPipelineFatLine;
 
 DebugVertexPushConstant DebugVertexPc;
 
+bool RenderDebugDescriptorSet = false;
 uint32_t DebugDescriptorSets[12];
 
 const char* DebugAttachmentNames[] =

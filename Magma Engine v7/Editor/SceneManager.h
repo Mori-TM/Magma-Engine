@@ -60,7 +60,7 @@ void EditorDrawScene()
 				PrevWindowSize.y != WindowSize.y) {
 				// Handle window resize event
 				PrevWindowSize = ImGui::GetWindowSize();
-				printf("%d, %d\n", SceneWidth, SceneHeight);
+			//	printf("%d, %d\n", SceneWidth, SceneHeight);
 
 				ForceResizeEvent = true;
 				PushEventSDL(0, 0);

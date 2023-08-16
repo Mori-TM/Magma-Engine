@@ -53,7 +53,7 @@ void UpdateFpsCamera(vec3* CameraPos, vec3* CameraFront, vec3* CameraUp)
 		CameraInfo.DeltaTime *= 0.03 * CameraInfo.Speed;
 
 	vec3 CamerSpeed = { CameraInfo.DeltaTime, CameraInfo.DeltaTime, CameraInfo.DeltaTime };
-
+	
 	if (MouseState == 4 || CameraInfo.FirstInit)
 	{
 		CameraInfo.FirstInit = false;

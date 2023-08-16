@@ -24,23 +24,25 @@ typedef struct
 	mat4 Projection;
 } SceneVertexUniformBufferObject;
 
+//Update every frame mean in SceneUpdateUniformBuffer()
+//FIX Change this to be only updated in SceneUpdateUniformBuffer()
 typedef struct
 {
-	float CascadeSplits[4];//dont't change[4] to other number!
-	float CascadeRange[4];
-	float CascadeScale[4];
-	float CascadeBias[4];
-	mat4 CascadeProjectionView[SHADOW_MAP_CASCADE_COUNT];
-	vec4 CameraPosition;
-	mat4 View;
-	vec4 ClearColor;
-	float Gamma;
-	float Exposure;
-	float AmbientMultiplier;
-	uint32_t RenderSSAO;
+	float CascadeSplits[4];	//Update every frame,	dont't change[4] to other number!
+	float CascadeRange[4];	//Update via imgui or ResetSceneSettings()
+	float CascadeScale[4];	//Update via imgui or ResetSceneSettings()
+	float CascadeBias[4];	//Update via imgui or ResetSceneSettings()
+	mat4 CascadeProjectionView[SHADOW_MAP_CASCADE_COUNT];	//Update every frame
+	vec4 CameraPosition;	//Update every frame in G-Buffer pipeline, not the best place to update!
+	mat4 View;				//Update every frame
+	vec4 ClearColor;		//Update every frame
+	float Gamma;			//Update via imgui or ResetSceneSettings()
+	float Exposure;			//Update via imgui or ResetSceneSettings()
+	float AmbientMultiplier;//Update via imgui or ResetSceneSettings()
+	uint32_t RenderSSAO;	//Update every frame
 } SceneFragmentUniformBufferObject;
 
-#define MAX_NUMBER_OF_LIGHTS 32
+#define MAX_NUMBER_OF_LIGHTS 128
 
 typedef struct
 {

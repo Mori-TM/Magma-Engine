@@ -342,7 +342,7 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 						goto Error;
 					}
 
-					printf("%d\n", BlockSize);
+				//	printf("%d\n", BlockSize);
 
 					if (MipWidth > 1) MipWidth /= 2;
 					if (MipHeight > 1) MipHeight /= 2;
@@ -429,7 +429,7 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 		if (Image->TextureSampler == OPENVK_ERROR)
 		{
 			Image->TextureSampler = ImageSampler;
-			printf("Failed to create sampler for: %s, will use default one\n");
+			printf("Failed to create sampler for: %s, will use default one\n", Path);
 		}			
 	}
 	else
@@ -537,7 +537,7 @@ bool ModelLoadNormal = true;
 bool ModelLoadMetallic = true;
 bool ModelLoadRoughness = true;
 bool ModelLoadOcclusion = true;
-vec4  ModelColor = Vec4f(1.0);
+vec4  ModelColor = { 1.0, 1.0, 1.0, 1.0 };
 float ModelMetallic = 0.0;
 float ModelRoughness = 1.0;
 float ModelOcclusion = 1.0;
@@ -656,11 +656,19 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 
 	MeshInfo->VertexBuffer = OpenVkCreateVertexBuffer(VertexCount * sizeof(SceneVertex), Vertices);
 	if (MeshInfo->VertexBuffer == OPENVK_ERROR)
+	{
+		free(Vertices);
+		free(Indices);
 		return false;
+	}		
 
 	MeshInfo->IndexBuffer = OpenVkCreateIndexBuffer(IndexCount * sizeof(uint32_t), Indices);
 	if (MeshInfo->IndexBuffer == OPENVK_ERROR)
+	{
+		free(Vertices);
+		free(Indices);
 		return false;
+	}
 
 	free(Vertices);
 	free(Indices);
@@ -800,7 +808,7 @@ uint32_t AddBean()
 	MeshInfo.MeshData[0].IndexCount = BeanIndexCount;
 	MeshInfo.MeshData[0].IndexOffset = 0;
 	MeshInfo.IndexBuffer = BeanIndexBuffer;
-
+	
 	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
 	MeshInfo.MeshData[0].AABB = BeanAABB;
 

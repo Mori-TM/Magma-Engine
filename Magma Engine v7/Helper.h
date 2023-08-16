@@ -18,7 +18,7 @@ typedef uint32_t bool;
 
 #define E 2.71828182846
 #define PI 3.141592653589793238
-#define PI2 6.28318530718
+#define PI2 6.283185307179586
 
 typedef enum
 {

@@ -174,51 +174,68 @@ void CreateRenderer()
 	strcpy(Entities[EntityIndex].Mesh.Name, Mesh->Name);
 	*/
 
-	uint32_t PlaneIndex = AddPlane();
-	uint32_t CubeIndex = AddBean();
+//	uint32_t PlaneIndex = AddPlane();
+//	uint32_t CubeIndex = AddBean();
+//
+//	SceneMesh* PlaneMesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, PlaneIndex);
+//	SceneMesh* CubeMesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, CubeIndex);
+//
+//	int32_t Count = 8;
+//
+//	for (int32_t j = -Count; j < Count; j++)
+//	{
+//		for (int32_t i = -Count; i < Count; i++)
+//		{
+//			uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_MESH);
+//			Entities[EntityIndex].Mesh.MeshIndex = PlaneIndex;
+//			Entities[EntityIndex].Scale = Vec3f(8.0);
+//			Entities[EntityIndex].Translate = Vec3((float)j * 10.0, 0.0, (float)i * 10.0);
+//			strcpy(Entities[EntityIndex].Mesh.Name, PlaneMesh->Name);
+//
+//
+//			EntityIndex = AddEntity(COMPONENT_TYPE_MESH);
+//		//	printf("%d\n", EntityIndex);			
+//			Entities[EntityIndex].Mesh.MeshIndex = CubeIndex;
+//			Entities[EntityIndex].Translate = Vec3((float)j * 10.0, 2.0, (float)i * 10.0);
+//			strcpy(Entities[EntityIndex].Mesh.Name, CubeMesh->Name);
+//		}
+//
+//	}
+	/*
+	int32_t RaageXZ = 100;
+	int32_t RaageY = 150;
 
-	SceneMesh* PlaneMesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, PlaneIndex);
-	SceneMesh* CubeMesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, CubeIndex);
-
-	int32_t Count = 8;
-
-	for (int32_t j = -Count; j < Count; j++)
+	for (uint32_t i = 0; i < MAX_NUMBER_OF_LIGHTS - 1; i++)
 	{
-		for (int32_t i = -Count; i < Count; i++)
-		{
-			uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_MESH);
-			Entities[EntityIndex].Mesh.MeshIndex = PlaneIndex;
-			Entities[EntityIndex].Scale = Vec3f(8.0);
-			Entities[EntityIndex].Translate = Vec3((float)j * 10.0, 0.0, (float)i * 10.0);
-			strcpy(Entities[EntityIndex].Mesh.Name, PlaneMesh->Name);
-
-
-			EntityIndex = AddEntity(COMPONENT_TYPE_MESH);
-		//	printf("%d\n", EntityIndex);			
-			Entities[EntityIndex].Mesh.MeshIndex = CubeIndex;
-			Entities[EntityIndex].Translate = Vec3((float)j * 10.0, 2.0, (float)i * 10.0);
-			strcpy(Entities[EntityIndex].Mesh.Name, CubeMesh->Name);
-		}
-
+		uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
+		ResetEntityLight(&Entities[EntityIndex]);
+		Entities[EntityIndex].Light.CastShadow = false;
+		Entities[EntityIndex].Light.Type = 0;
+		Entities[EntityIndex].Light.Strength = (float)RandomInt(80, 8000) / 10.0;
+		Entities[EntityIndex].Light.Color = Vec3((float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0);
+		Entities[EntityIndex].Translate = Vec3((float)RandomInt(-RaageXZ, RaageXZ) / 10.0, (float)RandomInt(0, RaageY) / 10.0, (float)RandomInt(-RaageXZ, RaageXZ) / 10.0);
+		
+		strcpy(Entities[EntityIndex].Light.Name, "Point Light");
+	//	OpenVkRuntimeInfo("Scene was initilaized", "");
 	}
-	
-	ExitLoops:
 
-	uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
-	ResetEntityLight(&Entities[EntityIndex]);
-	Entities[EntityIndex].Light.CastShadow = true;
-	Entities[EntityIndex].Light.Type = 1;
-	Entities[EntityIndex].Light.Strength = 5.8;
-	Entities[EntityIndex].Translate = Vec3(2.0, 2.5, 2.25);
-	strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
+//	uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
+//	ResetEntityLight(&Entities[EntityIndex]);
+//	Entities[EntityIndex].Light.CastShadow = true;
+//	Entities[EntityIndex].Light.Type = 1;
+//	Entities[EntityIndex].Light.Strength = 5.8;
+//	Entities[EntityIndex].Translate = Vec3(2.0, 2.5, 2.25);
+//	strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
 	OpenVkRuntimeInfo("Scene was initilaized", "");
+	
 //	AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
 
-//	AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
-//	AddEntity(COMPONENT_TYPE_MESH);
-//	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, 1);
-//	Entities[SelectedEntity].Mesh.MeshIndex = 1;
-//	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
+	uint32_t ModelIndex= AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
+	AddEntity(COMPONENT_TYPE_MESH);
+	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
+	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;
+	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
+	*/
 }
 
 void DestroyRenderer()
@@ -245,11 +262,6 @@ void RendererUpdate()
 		CameraFOV = CameraZoomFOV;
 	else
 		CameraFOV = CameraNormalFOV;
-
-	SceneFragmentUBO.CameraPosition.x = CameraPos.x;
-	SceneFragmentUBO.CameraPosition.y = CameraPos.y;
-	SceneFragmentUBO.CameraPosition.z = CameraPos.z;
-	SceneFragmentUBO.CameraPosition.w = 0.0;
 	
 //	if (RenderShadows || EffectFrame == 2)
 
@@ -281,12 +293,15 @@ void RendererUpdate()
 
 void RendererDraw()
 {
-	if (RenderFXAA)
-		SceneRenderDescriptorSet = FXAADescriptorSet;
-	else if (!RenderFXAA && RenderSSR)
-		SceneRenderDescriptorSet = SSROutputDescriptorSet;
-	else
-		SceneRenderDescriptorSet = SceneOutputDescriptorSet;
+	if (!RenderDebugDescriptorSet)
+	{
+		if (RenderFXAA)
+			SceneRenderDescriptorSet = FXAADescriptorSet;
+		else if (!RenderFXAA && RenderSSR)
+			SceneRenderDescriptorSet = SSROutputDescriptorSet;
+		else
+			SceneRenderDescriptorSet = SceneOutputDescriptorSet;
+	}	
 
 	BeginFrameTime = GetExecutionTimeOpenVkBool(OpenVkBeginFrame);
 	{
@@ -352,7 +367,7 @@ void RendererEvent()
 			SceneWidth = ImGuiSceneWidth * Scale;
 			SceneHeight = ImGuiSceneHeight * Scale;
 		}
-		printf("Event\n");
+	//	printf("Event\n");
 		RendererResize();
 	}
 

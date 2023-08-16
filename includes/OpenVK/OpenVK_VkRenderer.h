@@ -828,7 +828,7 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 	return VkRenderer.PipelineCount - 1;
 }
 /*
-//TO-DO Needs to be fixed
+//TO-DO Needs to be fixed, pipelines need to use cma
 void VkDestroyGraphicsPipeline(uint32_t GraphicsPipeline)
 {
 	vkDeviceWaitIdle(VkRenderer.Device);

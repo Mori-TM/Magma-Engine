@@ -88,7 +88,7 @@ void SwapChainDraw()
 			OpenVkSetViewport(0, 0, WindowWidth, WindowHeight);
 
 			OpenVkBindPipeline(SwapChainPipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
-			OpenVkBindDescriptorSet(SwapChainLayout, 0, FXAADescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+			OpenVkBindDescriptorSet(SwapChainLayout, 0, SceneRenderDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 			OpenVkDrawVertices(0, 3);
 		}
 		else

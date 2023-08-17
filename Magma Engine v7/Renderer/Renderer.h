@@ -201,7 +201,7 @@ void CreateRenderer()
 //		}
 //
 //	}
-	/*
+	
 	int32_t RaageXZ = 100;
 	int32_t RaageY = 150;
 
@@ -230,12 +230,12 @@ void CreateRenderer()
 	
 //	AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
 
-	uint32_t ModelIndex= AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
-	AddEntity(COMPONENT_TYPE_MESH);
-	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
-	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;
-	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
-	*/
+//	uint32_t ModelIndex= AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
+//	AddEntity(COMPONENT_TYPE_MESH);
+//	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
+//	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;
+//	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
+	
 }
 
 void DestroyRenderer()

@@ -333,13 +333,15 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 					stbir_resize_uint8(Pixels, Image->Width, Image->Height, 0, ResizeData, MipWidth > 1 ? MipWidth / 2 : 1, MipHeight > 1 ? MipHeight / 2 : 1, 0, 4);
 					if (!CompressImage(ResizeData, MipWidth > 1 ? MipWidth / 2 : 1, MipHeight > 1 ? MipHeight / 2 : 1, &Blocks[i], &BlockSize, Image->Format, TextureCompressedHQ))
 					{
-						printf("Failed to compress block %d: %s\n", i, Path);
-						for (uint32_t j = 0; j < i; j++)
-							free(Blocks[i]);
-
-						free(Blocks);
-						free(Pixels);
-						goto Error;
+						MipLevels = i;
+						break;
+					//	printf("Failed to compress block %d: %s\n", i, Path);
+					//	for (uint32_t j = 0; j < i; j++)
+					//		free(Blocks[j]);
+					//
+					//	free(Blocks);
+					//	free(Pixels);
+					//	goto Error;
 					}
 
 				//	printf("%d\n", BlockSize);

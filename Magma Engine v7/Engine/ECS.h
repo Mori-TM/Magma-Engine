@@ -3,6 +3,7 @@
 
 typedef enum
 {
+	//Add Empty entity
 	COMPONENT_TYPE_MESH = 0,
 	COMPONENT_TYPE_MATERIAL = 1,
 	COMPONENT_TYPE_CAMERA = 2,

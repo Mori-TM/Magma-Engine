@@ -177,7 +177,7 @@ uint32_t VkGetBestSuitablePhysicalDevice(uint32_t DeviceCount, VkPhysicalDevice*
 		vkGetPhysicalDeviceProperties(Devices[i], &VkRenderer.PhysicalDeviceProperties);
 		vkGetPhysicalDeviceFeatures(Devices[i], &VkRenderer.PhysicalDeviceFeatures);
 
-		if (VkRenderer.PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+		if (VkRenderer.PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
 			Score++;
 		if (VkRenderer.PhysicalDeviceFeatures.textureCompressionBC == VK_TRUE)
 			Score++;

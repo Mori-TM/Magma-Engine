@@ -1,0 +1,306 @@
+﻿  main.cpp
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\stb\dxt\stb_dxt.c(654,35): warning C4244: 'argument': conversion from 'uint64_t' to 'int', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\stb\dxt\stb_dxt.c(654,32): warning C4244: 'argument': conversion from 'uint64_t' to 'int', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\stb\dxt\stb_dxt.c(672,41): warning C4244: 'argument': conversion from 'uint64_t' to 'int', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\stb\dxt\stb_dxt.c(672,38): warning C4244: 'argument': conversion from 'uint64_t' to 'int', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1199,20): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1200,21): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1201,18): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1253,58): warning C4244: '=': conversion from 'double' to 'ALfloat', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1275,39): warning C4244: '=': conversion from 'double' to 'ALfloat', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1281,26): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1293,41): warning C4244: '=': conversion from 'double' to 'ALfloat', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1294,43): warning C4244: '=': conversion from 'double' to 'ALfloat', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1302,26): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1330,39): warning C4244: '+=': conversion from 'double' to 'ALfloat', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1334,45): warning C4244: '=': conversion from 'double' to 'ALfloat', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1335,47): warning C4244: '=': conversion from 'double' to 'ALfloat', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1347,73): warning C4244: '+=': conversion from 'double' to 'ALfloat', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(4259,28): warning C4244: '=': conversion from 'ALfloat' to 'int', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(4262,35): warning C4244: '=': conversion from 'ALfloat' to 'int', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(103,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(111,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(120,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(130,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(137,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(145,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(436,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(437,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(447,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(448,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(449,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(460,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(461,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(462,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(778,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(779,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(808,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(809,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(838,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(839,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(868,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(869,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(898,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(899,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(928,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(929,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1020,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1020,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1020,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1048,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1048,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1048,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1271,23): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(828,20): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(1193,32): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(1853,24): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(1872,24): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Md2Loader.h(105,3): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkHelperFunc.h(529,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkHelperFunc.h(536,50): warning C4244: 'argument': conversion from 'VkDeviceSize' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkHelperFunc.h(536,34): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkHelperFunc.h(547,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(326,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(415,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(435,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(571,17): warning C4267: 'return': conversion from 'size_t' to 'OpenVkBool', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(342,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(349,81): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(366,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(380,81): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(395,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(446,83): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(482,83): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(405,26): warning C4101: 'DepthAttachmentDescription': unreferenced local variable
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(406,26): warning C4101: 'ColorAttachmentResolveDescription': unreferenced local variable
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(404,26): warning C4101: 'ColorAttachmentDescription': unreferenced local variable
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(664,34): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(696,19): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(697,19): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(698,23): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(699,24): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(738,86): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1004,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1278,29): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1440,39): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1440,72): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1475,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1489,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1577,33): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1585,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1650,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1661,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1801,154): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(228,9): warning C4244: 'return': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(445,21): warning C4244: '=': conversion from 'double' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(446,30): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(690,33): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(690,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(747,61): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(747,44): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(849,25): warning C4244: '=': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(862,25): warning C4244: '=': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(877,22): warning C4244: '+=': conversion from 'double' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(883,18): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(884,17): warning C4244: 'initializing': conversion from 'double' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(904,11): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(985,11): warning C4244: 'return': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(992,8): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(992,8): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(992,16): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(992,16): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(992,41): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(992,41): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(992,44): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(992,44): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(993,8): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(993,8): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(993,13): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(993,13): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(993,37): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(993,37): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(993,40): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(993,40): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(994,6): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(994,6): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(994,9): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(994,9): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(994,34): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(994,34): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(994,37): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(994,37): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(995,6): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(995,6): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(995,12): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(995,12): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(995,38): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(995,38): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(995,41): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(995,41): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1023,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1024,24): warning C4018: '>': signed/unsigned mismatch
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1025,24): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1026,24): warning C4018: '>': signed/unsigned mismatch
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1067,15): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1067,15): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1067,34): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1067,34): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1067,70): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1067,70): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1067,79): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1067,79): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1068,15): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1068,15): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1068,30): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1068,30): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1068,64): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1068,64): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1068,73): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1068,73): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1069,11): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1069,11): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1069,24): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1069,24): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1069,59): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1069,59): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1069,68): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1069,68): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1070,11): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1070,11): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1070,28): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1070,28): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1070,65): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1070,65): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1070,74): warning C4838: conversion from 'int32_t' to 'float' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1070,74): warning C4244: 'initializing': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1100,29): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1101,27): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1257,77): warning C4244: 'argument': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1257,43): warning C4244: 'argument': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1288,45): warning C4244: 'argument': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1293,37): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1305,8): warning C4244: 'argument': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1304,59): warning C4244: 'argument': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1320,20): warning C4244: '=': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1353,20): warning C4244: '=': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1354,20): warning C4244: '=': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1368,46): warning C4244: 'argument': conversion from 'double' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1367,46): warning C4244: 'argument': conversion from 'double' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1366,47): warning C4244: 'argument': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1365,41): warning C4244: 'argument': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1395,20): warning C4244: '=': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1435,22): warning C4244: '-=': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1436,22): warning C4244: '+=': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1461,22): warning C4244: '+=': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1476,20): warning C4244: '=': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1477,30): warning C4244: '=': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1478,67): warning C4244: '=': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1480,12): warning C4244: '+=': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1484,41): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(1517,20): warning C4244: '=': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Helper.h(62,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\ImGui\FileDialog\ImFileDialog.cpp(45,1): warning C4005: 'PI': macro redefinition
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_Defines.h(7,1): message : see previous definition of 'PI'
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(236,31): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(238,31): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(240,78): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(240,66): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(240,54): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(271,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(282,11): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(283,56): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(318,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(319,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(321,64): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(324,54): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(327,64): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\GUI.h(8,61): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\GUI.h(8,43): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\GUI.h(8,25): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Engine.h(38,24): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Engine.h(126,18): warning C4244: '=': conversion from 'time_t' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Engine.h(129,15): warning C4244: '=': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(252,25): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(265,29): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(300,39): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(300,24): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(484,28): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(507,30): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(684,18): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(681,7): warning C4101: 'LastPath': unreferenced local variable
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(36,21): warning C4244: 'initializing': conversion from 'Uint32' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(49,32): warning C4244: '*=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(51,32): warning C4244: '*=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(53,32): warning C4244: '*=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(83,28): warning C4244: '=': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(84,28): warning C4244: '=': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ScriptEngine.h(69,61): warning C4244: '=': conversion from 'lua_Number' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ScriptEngine.h(70,61): warning C4244: '=': conversion from 'lua_Number' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ScriptEngine.h(71,61): warning C4244: '=': conversion from 'lua_Number' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ScriptEngine.h(73,58): warning C4244: '=': conversion from 'lua_Number' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ScriptEngine.h(74,58): warning C4244: '=': conversion from 'lua_Number' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ScriptEngine.h(75,58): warning C4244: '=': conversion from 'lua_Number' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ScriptEngine.h(77,57): warning C4244: '=': conversion from 'lua_Number' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ScriptEngine.h(78,57): warning C4244: '=': conversion from 'lua_Number' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ScriptEngine.h(79,58): warning C4244: '=': conversion from 'lua_Number' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ScriptEngine.h(112,10): warning C4244: '=': conversion from 'lua_Number' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Editor\SceneManager.h(69,42): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Editor\SceneManager.h(70,42): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Editor\SceneManager.h(72,32): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Editor\SceneManager.h(73,33): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Editor\AssetBrowser.h(22,144): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Editor\AssetBrowser.h(22,130): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(331,37): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(695,20): warning C4244: 'initializing': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(696,70): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(696,65): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(700,41): warning C4244: '=': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(104,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(104,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\DebugPipeline.h(85,32): warning C4838: conversion from 'OpenVkImageLayouts' to 'uint32_t' requires a narrowing conversion
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\DebugPipeline.h(133,64): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(220,25): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(220,33): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(235,70): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(323,50): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(323,33): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(323,22): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\GBufferPipeline.h(227,39): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\GBufferPipeline.h(227,27): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(71,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(99,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(188,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(188,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOBlurPipeline.h(91,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOBlurPipeline.h(91,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ScenePipeline.h(303,39): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ScenePipeline.h(303,27): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSRPipeline.h(145,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSRPipeline.h(145,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\FXAAPipeline.h(92,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\FXAAPipeline.h(92,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(88,41): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(88,28): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(178,28): warning C4477: '_snprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'uint64_t'
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(178,28): message : consider using '%lld' in the format string
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(178,28): message : consider using '%Id' in the format string
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(178,28): message : consider using '%I64d' in the format string
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(214,69): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(215,137): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(215,103): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(215,69): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(216,158): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(216,114): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(216,78): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(362,29): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(363,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(367,33): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(368,35): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+     Creating library C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.lib and object C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exp
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  Generating code
+  4 of 4660 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    92 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  Magma Engine v7.vcxproj -> C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exe

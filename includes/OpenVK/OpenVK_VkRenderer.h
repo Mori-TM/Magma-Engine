@@ -110,6 +110,7 @@ OpenVkBool VkCreateSwapChain(uint32_t* Width, uint32_t* Height)
 	OpenVkFree(SwapChainSupport.Formats);
 	OpenVkFree(SwapChainSupport.PresentModes);
 
+	VkRenderer.SwapChainImageCountOld = VkRenderer.SwapChainImageCount;
 	VkRenderer.SwapChainImageCount = ImageCount;
 	
 	return 1;
@@ -260,11 +261,20 @@ uint32_t VkCreateRenderer(const char**(*GetExtensions)(uint32_t* ExtensionCount)
 	DeviceFeatures.depthClamp = VK_TRUE;
 	DeviceFeatures.independentBlend = VK_TRUE;
 
+//	VkPhysicalDeviceVulkan11Features DeviceFeatures11;
+//	memset(&DeviceFeatures11, 0, sizeof(VkPhysicalDeviceVulkan11Features));
+//	DeviceFeatures.
+
+	VkPhysicalDeviceVulkan12Features DeviceFeatures12;
+	memset(&DeviceFeatures12, 0, sizeof(VkPhysicalDeviceVulkan12Features));
+	DeviceFeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+	DeviceFeatures12.descriptorIndexing = VK_TRUE;
+
 	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
 	VkDeviceCreateInfo CreateInfo;
 	CreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	CreateInfo.pNext = NULL;
+	CreateInfo.pNext = &DeviceFeatures12;
 	CreateInfo.flags = 0;
 	CreateInfo.queueCreateInfoCount = QueueCount;
 	CreateInfo.pQueueCreateInfos = DeviceQueueCreateInfos;
@@ -1829,7 +1839,8 @@ void VkRecreateSwapChain(uint32_t* Width, uint32_t* Height)
 
 	VkCreateSwapChain(Width, Height);
 	VkCreateCommandBuffers();
-	VkRenderer.InFlightImages = (VkFence*)OpenVkRealloc(VkRenderer.InFlightImages, VkRenderer.SwapChainImageCount * sizeof(VkFence));
+	if (VkRenderer.SwapChainImageCount != VkRenderer.SwapChainImageCountOld)
+		VkRenderer.InFlightImages = (VkFence*)OpenVkRealloc(VkRenderer.InFlightImages, VkRenderer.SwapChainImageCount * sizeof(VkFence));
 }
 
 void VkDeviceWaitIdle()

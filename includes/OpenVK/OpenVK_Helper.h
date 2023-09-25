@@ -363,10 +363,24 @@ void OpenVkRuntimeInfo(const char* Msg, const char* Val)
 	printf("\x1B[36m[Renderer Info]\033[0m\t%s%s\n", Msg, Val);
 }
 
+OpenVkBool OpenVkRuntimeWarning(const char* Msg, ...)
+{
+	char Buf[2048];
+	sprintf(Buf, "\x1B[93m[Renderer Warning]\033[0m\t%s\n", Msg);
+
+	va_list ArgList;
+	va_start(ArgList, Msg);
+	vprintf(Buf, ArgList);
+	va_end(ArgList);
+	//	printf("\x1B[31m[Renderer Error]\033[0m\t%s\n", Msg);
+
+	return OPENVK_ERROR;
+}
+
 OpenVkBool OpenVkRuntimeError(const char* Msg, ...)
 {
 	char Buf[2048];
-	sprintf(Buf, "\x1B[31m[Renderer Error]\033[0m\t%s\n", Msg);
+	sprintf(Buf, "\x1B[91m[Renderer Error]\033[0m\t%s\n", Msg);
 
 	va_list ArgList;
 	va_start(ArgList, Msg);

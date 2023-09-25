@@ -64,6 +64,7 @@ typedef struct
 	VkSurfaceKHR Surface;
 
 	uint32_t SwapChainImageCount;
+	uint32_t SwapChainImageCountOld;
 	VkSwapchainKHR SwapChain;
 	VkSwapchainKHR SwapChainOld;
 	VkFormat SwapChainImageFormat;
@@ -176,7 +177,7 @@ uint32_t VkGetBestSuitablePhysicalDevice(uint32_t DeviceCount, VkPhysicalDevice*
 		vkGetPhysicalDeviceProperties(Devices[i], &VkRenderer.PhysicalDeviceProperties);
 		vkGetPhysicalDeviceFeatures(Devices[i], &VkRenderer.PhysicalDeviceFeatures);
 
-		if (VkRenderer.PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+		if (VkRenderer.PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
 			Score++;
 		if (VkRenderer.PhysicalDeviceFeatures.textureCompressionBC == VK_TRUE)
 			Score++;
@@ -254,6 +255,8 @@ VkSurfaceFormatKHR VkChooseSwapSurfaceFormat(VkSurfaceFormatKHR* AvailableFormat
 			//	if (AvailableFormats[i].format == VK_FORMAT_B8G8R8A8_SRGB && AvailableFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
 			return AvailableFormats[i];
 
+	OpenVkRuntimeWarning("Requested swap surface format not supported");
+
 	return AvailableFormats[0];
 }
 
@@ -270,7 +273,7 @@ VkPresentModeKHR VkChooseSwapPresentMode(VkPresentModeKHR* AvailablePresentModes
 		if (AvailablePresentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
 			return AvailablePresentModes[i];
 
-	OpenVkRuntimeInfo("Desired present mode not supported, mode fifo will be used", "");
+	OpenVkRuntimeWarning("Desired present mode not supported, mode fifo will be used");
 	return VK_PRESENT_MODE_FIFO_KHR;
 }
 

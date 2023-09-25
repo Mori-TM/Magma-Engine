@@ -311,7 +311,7 @@ void EndSingleTimeCommandBuffer(VkCommandBuffer CommandBuffer)
 	vkFreeCommandBuffers(VkRenderer.Device, VkRenderer.CommandPool, 1, &CommandBuffer);
 }
 
-const float FontMultiplyer = 1.25;
+const float FontMultiplyer = 2.25;
 
 uint32_t ImGuiUsedDescriptorPool = 0;
 
@@ -414,9 +414,9 @@ void ImGuiInit()
 	IO->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 	DefaultFont = IO->Fonts->AddFontFromFileTTF("Data/Fonts/Roboto-Medium.ttf", 18.0 * FontMultiplyer);
-	IconFontSmall = IO->Fonts->AddFontFromFileTTF("Data/Fonts/MagmaIcons.ttf", 18.0);
+	IconFontSmall = IO->Fonts->AddFontFromFileTTF("Data/Fonts/MagmaIcons.ttf", 18.0 * FontMultiplyer);
 	IconFontLarge = IO->Fonts->AddFontFromFileTTF("Data/Fonts/MagmaIcons.ttf", 85.0);
-	IconFontExt = IO->Fonts->AddFontFromFileTTF("Data/Fonts/MagmaIconsExt.ttf", 18.0);
+	IconFontExt = IO->Fonts->AddFontFromFileTTF("Data/Fonts/MagmaIconsExt.ttf", 18.0 * FontMultiplyer);
 	
 	ImGui::StyleColorsDark();
 	ImGui_ImplSDL2_InitForVulkan(Window);

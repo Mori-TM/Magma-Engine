@@ -20,6 +20,10 @@ int WaveLoadingStatus;
 
 #define WAVE_MAX_ALLOCATION_SIZE 100000//388608
 
+typedef char WAVE_BOOL;
+#define WAVE_TRUE 1
+#define WAVE_FALSE 0
+
 #ifndef WAVE_BASIC_MATH
 #define WAVE_BASIC_MATH
 
@@ -244,22 +248,47 @@ typedef struct
 	char* Line;
 } WaveLine;
 
+void* WaveLoaderError(const char* Msg, ...)
+{
+	char Buf[2048];
+	snprintf(Buf, 2048, "\x1B[31m[Wave Loader Error]\033[0m\t%s\n", Msg);
+
+	va_list ArgList;
+	va_start(ArgList, Msg);
+	vprintf(Buf, ArgList);
+	va_end(ArgList);
+	//	printf("\x1B[31m[Renderer Error]\033[0m\t%s\n", Msg);
+
+	return NULL;
+}
+
+
 char* WaveLoadFile(const char* Path, size_t* Length)
 {
 	FILE* File = fopen(Path, "rb");
 	if (!File)
+	{
+		WaveLoaderError("Failed to Open File: %s", Path);
 		return NULL;
+	}		
 
 	fseek(File, 0, SEEK_END);
 	size_t FileSize = ftell(File);
 	fseek(File, 0, SEEK_SET);
+	*Length = FileSize + 1;
 
 	char* Buffer = (char*)malloc(FileSize + 1);
+	if (!Buffer)
+	{
+		WaveLoaderError("Failed Allocate Mem for File: %s", Path);
+		return NULL;
+	}
+
 	fread(Buffer, FileSize, 1, File);
 	Buffer[FileSize] = '\0';
 	fclose(File);
 
-	*Length = FileSize + 1;
+	
 
 	return Buffer;
 }
@@ -272,6 +301,11 @@ WaveLine* WaveGetLinesFromBuffer(size_t Length, char* Buffer, uint32_t* LineCoun
 			Count++;
 
 	WaveLine* Lines = (WaveLine*)calloc(Count, sizeof(WaveLine));
+	if (!Lines)
+	{
+		WaveLoaderError("Failed Allocate Lines");
+		return NULL;
+	}
 
 	Count = 0;
 	uint32_t LineLength = 0;
@@ -282,6 +316,12 @@ WaveLine* WaveGetLinesFromBuffer(size_t Length, char* Buffer, uint32_t* LineCoun
 		{
 			Lines[Count].Length = LineLength;
 			Lines[Count].Line = (char*)calloc(LineLength, sizeof(char));
+			if (!Lines[Count].Line)
+			{
+				WaveLoaderError("Failed Allocate Line: %d, Length: %d", Count, LineLength);
+				return NULL;
+			}
+
 			memcpy(Lines[Count].Line, Buffer + i - LineLength + 1, LineLength - 1);
 			Lines[Count].Line[LineLength - 1] = '\0';
 
@@ -396,19 +436,6 @@ inline char WaveFloatEqual(float f1, float f2)
 char WaveCmpWithNormal = 1;
 inline int WaveCompareVertices(WaveVertexData* a, WaveVertexData* b)
 {
-	/*
-	if (WaveFloatEqual(a->Vertices.x, b->Vertices.x) &&
-		WaveFloatEqual(a->Vertices.y, b->Vertices.y) &&
-		WaveFloatEqual(a->Vertices.z, b->Vertices.z) &&
-		WaveFloatEqual(a->TexCoords.x, b->TexCoords.x) &&
-		WaveFloatEqual(a->TexCoords.y, b->TexCoords.y))
-		return 0;
-
-	if (a->Vertices.x > b->Vertices.x)
-		return 1;
-
-	return -1;
-	*/
 	char* A = (char*)a + 8;
 	char* B = (char*)b + 8;
 	
@@ -431,7 +458,7 @@ int WaveCompareFunc1(const void* a, const void* b)
 	return A->VertexIndex - B->VertexIndex;
 }
 
-void WaveGenIndices(WaveModelData* ModelData)
+WAVE_BOOL WaveGenIndices(WaveModelData* ModelData)
 {
 	WaveLoadingStatus = WAVE_STATUS_GEN_INDICES;
 	for (uint32_t k = 0; k < ModelData->MeshCount; k++)
@@ -441,10 +468,22 @@ void WaveGenIndices(WaveModelData* ModelData)
 		Data->IndexCount = 0;
 
 		Data->Indices = (uint32_t*)calloc(Data->VertexCount, sizeof(uint32_t));
+		if (!Data->Indices)
+		{
+			WaveLoaderError("Failed to Allocate Indices: %d", Data->VertexCount);
+			return WAVE_FALSE;
+		}
+
 		qsort(Data->Vertices, Data->VertexCount, sizeof(WaveVertexData), WaveCompareFunc);
 
 		uint32_t VertexCount = 1;
 		WaveVertexData* NewVertices = (WaveVertexData*)calloc(Data->VertexCount, sizeof(WaveVertexData));
+		if (!NewVertices)
+		{
+			WaveLoaderError("Failed to Allocate Vertices: %d", Data->VertexCount);
+			return WAVE_FALSE;
+		}
+
 		NewVertices[0] = Data->Vertices[0];
 
 		uint32_t j = 0;
@@ -479,7 +518,14 @@ void WaveGenIndices(WaveModelData* ModelData)
 		Data->VertexCount = VertexCount;
 		Data->Vertices = NewVertices;
 		Data->Vertices = (WaveVertexData*)realloc(Data->Vertices, Data->VertexCount * sizeof(WaveVertexData));
+		if (!Data->Vertices)
+		{
+			WaveLoaderError("Failed to Reallocate Vertices: %d", Data->VertexCount);
+			return WAVE_FALSE;
+		}
 	}
+
+	return WAVE_TRUE;
 }
 
 int WaveCompareMaterials(const WaveModelMaterial* a, const WaveModelMaterial* b)
@@ -501,7 +547,7 @@ int WaveCompareMeshMaterials(const void* a, const void* b)
 	return memcmp(AA, BB, sizeof(WaveModelMaterial) - 2048);
 }
 
-void WaveCombineMeshes(WaveMeshData* A, WaveMeshData* B, WaveMeshData* Dst)
+WAVE_BOOL WaveCombineMeshes(WaveMeshData* A, WaveMeshData* B, WaveMeshData* Dst)
 {
 //	uint32_t OldVertexCount = A->VertexCount;
 //	uint32_t OldIndexCount = A->IndexCount;
@@ -509,6 +555,11 @@ void WaveCombineMeshes(WaveMeshData* A, WaveMeshData* B, WaveMeshData* Dst)
 	Dst->VertexSize = Dst->VertexCount;
 	Dst->Material = B->Material;
 	Dst->Vertices = (WaveVertexData*)malloc(Dst->VertexCount * sizeof(WaveVertexData));
+	if (!Dst->Vertices)
+	{
+		WaveLoaderError("Failed to Allocate Combine Vertices: %d", Dst->VertexCount);
+		return WAVE_FALSE;
+	}
 
 	memcpy(Dst->Vertices, A->Vertices, A->VertexCount * sizeof(WaveVertexData));
 	memcpy(Dst->Vertices + A->VertexCount, B->Vertices, B->VertexCount * sizeof(WaveVertexData));
@@ -519,15 +570,21 @@ void WaveCombineMeshes(WaveMeshData* A, WaveMeshData* B, WaveMeshData* Dst)
 		Dst->IndexCount = A->IndexCount + B->IndexCount;
 		Dst->IndexSize = Dst->IndexCount;
 		Dst->Indices = (uint32_t*)malloc(Dst->IndexCount * sizeof(uint32_t));
+		if (!Dst->Indices)
+		{
+			WaveLoaderError("Failed to Allocate Combine Indices: %d", Dst->IndexCount);
+			return WAVE_FALSE;
+		}
 
 		memcpy(Dst->Indices, A->Indices, A->IndexCount * sizeof(uint32_t));
 		memcpy(Dst->Indices + A->IndexCount, B->Indices, B->IndexCount * sizeof(uint32_t));
 	}	
 
 //	memcpy(A->Indices + OldIndexCount, B->Indices, B->IndexCount * sizeof(uint32_t));
+	return WAVE_TRUE;
 }
 
-void WaveRemoveRedundantMaterials(WaveModelData* ModelData)
+WAVE_BOOL WaveRemoveRedundantMaterials(WaveModelData* ModelData)
 {
 	WaveLoadingStatus = WAVE_STATUS_REMOVE_REDUDANT_MATERIALS;
 	qsort(ModelData->Meshes, ModelData->MeshCount, sizeof(WaveMeshData), WaveCompareMeshMaterials);
@@ -541,6 +598,12 @@ void WaveRemoveRedundantMaterials(WaveModelData* ModelData)
 
 	uint32_t MeshCount = 1;
 	WaveMeshData* NewMeshes = (WaveMeshData*)calloc(ModelData->MeshCount, sizeof(WaveMeshData));
+	if (!NewMeshes)
+	{
+		WaveLoaderError("Failed to Allocate New Meshes: %d", ModelData->MeshCount);
+		return WAVE_FALSE;
+	}
+
 	NewMeshes[0] = ModelData->Meshes[0];
 //	for (uint32_t i = 0; i < ModelData->MeshCount; i++)
 //		NewMeshes[i] = ModelData->Meshes[i];
@@ -561,19 +624,34 @@ void WaveRemoveRedundantMaterials(WaveModelData* ModelData)
 
 		if (WaveCompareMaterials(A->Material, B->Material) == 0) //Are the same
 		{
-			WaveCombineMeshes(A, B, &RefMesh);
+			if (WaveCombineMeshes(A, B, &RefMesh) == WAVE_FALSE)
+			{
+				WaveLoaderError("Failed to Combine Meshes A-B: %d/%d", i, ModelData->MeshCount - 1);
+				return WAVE_FALSE;
+			}
 
 			RefMesh1 = NewMeshes[MeshCount - 1];
-			WaveCombineMeshes(&RefMesh1, &RefMesh, &NewMeshes[MeshCount - 1]);
+			if (WaveCombineMeshes(&RefMesh1, &RefMesh, &NewMeshes[MeshCount - 1]) == WAVE_FALSE)
+			{
+				WaveLoaderError("Failed to Combine Meshes A-B-C: %d/%d", i, ModelData->MeshCount - 1);
+				return WAVE_FALSE;
+			}
 		}
 		else
 		{
-			NewMeshes[MeshCount++] = *B;
+			if (MeshCount < ModelData->MeshCount)
+				NewMeshes[MeshCount++] = *B;
 		}
 	}
 
 	uint32_t MaterialCount = MeshCount;
 	WaveModelMaterial* NewMaterials = (WaveModelMaterial*)calloc(ModelData->MaterialCount, sizeof(WaveModelMaterial));
+	if (!NewMaterials)
+	{
+		WaveLoaderError("Failed to Allocate New Materials: %d", ModelData->MaterialCount);
+		return WAVE_FALSE;
+	}
+
 
 	for (uint32_t i = 0; i < MeshCount; i++)
 	{
@@ -594,11 +672,22 @@ void WaveRemoveRedundantMaterials(WaveModelData* ModelData)
 	ModelData->Materials = NewMaterials;
 
 	if (Diff != 0)
+	{
 		ModelData->Meshes = (WaveMeshData*)realloc(ModelData->Meshes, ModelData->MeshCount * sizeof(WaveMeshData));
+		if (!ModelData->Meshes)
+		{
+			WaveLoaderError("Failed to Reallocate Meshes: %d", ModelData->MeshCount);
+			return WAVE_FALSE;
+		}
+	}
+		
 
 	for (uint32_t j = 0; j < ModelData->MeshCount; j++)
 	{
 		WaveMeshData* Data = &ModelData->Meshes[j];
+
+		if (!Data)
+			break;
 
 		for (uint32_t i = 0; i < Data->VertexCount; i++)
 			Data->Vertices[i].VertexIndex = i;
@@ -831,7 +920,7 @@ void WaveScan(char* Buffer, const char* Token, const char* Format, ...)
 	{
 		Buffer++;
 	}
-
+	
 	va_list Args;
 	va_start(Args, Format);
 	vsscanf(Buffer, Format, Args);
@@ -893,7 +982,7 @@ void WaveCombinePathDst(const char* Path, char* DstFileName)
 	strcpy(DstFileName, PathCombined);
 }
 
-char WaveLoadMTL(const char* FilePath, const char* FileName, WaveModelData* Data, uint32_t Settings)
+WAVE_BOOL WaveLoadMTL(const char* FilePath, const char* FileName, WaveModelData* Data, uint32_t Settings)
 {
 	char PathCombined[2048];
 	memset(PathCombined, 0, 2048);
@@ -909,12 +998,13 @@ char WaveLoadMTL(const char* FilePath, const char* FileName, WaveModelData* Data
 	char* MatBuffer = WaveLoadFile(PathCombined, &MatLength);
 	if (MatBuffer == NULL || MatLength == 0)
 	{
-		printf("Failed to load material file: %s\n", PathCombined);
-		return 0;
+		WaveLoaderError("Failed to load material file: %s\n", PathCombined);
+		return WAVE_FALSE;
 	}		
 	else
 	{
-		int32_t MaterialCount = 0;
+		uint32_t MaterialCount = 0;
+		uint32_t MaterialCounter = 0;
 
 		char* OldBuffer;
 		char* Line = WaveGetLine(MatBuffer, &OldBuffer);
@@ -927,10 +1017,14 @@ char WaveLoadMTL(const char* FilePath, const char* FileName, WaveModelData* Data
 		}
 
 		if (MaterialCount == 0)
-			return 0;
+			return WAVE_FALSE;
 
 		Data->Materials = (WaveModelMaterial*)calloc(MaterialCount, sizeof(WaveModelMaterial));
-		MaterialCount = 0;
+		if (!Data->Materials)
+		{
+			WaveLoaderError("Failed to allocate materials for: %s\n", PathCombined);
+			return WAVE_FALSE;
+		}
 
 		WaveModelMaterial* CurMaterial = &Data->Materials[0];
 
@@ -939,7 +1033,22 @@ char WaveLoadMTL(const char* FilePath, const char* FileName, WaveModelData* Data
 		{
 			if (WaveLineEqual(Line, "newmtl "))
 			{
-				CurMaterial = &Data->Materials[MaterialCount++];
+				//Quiet unnessecary, bad english
+				if (MaterialCounter >= MaterialCount)
+				{					
+					WaveModelMaterial* MaterialTmp = (WaveModelMaterial*)realloc(Data->Materials, (MaterialCount + MaterialCount) * sizeof(WaveModelMaterial));
+					if (!MaterialTmp)
+					{
+						WaveLoaderError("Failed to allocate more materials for: %s\n", PathCombined);
+						break;
+					}
+
+					Data->Materials = MaterialTmp;
+					memset(Data->Materials + MaterialCount, 0, MaterialCount * sizeof(WaveModelMaterial));
+					MaterialCount += MaterialCount;
+				}
+
+				CurMaterial = &Data->Materials[MaterialCounter++];
 
 				memcpy(CurMaterial, &WaveEmptyMaterial, sizeof(WaveModelMaterial));
 				WaveScan(Line, "newmtl", "%[^\r\n]%*c\r\n", CurMaterial->MaterialName);
@@ -970,7 +1079,7 @@ char WaveLoadMTL(const char* FilePath, const char* FileName, WaveModelData* Data
 			Line = WaveGetLine(NULL, &OldBuffer);
 		}
 
-		Data->MaterialCount = MaterialCount;
+		Data->MaterialCount = MaterialCounter;
 		if (Settings & WAVE_MATERIAL_USE_MODEL_PATH)
 		{
 			for (uint32_t i = 0; i < Data->MaterialCount; i++)
@@ -993,7 +1102,7 @@ char WaveLoadMTL(const char* FilePath, const char* FileName, WaveModelData* Data
 		}
 	}
 
-	return 1;
+	return WAVE_TRUE;
 }
 
 WaveModelData WaveLoadOBJ(const char* FilePath, size_t Length, char* Buffer, uint32_t Settings)
@@ -1031,6 +1140,10 @@ WaveModelData WaveLoadOBJ(const char* FilePath, size_t Length, char* Buffer, uin
 	WaveLoadingStatus = WAVE_STATUS_ALLOCATE_VERTICES;
 	const WaveVec3 NullVec = { 0.0, 0.0, 0.0 };
 	WaveVec3* Vertices = (WaveVec3*)calloc(VertexCount, sizeof(WaveVec3));
+	if (!Vertices)
+	{
+		WaveLoaderError("Failed to allocate vertices for: %s", FilePath);
+	}
 	WaveVec3* VertexTextures = (WaveVec3*)calloc(VertexTextureCount, sizeof(WaveVec3));
 	WaveVec3* VertexNormals = (WaveVec3*)calloc(VertexNormalCount, sizeof(WaveVec3));
 
@@ -1261,8 +1374,21 @@ WaveModelData WaveLoadSTL(const char* FilePath, size_t Length, char* Buffer, uin
 	ModelData.Materials = &WaveEmptyMaterial;
 	ModelData.MeshCount = 1;
 	ModelData.Meshes = (WaveMeshData*)malloc(ModelData.MeshCount * sizeof(WaveMeshData));
+	if (!ModelData.Meshes)
+	{
+		WaveLoaderError("Failed to alloacte meshes for: %s", FilePath);
+		memset(&ModelData, 0, sizeof(WaveModelData));
+		return ModelData;
+	}
 	ModelData.Meshes[0].VertexSize = VertexCount;
 	ModelData.Meshes[0].Vertices = (WaveVertexData*)calloc(VertexCount, sizeof(WaveVertexData));
+	if (!ModelData.Meshes[0].Vertices)
+	{
+		free(ModelData.Meshes);
+		WaveLoaderError("Failed to alloacte vertices for: %s", FilePath);
+		memset(&ModelData, 0, sizeof(WaveModelData));
+		return ModelData;
+	}
 	ModelData.Meshes[0].VertexCount = VertexCount;
 	ModelData.Meshes[0].Material = &WaveEmptyMaterial;
 	ModelData.Meshes[0].IndexCount = 0;
@@ -1858,17 +1984,19 @@ WaveModelData WaveLoadModel(const char* Path, uint32_t Settings)
 	char* Buffer = WaveLoadFile(Path, &FileSize);
 	if (Buffer == NULL || FileSize == 0)
 	{
-		printf("Failed to open Model: %s\n", Path);
-
-		ModelData.MaterialCount = 0;
-		ModelData.Materials = NULL;
-		ModelData.MeshCount = 0;
-		ModelData.Meshes = NULL;
+		WaveLoaderError("Failed to open Model: %s", Path);
+		memset(&ModelData, 0, sizeof(WaveModelData));
 		return ModelData;
 	}
 
 	char* FilePath = (char*)malloc(strlen(Path));
-
+	if (!FilePath)
+	{
+		free(Buffer);
+		WaveLoaderError("Failed to alloacte file path for: %s", FilePath);
+		memset(&ModelData, 0, sizeof(WaveModelData));
+		return ModelData;
+	}
 	for (i = strlen(Path) - 1; i > 0; i--)
 		if (Path[i] == '/' ||
 			Path[i] == '\\') break;
@@ -1888,7 +2016,7 @@ WaveModelData WaveLoadModel(const char* Path, uint32_t Settings)
 			 strcmp(Extension + 1, "glb") == 0)
 		ModelData = WaveLoadGLTF(FilePath, FileSize, Buffer, Settings);
 	else
-		printf("%s format is not supported\n", Extension + 1);
+		WaveLoaderError("%s format is not supported", Extension + 1);
 
 	free(FilePath);
 	free(Buffer);

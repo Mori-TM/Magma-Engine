@@ -51,10 +51,10 @@ D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1048,11): warning C5033: 'regist
 D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1048,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1048,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1271,23): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(828,35): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(1193,32): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(1853,2): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(1872,2): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(917,35): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(1306,32): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(1979,2): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(2000,2): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Md2Loader.h(105,12): warning C5033: 'register' is no longer a supported storage class
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkHelperFunc.h(529,57): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkHelperFunc.h(536,50): warning C4244: 'argument': conversion from 'VkDeviceSize' to 'uint32_t', possible loss of data
@@ -299,11 +299,8 @@ D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(368,35): warning C424
      Creating library D:\GitHub\Magma-Engine\x64\Release\Magma Engine v7.lib and object D:\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exp
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  Previous IPDB not found, fall back to full compilation.
-D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(866): warning C4172: returning address of local variable or temporary: Line
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(344): warning C4715: 'CreateBean': not all control paths return a value
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\Meshes.h(262): warning C4715: 'CreateSphere': not all control paths return a value
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(678): warning C4715: 'LoadModelWave': not all control paths return a value
-  All 4682 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  1 of 4683 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    98 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Magma Engine v7.vcxproj -> D:\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exe

@@ -82,7 +82,7 @@ typedef uint32_t OpenVkBool;
 typedef enum
 {
 	OPENVK_VULKAN = 0x1,
-	OPENVK_DIRECTX_12 = 0x2,
+	OPENVK_OPENGL = 0x2,
 	OPENVK_RAYTRACING = 0x4,
 	OPENVK_VALIDATION_LAYER = 0x8,
 } OpenVkRendererFlagOptions;

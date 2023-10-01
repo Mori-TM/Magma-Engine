@@ -53,5 +53,8 @@ void Free(void* Data)
 #include "OpenVK_VkRaytracing.h"
 #include "OpenVK_VkRenderer.h"
 
+#include "OpenVK_GLHelperFunc.h"
+#include "OpenVK_GLRenderer.h"
+
 #include "OpenVK_Functions.h"
 #include "OpenVK_GUI.h"

@@ -583,8 +583,6 @@ uint32_t VkCreatePipelineLayout(OpenVkPipelineLayoutCreateInfo* Info)
 		for (uint32_t i = 0; i < Info->PushConstantCount; i++)
 		{
 			PushConstantRanges[i].stageFlags = VkGetOpenVkShader(Info->PushConstantShaderTypes[i]);
-		//	if (Info->PushConstantShaderTypes[i] == 0) PushConstantRanges[i].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		//	if (Info->PushConstantShaderTypes[i] == 1) PushConstantRanges[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 			PushConstantRanges[i].offset = Info->PushConstantOffsets[i];
 			PushConstantRanges[i].size = Info->PushConstantSizes[i];
 		}
@@ -610,25 +608,6 @@ uint32_t VkCreatePipelineLayout(OpenVkPipelineLayoutCreateInfo* Info)
 	return VkRenderer.PipelineLayoutCount++;
 }
 
-//Shader Types
-//0 = Vertex Shader
-//1 = Fragment Shader
-//Primitive Topology
-//0 = Point
-//1 = Line
-//2 = Triangle
-//Polygon Mode
-//0 = Fill
-//1 = Line
-//2 = Point
-//Cull Mode
-//0 = None
-//1 = Front
-//2 = Back
-//3 = Front and Back
-//Front Face
-//0 = CCW
-//1 = CW
 uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 {
 	VkRenderer.Pipelines = (VkPipeline*)OpenVkRealloc(VkRenderer.Pipelines, (VkRenderer.PipelineCount + 1) * sizeof(VkPipeline));
@@ -898,16 +877,11 @@ uint32_t VkCreateDescriptorSetLayout(uint32_t BindingCount, uint32_t* Bindings, 
 	VkRenderer.DescriptorSetLayouts = (VkDescriptorSetLayout*)OpenVkRealloc(VkRenderer.DescriptorSetLayouts, (VkRenderer.DescriptorSetLayoutCount + 1) * sizeof(VkDescriptorSetLayout));
 
 	VkDescriptorSetLayoutBinding* LayoutBindings = (VkDescriptorSetLayoutBinding*)OpenVkMalloc(BindingCount * sizeof(VkDescriptorSetLayoutBinding));
-
+	
 	for (uint32_t i = 0; i < BindingCount; i++)
 	{
 		LayoutBindings[i].binding = Bindings[i];
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)			LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER)	LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER)				LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE)				LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE)	LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER)			LayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		LayoutBindings[i].descriptorType = VkGetOpenVkDescriptorType(DescriptorTypes[i]);
 		LayoutBindings[i].descriptorCount = DescriptorCounts[i];
 		LayoutBindings[i].stageFlags = VkGetOpenVkShader(ShaderTypes[i]);
 		LayoutBindings[i].pImmutableSamplers = NULL;
@@ -961,12 +935,7 @@ uint32_t VkCreateDescriptorPool(uint32_t DescriptorPoolType, uint32_t PoolSizeCo
 
 	for (uint32_t i = 0; i < PoolSizeCount; i++)
 	{
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)			PoolSizes[i].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER)	PoolSizes[i].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER)				PoolSizes[i].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE)				PoolSizes[i].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE)	PoolSizes[i].type = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
-		if (DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER)			PoolSizes[i].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		PoolSizes[i].type = VkGetOpenVkDescriptorType(DescriptorTypes[i]);
 		PoolSizes[i].descriptorCount = DescriptorCounts[i] * MAX_FRAMES_IN_FLIGHT;
 		
 		MaxSets += DescriptorCounts[i] * MAX_FRAMES_IN_FLIGHT;
@@ -1547,8 +1516,6 @@ OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t Src, uint32_t D
 
 uint32_t VkCreateImageSampler(uint32_t Filter, uint32_t AddressMode)
 {
-//	VkRenderer.Sampler = (VkSampler*)OpenVkRealloc(VkRenderer.Sampler, (VkRenderer.SamplerCount + 1) * sizeof(VkSampler));
-
 	VkSamplerCreateInfo SamplerInfo;
 	SamplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 	SamplerInfo.pNext = NULL;
@@ -1592,7 +1559,7 @@ uint32_t VkCreateVertexBuffer(size_t Size, const void* Vertices)
 {
 	if (OpenVkRendererFlags & OPENVK_RAYTRACING)
 	{
-		return VkCreateBufferExt(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,			//removed VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+		return VkCreateBufferExt(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,			
 								 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 								 Size, Vertices);
 	}
@@ -1607,7 +1574,7 @@ uint32_t VkCreateIndexBuffer(size_t Size, const void* Indices)
 {
 	if (OpenVkRendererFlags & OPENVK_RAYTRACING)
 	{
-		return VkCreateBufferExt(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,			//removed VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+		return VkCreateBufferExt(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,			
 								 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 								 Size, Indices);
 	}

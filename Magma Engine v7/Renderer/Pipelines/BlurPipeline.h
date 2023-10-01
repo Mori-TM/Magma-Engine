@@ -1,10 +1,10 @@
 void CreateBlurRenderPass()
 {
-	BlurColorAttachments[0] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_DEFAULT);
-	BlurColorAttachments[1] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_DEFAULT);
+	BlurColorAttachments[0] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_R);
+	BlurColorAttachments[1] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_R);
 
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR };
-	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_DEFAULT };
+	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_R };
 	uint32_t MsaaSamples[] = { 1 };
 	BlurRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
 }

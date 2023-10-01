@@ -20,7 +20,7 @@ void EditorEntities()
 		}
 		Mutex.unlock();
 
-		ImGui::BeginChild("Pop Up");
+	//	ImGui::BeginChild("Pop Up");
 		if (ImGui::BeginPopupContextWindow())
 		{
 			if (ImGui::Selectable("Add Empty Entity"))
@@ -43,7 +43,7 @@ void EditorEntities()
 
 			ImGui::EndPopup();
 		}
-		ImGui::EndChild();
+	//	ImGui::EndChild();
 	}
 	ImGui::End();
 }

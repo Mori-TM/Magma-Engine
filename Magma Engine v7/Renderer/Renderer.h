@@ -205,36 +205,36 @@ void CreateRenderer()
 	int32_t RaageXZ = 100;
 	int32_t RaageY = 150;
 
-	for (uint32_t i = 0; i < MAX_NUMBER_OF_LIGHTS - 1; i++)
-	{
-		uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
-		ResetEntityLight(&Entities[EntityIndex]);
-		Entities[EntityIndex].Light.CastShadow = false;
-		Entities[EntityIndex].Light.Type = 0;
-		Entities[EntityIndex].Light.Strength = (float)RandomInt(80, 80000) / 10.0;
-		Entities[EntityIndex].Light.Color = Vec3((float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0);
-		Entities[EntityIndex].Translate = Vec3((float)RandomInt(-RaageXZ, RaageXZ) / 10.0, (float)RandomInt(0, RaageY) / 10.0, (float)RandomInt(-RaageXZ, RaageXZ) / 10.0);
-		
-		strcpy(Entities[EntityIndex].Light.Name, "Point Light");
-	//	OpenVkRuntimeInfo("Scene was initilaized", "");
-	}
+//	for (uint32_t i = 0; i < MAX_NUMBER_OF_LIGHTS - 1; i++)
+//	{
+//		uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
+//		ResetEntityLight(&Entities[EntityIndex]);
+//		Entities[EntityIndex].Light.CastShadow = false;
+//		Entities[EntityIndex].Light.Type = 0;
+//		Entities[EntityIndex].Light.Strength = (float)RandomInt(80, 80000) / 10.0;
+//		Entities[EntityIndex].Light.Color = Vec3((float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0);
+//		Entities[EntityIndex].Translate = Vec3((float)RandomInt(-RaageXZ, RaageXZ) / 10.0, (float)RandomInt(0, RaageY) / 10.0, (float)RandomInt(-RaageXZ, RaageXZ) / 10.0);
+//		
+//		strcpy(Entities[EntityIndex].Light.Name, "Point Light");
+//	//	OpenVkRuntimeInfo("Scene was initilaized", "");
+//	}
 
 	uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
 	ResetEntityLight(&Entities[EntityIndex]);
 	Entities[EntityIndex].Light.CastShadow = true;
 	Entities[EntityIndex].Light.Type = 1;
 	Entities[EntityIndex].Light.Strength = 5.8;
-	Entities[EntityIndex].Translate = Vec3(2.0, 2.5, 2.25);
+	Entities[EntityIndex].Translate = Vec3(2.0, 16.5, 2.25);
 	strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
 	OpenVkRuntimeInfo("Scene was initilaized", "");
 	
-//	AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
+	AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
 
-//	uint32_t ModelIndex= AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
-//	AddEntity(COMPONENT_TYPE_MESH);
-//	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
-//	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;
-//	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
+	uint32_t ModelIndex= AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
+	AddEntity(COMPONENT_TYPE_MESH);
+	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
+	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;
+	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
 	
 }
 

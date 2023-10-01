@@ -128,10 +128,62 @@ uint32_t OpenVkCreateRenderer(uint32_t RendererFlags, const char** (*GetExtensio
 
 		return VkCreateRenderer(GetExtensions, GetSurface, GetWindowSize);
 	}
-	else if (RendererFlags & OPENVK_DIRECTX_12)
+	else if (RendererFlags & OPENVK_OPENGL)
 	{
-		OpenVkRuntimeInfo("Renderer: ", "DirectX 12");
-		return OpenVkRuntimeError("DirectX 12 currently not supported");
+		OpenVkRuntimeInfo("Renderer: ", "OpenGL");
+	//	OpenVkDestroyRenderer = GLDestroyRenderer;
+	//	OpenVkDeviceWaitIdle = GLDeviceWaitIdle;
+	//	OpenVkRecreateSwapChain = GLRecreateSwapChain;
+	//	OpenVkCreateRenderPass = GLCreateRenderPass;
+	//	OpenVkCreateGraphicsPipeline = GLCreateGraphicsPipeline;
+	//	OpenVkCreatePipelineLayout = GLCreatePipelineLayout;
+	//	OpenVkCreateFramebuffer = GLCreateFramebuffer;
+	//	OpenVkCreateDescriptorSetLayout = GLCreateDescriptorSetLayout;
+	//	OpenVkCreateDescriptorPool = GLCreateDescriptorPool;
+	//	OpenVkFreeDescriptorSet = GLFreeDescriptorSet;
+	//	OpenVkDestroyDescriptorPool = GLDestroyDescriptorPool;
+	//	OpenVkCreateDescriptorSet = GLCreateDescriptorSet;
+	//	OpenVkDrawFrame = GLDrawFrame;
+	//	OpenVkBeginFrame = GLBeginFrame;
+	//	OpenVkEndFrame = GLEndFrame;
+	//	OpenVkBeginRenderPass = GLBeginRenderPass;
+	//	OpenVkEndRenderPass = GLEndRenderPass;
+	//	OpenVkCreateTexture = GLCreateTexture;
+	//	OpenVkCreateStorageImage = GLCreateStorageImage;
+	//	OpenVkDestroyImage = GLDestroyImage;
+	//	OpenVkCopyImage = GLCopyImage;
+	//	OpenVkCreateImageSampler = GLCreateImageSampler;
+	//	OpenVkDestroySampler = GLDestroySampler;
+	//	OpenVkCreateColorImageAttachment = GLCreateColorImageAttachment;
+	//	OpenVkCreateDepthImageAttachment = GLCreateDepthImageAttachment;
+	//	OpenVkCreateVertexBuffer = GLCreateVertexBuffer;
+	//	OpenVkCreateIndexBuffer = GLCreateIndexBuffer;
+	//	OpenVkCreateDynamicVertexBuffer = GLCreateDynamicVertexBuffer;
+	//	OpenVkCreateDynamicIndexBuffer = GLCreateDynamicIndexBuffer;
+	//	OpenVkCreateUniformBuffer = GLCreateUniformBuffer;
+	//	OpenVkCreateStorageBuffer = GLCreateStorageBuffer;
+	//	OpenVkCreateDynamicBuffer = GLCreateDynamicUniformBuffer;
+	//	OpenVkUpdateBuffer = GLUpdateBuffer;
+	//	OpenVkUpdateDynamicBuffer = GLUpdateDynamicBuffer;
+	//	OpenVkDestroyBuffer = GLDestroyBuffer;
+	//	OpenVkDestroyDynamicBuffer = GLDestroyDynamicBuffer;
+	//	OpenVkBindPipeline = GLBindPipeline;
+	//	OpenVkSetViewport = GLSetViewport;
+	//	OpenVkSetScissor = GLSetScissor;
+	//	OpenVkBindVertexBuffer = GLBindVertexBuffer;
+	//	OpenVkBindIndexBuffer = GLBindIndexBuffer;
+	//	OpenVkBindDynamicVertexBuffer = GLBindDynamicVertexBuffer;
+	//	OpenVkBindDynamicIndexBuffer = GLBindDynamicIndexBuffer;
+	//	OpenVkDrawVertices = GLDrawVertices;
+	//	OpenVkDrawIndices = GLDrawIndices;
+	//	OpenVkBindDescriptorSet = GLBindDescriptorSet;
+	//	OpenVkPushConstant = GLPushConstant;
+
+		if (RendererFlags & OPENVK_RAYTRACING)
+			return OpenVkRuntimeError("OpenGL doesn't support raytracing");
+
+		return OpenVkRuntimeError("OpenGL not supported");
+	//	return GLCreateRenderer();
 	}
 	else
 	{

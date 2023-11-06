@@ -2,6 +2,125 @@
 #include <stdlib.h>
 #include <math.h>
 
+//For cross platform cpu define WAVE_CROSS_PLATFORM
+
+#if defined(__clang__)
+#define WAVE_CLANG
+#define WAVE_INLINE inline
+#elif defined(__GNUC__)
+#define WAVE_GCC
+#define WAVE_INLINE __attribute__((always_inline))
+#elif defined(_MSC_VER)
+#define WAVE_MSVC
+#define WAVE_INLINE __forceinline
+#else
+#define WAVE_INLINE inline
+#endif
+
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)
+
+	#define WAVE_X86
+
+	#if defined(__x86_64__) || defined(_M_X64)
+		#define WAVE_ADDRESS_BITS 64
+	#else
+		#define WAVE_ADDRESS_BITS 32
+	#endif
+
+	#define WAVE_HAS_SSE
+
+	#define WAVE_VECTOR_ALIGNMENT 16
+	#define WAVE_DVECTOR_ALIGNMENT 32
+
+	// Detect enabled instruction sets
+	#if defined(__AVX512F__) && defined(__AVX512VL__) && defined(__AVX512DQ__) && !defined(WAVE_HAS_AVX512)
+	#define WAVE_HAS_AVX512
+	#endif
+	#if (defined(__AVX2__) || defined(WAVE_HAS_AVX512)) && !defined(WAVE_HAS_AVX2)
+	#define WAVE_HAS_AVX2
+	#endif
+	#if (defined(__AVX__) || defined(WAVE_HAS_AVX2)) && !defined(WAVE_HAS_AVX)
+	#define WAVE_HAS_AVX
+	#endif
+	#if (defined(__SSE4_2__) || defined(WAVE_HAS_AVX)) && !defined(WAVE_HAS_SSE4_2)
+	#define WAVE_HAS_SSE4_2
+	#endif
+	#if (defined(__SSE4_1__) || defined(WAVE_HAS_SSE4_2)) && !defined(WAVE_HAS_SSE4_1)
+	#define WAVE_HAS_SSE4_1
+	#endif
+	#if (defined(__F16C__) || defined(WAVE_HAS_AVX2)) && !defined(WAVE_HAS_F16C)
+	#define WAVE_HAS_F16C
+	#endif
+	#if (defined(__LZCNT__) || defined(WAVE_HAS_AVX2)) && !defined(WAVE_HAS_LZCNT)
+	#define WAVE_HAS_LZCNT
+	#endif
+	#if (defined(__BMI__) || defined(WAVE_HAS_AVX2)) && !defined(WAVE_HAS_TZCNT)
+	#define WAVE_HAS_TZCNT
+	#endif
+	#ifndef WAVE_CROSS_PLATFORM // FMA is not compatible with cross platform determinism
+	#if defined(WAVE_CLANG) || defined(WAVE_GCC)
+	#if defined(__FMA__) && !defined(WAVE_HAS_FMADD)
+	#define WAVE_HAS_FMADD
+	#endif
+	#elif defined(WAVE_MSVC)
+	#if defined(__AVX2__) && !defined(WAVE_HAS_FMADD) // AVX2 also enables fHASd multiply add
+	#define WAVE_HAS_FMADD
+	#endif
+	#else
+	#error Undefined compiler
+	#endif
+	#endif
+
+#elif defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) || defined(_M_ARM)
+#define WAVE_ARM
+#if defined(__aarch64__) || defined(_M_ARM64)
+#define WAVE_ADDRESS_BITS 64
+#define WAVE_HAS_NEON
+#define WAVE_VECTOR_ALIGNMENT 16
+#define WAVE_DVECTOR_ALIGNMENT 32
+#else
+#define WAVE_ADDRESS_BITS 32
+#define WAVE_VECTOR_ALIGNMENT 8
+#define WAVE_DVECTOR_ALIGNMENT 8
+#endif
+
+#ifdef WAVE_MSVC
+JPH_INLINE float32x4_t NeonShuffleFloat32x4(float32x4_t inV1, float32x4_t inV2)
+{
+	float32x4_t ret;
+	ret = vmovq_n_f32(vgetq_lane_f32(I1 >= 4 ? inV2 : inV1, I1 & 0b11));
+	ret = vsetq_lane_f32(vgetq_lane_f32(I2 >= 4 ? inV2 : inV1, I2 & 0b11), ret, 1);
+	ret = vsetq_lane_f32(vgetq_lane_f32(I3 >= 4 ? inV2 : inV1, I3 & 0b11), ret, 2);
+	ret = vsetq_lane_f32(vgetq_lane_f32(I4 >= 4 ? inV2 : inV1, I4 & 0b11), ret, 3);
+	return ret;
+}
+
+//doesn't work, I guess?!
+#define WAVE_SHUFFLE(vec1, vec2, index1, index2, index3, index4) NeonShuffleFloat32x4(vec1, vec2)
+#else
+#define WAVE_SHUFFLE(vec1, vec2, index1, index2, index3, index4) __builtin_shufflevector(vec1, vec2, index1, index2, index3, index4)
+#endif
+#endif
+
+#if defined(WAVE_HAS_SSE)
+#include <immintrin.h>
+#elif defined(WAVE_HAS_NEON)
+#ifdef WAVE_MSVC
+#include <intrin.h>
+#include <arm64_neon.h>
+#else
+#include <arm_neon.h>
+#endif
+#endif
+
+#if defined(WAVE_HAS_SSE)
+typedef __m128 Wave128;
+#elif defined(WAVE_HAS_NEON)
+typedef float32x4_t Wave128;
+#else
+typedef float Wave128[4];
+#endif
+
 //vector
 typedef struct
 {
@@ -47,38 +166,68 @@ typedef struct
 		float b;
 	};
 } vec3;
-
+/*
 typedef struct
 {
 	union
 	{
+		Wave128 Fast;
+		float	mF32[4];
+
+		union
+		{
+			float x;
+			float u;
+			float s;
+			float r;
+		};
+
+		union
+		{
+			float y;
+			float v;
+			float t;
+			float g;
+		};
+
+		union
+		{
+			float z;
+			float p;
+			float b;
+		};
+
+		union
+		{
+			float w;
+			float q;
+			float a;
+		};
+		
+	};	
+} vec4;
+*/
+
+typedef union
+{
+	Wave128 Fast;
+
+	struct
+	{
 		float x;
-		float u;
-		float s;
-		float r;
-	};
-
-	union
-	{
 		float y;
-		float v;
-		float t;
-		float g;
-	};
-
-	union
-	{
 		float z;
-		float p;
-		float b;
+		float w;
 	};
 
-	union
+	struct
 	{
-		float w;
-		float q;
+		float r;
+		float g;
+		float b;
 		float a;
 	};
+
 } vec4;
 
 float FastInverseSqrt(float number)
@@ -115,14 +264,60 @@ vec3 Normalize3(vec3 v)
 	return v;
 }
 
-vec4 Normalize4(vec4 v)
+void Normalize4P(vec4* v)
 {
+#if defined(WAVE_HAS_SSE4_1)
+	Wave128 len_sq = _mm_dp_ps(v->Fast, v->Fast, 0x7f);
+	Wave128 is_zero = _mm_cmpeq_ps(len_sq, _mm_setzero_ps());
+
+	v->Fast = (Wave128)_mm_blendv_ps(_mm_div_ps(v->Fast, _mm_sqrt_ps(len_sq)), v->Fast, is_zero);
+#elif defined(WAVE_HAS_NEON)
+	float32x4_t mul = vmulq_f32(v->Fast, v->Fast);
+	mul = vsetq_lane_f32(0, mul, 3);
+	float32x4_t sum = vdupq_n_f32(vaddvq_f32(mul));
+	float32x4_t len = vsqrtq_f32(sum);
+	float32x4_t is_zero = vceqq_f32(len, vdupq_n_f32(0));
+
+	v->Fast = (Wave128)vbslq_f32(is_zero, v->Fast, vdivq_f32(v->Fast, len));
+#else
 	register float length = FastInverseSqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
 	v.x *= length;
 	v.y *= length;
 	v.z *= length;
 	v.w *= length;
 	return v;
+#endif
+}
+
+WAVE_INLINE vec4 Normalize4(vec4 v)
+{
+	Normalize4P(&v);
+	return v;
+}
+
+//Basically just cross 3
+void Cross4P(vec4* a, vec4* b, vec4* r)
+{
+#if defined(WAVE_HAS_SSE)
+	Wave128 t1 = _mm_shuffle_ps(b->Fast, b->Fast, _MM_SHUFFLE(0, 0, 2, 1)); // Assure Z and W are the same
+	t1 = _mm_mul_ps(t1, a->Fast);
+	Wave128 t2 = _mm_shuffle_ps(a->Fast, a->Fast, _MM_SHUFFLE(0, 0, 2, 1)); // Assure Z and W are the same
+	t2 = _mm_mul_ps(t2, b->Fast);
+	Wave128 t3 = _mm_sub_ps(t1, t2);
+	r->Fast = _mm_shuffle_ps(t3, t3, _MM_SHUFFLE(0, 0, 2, 1)); // Assure Z and W are the same
+#elif defined(WAVE_HAS_NEON)
+	Wave128 t1 = JPH_NEON_SHUFFLE_F32x4(b->Fast, b->Fast, 1, 2, 0, 0); // Assure Z and W are the same
+	t1 = vmulq_f32(t1, a->Fast);
+	Wave128 t2 = JPH_NEON_SHUFFLE_F32x4(a->Fast, a->Fast, 1, 2, 0, 0); // Assure Z and W are the same
+	t2 = vmulq_f32(t2, b->Fast);
+	Wave128 t3 = vsubq_f32(t1, t2);
+	return JPH_NEON_SHUFFLE_F32x4(t3, t3, 1, 2, 0, 0); // Assure Z and W are the same
+#else
+	r->x = a->y * b->z - a->z * b->y;
+	r->y = a->z * b->x - a->x * b->z;
+	r->z = a->x * b->y - a->y * b->x;
+	r->z = 1.0;
+#endif
 }
 
 void Normalize2P(vec2* v)
@@ -140,16 +335,7 @@ void Normalize3P(vec3* v)
 	v->z *= length;
 }
 
-void Normalize4P(vec4* v)
-{
-	register float length = FastInverseSqrt(v->x * v->x + v->y * v->y + v->z * v->z + v->w * v->w);
-	v->x *= length;
-	v->y *= length;
-	v->z *= length;
-	v->w *= length;
-}
-
-extern inline vec3 Cross3P(vec3* a, vec3* b)
+WAVE_INLINE vec3 Cross3P(vec3* a, vec3* b)
 {
 	vec3 r;
 	r.x = a->y * b->z - a->z * b->y;
@@ -158,17 +344,17 @@ extern inline vec3 Cross3P(vec3* a, vec3* b)
 	return r;
 }
 
-extern inline float Dot2P(vec2* a, vec2* b)
+WAVE_INLINE float Dot2P(vec2* a, vec2* b)
 {
 	return a->x * b->x + a->y * b->y;
 }
 
-extern inline float Dot3P(vec3* a, vec3* b)
+WAVE_INLINE float Dot3P(vec3* a, vec3* b)
 {
 	return a->x * b->x + a->y * b->y + a->z * b->z;
 }
 
-extern inline vec2 Add2P(vec2* a, vec2* b)
+WAVE_INLINE vec2 Add2P(vec2* a, vec2* b)
 {
 	vec2 r;
 	r.x = a->x + b->x;
@@ -176,7 +362,7 @@ extern inline vec2 Add2P(vec2* a, vec2* b)
 	return r;
 }
 
-extern inline vec2 Sub2P(vec2* a, vec2* b)
+WAVE_INLINE vec2 Sub2P(vec2* a, vec2* b)
 {
 	vec2 r;
 	r.x = a->x - b->x;
@@ -184,7 +370,7 @@ extern inline vec2 Sub2P(vec2* a, vec2* b)
 	return r;
 }
 
-extern inline vec2 Mul2P(vec2* a, vec2* b)
+WAVE_INLINE vec2 Mul2P(vec2* a, vec2* b)
 {
 	vec2 r;
 	r.x = a->x * b->x;
@@ -192,7 +378,7 @@ extern inline vec2 Mul2P(vec2* a, vec2* b)
 	return r;
 }
 
-extern inline vec2 Div2P(vec2* a, vec2* b)
+WAVE_INLINE vec2 Div2P(vec2* a, vec2* b)
 {
 	vec2 r;
 	r.x = a->x / b->x;
@@ -200,7 +386,7 @@ extern inline vec2 Div2P(vec2* a, vec2* b)
 	return r;
 }
 
-extern inline vec3 Add3P(vec3* a, vec3* b)
+WAVE_INLINE vec3 Add3P(vec3* a, vec3* b)
 {
 	vec3 r;
 	r.x = a->x + b->x;
@@ -209,7 +395,7 @@ extern inline vec3 Add3P(vec3* a, vec3* b)
 	return r;
 }
 
-extern inline vec3 Sub3P(vec3* a, vec3* b)
+WAVE_INLINE vec3 Sub3P(vec3* a, vec3* b)
 {
 	vec3 r;
 	r.x = a->x - b->x;
@@ -218,7 +404,7 @@ extern inline vec3 Sub3P(vec3* a, vec3* b)
 	return r;
 }
 
-extern inline vec3 Mul3P(vec3* a, vec3* b)
+WAVE_INLINE vec3 Mul3P(vec3* a, vec3* b)
 {
 	vec3 r;
 	r.x = a->x * b->x;
@@ -227,7 +413,7 @@ extern inline vec3 Mul3P(vec3* a, vec3* b)
 	return r;
 }
 
-extern inline vec3 Div3P(vec3* a, vec3* b)
+WAVE_INLINE vec3 Div3P(vec3* a, vec3* b)
 {
 	vec3 r;
 	r.x = a->x / b->x;
@@ -236,48 +422,90 @@ extern inline vec3 Div3P(vec3* a, vec3* b)
 	return r;
 }
 
-extern inline vec4 Add4P(vec4* a, vec4* b)
+WAVE_INLINE vec4 Add4P(vec4* a, vec4* b)
 {
+#if defined(WAVE_HAS_SSE)
+	vec4 r;
+	r.Fast = _mm_add_ps(a->Fast, b->Fast);
+	return r;
+#elif defined(WAVE_HAS_NEON)
+	vec4 r;
+	r.Fast = vaddq_f32(a->Fast, b->Fast);
+	return r;
+#else
 	vec4 r;
 	r.x = a->x + b->x;
 	r.y = a->y + b->y;
 	r.z = a->z + b->z;
 	r.w = a->w + b->w;
 	return r;
+#endif
 }
 
-extern inline vec4 Sub4P(vec4* a, vec4* b)
+WAVE_INLINE vec4 Sub4P(vec4* a, vec4* b)
 {
+#if defined(WAVE_HAS_SSE)
+	vec4 r;
+	r.Fast = _mm_sub_ps(a->Fast, b->Fast);
+	return r;
+#elif defined(WAVE_HAS_NEON)
+	vec4 r;
+	r.Fast = vsubq_f32(a->Fast, b->Fast);
+	return r;
+#else
 	vec4 r;
 	r.x = a->x - b->x;
 	r.y = a->y - b->y;
 	r.z = a->z - b->z;
 	r.w = a->w - b->w;
 	return r;
+#endif
 }
 
-extern inline vec4 Mul4P(vec4* a, vec4* b)
+WAVE_INLINE vec4 Mul4P(vec4* a, vec4* b)
 {
+#if defined(WAVE_HAS_SSE)
+	vec4 r;
+	r.Fast = _mm_mul_ps(a->Fast, b->Fast);
+	return r;
+#elif defined(WAVE_HAS_NEON)
+	vec4 r;
+	r.Fast = vmulq_f32(a->Fast, b->Fast);
+	return r;
+#else
 	vec4 r;
 	r.x = a->x * b->x;
 	r.y = a->y * b->y;
 	r.z = a->z * b->z;
 	r.w = a->w * b->w;
 	return r;
+#endif
+
+	
 }
 
-extern inline vec4 Div4P(vec4* a, vec4* b)
+WAVE_INLINE vec4 Div4P(vec4* a, vec4* b)
 {
+#if defined(WAVE_HAS_SSE)
+	vec4 r;
+	r.Fast = _mm_div_ps(a->Fast, b->Fast);
+	return r;
+#elif defined(WAVE_HAS_NEON)
+	vec4 r;
+	r.Fast = vdivq_f32(a->Fast, b->Fast);
+	return r;
+#else
 	vec4 r;
 	r.x = a->x / b->x;
 	r.y = a->y / b->y;
 	r.z = a->z / b->z;
 	r.w = a->w / b->w;
 	return r;
+#endif
 }
 
 
-extern inline vec3 Cross3(vec3 a, vec3 b)
+WAVE_INLINE vec3 Cross3(vec3 a, vec3 b)
 {
 	vec3 r;
 	r.x = a.y * b.z - a.z * b.y;
@@ -286,17 +514,17 @@ extern inline vec3 Cross3(vec3 a, vec3 b)
 	return r;
 }
 
-extern inline float Dot2(vec2 a, vec2 b)
+WAVE_INLINE float Dot2(vec2 a, vec2 b)
 {
 	return a.x * b.x + a.y * b.y;
 }
 
-extern inline float Dot3(vec3 a, vec3 b)
+WAVE_INLINE float Dot3(vec3 a, vec3 b)
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-extern inline vec2 Add2(vec2 a, vec2 b)
+WAVE_INLINE vec2 Add2(vec2 a, vec2 b)
 {
 	vec2 r;
 	r.x = a.x + b.x;
@@ -304,7 +532,7 @@ extern inline vec2 Add2(vec2 a, vec2 b)
 	return r;
 }
 
-extern inline vec2 Sub2(vec2 a, vec2 b)
+WAVE_INLINE vec2 Sub2(vec2 a, vec2 b)
 {
 	vec2 r;
 	r.x = a.x - b.x;
@@ -312,7 +540,7 @@ extern inline vec2 Sub2(vec2 a, vec2 b)
 	return r;
 }
 
-extern inline vec2 Mul2(vec2 a, vec2 b)
+WAVE_INLINE vec2 Mul2(vec2 a, vec2 b)
 {
 	vec2 r;
 	r.x = a.x * b.x;
@@ -320,7 +548,7 @@ extern inline vec2 Mul2(vec2 a, vec2 b)
 	return r;
 }
 
-extern inline vec2 Div2(vec2 a, vec2 b)
+WAVE_INLINE vec2 Div2(vec2 a, vec2 b)
 {
 	vec2 r;
 	r.x = a.x / b.x;
@@ -328,7 +556,7 @@ extern inline vec2 Div2(vec2 a, vec2 b)
 	return r;
 }
 
-extern inline vec3 Add3(vec3 a, vec3 b)
+WAVE_INLINE vec3 Add3(vec3 a, vec3 b)
 {
 	vec3 r;
 	r.x = a.x + b.x;
@@ -337,7 +565,7 @@ extern inline vec3 Add3(vec3 a, vec3 b)
 	return r;
 }
 
-extern inline vec3 Sub3(vec3 a, vec3 b)
+WAVE_INLINE vec3 Sub3(vec3 a, vec3 b)
 {
 	vec3 r;
 	r.x = a.x - b.x;
@@ -346,7 +574,7 @@ extern inline vec3 Sub3(vec3 a, vec3 b)
 	return r;
 }
 
-extern inline vec3 Mul3(vec3 a, vec3 b)
+WAVE_INLINE vec3 Mul3(vec3 a, vec3 b)
 {
 	vec3 r;
 	r.x = a.x * b.x;
@@ -355,7 +583,7 @@ extern inline vec3 Mul3(vec3 a, vec3 b)
 	return r;
 }
 
-extern inline vec3 Div3(vec3 a, vec3 b)
+WAVE_INLINE vec3 Div3(vec3 a, vec3 b)
 {
 	vec3 r;
 	r.x = a.x / b.x;
@@ -364,57 +592,50 @@ extern inline vec3 Div3(vec3 a, vec3 b)
 	return r;
 }
 
-extern inline vec4 Add4(vec4 a, vec4 b)
+WAVE_INLINE vec4 Add4(vec4 a, vec4 b)
 {
-	vec4 r;
-	r.x = a.x + b.x;
-	r.y = a.y + b.y;
-	r.z = a.z + b.z;
-	r.w = a.w + b.w;
-	return r;
+	return Add4P(&a, &b);
 }
 
-extern inline vec4 Sub4(vec4 a, vec4 b)
+WAVE_INLINE vec4 Sub4(vec4 a, vec4 b)
 {
-	vec4 r;
-	r.x = a.x - b.x;
-	r.y = a.y - b.y;
-	r.z = a.z - b.z;
-	r.w = a.w - b.w;
-	return r;
+	return Add4P(&a, &b);
 }
 
-extern inline vec4 Mul4(vec4 a, vec4 b)
+WAVE_INLINE vec4 Mul4(vec4 a, vec4 b)
 {
-	vec4 r;
-	r.x = a.x * b.x;
-	r.y = a.y * b.y;
-	r.z = a.z * b.z;
-	r.w = a.w * b.w;
-	return r;
+	return Add4P(&a, &b);
 }
 
-extern inline vec4 Div4(vec4 a, vec4 b)
+WAVE_INLINE vec4 Div4(vec4 a, vec4 b)
 {
-	vec4 r;
-	r.x = a.x / b.x;
-	r.y = a.y / b.y;
-	r.z = a.z / b.z;
-	r.w = a.w / b.w;
-	return r;
+	return Add4P(&a, &b);
 }
 
-extern inline float Length3(vec3 v)
+WAVE_INLINE float Length3(vec3 v)
 {
 	return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-extern inline float Length3P(vec3* v)
+WAVE_INLINE float Length3P(vec3* v)
 {
 	return sqrtf((v->x * v->x) + (v->y * v->y) + (v->z * v->z));
 }
 
-extern inline vec2 Reflect2(vec2* v, vec2* n)
+WAVE_INLINE float Length4P(vec4* v)
+{
+#if defined(WAVE_HAS_SSE4_1)
+	return _mm_cvtss_f32(_mm_sqrt_ss(_mm_dp_ps(v->Fast, v->Fast, 0xff)));
+#elif defined(WAVE_HAS_NEON)
+	float32x4_t mul = vmulq_f32(v->Fast, v->Fast);
+	float32x2_t sum = vdup_n_f32(vaddvq_f32(mul));
+	return vget_lane_f32(vsqrt_f32(sum), 0);
+#else
+	return sqrtf((v->x * v->x) + (v->y * v->y) + (v->z * v->z) + (v->w * v->w));
+#endif	
+}
+
+WAVE_INLINE vec2 Reflect2(vec2* v, vec2* n)
 {
 	vec2 r;
 	r.x = v->x - 2 * Dot2P(v, n) * n->x;
@@ -422,7 +643,7 @@ extern inline vec2 Reflect2(vec2* v, vec2* n)
 	return r;
 }
 
-extern inline vec3 Reflect3(vec3* v, vec3* n)
+WAVE_INLINE vec3 Reflect3(vec3* v, vec3* n)
 {
 	vec3 r;
 	r.x = v->x - 2 * Dot3P(v, n) * n->x;
@@ -468,147 +689,175 @@ float GetDistanceVec3P(vec3* a, vec3* b)
 	return sqrtf(DX + DY + DZ);
 }
 
-extern inline vec2 Vec2(float x, float y)
+WAVE_INLINE vec2 Vec2(float x, float y)
 {
 	vec2 r = { x, y };
 	return r;
 }
 
-extern inline vec3 Vec3(float x, float y, float z)
+WAVE_INLINE vec3 Vec3(float x, float y, float z)
 {
 	vec3 r = { x, y, z };
 	return r;
 }
 
-extern inline vec4 Vec4(float x, float y, float z, float w)
+WAVE_INLINE void Vec4P(float x, float y, float z, float w, Wave128* r)
 {
-	vec4 r = { x, y, z, w };
+#if defined(WAVE_HAS_SSE)
+	*r = _mm_set_ps(w, z, y, x);
+#elif defined(WAVE_HAS_NEON)
+	uint32x2_t xy = vcreate_f32(static_cast<uint64>(*reinterpret_cast<uint32*>(&x)) | (static_cast<uint64>(*reinterpret_cast<uint32*>(&y)) << 32));
+	uint32x2_t zw = vcreate_f32(static_cast<uint64>(*reinterpret_cast<uint32*>(&z)) | (static_cast<uint64>(*reinterpret_cast<uint32*>(&w)) << 32));
+	*r = vcombine_f32(xy, zw);
+#else
+	vec4 a;
+	a.x = x;
+	a.y = y;
+	a.z = z;
+	a.w = w;
+	*r = a.Fast;
+#endif
+}
+
+WAVE_INLINE vec4 Vec4(float x, float y, float z, float w)
+{
+	vec4 r;
+	Vec4P(x, y, z, w, &r.Fast);
 	return r;
 }
 
-extern inline vec2 Vec2f(float x)
+WAVE_INLINE vec2 Vec2f(float x)
 {
 	vec2 r = { x, x };
 	return r;
 }
 
-extern inline vec3 Vec3f(float x)
+WAVE_INLINE vec3 Vec3f(float x)
 {
 	vec3 r = { x, x, x };
 	return r;
 }
 
-extern inline vec4 Vec4f(float x)
+WAVE_INLINE vec4 Vec4f(float x)
 {
+#if defined(WAVE_HAS_SSE)
+	vec4 r;
+	r.Fast = _mm_set_ps1(x);
+	return r; 
+#elif defined(WAVE_HAS_NEON)
+	vec4 r;
+	r.Fast = vdupq_n_f32(x);
+	return r; 
+#else
 	vec4 r = { x, x, x, x };
+	return Vec4(x, x, x, x);
+#endif
+
 	return r;
 }
 
 //matrix
+/*
 typedef struct
 {
+	float m[4][4];
+} mat4;
+*/
+typedef union
+{
+	Wave128 Fast[4];
 	float m[4][4];
 } mat4;
 
 void LoadMat4IdentityP(mat4* Matrix)
 {
-	Matrix->m[0][0] = 1.0;
-	Matrix->m[1][0] = 0.0;
-	Matrix->m[2][0] = 0.0;
-	Matrix->m[3][0] = 0.0;
+	Vec4P(1.0, 0.0, 0.0, 0.0, &Matrix->Fast[0]);
+	Vec4P(0.0, 1.0, 0.0, 0.0, &Matrix->Fast[1]);
+	Vec4P(0.0, 0.0, 1.0, 0.0, &Matrix->Fast[2]);
+	Vec4P(0.0, 0.0, 0.0, 1.0, &Matrix->Fast[3]);
 
-	Matrix->m[0][1] = 0.0;
-	Matrix->m[1][1] = 1.0;
-	Matrix->m[2][1] = 0.0;
-	Matrix->m[3][1] = 0.0;
 
-	Matrix->m[0][2] = 0.0;
-	Matrix->m[1][2] = 0.0;
-	Matrix->m[2][2] = 1.0;
-	Matrix->m[3][2] = 0.0;
-
-	Matrix->m[0][3] = 0.0;
-	Matrix->m[1][3] = 0.0;
-	Matrix->m[2][3] = 0.0;
-	Matrix->m[3][3] = 1.0;
+//	Matrix->m[0][0] = 1.0;
+//	Matrix->m[1][0] = 0.0;
+//	Matrix->m[2][0] = 0.0;
+//	Matrix->m[3][0] = 0.0;
+//
+//	Matrix->m[0][1] = 0.0;
+//	Matrix->m[1][1] = 1.0;
+//	Matrix->m[2][1] = 0.0;
+//	Matrix->m[3][1] = 0.0;
+//
+//	Matrix->m[0][2] = 0.0;
+//	Matrix->m[1][2] = 0.0;
+//	Matrix->m[2][2] = 1.0;
+//	Matrix->m[3][2] = 0.0;
+//
+//	Matrix->m[0][3] = 0.0;
+//	Matrix->m[1][3] = 0.0;
+//	Matrix->m[2][3] = 0.0;
+//	Matrix->m[3][3] = 1.0;
 }
 
 mat4 LoadMat4Identity()
 {
 	mat4 Matrix;
-	Matrix.m[0][0] = 1.0;
-	Matrix.m[1][0] = 0.0;
-	Matrix.m[2][0] = 0.0;
-	Matrix.m[3][0] = 0.0;
-		  
-	Matrix.m[0][1] = 0.0;
-	Matrix.m[1][1] = 1.0;
-	Matrix.m[2][1] = 0.0;
-	Matrix.m[3][1] = 0.0;
-		  
-	Matrix.m[0][2] = 0.0;
-	Matrix.m[1][2] = 0.0;
-	Matrix.m[2][2] = 1.0;
-	Matrix.m[3][2] = 0.0;
-		  
-	Matrix.m[0][3] = 0.0;
-	Matrix.m[1][3] = 0.0;
-	Matrix.m[2][3] = 0.0;
-	Matrix.m[3][3] = 1.0;
+	LoadMat4IdentityP(&Matrix);
 	return Matrix;
 }
 
 mat4 MultiplyMat4P(mat4* a, mat4* b)
 {
 	mat4 r;
+#if defined(WAVE_HAS_SSE)
+	for (int i = 0; i < 4; ++i)
+	{
+		__m128 c = b->Fast[i];
+		__m128 t = _mm_mul_ps(a->Fast[0], _mm_shuffle_ps(c, c, _MM_SHUFFLE(0, 0, 0, 0)));
+		t = _mm_add_ps(t, _mm_mul_ps(a->Fast[1], _mm_shuffle_ps(c, c, _MM_SHUFFLE(1, 1, 1, 1))));
+		t = _mm_add_ps(t, _mm_mul_ps(a->Fast[2], _mm_shuffle_ps(c, c, _MM_SHUFFLE(2, 2, 2, 2))));
+		t = _mm_add_ps(t, _mm_mul_ps(a->Fast[3], _mm_shuffle_ps(c, c, _MM_SHUFFLE(3, 3, 3, 3))));
+		r.Fast[i] = t;
+	}
+#elif defined(WAVE_HAS_NEON)
+	for (int i = 0; i < 4; ++i)
+	{
+		Type c = b->Fast[i];
+		Type t = vmulq_f32(a->Fast[0], vdupq_laneq_f32(c, 0));
+		t = vmlaq_f32(t, a->Fast[1], vdupq_laneq_f32(c, 1));
+		t = vmlaq_f32(t, a->Fast[2], vdupq_laneq_f32(c, 2));
+		t = vmlaq_f32(t, a->Fast[3], vdupq_laneq_f32(c, 3));
+		r.Fast[i] = t;
+	}
+#else
 	r.m[0][0] = a->m[0][0] * b->m[0][0] + a->m[1][0] * b->m[0][1] + a->m[2][0] * b->m[0][2] + a->m[3][0] * b->m[0][3];
 	r.m[0][1] = a->m[0][1] * b->m[0][0] + a->m[1][1] * b->m[0][1] + a->m[2][1] * b->m[0][2] + a->m[3][1] * b->m[0][3];
 	r.m[0][2] = a->m[0][2] * b->m[0][0] + a->m[1][2] * b->m[0][1] + a->m[2][2] * b->m[0][2] + a->m[3][2] * b->m[0][3];
 	r.m[0][3] = a->m[0][3] * b->m[0][0] + a->m[1][3] * b->m[0][1] + a->m[2][3] * b->m[0][2] + a->m[3][3] * b->m[0][3];
-	 
+
 	r.m[1][0] = a->m[0][0] * b->m[1][0] + a->m[1][0] * b->m[1][1] + a->m[2][0] * b->m[1][2] + a->m[3][0] * b->m[1][3];
 	r.m[1][1] = a->m[0][1] * b->m[1][0] + a->m[1][1] * b->m[1][1] + a->m[2][1] * b->m[1][2] + a->m[3][1] * b->m[1][3];
 	r.m[1][2] = a->m[0][2] * b->m[1][0] + a->m[1][2] * b->m[1][1] + a->m[2][2] * b->m[1][2] + a->m[3][2] * b->m[1][3];
 	r.m[1][3] = a->m[0][3] * b->m[1][0] + a->m[1][3] * b->m[1][1] + a->m[2][3] * b->m[1][2] + a->m[3][3] * b->m[1][3];
-	 
+
 	r.m[2][0] = a->m[0][0] * b->m[2][0] + a->m[1][0] * b->m[2][1] + a->m[2][0] * b->m[2][2] + a->m[3][0] * b->m[2][3];
 	r.m[2][1] = a->m[0][1] * b->m[2][0] + a->m[1][1] * b->m[2][1] + a->m[2][1] * b->m[2][2] + a->m[3][1] * b->m[2][3];
 	r.m[2][2] = a->m[0][2] * b->m[2][0] + a->m[1][2] * b->m[2][1] + a->m[2][2] * b->m[2][2] + a->m[3][2] * b->m[2][3];
 	r.m[2][3] = a->m[0][3] * b->m[2][0] + a->m[1][3] * b->m[2][1] + a->m[2][3] * b->m[2][2] + a->m[3][3] * b->m[2][3];
-	 
+
 	r.m[3][0] = a->m[0][0] * b->m[3][0] + a->m[1][0] * b->m[3][1] + a->m[2][0] * b->m[3][2] + a->m[3][0] * b->m[3][3];
 	r.m[3][1] = a->m[0][1] * b->m[3][0] + a->m[1][1] * b->m[3][1] + a->m[2][1] * b->m[3][2] + a->m[3][1] * b->m[3][3];
 	r.m[3][2] = a->m[0][2] * b->m[3][0] + a->m[1][2] * b->m[3][1] + a->m[2][2] * b->m[3][2] + a->m[3][2] * b->m[3][3];
 	r.m[3][3] = a->m[0][3] * b->m[3][0] + a->m[1][3] * b->m[3][1] + a->m[2][3] * b->m[3][2] + a->m[3][3] * b->m[3][3];
 
+#endif
+
+	
 	return r;
 }
 
 mat4 MultiplyMat4(mat4 a, mat4 b)
 {
-	mat4 r;
-
-	r.m[0][0] = a.m[0][0] * b.m[0][0] + a.m[1][0] * b.m[0][1] + a.m[2][0] * b.m[0][2] + a.m[3][0] * b.m[0][3];
-	r.m[0][1] = a.m[0][1] * b.m[0][0] + a.m[1][1] * b.m[0][1] + a.m[2][1] * b.m[0][2] + a.m[3][1] * b.m[0][3];
-	r.m[0][2] = a.m[0][2] * b.m[0][0] + a.m[1][2] * b.m[0][1] + a.m[2][2] * b.m[0][2] + a.m[3][2] * b.m[0][3];
-	r.m[0][3] = a.m[0][3] * b.m[0][0] + a.m[1][3] * b.m[0][1] + a.m[2][3] * b.m[0][2] + a.m[3][3] * b.m[0][3];
-	 
-	r.m[1][0] = a.m[0][0] * b.m[1][0] + a.m[1][0] * b.m[1][1] + a.m[2][0] * b.m[1][2] + a.m[3][0] * b.m[1][3];
-	r.m[1][1] = a.m[0][1] * b.m[1][0] + a.m[1][1] * b.m[1][1] + a.m[2][1] * b.m[1][2] + a.m[3][1] * b.m[1][3];
-	r.m[1][2] = a.m[0][2] * b.m[1][0] + a.m[1][2] * b.m[1][1] + a.m[2][2] * b.m[1][2] + a.m[3][2] * b.m[1][3];
-	r.m[1][3] = a.m[0][3] * b.m[1][0] + a.m[1][3] * b.m[1][1] + a.m[2][3] * b.m[1][2] + a.m[3][3] * b.m[1][3];
-	 
-	r.m[2][0] = a.m[0][0] * b.m[2][0] + a.m[1][0] * b.m[2][1] + a.m[2][0] * b.m[2][2] + a.m[3][0] * b.m[2][3];
-	r.m[2][1] = a.m[0][1] * b.m[2][0] + a.m[1][1] * b.m[2][1] + a.m[2][1] * b.m[2][2] + a.m[3][1] * b.m[2][3];
-	r.m[2][2] = a.m[0][2] * b.m[2][0] + a.m[1][2] * b.m[2][1] + a.m[2][2] * b.m[2][2] + a.m[3][2] * b.m[2][3];
-	r.m[2][3] = a.m[0][3] * b.m[2][0] + a.m[1][3] * b.m[2][1] + a.m[2][3] * b.m[2][2] + a.m[3][3] * b.m[2][3];
-	 
-	r.m[3][0] = a.m[0][0] * b.m[3][0] + a.m[1][0] * b.m[3][1] + a.m[2][0] * b.m[3][2] + a.m[3][0] * b.m[3][3];
-	r.m[3][1] = a.m[0][1] * b.m[3][0] + a.m[1][1] * b.m[3][1] + a.m[2][1] * b.m[3][2] + a.m[3][1] * b.m[3][3];
-	r.m[3][2] = a.m[0][2] * b.m[3][0] + a.m[1][2] * b.m[3][1] + a.m[2][2] * b.m[3][2] + a.m[3][2] * b.m[3][3];
-	r.m[3][3] = a.m[0][3] * b.m[3][0] + a.m[1][3] * b.m[3][1] + a.m[2][3] * b.m[3][2] + a.m[3][3] * b.m[3][3];
-	
-	return r;
+	return MultiplyMat4P(&a, &b);
 }
 
 vec4 MultiplyVec4Mat4P(vec4* v, mat4* m)
@@ -1246,27 +1495,27 @@ mat4 TransposeMat4(mat4* Mat)
 }
 
 //helper
-extern inline void PrintVec2(vec2* a)
+WAVE_INLINE void PrintVec2(vec2* a)
 {
 	printf("%f %f\n", a->x, a->y);
 }
 
-extern inline void PrintVec3(vec3* a)
+WAVE_INLINE void PrintVec3(vec3* a)
 {
 	printf("%f %f %f\n", a->x, a->y, a->z);
 }
 
-extern inline void PrintVec4(vec4* a)
+WAVE_INLINE void PrintVec4(vec4* a)
 {
 	printf("%f %f %f %f\n", a->x, a->y, a->z, a->w);
 }
 
-extern inline int RandomInt(int Min, int Max)
+WAVE_INLINE int RandomInt(int Min, int Max)
 {
 	return (rand() % (Max - Min + 1)) + Min;
 }
 
-extern inline float ToRadians(float Angle)
+WAVE_INLINE float ToRadians(float Angle)
 {
 	return 0.01745329251 * Angle;
 }

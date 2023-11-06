@@ -18,39 +18,37 @@ D:\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1335,47): warning C4244: '=': co
 D:\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(1347,73): warning C4244: '+=': conversion from 'double' to 'ALfloat', possible loss of data
 D:\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(4259,28): warning C4244: '=': conversion from 'ALfloat' to 'int', possible loss of data
 D:\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(4262,35): warning C4244: '=': conversion from 'ALfloat' to 'int', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(103,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(111,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(120,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(130,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(137,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(145,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(436,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(437,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(447,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(448,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(449,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(460,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(461,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(462,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(778,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(779,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(808,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(809,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(838,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(839,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(868,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(869,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(898,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(899,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(928,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(929,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1020,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1020,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1020,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1048,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1048,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1048,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1271,23): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(252,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(260,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(325,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(332,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(657,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(658,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(668,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(669,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(670,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(681,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(682,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(683,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1027,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1028,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1057,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1058,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1087,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1088,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1117,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1118,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1147,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1148,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1177,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1178,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1269,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1269,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1269,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1297,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1297,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1297,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1520,23): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(917,20): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(1306,32): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(1979,24): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
@@ -299,9 +297,8 @@ D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(369,35): warning C424
      Creating library D:\GitHub\Magma-Engine\x64\Release\Magma Engine v7.lib and object D:\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exp
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(736): warning C4715: 'LoadModelWave': not all control paths return a value
-  108 of 4663 functions ( 2.3%) were compiled, the rest were copied from previous compilation.
-    2 functions were new in current compilation
-    103 functions had inline decision re-evaluated but remain unchanged
+  10 of 4665 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    84 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Magma Engine v7.vcxproj -> D:\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exe

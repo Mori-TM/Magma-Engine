@@ -2,7 +2,7 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 #define SHADOW_MAP_CASCADE_COUNT 3
-#define MAX_NUMBER_OF_LIGHTS 128
+#define MAX_NUMBER_OF_LIGHTS 64
 
 layout(location = 0) out vec4 OutColor;
 

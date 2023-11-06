@@ -352,16 +352,20 @@ void EditorDrawMainMenuBar()
 			ImVec2 ButtonSize = ImGui::CalcItemSize(ImVec2(0, 0), LableSize.x + Style->FramePadding.x * 2.0f, LableSize.y + Style->FramePadding.y * 2.0f);
 
 			ImGui::SetCursorPosX((float)WindowWidth - (Style->ItemSpacing.x * 3) - (ButtonSize.x * 3));
+			
 			ImGui::PushStyleColor(ImGuiCol_Button, Style->Colors[ImGuiCol_MenuBarBg]);
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.26f, 0.59f, 0.98f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.18f, 0.51f, 0.90f, 1.0f });
+
 			if (ImGui::Button("r"))
 			{
 				EditorBarButtonPressed = true;
 				ForceResizeEvent = true;
 				SDL_MinimizeWindow(Window);
 			}
-			ImGui::PopStyleColor(1);
+		//	ImGui::PopStyleColor(1);
 			ImGui::SameLine();
-			ImGui::PushStyleColor(ImGuiCol_Button, Style->Colors[ImGuiCol_MenuBarBg]);
+		//	ImGui::PushStyleColor(ImGuiCol_Button, Style->Colors[ImGuiCol_MenuBarBg]);
 			char Icon[4];
 			if (FullScreen)
 				strcpy(Icon, "W");
@@ -373,7 +377,7 @@ void EditorDrawMainMenuBar()
 				EditorBarButtonPressed = true;
 				PushEventSDL(SDL_KEYDOWN, SDLK_F11);
 			}
-			ImGui::PopStyleColor(1);
+			ImGui::PopStyleColor(3);
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_Button, Style->Colors[ImGuiCol_MenuBarBg]);
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 1.0, 0.0, 0.0, 1.0f });

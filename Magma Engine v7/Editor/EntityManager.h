@@ -26,6 +26,15 @@ void EditorEntities()
 			if (ImGui::Selectable("Add Empty Entity"))
 				AddEntity(UINT32_MAX);
 
+			for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
+			{
+				char Name[64];
+				snprintf(Name, 64, "Add %s Entity", ComponentNames[i]);
+				if (ImGui::Selectable(Name))
+					AddEntity(i);
+			}
+
+			/*
 			if (ImGui::Selectable("Add Mesh Entity"))
 				AddEntity(COMPONENT_TYPE_MESH);
 
@@ -40,7 +49,7 @@ void EditorEntities()
 
 			if (ImGui::Selectable("Add Light Entity"))
 				AddEntity(COMPONENT_TYPE_LIGHT);
-
+				*/
 			ImGui::EndPopup();
 		}
 	//	ImGui::EndChild();

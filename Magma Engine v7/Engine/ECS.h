@@ -1,17 +1,55 @@
-#define COMPONENT_COUNT 6
 #define ENTITY_ALLOCATION_COUNT 32
 
 typedef enum
 {
 	//Add Empty entity
 	COMPONENT_TYPE_MESH = 0,
-	COMPONENT_TYPE_MATERIAL = 1,
-	COMPONENT_TYPE_CAMERA = 2,
-	COMPONENT_TYPE_AUDIO = 3,
-	COMPONENT_TYPE_ANIMATION = 4,
-	COMPONENT_TYPE_LIGHT = 5,
+	COMPONENT_TYPE_MATERIAL,
+	COMPONENT_TYPE_CAMERA,
+	COMPONENT_TYPE_AUDIO,
+	COMPONENT_TYPE_ANIMATION,
+	COMPONENT_TYPE_LIGHT,
+	COMPONENT_TYPE_COLLIDER,
+	COMPONENT_TYPE_RIGIDBODY,
+	COMPONENT_COUNT
 } ComponentTypes;
 
+const char* ComponentNames[] = 
+{ 
+	"Mesh", 
+	"Material", 
+	"Camera", 
+	"Audio", 
+	"Animation", 
+	"Light",
+	"Collider",
+	"Rigidbody"
+};
+
+typedef enum
+{
+	COLLIDER_BOX = 0,
+	COLLIDER_SPHERE,
+	COLLIDER_CYLINDER,
+	COLLIDER_Bean,
+	COLLIDER_CONE,
+	COLLIDER_CONVEX,
+	COLLIDER_MESH,
+	COLLIDER_COUNT
+} ColliderTypes;
+
+const char* ColliderNames[] =
+{
+	"Box",
+	"Sphere",
+	"Cylinder",
+	"Bean",
+	"Cone",
+	"Convex",
+	"Mesh",
+};
+
+//Use MAX_CHAR_NAME_LENGTH_SHORT
 typedef struct
 {
 	char Name[MAX_CHAR_NAME_LENGTH];
@@ -57,6 +95,18 @@ typedef struct
 typedef struct
 {
 	char Name[MAX_CHAR_NAME_LENGTH];
+	ColliderTypes Collider;
+} ColliderComponent;
+
+typedef struct
+{
+	char Name[MAX_CHAR_NAME_LENGTH];
+	float Mass;
+} RigidbodyComponent;
+
+typedef struct
+{
+	char Name[MAX_CHAR_NAME_LENGTH];
 	vec3 Translate;
 	vec3 Rotate;
 	vec3 Scale;
@@ -69,6 +119,8 @@ typedef struct
 	AudioComponent Audio;
 	AnimationComponent Animation;
 	LightComponent Light;
+	ColliderComponent Collider;
+	RigidbodyComponent Rigidbody;
 } EntityInfo;
 
 uint32_t SelectedEntity = 0;
@@ -89,7 +141,7 @@ void EntitiesInit()
 	Entities = (EntityInfo*)malloc(ENTITY_ALLOCATION_COUNT * sizeof(EntityInfo));
 	if (!Entities)
 	{
-		printf("Error, your system doesn't have enough ram for %d entities, buy more than 1 mb of ram", ENTITY_ALLOCATION_COUNT);
+		printf("Error, your system doesn't have enough ram for %d entities, buy more than 1 mb of ram\n", ENTITY_ALLOCATION_COUNT);
 		exit(0);
 	}
 }
@@ -186,6 +238,12 @@ void ResetEntityLight(EntityInfo* Entity)
 	Entity->Light.Strength = 1.0;
 	Entity->Light.Type = 0;
 	Entity->Light.CastShadow = false;
+}
+
+void ResetEntityCollider(EntityInfo* Entity)
+{
+	strcpy(Entity->Collider.Name, "None");
+	Entity->Collider.Collider = COLLIDER_BOX;
 }
 
 uint32_t AddEntity(uint32_t UsedComponent)

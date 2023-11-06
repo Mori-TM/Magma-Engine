@@ -1,5 +1,4 @@
-#define SSAO_KERNEL_SIZE 32
-#define SSAO_RADIUS 0.3
+#define SSAO_KERNEL_SIZE 16
 #define SSAO_NOISE_DIM 4
 
 typedef struct

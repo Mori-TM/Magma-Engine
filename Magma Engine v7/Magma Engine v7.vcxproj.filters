@@ -164,6 +164,9 @@
     <ClInclude Include="Renderer\Pipelines\FXAAPipeline.h">
       <Filter>Header Files\Renderer\Pipelines</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Physics.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Shader\BlurFragment.frag">

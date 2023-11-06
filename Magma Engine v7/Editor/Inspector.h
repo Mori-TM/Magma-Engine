@@ -178,10 +178,10 @@ void EditorEntityInspector()
 			if (ImGui::BeginPopupContextWindow("Entity Inspector Pop Up"))
 			{				
 				ImGui::Text("Components");
-				const char* Components[] = { "Mesh", "Material", "Camera", "Audio", "Animation", "Light"};
+				
 				for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
 				{
-					if (ImGui::Button(Components[i]))
+					if (ImGui::Button(ComponentNames[i]))
 						Entities[SelectedEntity].UsedComponents[i] = true;
 				}
 			

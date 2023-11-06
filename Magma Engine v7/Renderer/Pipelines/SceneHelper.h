@@ -42,7 +42,7 @@ typedef struct
 	uint32_t RenderSSAO;	//Update every frame
 } SceneFragmentUniformBufferObject;
 
-#define MAX_NUMBER_OF_LIGHTS 128
+#define MAX_NUMBER_OF_LIGHTS 64
 
 typedef struct
 {

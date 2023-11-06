@@ -6,6 +6,12 @@ uint32_t SceneCreateDefaultTexture(SceneTextureImage* Image)
 	Image->Height = 2;
 
 	unsigned char* Pixels = (unsigned char*)malloc(16);
+	if (!Pixels)
+	{
+		printf("Error, your system doesn't have enough ram for 16 bytes for default texture, buy more than 1 mb of ram\n");
+		exit(0);
+	}
+
 	memset(Pixels, 255, 16);
 
 	OpenVkTextureCreateInfo TextureCreateInfo;

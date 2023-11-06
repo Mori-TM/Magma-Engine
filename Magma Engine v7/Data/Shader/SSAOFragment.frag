@@ -9,7 +9,7 @@ layout (binding = 0) uniform sampler2D SamplerPositionDepth;
 layout (binding = 1) uniform sampler2D SamplerViewNormal;
 layout (binding = 2) uniform sampler2D SSAONoise;
 
-#define SSAO_KERNEL_SIZE 32
+#define SSAO_KERNEL_SIZE 16
 #define SSAO_RADIUS 0.6f
 
 layout (binding = 3) uniform UniformBufferObject
@@ -32,7 +32,7 @@ void main()
 
 //	vec3 normal = normalize(texture(SamplerViewNormal, FragTexCoord).rgb * 2.0 - 1.0);
 	vec4 NormalTex = texture(SamplerViewNormal, FragTexCoord);
-	vec3 normal = normalize(NormalTex.rgb);
+	vec3 normal = (NormalTex.rgb);
 //	if (NormalTex.w < 0.9)
 //	{
 //		OutColor = 1.0;

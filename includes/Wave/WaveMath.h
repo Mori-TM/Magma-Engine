@@ -85,7 +85,7 @@
 #endif
 
 #ifdef WAVE_MSVC
-JPH_INLINE float32x4_t NeonShuffleFloat32x4(float32x4_t inV1, float32x4_t inV2)
+WAVE_INLINE float32x4_t NeonShuffleFloat32x4(float32x4_t inV1, float32x4_t inV2)
 {
 	float32x4_t ret;
 	ret = vmovq_n_f32(vgetq_lane_f32(I1 >= 4 ? inV2 : inV1, I1 & 0b11));
@@ -296,7 +296,7 @@ WAVE_INLINE vec4 Normalize4(vec4 v)
 }
 
 //Basically just cross 3
-void Cross4P(vec4* a, vec4* b, vec4* r)
+void Cross4Perf(vec4* a, vec4* b, vec4* r)
 {
 #if defined(WAVE_HAS_SSE)
 	Wave128 t1 = _mm_shuffle_ps(b->Fast, b->Fast, _MM_SHUFFLE(0, 0, 2, 1)); // Assure Z and W are the same
@@ -306,18 +306,54 @@ void Cross4P(vec4* a, vec4* b, vec4* r)
 	Wave128 t3 = _mm_sub_ps(t1, t2);
 	r->Fast = _mm_shuffle_ps(t3, t3, _MM_SHUFFLE(0, 0, 2, 1)); // Assure Z and W are the same
 #elif defined(WAVE_HAS_NEON)
-	Wave128 t1 = JPH_NEON_SHUFFLE_F32x4(b->Fast, b->Fast, 1, 2, 0, 0); // Assure Z and W are the same
+	printf("Cross4 may not work correctly on amd\n");
+	Wave128 t1 = vextq_f32(b->Fast, b->Fast, 1); // Assure Z and W are the same
 	t1 = vmulq_f32(t1, a->Fast);
-	Wave128 t2 = JPH_NEON_SHUFFLE_F32x4(a->Fast, a->Fast, 1, 2, 0, 0); // Assure Z and W are the same
+	Wave128 t2 = vextq_f32(a->Fast, a->Fast, 1); // Assure Z and W are the same
 	t2 = vmulq_f32(t2, b->Fast);
 	Wave128 t3 = vsubq_f32(t1, t2);
-	return JPH_NEON_SHUFFLE_F32x4(t3, t3, 1, 2, 0, 0); // Assure Z and W are the same
+	return vextq_f32(t3, t3, 1); // Assure Z and W are the same
 #else
 	r->x = a->y * b->z - a->z * b->y;
 	r->y = a->z * b->x - a->x * b->z;
 	r->z = a->x * b->y - a->y * b->x;
 	r->z = 1.0;
 #endif
+}
+
+WAVE_INLINE vec4 Cross4P(vec4* a, vec4* b)
+{
+	vec4 r;
+	Cross4Perf(a, b, &r);
+	return r;
+}
+
+
+WAVE_INLINE vec4 Cross4(vec4 a, vec4 b)
+{
+	vec4 r;
+	Cross4Perf(&a, &b, &r);
+	return r;
+}
+
+//Basically dot 3
+WAVE_INLINE float Dot4P(vec4* a, vec4* b)
+{
+#if defined(WAVE_HAS_SSE4_1)
+	return _mm_cvtss_f32(_mm_dp_ps(a->Fast, b->Fast, 0x7f));
+#elif defined(WAVE_HAS_NEON)
+	float32x4_t mul = vmulq_f32(a->Fast, b->Fast);
+	mul = vsetq_lane_f32(0, mul, 3);
+	return vaddvq_f32(mul);
+#else
+	return a->x * b->x + a->y * b->y + a->z * b->z;
+#endif
+}
+
+//Basically dot 3
+WAVE_INLINE float Dot4(vec4 a, vec4 b)
+{
+	return Dot4P(&a, &b);
 }
 
 void Normalize2P(vec2* v)
@@ -507,89 +543,57 @@ WAVE_INLINE vec4 Div4P(vec4* a, vec4* b)
 
 WAVE_INLINE vec3 Cross3(vec3 a, vec3 b)
 {
-	vec3 r;
-	r.x = a.y * b.z - a.z * b.y;
-	r.y = a.z * b.x - a.x * b.z;
-	r.z = a.x * b.y - a.y * b.x;
-	return r;
+	return Cross3P(&a, &b);
 }
 
 WAVE_INLINE float Dot2(vec2 a, vec2 b)
 {
-	return a.x * b.x + a.y * b.y;
+	return Dot2P(&a, &b);
 }
 
 WAVE_INLINE float Dot3(vec3 a, vec3 b)
 {
-	return a.x * b.x + a.y * b.y + a.z * b.z;
+	return Dot3P(&a, &b);
 }
 
 WAVE_INLINE vec2 Add2(vec2 a, vec2 b)
 {
-	vec2 r;
-	r.x = a.x + b.x;
-	r.y = a.y + b.y;
-	return r;
+	return Add2P(&a, &b);
 }
 
 WAVE_INLINE vec2 Sub2(vec2 a, vec2 b)
 {
-	vec2 r;
-	r.x = a.x - b.x;
-	r.y = a.y - b.y;
-	return r;
+	return Sub2P(&a, &b);
 }
 
 WAVE_INLINE vec2 Mul2(vec2 a, vec2 b)
 {
-	vec2 r;
-	r.x = a.x * b.x;
-	r.y = a.y * b.y;
-	return r;
+	return Mul2P(&a, &b);
 }
 
 WAVE_INLINE vec2 Div2(vec2 a, vec2 b)
 {
-	vec2 r;
-	r.x = a.x / b.x;
-	r.y = a.y / b.y;
-	return r;
+	return Div2P(&a, &b);
 }
 
 WAVE_INLINE vec3 Add3(vec3 a, vec3 b)
 {
-	vec3 r;
-	r.x = a.x + b.x;
-	r.y = a.y + b.y;
-	r.z = a.z + b.z;
-	return r;
+	return Add3P(&a, &b);
 }
 
 WAVE_INLINE vec3 Sub3(vec3 a, vec3 b)
 {
-	vec3 r;
-	r.x = a.x - b.x;
-	r.y = a.y - b.y;
-	r.z = a.z - b.z;
-	return r;
+	return Sub3P(&a, &b);
 }
 
 WAVE_INLINE vec3 Mul3(vec3 a, vec3 b)
 {
-	vec3 r;
-	r.x = a.x * b.x;
-	r.y = a.y * b.y;
-	r.z = a.z * b.z;
-	return r;
+	return Mul3P(&a, &b);
 }
 
 WAVE_INLINE vec3 Div3(vec3 a, vec3 b)
 {
-	vec3 r;
-	r.x = a.x / b.x;
-	r.y = a.y / b.y;
-	r.z = a.z / b.z;
-	return r;
+	return Div3P(&a, &b);
 }
 
 WAVE_INLINE vec4 Add4(vec4 a, vec4 b)
@@ -612,14 +616,14 @@ WAVE_INLINE vec4 Div4(vec4 a, vec4 b)
 	return Add4P(&a, &b);
 }
 
-WAVE_INLINE float Length3(vec3 v)
-{
-	return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
-}
-
 WAVE_INLINE float Length3P(vec3* v)
 {
 	return sqrtf((v->x * v->x) + (v->y * v->y) + (v->z * v->z));
+}
+
+WAVE_INLINE float Length3(vec3 v)
+{
+	return Length3P(&v);
 }
 
 WAVE_INLINE float Length4P(vec4* v)
@@ -633,6 +637,11 @@ WAVE_INLINE float Length4P(vec4* v)
 #else
 	return sqrtf((v->x * v->x) + (v->y * v->y) + (v->z * v->z) + (v->w * v->w));
 #endif	
+}
+
+WAVE_INLINE float Length4(vec4 v)
+{
+	return Length4P(&v);
 }
 
 WAVE_INLINE vec2 Reflect2(vec2* v, vec2* n)
@@ -652,7 +661,7 @@ WAVE_INLINE vec3 Reflect3(vec3* v, vec3* n)
 	return r;
 }
 
-float GetDistanceVec2(vec2* a, vec2* b)
+float GetDistanceVec2P(vec2* a, vec2* b)
 {
 	register float DX = a->x - b->x;
 	register float DY = a->y - b->y;
@@ -663,17 +672,9 @@ float GetDistanceVec2(vec2* a, vec2* b)
 	return sqrtf(DX + DY);
 }
 
-float GetDistanceVec3(vec3 a, vec3 b)
+WAVE_INLINE float GetDistanceVec2(vec2 a, vec2 b)
 {
-	register float DX = a.x - b.x;
-	register float DY = a.y - b.y;
-	register float DZ = a.z - b.z;
-
-	DX *= DX;
-	DY *= DY;
-	DZ *= DZ;
-
-	return sqrtf(DX + DY + DZ);
+	return GetDistanceVec2P(&a, &b);
 }
 
 float GetDistanceVec3P(vec3* a, vec3* b)
@@ -688,6 +689,13 @@ float GetDistanceVec3P(vec3* a, vec3* b)
 
 	return sqrtf(DX + DY + DZ);
 }
+
+WAVE_INLINE float GetDistanceVec3(vec3 a, vec3 b)
+{
+	return GetDistanceVec3P(&a, &b);
+}
+
+
 
 WAVE_INLINE vec2 Vec2(float x, float y)
 {
@@ -883,7 +891,7 @@ vec4 MultiplyVec4Mat4(mat4 m, vec4 v)
 mat4 TranslateMat4P(mat4* m, vec3* v)
 {
 	mat4 Matrix;
-
+	/*
 	Matrix.m[0][0] = 1.0;
 	Matrix.m[1][0] = 0.0;
 	Matrix.m[2][0] = 0.0;
@@ -903,12 +911,19 @@ mat4 TranslateMat4P(mat4* m, vec3* v)
 	Matrix.m[1][3] = 0.0;
 	Matrix.m[2][3] = 0.0;
 	Matrix.m[3][3] = 1.0;
+	*/
+
+	Vec4P(1.0, 0.0, 0.0, 0.0, &Matrix.Fast[0]);
+	Vec4P(0.0, 1.0, 0.0, 0.0, &Matrix.Fast[1]);
+	Vec4P(0.0, 0.0, 1.0, 0.0, &Matrix.Fast[2]);
+	Vec4P(v->x, v->y, v->z, 1.0, &Matrix.Fast[3]);
 
 	return MultiplyMat4P(&Matrix, m);
 }
 
-mat4 TranslateMat4(mat4 m, vec3 v)
+WAVE_INLINE mat4 TranslateMat4(mat4 m, vec3 v)
 {
+	/*
 	mat4 Matrix;
 
 	Matrix.m[0][0] = 1.0;
@@ -932,12 +947,15 @@ mat4 TranslateMat4(mat4 m, vec3 v)
 	Matrix.m[3][3] = 1.0;
 
 	return MultiplyMat4P(&Matrix, &m);
+	*/
+
+	return TranslateMat4P(&m, &v);
 }
 
 mat4 ScaleMat4P(mat4* m, vec3* v)
 {
 	mat4 Matrix;
-
+	/*
 	Matrix.m[0][0] = v->x;
 	Matrix.m[1][0] = 0.0;
 	Matrix.m[2][0] = 0.0;
@@ -957,12 +975,19 @@ mat4 ScaleMat4P(mat4* m, vec3* v)
 	Matrix.m[1][3] = 0.0;
 	Matrix.m[2][3] = 0.0;
 	Matrix.m[3][3] = 1.0;
+	*/
+
+	Vec4P(v->x, 0.0, 0.0, 0.0, &Matrix.Fast[0]);
+	Vec4P(0.0, v->y, 0.0, 0.0, &Matrix.Fast[1]);
+	Vec4P(0.0, 0.0, v->z, 0.0, &Matrix.Fast[2]);
+	Vec4P(0.0, 0.0, 0.0, 1.0, &Matrix.Fast[3]);
 
 	return MultiplyMat4P(&Matrix, m);
 }
 
-mat4 ScaleMat4(mat4 m, vec3 v)
+WAVE_INLINE mat4 ScaleMat4(mat4 m, vec3 v)
 {
+	/*
 	mat4 Matrix;
 
 	Matrix.m[0][0] = v.x;
@@ -986,6 +1011,9 @@ mat4 ScaleMat4(mat4 m, vec3 v)
 	Matrix.m[3][3] = 1.0;
 
 	return MultiplyMat4P(&Matrix, &m);
+	*/
+
+	return ScaleMat4P(&m, &v);
 }
 /*
 void RotateMat4(mat4* m, float Angle, float x, float y, float z)
@@ -1027,25 +1055,10 @@ mat4 RotateXMat4P(mat4* m, float Angle)
 	register float Cos = cosf(Angle);
 	register float Sin = sinf(Angle);
 
-	Matrix.m[0][0] = 1.0;
-	Matrix.m[1][0] = 0.0;
-	Matrix.m[2][0] = 0.0;
-	Matrix.m[3][0] = 0.0;
-
-	Matrix.m[0][1] = 0.0;
-	Matrix.m[1][1] = Cos;
-	Matrix.m[2][1] = -Sin;
-	Matrix.m[3][1] = 0.0;
-
-	Matrix.m[0][2] = 0.0;
-	Matrix.m[1][2] = Sin;
-	Matrix.m[2][2] = Cos;
-	Matrix.m[3][2] = 0.0;
-
-	Matrix.m[0][3] = 0.0;
-	Matrix.m[1][3] = 0.0;
-	Matrix.m[2][3] = 0.0;
-	Matrix.m[3][3] = 1.0;
+	Vec4P(1.0, 0.0, 0.0, 0.0, &Matrix.Fast[0]);
+	Vec4P(0.0, Cos, Sin, 0.0, &Matrix.Fast[1]);
+	Vec4P(0.0, -Sin, Cos, 0.0, &Matrix.Fast[2]);
+	Vec4P(0.0, 0.0, 0.0, 1.0, &Matrix.Fast[3]);
 
 	return MultiplyMat4P(&Matrix, m);
 }
@@ -1057,25 +1070,10 @@ mat4 RotateYMat4P(mat4* m, float Angle)
 	register float Cos = cosf(Angle);
 	register float Sin = sinf(Angle);
 
-	Matrix.m[0][0] = Cos;
-	Matrix.m[1][0] = 0.0;
-	Matrix.m[2][0] = Sin;
-	Matrix.m[3][0] = 0.0;
-
-	Matrix.m[0][1] = 0.0;
-	Matrix.m[1][1] = 1.0;
-	Matrix.m[2][1] = 0.0;
-	Matrix.m[3][1] = 0.0;
-
-	Matrix.m[0][2] = -Sin;
-	Matrix.m[1][2] = 0.0;
-	Matrix.m[2][2] = Cos;
-	Matrix.m[3][2] = 0.0;
-
-	Matrix.m[0][3] = 0.0;
-	Matrix.m[1][3] = 0.0;
-	Matrix.m[2][3] = 0.0;
-	Matrix.m[3][3] = 1.0;
+	Vec4P(Cos, 0.0, -Sin, 0.0, &Matrix.Fast[0]);
+	Vec4P(0.0, 1.0, 0.0, 0.0, &Matrix.Fast[1]);
+	Vec4P(Sin, 0.0, Cos, 0.0, &Matrix.Fast[2]);
+	Vec4P(0.0, 0.0, 0.0, 1.0, &Matrix.Fast[3]);
 
 	return MultiplyMat4P(&Matrix, m);
 }
@@ -1087,149 +1085,27 @@ mat4 RotateZMat4P(mat4* m, float Angle)
 	register float Cos = cosf(Angle);
 	register float Sin = sinf(Angle);
 
-	Matrix.m[0][0] = Cos;
-	Matrix.m[1][0] = -Sin;
-	Matrix.m[2][0] = 0.0;
-	Matrix.m[3][0] = 0.0;
-
-	Matrix.m[0][1] = Sin;
-	Matrix.m[1][1] = Cos;
-	Matrix.m[2][1] = 0.0;
-	Matrix.m[3][1] = 0.0;
-
-	Matrix.m[0][2] = 0.0;
-	Matrix.m[1][2] = 0.0;
-	Matrix.m[2][2] = 1.0;
-	Matrix.m[3][2] = 0.0;
-
-	Matrix.m[0][3] = 0.0;
-	Matrix.m[1][3] = 0.0;
-	Matrix.m[2][3] = 0.0;
-	Matrix.m[3][3] = 1.0;
+	Vec4P(Cos, Sin, 0.0, 0.0, &Matrix.Fast[0]);
+	Vec4P(-Sin, Cos, 0.0, 0.0, &Matrix.Fast[1]);
+	Vec4P(0.0, 0.0, 1.0, 0.0, &Matrix.Fast[2]);
+	Vec4P(0.0, 0.0, 0.0, 1.0, &Matrix.Fast[3]);
 
 	return MultiplyMat4P(&Matrix, m);
 }
 
-mat4 RotateXMat4(mat4 m, float Angle)
+WAVE_INLINE mat4 RotateXMat4(mat4 m, float Angle)
 {
-	mat4 Matrix;
-
-	register float Cos = cosf(Angle);
-	register float Sin = sinf(Angle);
-
-	Matrix.m[0][0] = 1.0;
-	Matrix.m[1][0] = 0.0;
-	Matrix.m[2][0] = 0.0;
-	Matrix.m[3][0] = 0.0;
-
-	Matrix.m[0][1] = 0.0;
-	Matrix.m[1][1] = Cos;
-	Matrix.m[2][1] = -Sin;
-	Matrix.m[3][1] = 0.0;
-
-	Matrix.m[0][2] = 0.0;
-	Matrix.m[1][2] = Sin;
-	Matrix.m[2][2] = Cos;
-	Matrix.m[3][2] = 0.0;
-
-	Matrix.m[0][3] = 0.0;
-	Matrix.m[1][3] = 0.0;
-	Matrix.m[2][3] = 0.0;
-	Matrix.m[3][3] = 1.0;
-
-	return MultiplyMat4P(&Matrix, &m);
+	return RotateXMat4P(&m, Angle);
 }
 
-mat4 RotateYMat4(mat4 m, float Angle)
+WAVE_INLINE mat4 RotateYMat4(mat4 m, float Angle)
 {
-	mat4 Matrix;
-
-	register float Cos = cosf(Angle);
-	register float Sin = sinf(Angle);
-
-	Matrix.m[0][0] = Cos;
-	Matrix.m[1][0] = 0.0;
-	Matrix.m[2][0] = Sin;
-	Matrix.m[3][0] = 0.0;
-
-	Matrix.m[0][1] = 0.0;
-	Matrix.m[1][1] = 1.0;
-	Matrix.m[2][1] = 0.0;
-	Matrix.m[3][1] = 0.0;
-
-	Matrix.m[0][2] = -Sin;
-	Matrix.m[1][2] = 0.0;
-	Matrix.m[2][2] = Cos;
-	Matrix.m[3][2] = 0.0;
-
-	Matrix.m[0][3] = 0.0;
-	Matrix.m[1][3] = 0.0;
-	Matrix.m[2][3] = 0.0;
-	Matrix.m[3][3] = 1.0;
-
-	return MultiplyMat4P(&Matrix, &m);
+	return RotateYMat4P(&m, Angle);
 }
 
-mat4 RotateZMat4(mat4 m, float Angle)
+WAVE_INLINE mat4 RotateZMat4(mat4 m, float Angle)
 {
-	mat4 Matrix;
-
-	register float Cos = cosf(Angle);
-	register float Sin = sinf(Angle);
-
-	Matrix.m[0][0] = Cos;
-	Matrix.m[1][0] = -Sin;
-	Matrix.m[2][0] = 0.0;
-	Matrix.m[3][0] = 0.0;
-
-	Matrix.m[0][1] = Sin;
-	Matrix.m[1][1] = Cos;
-	Matrix.m[2][1] = 0.0;
-	Matrix.m[3][1] = 0.0;
-
-	Matrix.m[0][2] = 0.0;
-	Matrix.m[1][2] = 0.0;
-	Matrix.m[2][2] = 1.0;
-	Matrix.m[3][2] = 0.0;
-
-	Matrix.m[0][3] = 0.0;
-	Matrix.m[1][3] = 0.0;
-	Matrix.m[2][3] = 0.0;
-	Matrix.m[3][3] = 1.0;
-
-	return MultiplyMat4P(&Matrix, &m);
-}
-
-mat4 LookAtMat4(vec3 Pos, vec3 LookAt, vec3 Up)
-{
-	mat4 Matrix;
-
-	vec3 Z = Normalize3(Sub3P(&LookAt, &Pos));
-	vec3 X = Normalize3(Cross3P(&Z, &Up));
-	vec3 Y = Cross3P(&X, &Z);
-
-	Z.x *= -1;
-	Z.y *= -1;
-	Z.z *= -1;
-
-	Matrix.m[0][0] = X.x;
-	Matrix.m[1][0] = X.y;
-	Matrix.m[2][0] = X.z;
-	Matrix.m[3][0] = -Dot3P(&X, &Pos);
-	Matrix.m[0][1] = Y.x;
-	Matrix.m[1][1] = Y.y;
-	Matrix.m[2][1] = Y.z;
-	Matrix.m[3][1] = -Dot3P(&Y, &Pos);
-	Matrix.m[0][2] = Z.x;
-	Matrix.m[1][2] = Z.y;
-	Matrix.m[2][2] = Z.z;
-	Matrix.m[3][2] = -Dot3P(&Z, &Pos);
-	Matrix.m[0][3] = 0;
-	Matrix.m[1][3] = 0;
-	Matrix.m[2][3] = 0;
-	Matrix.m[3][3] = 1.0;
-
-	return Matrix;
+	return RotateZMat4P(&m, Angle);
 }
 
 mat4 LookAtMat4P(vec3* Pos, vec3* LookAt, vec3* Up)
@@ -1264,32 +1140,10 @@ mat4 LookAtMat4P(vec3* Pos, vec3* LookAt, vec3* Up)
 	return Matrix;
 }
 
-mat4 PerspectiveMat4(float Aspect, float FOV, float NearPlane, float FarPlane)
+
+mat4 LookAtMat4(vec3 Pos, vec3 LookAt, vec3 Up)
 {
-	register float F = 1.0 / tanf(0.5 * FOV);
-
-	mat4 Matrix;
-	Matrix.m[0][0] = F / Aspect;
-	Matrix.m[0][1] = 0.0;
-	Matrix.m[0][2] = 0.0;
-	Matrix.m[0][3] = 0.0;
-
-	Matrix.m[1][0] = 0.0;
-	Matrix.m[1][1] = -F;
-	Matrix.m[1][2] = 0.0;
-	Matrix.m[1][3] = 0.0;
-
-	Matrix.m[2][0] = 0.0;
-	Matrix.m[2][1] = 0.0;
-	Matrix.m[2][2] = FarPlane / (NearPlane - FarPlane);
-	Matrix.m[2][3] = -1.0;
-
-	Matrix.m[3][0] = 0.0;
-	Matrix.m[3][1] = 0.0;
-	Matrix.m[3][2] = (NearPlane * FarPlane) / (NearPlane - FarPlane);
-	Matrix.m[3][3] = 0.0;
-
-	return Matrix;
+	return LookAtMat4P(&Pos, &LookAt, &Up);
 }
 
 void PerspectiveMat4P(float Aspect, float FOV, float NearPlane, float FarPlane, mat4* m)
@@ -1317,30 +1171,11 @@ void PerspectiveMat4P(float Aspect, float FOV, float NearPlane, float FarPlane, 
 	m->m[3][3] = 0.0;
 }
 
-mat4 OrthoMat4(float Left, float Right, float Bottom, float Top, float NearZ, float FarZ)
+
+mat4 PerspectiveMat4(float Aspect, float FOV, float NearPlane, float FarPlane)
 {
 	mat4 m;
-
-	m.m[0][0] = 2 / (Right - Left);
-	m.m[1][0] = 0.0;
-	m.m[2][0] = 0.0;
-	m.m[3][0] = -(Right + Left) / (Right - Left);
-
-	m.m[0][1] = 0.0;
-	m.m[1][1] = 2 / (Top - Bottom);
-	m.m[2][1] = 0.0;
-	m.m[3][1] = -(Top + Bottom) / (Top - Bottom);
-
-	m.m[0][2] = 0.0;
-	m.m[1][2] = 0.0;
-	m.m[2][2] = -1 / (FarZ - NearZ);
-	m.m[3][2] = -NearZ / (FarZ - NearZ);
-
-	m.m[0][3] = 0.0;
-	m.m[1][3] = 0.0;
-	m.m[2][3] = 0.0;
-	m.m[3][3] = 1.0;
-
+	PerspectiveMat4P(Aspect, FOV, NearPlane, FarPlane, &m);
 	return m;
 }
 
@@ -1365,6 +1200,13 @@ void OrthoMat4P(float Left, float Right, float Bottom, float Top, float NearZ, f
 	m->m[1][3] = 0.0;
 	m->m[2][3] = 0.0;
 	m->m[3][3] = 1.0;
+}
+
+mat4 OrthoMat4(float Left, float Right, float Bottom, float Top, float NearZ, float FarZ)
+{
+	mat4 m;
+	OrthoMat4P(Left, Right, Bottom, Top, NearZ, FarZ, &m);
+	return m;
 }
 
 mat4 MulMat4Float(mat4 m, float f)

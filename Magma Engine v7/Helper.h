@@ -8,6 +8,14 @@
 #define MAX_CHAR_PATH_LENGTH 4096
 #define MAX_CHAR_SCRIPT_LENGTH 1048576
 
+//Just use for stack allocated strings in dst!!!
+//This is like strcpy but it checks if buffer size is not overrun
+#define strcpycut(dst, src) do { strncpy(dst, src, ARRAY_SIZE(dst)); dst[ARRAY_SIZE(dst) - 1] = '\0'; } while (0)
+
+//Just use for stack allocated strings in Buffer!!!
+//This one always adds a null terminator at the end!
+#define ssprintf(Buffer, Format, ...) do { snprintf(Buffer, ARRAY_SIZE(Buffer), Format, __VA_ARGS__); Buffer[ARRAY_SIZE(Buffer) - 1] = '\0'; } while (0)
+
 #define ERROR32 UINT32_MAX
 
 #define true 1
@@ -59,7 +67,7 @@ Mtx Mutex;
 
 float GetDeltaTime()
 {
-	float CurrentTime = (float)SDL_GetTicks() / 1000.0;
+	float CurrentTime = (float)SDL_GetTicks() / 1000.0f;
 	DeltaTime = CurrentTime - LastTime;
 	LastTime = CurrentTime;
 	

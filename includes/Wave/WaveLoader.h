@@ -344,12 +344,6 @@ extern inline char* WaveStrtok(char* Str, const char Delimiter)
 
 void WaveGenUVs(WaveVertexData* Vertex)
 {
-	float MinX = 1000000000.0;
-	float MaxX = -1000000000.0;
-
-	float MinY = 1000000000.0;
-	float MaxY = -1000000000.0;
-
 	float TempUVsqrt = sqrtf(Vertex->Vertices.x * Vertex->Vertices.x + Vertex->Vertices.y * Vertex->Vertices.y + Vertex->Vertices.z * Vertex->Vertices.z);
 	Vertex->TexCoords.x = sinf(cosf(Vertex->Vertices.x / TempUVsqrt));
 	Vertex->TexCoords.y = sinf(sinf(Vertex->Vertices.y / TempUVsqrt));
@@ -807,6 +801,8 @@ WAVE_BOOL WaveRemoveRedundantMaterials(WaveModelData* ModelData)
 	*/
 
 //	qsort(ModelData->Materials, ModelData->MaterialCount, sizeof(WaveModelMaterial), WaveCompareMaterials);
+
+	return WAVE_TRUE;
 }
 
 void WaveGenAABBs(WaveModelData* ModelData)
@@ -817,15 +813,15 @@ void WaveGenAABBs(WaveModelData* ModelData)
 
 		Data->AABB.Min = Data->Vertices[0].Vertices;
 		Data->AABB.Max = Data->Vertices[0].Vertices;
-		for (uint32_t i = 1; i < Data->VertexCount; i++)
+		for (uint32_t j = 1; j < Data->VertexCount; j++)
 		{
-			if (Data->Vertices[i].Vertices.x > Data->AABB.Max.x) Data->AABB.Max.x = Data->Vertices[i].Vertices.x;
-			if (Data->Vertices[i].Vertices.y > Data->AABB.Max.y) Data->AABB.Max.y = Data->Vertices[i].Vertices.y;
-			if (Data->Vertices[i].Vertices.z > Data->AABB.Max.z) Data->AABB.Max.z = Data->Vertices[i].Vertices.z;
-
-			if (Data->Vertices[i].Vertices.x < Data->AABB.Min.x) Data->AABB.Min.x = Data->Vertices[i].Vertices.x;
-			if (Data->Vertices[i].Vertices.y < Data->AABB.Min.y) Data->AABB.Min.y = Data->Vertices[i].Vertices.y;
-			if (Data->Vertices[i].Vertices.z < Data->AABB.Min.z) Data->AABB.Min.z = Data->Vertices[i].Vertices.z;
+			if (Data->Vertices[j].Vertices.x > Data->AABB.Max.x) Data->AABB.Max.x = Data->Vertices[j].Vertices.x;
+			if (Data->Vertices[j].Vertices.y > Data->AABB.Max.y) Data->AABB.Max.y = Data->Vertices[j].Vertices.y;
+			if (Data->Vertices[j].Vertices.z > Data->AABB.Max.z) Data->AABB.Max.z = Data->Vertices[j].Vertices.z;
+							   																	   
+			if (Data->Vertices[j].Vertices.x < Data->AABB.Min.x) Data->AABB.Min.x = Data->Vertices[j].Vertices.x;
+			if (Data->Vertices[j].Vertices.y < Data->AABB.Min.y) Data->AABB.Min.y = Data->Vertices[j].Vertices.y;
+			if (Data->Vertices[j].Vertices.z < Data->AABB.Min.z) Data->AABB.Min.z = Data->Vertices[j].Vertices.z;
 		}
 	}
 }

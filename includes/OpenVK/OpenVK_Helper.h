@@ -274,10 +274,10 @@ typedef struct
 	uint32_t*	ShaderAttributeFormats;
 	uint32_t*	ShaderAttributeOffsets;
 	uint32_t	PrimitiveTopology;
-	uint32_t	x;
-	uint32_t	y;
-	uint32_t	Width;
-	uint32_t	Height;
+	float		x;
+	float		y;
+	float		Width;
+	float		Height;
 	OpenVkBool	DepthClamp;
 	uint32_t	PolygonMode;
 	float		LineWidth;
@@ -366,7 +366,8 @@ void OpenVkRuntimeInfo(const char* Msg, const char* Val)
 OpenVkBool OpenVkRuntimeWarning(const char* Msg, ...)
 {
 	char Buf[2048];
-	sprintf(Buf, "\x1B[93m[Renderer Warning]\033[0m\t%s\n", Msg);
+	snprintf(Buf, 2048, "\x1B[93m[Renderer Warning]\033[0m\t%s\n", Msg);
+	Buf[2047] = '\0';
 
 	va_list ArgList;
 	va_start(ArgList, Msg);
@@ -380,7 +381,8 @@ OpenVkBool OpenVkRuntimeWarning(const char* Msg, ...)
 OpenVkBool OpenVkRuntimeError(const char* Msg, ...)
 {
 	char Buf[2048];
-	sprintf(Buf, "\x1B[91m[Renderer Error]\033[0m\t%s\n", Msg);
+	snprintf(Buf, 2048, "\x1B[91m[Renderer Error]\033[0m\t%s\n", Msg);
+	Buf[2047] = '\0';
 
 	va_list ArgList;
 	va_start(ArgList, Msg);
@@ -399,6 +401,16 @@ void* OpenVkMalloc(size_t Size)
 
 	return Mem;
 }
+
+void* OpenVkCalloc(size_t Count, size_t Size)
+{
+	void* Mem = calloc(Count, Size);
+	if (Mem == NULL)
+		OpenVkRuntimeError("Failed to clear allocate Memory!");
+
+	return Mem;
+}
+
 
 void* OpenVkRealloc(void* Data, size_t Size)
 {

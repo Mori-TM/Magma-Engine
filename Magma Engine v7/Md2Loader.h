@@ -102,7 +102,7 @@ namespace Md2
 
 	void Normalize(glVec3* v)
 	{
-		register float Length = FastInverseSqrt(v->P[0] * v->P[0] + v->P[1] * v->P[1] + v->P[2] * v->P[2]);
+		float Length = FastInverseSqrt(v->P[0] * v->P[0] + v->P[1] * v->P[1] + v->P[2] * v->P[2]);
 		v->P[0] *= Length;
 		v->P[1] *= Length;
 		v->P[2] *= Length;

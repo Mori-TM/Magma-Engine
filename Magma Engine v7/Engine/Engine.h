@@ -51,7 +51,7 @@ void PushEventSDL(UINT32 Type, UINT32 Key)
 }
  
 //template <typename T>
-void CheckForSameNames(CMA_MemoryZone* MemZone, const char* NameToSearch, char* NewName)
+void CheckForSameNames(CMA_MemoryZone* MemZone, size_t MaxSize, const char* NameToSearch, char* NewName)
 {
 	uint32_t Count = 0;
 	for (uint32_t i = 0; i < MemZone->Size; i++)
@@ -67,9 +67,11 @@ void CheckForSameNames(CMA_MemoryZone* MemZone, const char* NameToSearch, char* 
 	}
 
 	if (Count > 0)
-		sprintf(NewName, "%s (%d)", NameToSearch, Count);
+		snprintf(NewName, MaxSize, "%s (%d)", NameToSearch, Count);
 	else
-		strcpy(NewName, NameToSearch);
+		strncpy(NewName, NameToSearch, MaxSize);
+
+	NewName[MaxSize - 1] = '\0';
 }
 
 void ResetSceneSettings()

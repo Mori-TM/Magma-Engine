@@ -28,6 +28,21 @@ const char* ComponentNames[] =
 
 typedef enum
 {
+	LIGHT_POINT = 0,
+	LIGHT_DIRECTIONAL,
+	LIGHT_SPOT,
+	LIGHT_COUNT
+} LightTypes;
+
+const char* LightNames[] =
+{
+	"Point",
+	"Directional",
+	"Spot"
+};
+
+typedef enum
+{
 	COLLIDER_BOX = 0,
 	COLLIDER_SPHERE,
 	COLLIDER_CYLINDER,
@@ -88,7 +103,7 @@ typedef struct
 	char Name[MAX_CHAR_NAME_LENGTH];
 	vec3 Color;
 	float Strength;
-	uint32_t Type;
+	LightTypes Type;
 	bool CastShadow;
 } LightComponent;
 
@@ -96,6 +111,8 @@ typedef struct
 {
 	char Name[MAX_CHAR_NAME_LENGTH];
 	ColliderTypes Collider;
+	float Friction;
+	float Bounciness;
 } ColliderComponent;
 
 typedef struct
@@ -191,7 +208,7 @@ float MaterialOcclusion = 1.0;
 
 void SetDefaultMaterial(SceneMaterial* Material, const char* Name)
 {
-	strcpy(Material->Name, Name);
+	strcpycut(Material->Name, Name);
 	Material->Color = MaterialColor;
 	Material->Metallic = MaterialMetallic;
 	Material->Roughness = MaterialRoughness;
@@ -236,7 +253,7 @@ void ResetEntityLight(EntityInfo* Entity)
 	strcpy(Entity->Light.Name, "None");
 	Entity->Light.Color = Vec3f(1.0);
 	Entity->Light.Strength = 1.0;
-	Entity->Light.Type = 0;
+	Entity->Light.Type = LIGHT_POINT;
 	Entity->Light.CastShadow = false;
 }
 
@@ -253,7 +270,7 @@ uint32_t AddEntity(uint32_t UsedComponent)
 
 	Mutex.lock();
 	EntityInfo Entity;
-	memset(Entity.UsedComponents, 0, ARRAY_SIZE(Entity.UsedComponents));
+	memset(Entity.UsedComponents, 0, COMPONENT_COUNT);
 //	for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
 //		Entity.UsedComponents[i] = false;
 
@@ -277,9 +294,9 @@ uint32_t AddEntity(uint32_t UsedComponent)
 			Count++;
 
 	if (Count > 0)
-		sprintf(Entity.Name, "Entity (%d)", Count);
+		ssprintf(Entity.Name, "Entity (%d)", Count);
 	else
-		strcpy(Entity.Name, "Entity");
+		strcpycut(Entity.Name, "Entity");
 
 //	Entities = (EntityInfo*)realloc(Entities, (EntityCount + 1) * sizeof(EntityInfo));
 //	if (EntitiesCheckForResize())
@@ -306,7 +323,7 @@ void AddMeshToEntity(uint32_t EntityIndex, uint32_t MeshIndex)
 uint32_t AddMesh(const char* Name, SceneMesh* MeshInfo)
 {
 	Mutex.lock();
-	CheckForSameNames(&SceneMeshes, Name, MeshInfo->Name);
+	CheckForSameNames(&SceneMeshes, ARRAY_SIZE(MeshInfo->Name), Name, MeshInfo->Name);
 
 	SelectedMesh = CMA_Push(&SceneMeshes, MeshInfo);
 	Mutex.unlock();
@@ -319,7 +336,7 @@ uint32_t AddMaterial()
 	SceneMaterial Material;
 	SetDefaultMaterial(&Material, MaterialName);
 
-	CheckForSameNames(&SceneMaterials, MaterialName, Material.Name);
+	CheckForSameNames(&SceneMaterials, ARRAY_SIZE(Material.Name), MaterialName, Material.Name);
 
 	SelectedMaterial = CMA_Push(&SceneMaterials, &Material);
 
@@ -538,7 +555,7 @@ uint32_t AddTexture(char* Path, bool ShowInAssetBrowser)
 	strcpy(Image.Path, Path);
 
 	char* Name = GetFileNameFromPath(Path);
-	CheckForSameNames(&SceneTextures, Name, Image.Name);
+	CheckForSameNames(&SceneTextures, ARRAY_SIZE(Image.Name), Name, Image.Name);
 
 	SelectedTexture = CMA_Push(&SceneTextures, &Image);
 
@@ -561,24 +578,28 @@ uint32_t AddAnimation(char* Path, int32_t TexWidth, int32_t TexHeight)
 	strcpy(Animation.Path, Path);
 
 	char* Name = GetFileNameFromPath(Path);
-	CheckForSameNames(&SceneAnimations, Name, Animation.Name);
+	CheckForSameNames(&SceneAnimations, ARRAY_SIZE(Animation.Name), Name, Animation.Name);
 
 	SelectedAnimation = CMA_Push(&SceneAnimations, &Animation);
 	
 	return SelectedAnimation;
 }
 
-//Fix memory
 void AddScript()
 {
-	SceneScripts = (SceneScript*)realloc(SceneScripts, (SceneScriptCount + 1) * sizeof(SceneScript));
+	SceneScript* NewScripts = (SceneScript*)realloc(SceneScripts, (SceneScriptCount + 1) * sizeof(SceneScript));
+	if (!NewScripts)
+		return;
+
+	SceneScripts = NewScripts;
+
 	SelectedScript = SceneScriptCount;
 
 	char* ScriptName = (char*)"Script";
 	char* Script = (char*)"function Start()\nend\n\nfunction Update()\n\tx, y, z, rx, ry, rz, sx, sy, sz = GetEntity(\"Entity\")\n\tprint(x, y, z, rx, ry, rz, sx, sy, sz)\nend";
-	strcpy(SceneScripts[SceneScriptCount].Name, ScriptName);
-	strcpy(SceneScripts[SceneScriptCount].Path, "None");
-	strcpy(SceneScripts[SceneScriptCount].Script, Script);
+	strcpycut(SceneScripts[SceneScriptCount].Name, ScriptName);
+	strcpycut(SceneScripts[SceneScriptCount].Path, "None");
+	strcpycut(SceneScripts[SceneScriptCount].Script, Script);
 
 	uint32_t Count = 0;
 	for (uint32_t i = 0; i < SceneScriptCount; i++)
@@ -586,9 +607,9 @@ void AddScript()
 			Count++;
 
 	if (Count > 0)
-		sprintf(SceneScripts[SceneScriptCount].Name, "%s (%d)", ScriptName, Count);
+		ssprintf(SceneScripts[SceneScriptCount].Name, "%s (%d)", ScriptName, Count);
 	else
-		strcpy(SceneScripts[SceneScriptCount].Name, ScriptName);
+		strcpycut(SceneScripts[SceneScriptCount].Name, ScriptName);
 
 	SceneScriptCount++;
 }
@@ -718,6 +739,7 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 	MeshInfo->VertexBuffer = OpenVkCreateVertexBuffer(VertexCount * sizeof(SceneVertex), Vertices);
 	if (MeshInfo->VertexBuffer == OPENVK_ERROR)
 	{
+		printf("Failed to allocate Vertex buffer for: %s, count: %d\n", Path, VertexCount);
 		free(Vertices);
 		free(Indices);
 		return false;
@@ -726,20 +748,24 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 	MeshInfo->IndexBuffer = OpenVkCreateIndexBuffer(IndexCount * sizeof(uint32_t), Indices);
 	if (MeshInfo->IndexBuffer == OPENVK_ERROR)
 	{
+		printf("Failed to allocate Index buffer for: %s, count: %d\n", Path, IndexCount);
 		free(Vertices);
 		free(Indices);
+		OpenVkDestroyBuffer(MeshInfo->VertexBuffer);
 		return false;
 	}
 
 	free(Vertices);
 	free(Indices);
+
+	return true;
 }
 
 uint32_t AddModel(uint32_t Settings, const char* FileName)
 {
 	char LastPath[MAX_CHAR_PATH_LENGTH];
 	char Path[MAX_CHAR_PATH_LENGTH];
-	strcpy(Path, FileName);
+	strcpycut(Path, FileName);
 	for (uint32_t i = strlen(FileName) - 1; i > 0; i--)
 		if (Path[i] == '\\' || Path[i] == '/')
 		{
@@ -771,11 +797,19 @@ uint32_t AddModel(uint32_t Settings, const char* FileName)
 
 	WaveModelData Model = WaveLoadModel(FileName, Settings);
 	if (Model.MeshCount == 0)
+	{
+		printf("Failed to load Model correctly\n");
 		return ERROR32;
+	}
+		
 
 	uint32_t MeshIndex = ERROR32;
 	if (LoadModelWave(FileName, &Model, &MeshInfo))
 		MeshIndex = AddMesh(GetFileNameFromPath((char*)FileName), &MeshInfo);
+	else
+	{
+		printf("Failed to parse Model\n");
+	}
 
 	WaveFreeModel(&Model);
 

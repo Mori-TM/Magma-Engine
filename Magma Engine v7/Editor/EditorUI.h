@@ -691,7 +691,7 @@ void EngineDrawEditor()
 			for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
 			{
 				char Name[64];
-				sprintf(Name, "Cascade %d", i);
+				ssprintf(Name, "Cascade %d", i);
 				ImGui::PushID(Name);
 				ImGui::SetCursorPosX(33);
 				if (ImGui::CollapsingHeader(Name))

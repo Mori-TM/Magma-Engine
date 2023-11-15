@@ -629,7 +629,7 @@ OpenVkBool VkCreateImage(uint32_t Width, uint32_t Height, uint32_t MipLevels, Vk
 	AllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	AllocateInfo.pNext = NULL;
 	AllocateInfo.allocationSize = MemoryRequirements.size;
-	AllocateInfo.memoryTypeIndex = VkFindMemoryType(MemoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	AllocateInfo.memoryTypeIndex = VkFindMemoryType(MemoryRequirements.memoryTypeBits, Properties);
 
 	if (vkAllocateMemory(VkRenderer.Device, &AllocateInfo, NULL, ImageMemory) != VK_SUCCESS)
 		return OpenVkRuntimeError("Failed to Allocate Image Memory");

@@ -37,7 +37,7 @@ void UpdateFpsCamera(vec3* CameraPos, vec3* CameraFront, vec3* CameraUp)
 	CameraInfo.DeltaTime = CurrentFrame - CameraInfo.LastTime;
 	CameraInfo.LastTime = CurrentFrame;
 
-	CameraInfo.DeltaTime *= 0.6;
+	CameraInfo.DeltaTime *= 0.6f;
 
 	int32_t MouseX;
 	int32_t MouseY;
@@ -46,11 +46,11 @@ void UpdateFpsCamera(vec3* CameraPos, vec3* CameraFront, vec3* CameraUp)
 	uint32_t MouseState = SDL_GetMouseState(&MouseX, &MouseY);
 
 	if (State[SDL_SCANCODE_LSHIFT])
-		CameraInfo.DeltaTime *= 0.06 * CameraInfo.Speed;
+		CameraInfo.DeltaTime *= 0.06f * CameraInfo.Speed;
 	else if (State[SDL_SCANCODE_LCTRL])
-		CameraInfo.DeltaTime *= 0.01 * CameraInfo.Speed;
+		CameraInfo.DeltaTime *= 0.01f * CameraInfo.Speed;
 	else
-		CameraInfo.DeltaTime *= 0.03 * CameraInfo.Speed;
+		CameraInfo.DeltaTime *= 0.03f * CameraInfo.Speed;
 
 	vec3 CamerSpeed = { CameraInfo.DeltaTime, CameraInfo.DeltaTime, CameraInfo.DeltaTime };
 	

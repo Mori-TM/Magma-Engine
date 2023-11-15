@@ -10,7 +10,7 @@ void EditorEntities()
 			Entities[SelectedEntity].Selected = true;
 
 			char Buffer[2048];
-			sprintf(Buffer, "%d %s\n", i, Entities[i].Name);
+			ssprintf(Buffer, "%d %s\n", i, Entities[i].Name);
 
 			if (ImGui::Selectable(Buffer, Entities[i].Selected))
 			{
@@ -29,7 +29,7 @@ void EditorEntities()
 			for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
 			{
 				char Name[64];
-				snprintf(Name, 64, "Add %s Entity", ComponentNames[i]);
+				ssprintf(Name, "Add %s Entity", ComponentNames[i]);
 				if (ImGui::Selectable(Name))
 					AddEntity(i);
 			}

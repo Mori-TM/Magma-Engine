@@ -136,49 +136,49 @@ void SwapChainDraw()
 
 
 
-				snprintf(String, 2048, "%f FPS %f MS", FPS, MS);
+				ssprintf(String, "%f FPS %f MS", FPS, MS);
 				uint32_t Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, ImGuiScenePosY + 20, 0, 0);
 
-				snprintf(String, 2048, "Shadow Render Time: %f ms", ShadowRenderingTime);
+				ssprintf(String, "Shadow Render Time: %f ms", ShadowRenderingTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "GBuffer Render Time: %f ms", GBufferRenderingTime);
+				ssprintf(String, "GBuffer Render Time: %f ms", GBufferRenderingTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "SSAO Render Time: %f ms", SSAORenderingTime);
+				ssprintf(String, "SSAO Render Time: %f ms", SSAORenderingTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "SSAO Blur Render Time: %f ms", SSAOBlurRenderingTime);
+				ssprintf(String, "SSAO Blur Render Time: %f ms", SSAOBlurRenderingTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "Scene Render Time: %f ms", SceneRenderingTime);
+				ssprintf(String, "Scene Render Time: %f ms", SceneRenderingTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "SSR Render Time: %f ms", SSRRenderingTime);
+				ssprintf(String, "SSR Render Time: %f ms", SSRRenderingTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "FXAA Render Time: %f ms", FXAARenderingTime);
+				ssprintf(String, "FXAA Render Time: %f ms", FXAARenderingTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "Swap Chain Render Time: %f ms", SwapChainRenderingTime);
+				ssprintf(String, "Swap Chain Render Time: %f ms", SwapChainRenderingTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "Render Time: %f ms", ShadowRenderingTime + GBufferRenderingTime + SSAORenderingTime + SSAOBlurRenderingTime + SceneRenderingTime + SSRRenderingTime + FXAARenderingTime + SwapChainRenderingTime);
+				ssprintf(String, "Render Time: %f ms", ShadowRenderingTime + GBufferRenderingTime + SSAORenderingTime + SSAOBlurRenderingTime + SceneRenderingTime + SSRRenderingTime + FXAARenderingTime + SwapChainRenderingTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "Begin Frame Time: %f ms", BeginFrameTime);
+				ssprintf(String, "Begin Frame Time: %f ms", BeginFrameTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "End Frame Time: %f ms", EndFrameTime);
+				ssprintf(String, "End Frame Time: %f ms", EndFrameTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "Frame Time: %f ms", FrameTime);
+				ssprintf(String, "Frame Time: %f ms", FrameTime);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "Frame: %d", FrameCount);
+				ssprintf(String, "Frame: %d", FrameCount);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 
-				snprintf(String, 2048, "Used CPU Memory : % f MB", WaveGetUsedMemory() * 0.000001);
+				ssprintf(String, "Used CPU Memory : % f MB", WaveGetUsedMemory() * 0.000001);
 				Offset = OpenVkGUITextPos(String, ImGuiScenePosX + 20, OpenVkGUI.Offset + Offset, 0, 0);
 				/*
 					OpenVkGUIBegin("OpenVk Window");

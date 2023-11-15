@@ -151,14 +151,13 @@ void EditorEntityInspector()
 					ImGui::ColorEdit3("Color", (float*)&Entities[SelectedEntity].Light.Color);
 					ImGui::DragFloat("Strength", &Entities[SelectedEntity].Light.Strength, 0.1, 0.01, 10000.0);					
 
-					const char* Types[] = { "Point", "Directional", "Spot" };
-					if (ImGui::BeginCombo("Light Type", Types[Entities[SelectedEntity].Light.Type]))
+					if (ImGui::BeginCombo("Light Type", LightNames[Entities[SelectedEntity].Light.Type]))
 					{
-						for (uint32_t i = 0; i < ARRAY_SIZE(Types); i++)
+						for (uint32_t i = 0; i < LIGHT_COUNT; i++)
 						{
-							if (ImGui::Button(Types[i]))
+							if (ImGui::Button(LightNames[i]))
 							{
-								Entities[SelectedEntity].Light.Type = i;
+								Entities[SelectedEntity].Light.Type = (LightTypes)i;
 							}
 						}
 						ImGui::EndCombo();
@@ -174,7 +173,36 @@ void EditorEntityInspector()
 					ImGui::PopStyleColor();
 				}
 			}
-	
+
+			if (Entities[SelectedEntity].UsedComponents[COMPONENT_TYPE_COLLIDER] == true)
+			{
+				if (ImGui::CollapsingHeader("COLLIDER"))
+				{
+					ImGui::DragFloat("Friction", &Entities[SelectedEntity].Collider.Friction, 0.001, 0.0, 1.0);
+					ImGui::DragFloat("Bounciness", &Entities[SelectedEntity].Collider.Bounciness, 0.001, 0.0, 1.0);
+
+					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+					if (ImGui::Button("Remove Collider Component"))
+					{
+						Entities[SelectedEntity].UsedComponents[COMPONENT_TYPE_COLLIDER] = false;
+					}
+					ImGui::PopStyleColor();
+				}
+			}
+		
+			if (Entities[SelectedEntity].UsedComponents[COMPONENT_TYPE_RIGIDBODY] == true)
+			{
+				if (ImGui::CollapsingHeader("RIGIDBODY"))
+				{
+					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+					if (ImGui::Button("Remove Rigidbody Component"))
+					{
+						Entities[SelectedEntity].UsedComponents[COMPONENT_TYPE_RIGIDBODY] = false;
+					}
+					ImGui::PopStyleColor();
+				}
+			}
+
 			if (ImGui::BeginPopupContextWindow("Entity Inspector Pop Up"))
 			{				
 				ImGui::Text("Components");
@@ -196,7 +224,7 @@ void EditorEntityInspector()
 						Entities[EntityCount] = Entities[SelectedEntity];
 						if (strstr(Entities[EntityCount].Name, ")") == 0)
 						{
-							sprintf(Entities[EntityCount].Name, "%s Copy(1)", Entities[EntityCount].Name);
+							ssprintf(Entities[EntityCount].Name, "%s Copy(1)", Entities[EntityCount].Name);
 						}
 						else
 						{
@@ -205,8 +233,10 @@ void EditorEntityInspector()
 							StrPtr += Length;
 							while (*(--StrPtr) != '(');
 							uint32_t Count = atoi(StrPtr + 1) + 1;
-							sprintf(StrPtr, "(%d)", Count);
 
+							size_t MaxLenth = ARRAY_SIZE(Entities[EntityCount].Name) - Length;
+							snprintf(StrPtr, MaxLenth, "(%d)", Count);
+							StrPtr[MaxLenth - 1] = '\0';
 						}
 
 						SelectedEntity = EntityCount;
@@ -414,7 +444,7 @@ void EditorMeshInspector()
 				{
 					for (uint32_t i = 0; i < Mesh->MeshCount; i++)
 					{
-						sprintf(MeshName, "%d\t%s", i, Mesh->MeshData[i].Material.Name);
+						ssprintf(MeshName, "%d\t%s", i, Mesh->MeshData[i].Material.Name);
 
 						ImGui::SetCursorPosX(33);
 						if (ImGui::CollapsingHeader(MeshName))

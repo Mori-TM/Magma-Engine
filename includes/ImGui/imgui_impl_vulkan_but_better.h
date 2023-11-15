@@ -597,9 +597,9 @@ bool ImGui_ImplVulkan_RenderDrawData(ImDrawData* DrawData, VkCommandBuffer Comma
 					ImGui_ImplVulkan_Renderer_Info.LastPipeline = true;
 				}					
 
-				for (int i = 0; i < NonAlphaTextureCount; i++)
+				for (int k = 0; k < NonAlphaTextureCount; k++)
 				{
-					if (NonAlphaTextures[i] == DrawCmd->TextureId)
+					if (NonAlphaTextures[k] == DrawCmd->TextureId)
 					{
 						vkCmdBindPipeline(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, ImGui_ImplVulkan_Renderer_Info.OpaquePipeline);
 						ImGui_ImplVulkan_Renderer_Info.LastPipeline = false;

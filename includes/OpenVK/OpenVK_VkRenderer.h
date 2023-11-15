@@ -392,10 +392,6 @@ uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uin
 {
 	VkRenderer.RenderPasses = (VkRenderPass*)OpenVkRealloc(VkRenderer.RenderPasses, (VkRenderer.RenderPassCount + 1) * sizeof(VkRenderPass));
 
-	VkAttachmentDescription ColorAttachmentDescription;
-	VkAttachmentDescription DepthAttachmentDescription;
-	VkAttachmentDescription ColorAttachmentResolveDescription;
-
 	VkAttachmentReference* ColorAttachmentReferences = NULL;
 	VkAttachmentReference  DepthAttachmentReference;
 	VkAttachmentReference* ColorAttachmentResolveReferences = NULL;
@@ -673,8 +669,8 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 	VkRect2D Scissor;
 	Scissor.offset.x = 0;
 	Scissor.offset.y = 0;
-	Scissor.extent.width = Info->Width;
-	Scissor.extent.height = Info->Height;
+	Scissor.extent.width = (uint32_t)Info->Width;
+	Scissor.extent.height = (uint32_t)Info->Height;
 
 	VkPipelineViewportStateCreateInfo ViewportState;
 	ViewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -1855,7 +1851,7 @@ void VkDestroyRenderer()
 //		OpenVkFree(VkRenderer.Sampler);
 	CMA_Destroy(&VkRenderer.Sampler);
 
-	//we start at 0 because the first one is a dummy(reserved for swapchain)
+	//we start at 1 because the first one is a dummy(reserved for swapchain)
 	for (uint32_t i = 1; i < VkRenderer.Images.Size; i++)
 	{
 		VkImageInfo* Image = (VkImageInfo*)CMA_GetAt(&VkRenderer.Images, i);

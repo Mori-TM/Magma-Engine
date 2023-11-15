@@ -280,12 +280,11 @@ void Normalize4P(vec4* v)
 
 	v->Fast = (Wave128)vbslq_f32(is_zero, v->Fast, vdivq_f32(v->Fast, len));
 #else
-	register float length = FastInverseSqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
-	v.x *= length;
-	v.y *= length;
-	v.z *= length;
-	v.w *= length;
-	return v;
+	register float length = FastInverseSqrt(v->x * v->x + v->y * v->y + v->z * v->z + v->w * v->w);
+	v->x *= length;
+	v->y *= length;
+	v->z *= length;
+	v->w *= length;
 #endif
 }
 

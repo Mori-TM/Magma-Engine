@@ -1,5 +1,6 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
+#include <stdarg.h>
 #include <time.h>
 #include <string.h>
 #include <SDL2/SDL.h>
@@ -18,7 +19,7 @@ extern "C"
 #include <lua/lualib.h>
 }
 
-#include <stb/stb_sprintf.h>
+//#include <stb/stb_sprintf.h>
 #include <stb/dxt/stb_dxt.c>
 #include <stb/stb_image_resize.h>
 
@@ -224,6 +225,7 @@ int32_t main(int32_t argc, char** argv)
 //	Culling.wait();
 //	std::thread t1(RenderThread);
 //	std::thread t2(CullingThread);
+
 	RenderThread();
 //	t1.join();
 //	t2.join();

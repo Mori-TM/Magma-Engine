@@ -259,6 +259,8 @@ bool CreateSphere(uint32_t xSegments, uint32_t ySegments)
 			SphereIndexCount += 6;
 		}
 	}
+
+	return true;
 }
 
 uint32_t BeanVertexCount = 0;
@@ -341,4 +343,6 @@ bool CreateBean(uint32_t Segments, uint32_t SubdivisionsHeight)
 			BeanIndexCount += 6;
 		}
 	}
+
+	return true;
 }

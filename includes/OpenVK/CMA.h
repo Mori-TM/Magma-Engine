@@ -133,7 +133,7 @@ size_t CMA_Push(CMA_MemoryZone* Zone, void* Data)
 		if (Zone->Size >= Zone->AllocateSize)
 		{
 			printf("CMA Error: Failed to push your data: %s\n", Zone->Name);
-			return -1;
+			return SIZE_MAX;
 		}
 	}
 
@@ -152,7 +152,7 @@ size_t CMA_Push(CMA_MemoryZone* Zone, void* Data)
 		if (!Zone->Mem[Zone->Size].Data)
 		{
 			printf("CMA Error: Failed to allocate data for your push data: %s\n", Zone->Name);
-			return -1;
+			return SIZE_MAX;
 		}
 		memcpy(Zone->Mem[Zone->Size].Data, Data, Zone->MemSize);
 		Zone->PushCountNew++;

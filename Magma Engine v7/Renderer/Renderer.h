@@ -202,23 +202,23 @@ void CreateRenderer()
 //		}
 //
 //	}
-	/*
+	
 	int32_t RaageXZ = 100;
 	int32_t RaageY = 150;
 	
-	for (uint32_t i = 0; i < MAX_NUMBER_OF_LIGHTS - 1; i++)
-	{
-		uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
-		ResetEntityLight(&Entities[EntityIndex]);
-		Entities[EntityIndex].Light.CastShadow = false;
-		Entities[EntityIndex].Light.Type = LIGHT_POINT;
-		Entities[EntityIndex].Light.Strength = (float)RandomInt(80, 80000) / 10.0;
-		Entities[EntityIndex].Light.Color = Vec3((float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0);
-		Entities[EntityIndex].Translate = Vec3((float)RandomInt(-RaageXZ, RaageXZ) / 10.0, (float)RandomInt(0, RaageY) / 10.0, (float)RandomInt(-RaageXZ, RaageXZ) / 10.0);
-		
-		strcpy(Entities[EntityIndex].Light.Name, "Point Light");
-	//	OpenVkRuntimeInfo("Scene was initilaized", "");
-	}
+//	for (uint32_t i = 0; i < MAX_NUMBER_OF_LIGHTS - 1; i++)
+//	{
+//		uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
+//		ResetEntityLight(&Entities[EntityIndex]);
+//		Entities[EntityIndex].Light.CastShadow = false;
+//		Entities[EntityIndex].Light.Type = LIGHT_POINT;
+//		Entities[EntityIndex].Light.Strength = (float)RandomInt(80, 80000) / 10.0;
+//		Entities[EntityIndex].Light.Color = Vec3((float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0);
+//		Entities[EntityIndex].Translate = Vec3((float)RandomInt(-RaageXZ, RaageXZ) / 10.0, (float)RandomInt(0, RaageY) / 10.0, (float)RandomInt(-RaageXZ, RaageXZ) / 10.0);
+//		
+//		strcpy(Entities[EntityIndex].Light.Name, "Point Light");
+//	//	OpenVkRuntimeInfo("Scene was initilaized", "");
+//	}
 
 //	uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
 //	ResetEntityLight(&Entities[EntityIndex]);
@@ -237,7 +237,7 @@ void CreateRenderer()
 	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;
 	if (Mesh)
 		strcpycut(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
-	*/
+	
 }
 
 void DestroyRenderer()

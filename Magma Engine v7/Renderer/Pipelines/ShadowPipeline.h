@@ -199,7 +199,7 @@ void UpdateCascades()
 			FrustumCorners[j].y = InvCorner.y / InvCorner.w;
 			FrustumCorners[j].z = InvCorner.z / InvCorner.w;
 		}
-
+		
 		for (uint32_t j = 0; j < 4; j++)
 		{
 			vec3 Dist = Sub3(FrustumCorners[j + 4], FrustumCorners[j]);

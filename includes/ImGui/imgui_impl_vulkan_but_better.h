@@ -120,6 +120,7 @@ typedef struct
 	VkPhysicalDevice PhysicalDevice;
 	uint32_t ImageCount;
 	VkSampleCountFlagBits MsaaSamples;
+	VkDescriptorSetLayout DescriptorSetLayout;//This Layout needs to be image sample, Fragment shader, no flags, one descriptor count and binding at 0
 } ImGui_ImplVulkan_InitInfo;
 
 typedef struct
@@ -671,23 +672,23 @@ bool ImGui_CreateSampler()
 
 bool ImGui_CreateDescriptorSets()
 {
-	VkDescriptorSetLayoutBinding LayoutBinding;
-
-	LayoutBinding.binding = 0;
-	LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	LayoutBinding.descriptorCount = 1;
-	LayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-	LayoutBinding.pImmutableSamplers = &ImGui_ImplVulkan_Renderer_Info.Sampler;
-
-	VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo;
-	DescriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	DescriptorSetLayoutCreateInfo.pNext = NULL;
-	DescriptorSetLayoutCreateInfo.flags = 0;
-	DescriptorSetLayoutCreateInfo.bindingCount = 1;
-	DescriptorSetLayoutCreateInfo.pBindings = &LayoutBinding;
-
-	if (vkCreateDescriptorSetLayout(ImGui_ImplVulkan_Renderer_Info.Device, &DescriptorSetLayoutCreateInfo, NULL, &ImGui_ImplVulkan_Renderer_Info.DescriptorSetLayout) != VK_SUCCESS)
-		return ImGui_ImplVulkanPrintError("[ImGui Vulkan] Failed to Create Sampler");
+//	VkDescriptorSetLayoutBinding LayoutBinding;
+//
+//	LayoutBinding.binding = 0;
+//	LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+//	LayoutBinding.descriptorCount = 1;
+//	LayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+//	LayoutBinding.pImmutableSamplers = &ImGui_ImplVulkan_Renderer_Info.Sampler;
+//
+//	VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo;
+//	DescriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+//	DescriptorSetLayoutCreateInfo.pNext = NULL;
+//	DescriptorSetLayoutCreateInfo.flags = 0;
+//	DescriptorSetLayoutCreateInfo.bindingCount = 1;
+//	DescriptorSetLayoutCreateInfo.pBindings = &LayoutBinding;
+//
+//	if (vkCreateDescriptorSetLayout(ImGui_ImplVulkan_Renderer_Info.Device, &DescriptorSetLayoutCreateInfo, NULL, &ImGui_ImplVulkan_Renderer_Info.DescriptorSetLayout) != VK_SUCCESS)
+//		return ImGui_ImplVulkanPrintError("[ImGui Vulkan] Failed to Create Sampler");
 
 	VkDescriptorSetAllocateInfo AllocateInfo;
 	AllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -927,6 +928,7 @@ void ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo* InitInfo)
 	ImGui_ImplVulkan_Renderer_Info.MsaaSamples = InitInfo->MsaaSamples;
 	ImGui_ImplVulkan_Renderer_Info.LastPipeline = false;
 	ImGui_ImplVulkan_Renderer_Info.LastDescriptorSet = false;
+	ImGui_ImplVulkan_Renderer_Info.DescriptorSetLayout = InitInfo->DescriptorSetLayout;
 
 	ImGuiIO* IO = &ImGui::GetIO();
 	IM_ASSERT(IO->BackendRendererUserData == NULL && "Already initialized a renderer backend!");
@@ -973,7 +975,7 @@ void ImGui_ImplVulkan_Shutdown()
 		}
 	}
 
-	vkDestroyDescriptorSetLayout(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.DescriptorSetLayout, NULL);
+//	vkDestroyDescriptorSetLayout(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.DescriptorSetLayout, NULL);
 	vkDestroyPipelineLayout(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.PipelineLayout, NULL);
 	vkDestroyPipeline(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.Pipeline, NULL);
 	vkDestroyPipeline(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.OpaquePipeline, NULL);

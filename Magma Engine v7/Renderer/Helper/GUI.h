@@ -429,6 +429,7 @@ void ImGuiInit()
 	InitInfo.PhysicalDevice = VkRenderer.PhysicalDevice;
 	InitInfo.ImageCount = MAX_FRAMES_IN_FLIGHT;
 	InitInfo.MsaaSamples = VK_SAMPLE_COUNT_1_BIT;
+	InitInfo.DescriptorSetLayout = VkRenderer.DescriptorSetLayouts[TextureDescriptorSetLayout];
 
 	ImGui_ImplVulkan_Init(&InitInfo);
 

@@ -216,8 +216,8 @@ void TransformAABB(AABBData* AABB, uint32_t i)
 	Model = RotateZMat4P(&Model, ToRadians(Entities[i].Rotate.z));
 	Model = TranslateMat4P(&Model, &Entities[i].Translate);
 
-	vec4 Min = MultiplyVec4Mat4(Model, Vec4(AABB->Min.x, AABB->Min.y, AABB->Min.z, 1.0));
-	vec4 Max = MultiplyVec4Mat4(Model, Vec4(AABB->Max.x, AABB->Max.y, AABB->Max.z, 1.0));
+	vec4 Min = MultiplyVec4Mat4(Vec4(AABB->Min.x, AABB->Min.y, AABB->Min.z, 1.0), Model);
+	vec4 Max = MultiplyVec4Mat4(Vec4(AABB->Max.x, AABB->Max.y, AABB->Max.z, 1.0), Model);
 
 	AABB->Min.x = Min.x;
 	AABB->Min.y = Min.y;

@@ -108,7 +108,7 @@ double GetExecutionTime(OpenVkBool (*Func)(void))
 	return Time;
 }
 
-double GetExecutionTimeOpenVkRender(OpenVkBool(*Func)(void (*RenderFunc)(void), void (*ResizeFunc)(void), void (*UpdateFunc)(void)), void(*RenderFunc)(void), void(*ResizeFunc)(void), void(*UpdateFunc)(void))
+double GetExecutionTimeOpenVkRender(OpenVkBool(*Func)(void (*RenderFunc)(void), void (*ResizeFunc)(OpenVkBool RecreateSwapChain), void (*UpdateFunc)(void)), void(*RenderFunc)(void), void(*ResizeFunc)(OpenVkBool RecreateSwapChain), void(*UpdateFunc)(void))
 {
 	struct timespec TimerStartTime;
 	struct timespec TimerEndTime;

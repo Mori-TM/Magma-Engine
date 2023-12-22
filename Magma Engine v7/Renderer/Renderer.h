@@ -321,9 +321,9 @@ void RendererDraw()
 	ForceRenderOnce = false;
 }
 
-void RendererResize()
+void RendererResize(OpenVkBool RecreateSwapChain)
 {
-	if (Event.window.event == SDL_WINDOWEVENT_RESIZED)
+	if (RecreateSwapChain)
 		OpenVkRecreateSwapChain(&WindowWidth, &WindowHeight);
 	else
 		OpenVkDestroySwapChainRelatives();
@@ -373,7 +373,7 @@ void RendererEvent()
 			SceneHeight = ImGuiSceneHeight * Scale;
 		}
 	//	printf("Event\n");
-		RendererResize();
+		RendererResize((Event.window.event == SDL_WINDOWEVENT_RESIZED));
 	}
 
 	if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_F12)
@@ -444,7 +444,7 @@ void RendererRender()
 		if (TextureToDelete != DefaultImage->TextureImage)	 OpenVkDestroyImage(TextureToDelete);
 		if (SamplerToDelete != DefaultImage->TextureSampler) OpenVkDestroySampler(SamplerToDelete);
 
-		RendererResize();
+		RendererResize(false);
 	}
 	if (DeleteMesh || DeleteMeshWithTextures)
 	{
@@ -490,7 +490,7 @@ void RendererRender()
 		DeleteMesh = false;
 		DeleteMeshWithTextures = false;
 
-		RendererResize();
+		RendererResize(false);
 	}
 	if (ReloadShaders)
 	{
@@ -511,7 +511,7 @@ void RendererRender()
 		
 		OpenVkGUIRecreatePipeline();
 		CreateGraphicsPipelines();
-		RendererResize();
+		RendererResize(false);
 	}
 
 	GetDeltaTime();

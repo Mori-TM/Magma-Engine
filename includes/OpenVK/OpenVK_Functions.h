@@ -11,7 +11,7 @@ uint32_t	(*OpenVkCreateDescriptorPool		)(uint32_t DescriptorPoolType, uint32_t P
 OpenVkBool	(*OpenVkFreeDescriptorSet			)(uint32_t DescriptorPool, uint32_t DescriptorSet);
 OpenVkBool	(*OpenVkDestroyDescriptorPool		)(uint32_t DescriptorPool);
 uint32_t	(*OpenVkCreateDescriptorSet			)(OpenVkDescriptorSetCreateInfo* Info);
-OpenVkBool	(*OpenVkDrawFrame					)(void (*RenderFunc)(void), void (*ResizeFunc)(void), void (*UpdateFunc)(void));
+OpenVkBool	(*OpenVkDrawFrame					)(void (*RenderFunc)(void), void (*ResizeFunc)(OpenVkBool RecreateSwapChain), void (*UpdateFunc)(void));
 OpenVkBool	(*OpenVkBeginFrame					)();
 OpenVkBool	(*OpenVkEndFrame					)();
 void		(*OpenVkBeginRenderPass				)(OpenVkBeginRenderPassInfo* Info);

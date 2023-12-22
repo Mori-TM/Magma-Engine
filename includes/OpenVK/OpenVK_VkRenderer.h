@@ -89,6 +89,9 @@ OpenVkBool VkCreateSwapChain(uint32_t* Width, uint32_t* Height)
 	if (vkCreateSwapchainKHR(VkRenderer.Device, &SwapchainCreateInfo, NULL, &VkRenderer.SwapChain) != VK_SUCCESS)
 		return OpenVkRuntimeError("Failed to Create SwapChain");
 
+	if (VkRenderer.SwapChainOld != VK_NULL_HANDLE)
+		vkDestroySwapchainKHR(VkRenderer.Device, VkRenderer.SwapChainOld, NULL);
+
 	//SwapChain Image
 	vkGetSwapchainImagesKHR(VkRenderer.Device, VkRenderer.SwapChain, &ImageCount, NULL);
 	
@@ -1240,7 +1243,7 @@ uint32_t VkCreateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 	return VkUpdateDescriptorSet(Info);
 }
 
-OpenVkBool VkDrawFrame(void (*RenderFunc)(void), void (*ResizeFunc)(void), void (*UpdateFunc)(void))
+OpenVkBool VkDrawFrame(void (*RenderFunc)(void), void (*ResizeFunc)(OpenVkBool RecreateSwapChain), void (*UpdateFunc)(void))
 {
 	vkWaitForFences(VkRenderer.Device, 1, &VkRenderer.InFlightFences[VkRenderer.CurrentFrame], VK_TRUE, UINT64_MAX);
 
@@ -1279,7 +1282,7 @@ OpenVkBool VkDrawFrame(void (*RenderFunc)(void), void (*ResizeFunc)(void), void 
 	if (Success == VK_ERROR_OUT_OF_DATE_KHR)
 	{
 		if (ResizeFunc != NULL)
-			ResizeFunc();
+			ResizeFunc(OpenVkTrue);
 	}
 	else if (Success != VK_SUCCESS)
 		return OpenVkRuntimeError("Failed to submit draw command buffer queue");
@@ -1300,7 +1303,7 @@ OpenVkBool VkDrawFrame(void (*RenderFunc)(void), void (*ResizeFunc)(void), void 
 
 	if (Success == VK_ERROR_OUT_OF_DATE_KHR || Success == VK_SUBOPTIMAL_KHR)
 		if (ResizeFunc != NULL)
-			ResizeFunc();
+			ResizeFunc(OpenVkTrue);
 	else if (Success != VK_SUCCESS)
 		return OpenVkRuntimeError("Failed to present draw command buffer queue");
 

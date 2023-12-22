@@ -86,28 +86,37 @@ D:\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(4849,89): warning C4100: 'value2
 D:\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(4849,74): warning C4100: 'value1': unreferenced formal parameter
 D:\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(4849,60): warning C4100: 'param': unreferenced formal parameter
 D:\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(4849,41): warning C4100: 'name': unreferenced formal parameter
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(221,3): warning C4201: nonstandard extension used: nameless struct/union
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(229,3): warning C4201: nonstandard extension used: nameless struct/union
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(252,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(260,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(283,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(360,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(367,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(665,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(666,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(681,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(682,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(683,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1054,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1055,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1069,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1070,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1084,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1085,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1150,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1150,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1150,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1361,23): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(234,3): warning C4201: nonstandard extension used: nameless struct/union
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(242,3): warning C4201: nonstandard extension used: nameless struct/union
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(248,3): warning C4201: nonstandard extension used: nameless struct/union
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(254,3): warning C4201: nonstandard extension used: nameless struct/union
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(270,3): warning C4201: nonstandard extension used: nameless struct/union
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(278,3): warning C4201: nonstandard extension used: nameless struct/union
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(284,3): warning C4201: nonstandard extension used: nameless struct/union
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(290,3): warning C4201: nonstandard extension used: nameless struct/union
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(313,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(321,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(344,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(421,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(428,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(750,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(751,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(766,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(767,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(768,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1141,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1142,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1156,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1157,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1171,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1172,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1260,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1260,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1260,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1293,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1293,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1293,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1475,23): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(690,11): warning C4189: 'j': local variable is initialized but not referenced
 D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(913,20): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(1302,32): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
@@ -768,18 +777,13 @@ D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(17
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(178,5): message : consider using '%lld' in the format string
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(178,5): message : consider using '%Id' in the format string
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(178,5): message : consider using '%I64d' in the format string
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(215,70): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(216,137): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(216,103): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(216,69): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(217,158): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(217,114): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(217,78): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(364,29): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(365,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(369,33): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(370,35): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(388,33): warning C4100: 'TextureImage': unreferenced formal parameter
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(206,10): warning C4189: 'RaageXZ': local variable is initialized but not referenced
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(207,10): warning C4189: 'RaageY': local variable is initialized but not referenced
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(367,29): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(368,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(372,33): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(373,35): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(391,33): warning C4100: 'TextureImage': unreferenced formal parameter
 D:\GitHub\Magma-Engine\Magma Engine v7\main.cpp(131,11): warning C4456: declaration of 'ViewProj' hides previous local declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\main.cpp(124,10): message : see declaration of 'ViewProj'
 D:\GitHub\Magma-Engine\Magma Engine v7\main.cpp(147,35): warning C4100: 'argv': unreferenced formal parameter
@@ -803,8 +807,8 @@ D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(874): warning C4701: potenti
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(887): warning C4701: potentially uninitialized local variable 'MinY' used
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ImageCompression.h(92): warning C4702: unreachable code
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ScriptEngine.h(115): warning C4701: potentially uninitialized local variable 'Key' used
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(342): warning C4706: assignment within conditional expression
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(345): warning C4706: assignment within conditional expression
 D:\GitHub\Magma-Engine\includes\ImGui\FileDialog\filesystem.cpp(163): warning C4702: unreachable code
 D:\GitHub\Magma-Engine\includes\ImGui\FileDialog\filesystem.cpp(204): warning C4702: unreachable code
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(763): warning C4702: unreachable code
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(848): warning C4702: unreachable code
   Magma Engine v7.vcxproj -> D:\GitHub\Magma-Engine\x64\Debug\Magma Engine v7.exe

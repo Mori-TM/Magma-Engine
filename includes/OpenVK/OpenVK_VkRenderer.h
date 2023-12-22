@@ -1797,6 +1797,36 @@ void VkRecreateSwapChain(uint32_t* Width, uint32_t* Height)
 		VkRenderer.InFlightImages = (VkFence*)OpenVkRealloc(VkRenderer.InFlightImages, VkRenderer.SwapChainImageCount * sizeof(VkFence));
 }
 
+void VkDestroySwapChainRelatives()
+{
+	vkDeviceWaitIdle(VkRenderer.Device);
+
+	for (uint32_t i = 1; i < VkRenderer.ImageAttachments.Size; i++)
+	{
+		VkImageInfo* ImageAttachment = (VkImageInfo*)CMA_GetAt(&VkRenderer.ImageAttachments, i);
+		if (ImageAttachment != NULL)
+		{
+			vkDestroyImageView(VkRenderer.Device, ImageAttachment->ImageView, NULL);
+			vkDestroyImage(VkRenderer.Device, ImageAttachment->Image, NULL);
+			vkFreeMemory(VkRenderer.Device, ImageAttachment->ImageMemory, NULL);
+			CMA_Pop(&VkRenderer.ImageAttachments, i);
+		}
+	}
+
+	for (uint32_t i = 0; i < VkRenderer.FramebufferCount; i++)
+		for (uint32_t j = 0; j < VkRenderer.SwapChainImageCount; j++)
+			vkDestroyFramebuffer(VkRenderer.Device, VkRenderer.Framebuffers[i].Framebuffers[j], NULL);
+
+	for (uint32_t i = 0; i < VkRenderer.FramebufferCount; i++)
+		OpenVkFree(VkRenderer.Framebuffers[i].Framebuffers);
+
+	for (uint32_t i = 0; i < VkRenderer.RenderPassCount; i++)
+		vkDestroyRenderPass(VkRenderer.Device, VkRenderer.RenderPasses[i], NULL);
+
+	VkRenderer.RenderPassCount = 0;
+	VkRenderer.FramebufferCount = 0;
+}
+
 void VkDeviceWaitIdle()
 {
 	vkDeviceWaitIdle(VkRenderer.Device);

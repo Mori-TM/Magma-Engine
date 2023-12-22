@@ -231,12 +231,12 @@ void CreateRenderer()
 //	
 //	AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
 
-	uint32_t ModelIndex= AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
-	AddEntity(COMPONENT_TYPE_MESH);
-	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
-	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;
-	if (Mesh)
-		strcpycut(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
+//	uint32_t ModelIndex= AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
+//	AddEntity(COMPONENT_TYPE_MESH);
+//	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
+//	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;
+//	if (Mesh)
+//		strcpycut(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
 	
 }
 
@@ -323,7 +323,10 @@ void RendererDraw()
 
 void RendererResize()
 {
-	OpenVkRecreateSwapChain(&WindowWidth, &WindowHeight);
+	if (Event.window.event == SDL_WINDOWEVENT_RESIZED)
+		OpenVkRecreateSwapChain(&WindowWidth, &WindowHeight);
+	else
+		OpenVkDestroySwapChainRelatives();
 
 	CreateRenderPasses();
 	CreateFramebuffers();

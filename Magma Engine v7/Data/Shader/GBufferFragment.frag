@@ -64,7 +64,10 @@ void main()
 	vec3 Normal = GetNormalFromMap();//normalize(FragNormal);
 	OutPosition = vec4(FragPosRelToCam.xyz, LinearDepth(gl_FragCoord.z));
 	OutViewNormal = vec4(normalize(FragViewNormal), Normal.x);				//use GetNormalFromMap
+//	float PrevAlpha = OutAlbedo.w;
 	OutAlbedo = texture(AlbedoMap, FragTexCoord) * PushConst.Color;
+//	OutAlbedo.xyz = PushConst.Color.xyz * PushConst.Color.w +  PushConst.Color.xyz * (1.0 - PushConst.Color.w);
+//	OutAlbedo.w = 1.0;
 	if (OutAlbedo.w < 0.9)
 		discard;
 	OutPBR.r = texture(MetallicMap, FragTexCoord).r * PushConst.Metallic;

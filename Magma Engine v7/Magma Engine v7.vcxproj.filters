@@ -167,6 +167,9 @@
     <ClInclude Include="Engine\Physics.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\CameraPath.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Shader\BlurFragment.frag">

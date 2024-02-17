@@ -167,6 +167,17 @@ void EntitiesInit()
 
 void EntitiesDestroy()
 {
+	EntityCount = 0;
+	EntityAllocatedCount = 0;
+
+	SelectedEntity = 0;
+	SelectedTexture = 0;
+	SelectedMaterial = 0;
+	SelectedMesh = 0;
+	SelectedAudio = 0;
+	SelectedAnimation = 0;
+	SelectedScript = 0;
+
 	free(Entities);
 }
 

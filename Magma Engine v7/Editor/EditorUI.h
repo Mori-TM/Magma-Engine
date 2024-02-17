@@ -73,6 +73,9 @@ void EditorWindowBar()
 	{
 		ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
 		SDL_SetWindowPosition(Window, MouseGX - MouseX, MouseGY - MouseY);
+
+		if (FullScreen)
+			PushEventSDL(SDL_KEYDOWN, SDLK_F11);
 	}
 	else
 	{
@@ -444,7 +447,8 @@ void EditorDrawMainMenuBar()
 		//	}
 		if (ImGui::MenuItem("Settings"))
 			EditorOpenedSettingsWindow = true;
-
+		//99, 201, 40
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.388f, 0.788f, 0.156f, 1.0f });
 		ImGui::PushFont(IconFontSmall);
 		ImGui::SetCursorPosX((WindowWidth * 0.5));
 		static char* ButtonType = (char*)"G";
@@ -461,6 +465,7 @@ void EditorDrawMainMenuBar()
 		}
 		ImGui::PopID();
 		ImGui::PopFont();
+		ImGui::PopStyleColor(1);
 
 		ImGui::PushFont(IconFontExt);
 		{

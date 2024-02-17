@@ -340,17 +340,17 @@ D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Engine.h(128,18): warning C4244: '
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Engine.h(131,15): warning C4244: '=': conversion from 'int32_t' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\CameraPath.h(85,23): warning C4456: declaration of 'Frames' hides previous local declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\CameraPath.h(77,22): message : see declaration of 'Frames'
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(330,25): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(343,29): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(378,39): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(378,24): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(562,28): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(585,30): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(719,33): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(770,7): warning C4459: declaration of 'LastPath' hides global declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(341,25): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(354,29): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(389,39): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(389,24): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(573,28): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(596,30): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(730,33): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(781,7): warning C4459: declaration of 'LastPath' hides global declaration
 D:\GitHub\Magma-Engine\includes\Wave\WaveLayer.h(22,6): message : see declaration of 'LastPath'
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(773,18): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(770,7): warning C4101: 'LastPath': unreferenced local variable
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(784,18): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(781,7): warning C4101: 'LastPath': unreferenced local variable
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(34,28): warning C4459: declaration of 'CameraPos' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(6,6): message : see declaration of 'CameraPos'
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(34,64): warning C4459: declaration of 'CameraUp' hides global declaration
@@ -388,13 +388,13 @@ D:\GitHub\Magma-Engine\Magma Engine v7\Editor\AssetBrowser.h(22,130): warning C4
 D:\GitHub\Magma-Engine\Magma Engine v7\Editor\Inspector.h(491,25): warning C4100: 'Length': unreferenced formal parameter
 D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(52,15): warning C4189: 'window': local variable is initialized but not referenced
 D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(57,11): warning C4189: 'MouseState': local variable is initialized but not referenced
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(449,37): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(416,11): warning C4189: 'IO': local variable is initialized but not referenced
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(843,20): warning C4244: 'initializing': conversion from 'float' to 'int32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(844,70): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(844,65): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(848,41): warning C4244: '=': conversion from 'int32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(528,11): warning C4189: 'IO': local variable is initialized but not referenced
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(453,37): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(419,11): warning C4189: 'IO': local variable is initialized but not referenced
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(848,20): warning C4244: 'initializing': conversion from 'float' to 'int32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(849,70): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(849,65): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(853,41): warning C4244: '=': conversion from 'int32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(533,11): warning C4189: 'IO': local variable is initialized but not referenced
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(8,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(17,10): message : see declaration of 'MsaaSamples'
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(40,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
@@ -493,8 +493,8 @@ D:\GitHub\Magma-Engine\includes\ImGui\FileDialog\ImFileDialog.cpp(1309,18): mess
      Creating library D:\GitHub\Magma-Engine\x64\Release\Magma Engine v7.lib and object D:\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exp
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  0 of 4666 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+  14 of 4669 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    90 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Magma Engine v7.vcxproj -> D:\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exe

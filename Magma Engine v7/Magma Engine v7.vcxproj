@@ -201,6 +201,7 @@
     <ClInclude Include="Renderer\Pipelines\SSRPipeline.h" />
     <ClInclude Include="Renderer\Pipelines\SwapChainHelper.h" />
     <ClInclude Include="Renderer\Pipelines\SwapChainPipeline.h" />
+    <ClInclude Include="Renderer\Raytracing\Raytracing.h" />
     <ClInclude Include="Renderer\Renderer.h" />
   </ItemGroup>
   <ItemGroup>
@@ -213,6 +214,13 @@
     <None Include="Data\Shader\DebugVertex.vert" />
     <None Include="Data\Shader\GUIFragment.frag" />
     <None Include="Data\Shader\GUIVertex.vert" />
+    <None Include="Data\Shader\Raytracing\closesthit.rchit" />
+    <None Include="Data\Shader\Raytracing\Fragment.frag" />
+    <None Include="Data\Shader\Raytracing\hg_sdf.frag" />
+    <None Include="Data\Shader\Raytracing\miss.rmiss" />
+    <None Include="Data\Shader\Raytracing\raygen.rgen" />
+    <None Include="Data\Shader\Raytracing\shadow.rmiss" />
+    <None Include="Data\Shader\Raytracing\Vertex.vert" />
     <None Include="Data\Shader\SceneFragment.frag" />
     <None Include="Data\Shader\SceneVertex.vert" />
     <None Include="Data\Shader\ShadowFragment.frag" />

@@ -22,3 +22,12 @@ glslc.exe Data/Shader/SSRFragment.frag -o Data/Shader/SSRFragment.spv
 glslc.exe Data/Shader/SSAOFragment.frag -o Data/Shader/SSAOFragment.spv
 glslc.exe Data/Shader/SSAOBlurFragment.frag -o Data/Shader/SSAOBlurFragment.spv
 glslc.exe Data/Shader/FXAAFragment.frag -o Data/Shader/FXAAFragment.spv
+
+::Raytracin Shader
+glslc.exe Data/Shader/Vertex.vert -o Data/Shader/Vertex.spv
+glslc.exe Data/Shader/Fragment.frag -o Data/Shader/Fragment.spv
+
+glslc.exe Data/Shader/closesthit.rchit --target-env=vulkan1.2 -o Data/Shader/closesthit.spv
+glslc.exe Data/Shader/miss.rmiss --target-env=vulkan1.2 -o Data/Shader/miss.spv
+glslc.exe Data/Shader/shadow.rmiss --target-env=vulkan1.2 -o Data/Shader/shadow.spv
+glslc.exe Data/Shader/raygen.rgen --target-env=vulkan1.2 -o Data/Shader/raygen.spv

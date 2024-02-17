@@ -45,6 +45,8 @@
 #include "Pipelines/FXAAPipeline.h"
 #include "Pipelines/SwapChainPipeline.h"
 
+#include "Raytracing/Raytracing.h"
+
 void CreateRenderPasses()
 {
 	CreateBlurRenderPass();
@@ -117,7 +119,7 @@ void CreateDescriptors()
 void CreateRenderer()
 {
 	OpenVkInitThreads();
-	SwapChain = OpenVkCreateRenderer(OPENVK_VULKAN | OPENVK_VALIDATION_LAYER, GetExtensions, GetSurface, GetWindowSize);
+	SwapChain = OpenVkCreateRenderer(OPENVK_VULKAN | OPENVK_VALIDATION_LAYER | OPENVK_RAYTRACING, GetExtensions, GetSurface, GetWindowSize);
 
 	CreateRenderPasses();
 	/*

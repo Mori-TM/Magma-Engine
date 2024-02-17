@@ -16,6 +16,7 @@ bool GamePerformanceOverlay = false;
 
 uint32_t MsaaSamples = 1;
 
+bool RenderRaytraced = true;
 bool RenderShadows = true;
 bool RenderSSAO = true;
 bool RenderSSAOBlur = true;

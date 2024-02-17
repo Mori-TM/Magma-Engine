@@ -28,6 +28,12 @@
     <Filter Include="Header Files\Engine">
       <UniqueIdentifier>{fa4c4a35-b5fc-4fe7-afdf-283ce1a2c54b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Raytracing">
+      <UniqueIdentifier>{09a48196-4564-447c-9760-29fd0f238252}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Renderer\Raytracing">
+      <UniqueIdentifier>{eeb75314-0e59-4705-9db6-dd7aef6c6cbe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -170,6 +176,9 @@
     <ClInclude Include="Engine\CameraPath.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Renderer\Raytracing\Raytracing.h">
+      <Filter>Header Files\Renderer\Raytracing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Shader\BlurFragment.frag">
@@ -222,6 +231,27 @@
     </None>
     <None Include="Data\Shader\FXAAFragment.frag">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\Raytracing\closesthit.rchit">
+      <Filter>Resource Files\Raytracing</Filter>
+    </None>
+    <None Include="Data\Shader\Raytracing\Fragment.frag">
+      <Filter>Resource Files\Raytracing</Filter>
+    </None>
+    <None Include="Data\Shader\Raytracing\hg_sdf.frag">
+      <Filter>Resource Files\Raytracing</Filter>
+    </None>
+    <None Include="Data\Shader\Raytracing\miss.rmiss">
+      <Filter>Resource Files\Raytracing</Filter>
+    </None>
+    <None Include="Data\Shader\Raytracing\raygen.rgen">
+      <Filter>Resource Files\Raytracing</Filter>
+    </None>
+    <None Include="Data\Shader\Raytracing\shadow.rmiss">
+      <Filter>Resource Files\Raytracing</Filter>
+    </None>
+    <None Include="Data\Shader\Raytracing\Vertex.vert">
+      <Filter>Resource Files\Raytracing</Filter>
     </None>
   </ItemGroup>
 </Project>

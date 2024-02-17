@@ -793,6 +793,7 @@ void EngineDrawEditor()
 		//	ImGui::Checkbox("Scene Backface Culling", &SceneBackfaceCulling);
 
 	//	ImGui::Checkbox("Render Shadows", &RenderShadows);
+		ImGui::Checkbox("Render Raytraced", &RenderRaytraced);
 		ImGui::Checkbox("Render SSAO", &RenderSSAO);
 		if (ImGui::Checkbox("Render SSAO Blur", &RenderSSAOBlur))
 		{

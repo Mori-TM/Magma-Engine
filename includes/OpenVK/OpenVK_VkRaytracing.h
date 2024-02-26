@@ -747,7 +747,7 @@ void VkDestroyRaytracing()
 	CMA_Destroy(&VkRaytracer.TopLevelAS);
 	CMA_Destroy(&VkRaytracer.Instances);
 	CMA_Destroy(&VkRaytracer.Geometry);
-	OpenVkFree(VkRaytracer.ShaderBindings);
-	OpenVkFree(VkRaytracer.InstanceStorage);
-	OpenVkFree(VkRaytracer.ShaderGroups);
+	if (VkRaytracer.ShaderBindings)		OpenVkFree(VkRaytracer.ShaderBindings);
+	if (VkRaytracer.InstanceStorage)	OpenVkFree(VkRaytracer.InstanceStorage);
+	if (VkRaytracer.ShaderGroups)		OpenVkFree(VkRaytracer.ShaderGroups);
 }

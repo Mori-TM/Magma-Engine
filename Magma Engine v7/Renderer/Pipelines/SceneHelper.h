@@ -127,7 +127,7 @@ typedef struct
 	bool Destroyable;
 
 	uint32_t VertexBuffer;
-	uint32_t IndexBuffer;
+	uint32_t IndexBuffer; //if OPENVK_ERROR then not used
 	SceneMeshData* MeshData;
 } SceneMesh;
 

@@ -107,7 +107,7 @@ vec3 skybox(vec3 dir, float time_of_day)
     return col;
 }
 
-layout(binding = 5, set = 0) uniform sampler2D SkyBox;
+//layout(binding = 5, set = 0) uniform sampler2D SkyBox;
 
 const float PI = 3.141592653589793238;
 const float PI2 = 6.28318530718;
@@ -131,7 +131,7 @@ void main()
 //	posAR.y = pos.y;
 //	vec3 rayDir = normalize(vec3(posAR.x, posAR.y, 1.0));
 
-/*
+
     float time_of_day = 18.0;
    vec3 dir = normalize(gl_WorldRayDirectionEXT);
     dir = rotate(radians(25.), vec3(1., 0., 0.)) * dir;
@@ -139,8 +139,8 @@ void main()
     dir = normalize(dir);
 
     HitValue.HitValue = skybox(dir, time_of_day);
-*/
-    
+
+    /*
     vec3 Dir = normalize(gl_WorldRayDirectionEXT);
     vec2 UV = vec2
     (
@@ -148,7 +148,7 @@ void main()
         0.5 - (asin(Dir.y) / PI)
     );
     HitValue.HitValue = texture(SkyBox, UV).rgb;
-
+    */
 /*
     const vec3 gradientStart = vec3(0.5, 0.6, 1.0);
 	const vec3 gradientEnd = vec3(1.0);

@@ -155,6 +155,7 @@ void CreateRenderer()
 	LuaInit();
 	ImGuiInit();
 	FpsCameraInit();
+	RaytracingInit();
 	
 	OpenVkRuntimeInfo("Engine was initilaized", "");
 //	exit(2);

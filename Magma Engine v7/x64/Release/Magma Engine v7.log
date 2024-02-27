@@ -1353,40 +1353,58 @@ C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pi
   C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(178,5):
   consider using '%I64d' in the format string
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(218,70): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(66,40): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(219,137): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(81,53): warning C4267: '+=': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(219,103): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(91,88): warning C4838: conversion from 'size_t' to 'uint32_t' requires a narrowing conversion
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(219,69): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(91,88): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(220,158): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(110,25): warning C4245: '=': conversion from 'int' to 'uint32_t', signed/unsigned mismatch
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(220,114): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(77,11): warning C4189: 'TotalBufferCount': local variable is initialized but not referenced
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(220,78): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(219,70): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(380,29): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(220,137): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(381,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(220,103): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(385,33): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(220,69): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(386,35): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(221,158): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(404,33): warning C4100: 'TextureImage': unreferenced formal parameter
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(221,114): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(221,78): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(381,29): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(382,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(386,33): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(387,35): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(405,33): warning C4100: 'TextureImage': unreferenced formal parameter
   (compiling source file 'main.cpp')
   
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\main.cpp(142,11): warning C4456: declaration of 'ViewProj' hides previous local declaration
@@ -1412,8 +1430,8 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.3313
      Creating library C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.lib and object C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exp
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  0 of 4681 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+  5 of 4684 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    85 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Magma Engine v7.vcxproj -> C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exe

@@ -15,19 +15,22 @@ typedef struct
 	uint32_t DescriptorSet;
 	uint32_t UniformBuffer;
 	uint32_t PipelineLayout;
-	uint32_t TransformBuffer;
+	uint32_t TransformBufferCount;
+	uint32_t* TransformBuffers;
 	uint32_t VertexCount;
 	uint32_t IndexCount;
 	uint32_t VertexBuffer;
 	uint32_t IndexBuffer;
 	uint32_t GeometryCount;
 	uint32_t* Geometry;
+	uint32_t InstanceCount;
 	uint32_t* Instances;
 	uint32_t* BottomLevelAS;
 	uint32_t TopLevelAS;
 	uint32_t StorageImage;
 	uint32_t RaytracingPipeline;
 	uint32_t* ShaderBindingTable;
+
 
 	uint32_t ImageCount;
 	uint32_t* ImageLayouts;
@@ -167,9 +170,55 @@ void RaytracingUpdateBuffers()
 
 }
 
+void RaytracingBeginFrame()
+{
+	
+}
+
 void RaytracingInit()
 {
 	memset(&RTR, 0, sizeof(RaytracingRenderer));
+
+	uint32_t VertexBufferCount = 0;
+	uint32_t IndexBufferCount = 0;
+	RtCountBuffer(&VertexBufferCount, &IndexBufferCount);
+
+	RTR.GeometryCount = VertexBufferCount;
+	RTR.Geometry = (uint32_t*)malloc(RTR.GeometryCount * sizeof(uint32_t));
+
+	RTR.InstanceCount = VertexBufferCount;
+	RTR.Instances = (uint32_t*)malloc(RTR.InstanceCount * sizeof(uint32_t));
+
+	RTR.InstanceCount = 0;
+	RTR.GeometryCount = 0;
+
+	for (uint32_t i = 0; i < EntityCount; i++)
+	{
+		if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
+		{
+
+		}
+	}
+
+
+	for (uint32_t i = 0; i < SceneMeshes.Size; i++)
+	{
+		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, i);
+		if (Mesh)
+		{
+			if (Mesh->IndexBuffer != OPENVK_ERROR)
+			{
+
+			}
+		}
+	}
+
+	RTR.Geometry[0] = VkCreateRaytracingGeometry(4, sizeof(Vertex), VertexCount, VertexBuffer, IndexCount, RTR.IndexBuffer, RTR.TransformBuffer);
+	RTR.BottomLevelAS[0] = VkCreateBottomLevelAccelerationStructure(Geometry[0], OpenVkFalse, NULL);
+	RTR.Instances[0] = VkCreateInstance(Matrix, OpenVkFalse, BottomLevelAS[0]);
+	RTR.TopLevelAS = OpenVkCreateTopLevelAS(RTR.GeometryCount, RTR.Instances, OpenVkTrue, NULL);
+
+	RtUpdateDescriptors(false);
 }
 
 void RaytracingUpdate()

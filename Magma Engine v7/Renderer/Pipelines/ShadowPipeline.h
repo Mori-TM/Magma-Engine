@@ -264,32 +264,38 @@ void UpdateAnimation(uint32_t AnimationIndex)
 		for (int i = 0; i < Model->NumTriangles; i++)
 		{
 			ProcModel.Update(i);
-			Vertices[j].Pos.x = ProcModel.Vertex[0].P[0];
-			Vertices[j].Pos.y = ProcModel.Vertex[0].P[1];
-			Vertices[j].Pos.z = ProcModel.Vertex[0].P[2];
-			Vertices[j].TexCoord.x = ProcModel.TexCoord[0].S;
-			Vertices[j].TexCoord.y = ProcModel.TexCoord[0].T;
-			Vertices[j].Normal.x = ProcModel.Normal[0].P[0];
-			Vertices[j].Normal.y = ProcModel.Normal[0].P[1];
-			Vertices[j].Normal.z = ProcModel.Normal[0].P[2];
+			Vertices[j].PosTexX.x = ProcModel.Vertex[0].P[0];
+			Vertices[j].PosTexX.y = ProcModel.Vertex[0].P[1];
+			Vertices[j].PosTexX.z = ProcModel.Vertex[0].P[2];
 
-			Vertices[j + 1].Pos.x = ProcModel.Vertex[2].P[0];
-			Vertices[j + 1].Pos.y = ProcModel.Vertex[2].P[1];
-			Vertices[j + 1].Pos.z = ProcModel.Vertex[2].P[2];
-			Vertices[j + 1].TexCoord.x = ProcModel.TexCoord[2].S;
-			Vertices[j + 1].TexCoord.y = ProcModel.TexCoord[2].T;
-			Vertices[j + 1].Normal.x = ProcModel.Normal[2].P[0];
-			Vertices[j + 1].Normal.y = ProcModel.Normal[2].P[1];
-			Vertices[j + 1].Normal.z = ProcModel.Normal[2].P[2];
+			Vertices[j].PosTexX.w = ProcModel.TexCoord[0].S;
+			Vertices[j].NormalTexY.w = ProcModel.TexCoord[0].T;
 
-			Vertices[j + 2].Pos.x = ProcModel.Vertex[1].P[0];
-			Vertices[j + 2].Pos.y = ProcModel.Vertex[1].P[1];
-			Vertices[j + 2].Pos.z = ProcModel.Vertex[1].P[2];
-			Vertices[j + 2].TexCoord.x = ProcModel.TexCoord[1].S;
-			Vertices[j + 2].TexCoord.y = ProcModel.TexCoord[1].T;
-			Vertices[j + 2].Normal.x = ProcModel.Normal[1].P[0];
-			Vertices[j + 2].Normal.y = ProcModel.Normal[1].P[1];
-			Vertices[j + 2].Normal.z = ProcModel.Normal[1].P[2];
+			Vertices[j].NormalTexY.x = ProcModel.Normal[0].P[0];
+			Vertices[j].NormalTexY.y = ProcModel.Normal[0].P[1];
+			Vertices[j].NormalTexY.z = ProcModel.Normal[0].P[2];
+
+			Vertices[j + 1].PosTexX.x = ProcModel.Vertex[2].P[0];
+			Vertices[j + 1].PosTexX.y = ProcModel.Vertex[2].P[1];
+			Vertices[j + 1].PosTexX.z = ProcModel.Vertex[2].P[2];
+
+			Vertices[j + 1].PosTexX.w = ProcModel.TexCoord[2].S;
+			Vertices[j + 1].NormalTexY.w = ProcModel.TexCoord[2].T;
+			
+			Vertices[j + 1].NormalTexY.x = ProcModel.Normal[2].P[0];
+			Vertices[j + 1].NormalTexY.y = ProcModel.Normal[2].P[1];
+			Vertices[j + 1].NormalTexY.z = ProcModel.Normal[2].P[2];
+
+			Vertices[j + 2].PosTexX.x = ProcModel.Vertex[1].P[0];
+			Vertices[j + 2].PosTexX.y = ProcModel.Vertex[1].P[1];
+			Vertices[j + 2].PosTexX.z = ProcModel.Vertex[1].P[2];
+
+			Vertices[j + 2].PosTexX.w = ProcModel.TexCoord[1].S;
+			Vertices[j + 2].NormalTexY.w = ProcModel.TexCoord[1].T;
+
+			Vertices[j + 2].NormalTexY.x = ProcModel.Normal[1].P[0];
+			Vertices[j + 2].NormalTexY.y = ProcModel.Normal[1].P[1];
+			Vertices[j + 2].NormalTexY.z = ProcModel.Normal[1].P[2];
 			j += 3;
 		}
 		ProcModel.End(GetDeltaTime() * Animation->Speed);

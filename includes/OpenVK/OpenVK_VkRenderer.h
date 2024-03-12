@@ -1075,7 +1075,7 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 					{
 						VkStaticBufferInfo* Buffer = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Info->Buffers[k]);
 						if (Buffer == NULL)
-							return OpenVkRuntimeError("Failed to find buffer for descriptor set");
+							return OpenVkRuntimeError("Failed to find vertex/index buffer for descriptor set");
 
 						BufferVk = Buffer->Buffer;
 					}
@@ -1083,7 +1083,7 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 					{
 						VkDynamicBufferInfo* Buffer = (VkDynamicBufferInfo*)CMA_GetAt(&VkRenderer.DynamicBuffers, Info->Buffers[k]);
 						if (Buffer == NULL)
-							return OpenVkRuntimeError("Failed to find buffer for descriptor set");
+							return OpenVkRuntimeError("Failed to find buffer for descriptor set, Index: %d, Itteration: %d", Info->Buffers[k], k);
 						
 						BufferVk = Buffer->Buffers[j];
 					}

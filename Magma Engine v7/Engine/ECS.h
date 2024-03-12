@@ -731,14 +731,17 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 
 		for (uint32_t j = 0; j < SceneMesh->VertexCount; j++)
 		{
-			Vertices[VertexCount].Pos.x = WaveMesh->Vertices[j].Vertices.x;
-			Vertices[VertexCount].Pos.y = WaveMesh->Vertices[j].Vertices.y;
-			Vertices[VertexCount].Pos.z = WaveMesh->Vertices[j].Vertices.z;
-			Vertices[VertexCount].Normal.x = WaveMesh->Vertices[j].Normals.x;
-			Vertices[VertexCount].Normal.y = WaveMesh->Vertices[j].Normals.y;
-			Vertices[VertexCount].Normal.z = WaveMesh->Vertices[j].Normals.z;
-			Vertices[VertexCount].TexCoord.x = WaveMesh->Vertices[j].TexCoords.x;
-			Vertices[VertexCount].TexCoord.y = WaveMesh->Vertices[j].TexCoords.y;
+			Vertices[VertexCount].PosTexX.x = WaveMesh->Vertices[j].Vertices.x;
+			Vertices[VertexCount].PosTexX.y = WaveMesh->Vertices[j].Vertices.y;
+			Vertices[VertexCount].PosTexX.z = WaveMesh->Vertices[j].Vertices.z;
+
+			Vertices[VertexCount].PosTexX.w = WaveMesh->Vertices[j].TexCoords.x;
+			Vertices[VertexCount].NormalTexY.w = WaveMesh->Vertices[j].TexCoords.y;
+
+			Vertices[VertexCount].NormalTexY.x = WaveMesh->Vertices[j].Normals.x;
+			Vertices[VertexCount].NormalTexY.y = WaveMesh->Vertices[j].Normals.y;
+			Vertices[VertexCount].NormalTexY.z = WaveMesh->Vertices[j].Normals.z;
+			
 			VertexCount++;
 		}
 

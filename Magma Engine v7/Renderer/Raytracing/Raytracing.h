@@ -17,14 +17,13 @@ typedef struct
 	uint32_t PipelineLayout;
 	uint32_t TransformBufferCount;
 	uint32_t* TransformBuffers;
-	uint32_t VertexCount;
-	uint32_t IndexCount;
-	uint32_t VertexBuffer;
-	uint32_t IndexBuffer;
+	uint32_t BufferCount;
+	uint32_t* Buffers;
 	uint32_t GeometryCount;
 	uint32_t* Geometry;
 	uint32_t InstanceCount;
 	uint32_t* Instances;
+	uint32_t BottomLevelASCount;
 	uint32_t* BottomLevelAS;
 	uint32_t TopLevelAS;
 	uint32_t StorageImage;
@@ -49,7 +48,7 @@ void RtCountBuffer(uint32_t* VertexBufferCount, uint32_t* IndexBufferCount)
 	for (uint32_t i = 0; i < SceneMeshes.Size; i++)
 	{
 		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, i);
-		if (Mesh)
+		if (Mesh && Mesh->MeshCount > 0)
 		{
 			if (Mesh->IndexBuffer != OPENVK_ERROR)
 				IndexCount++;
@@ -60,6 +59,21 @@ void RtCountBuffer(uint32_t* VertexBufferCount, uint32_t* IndexBufferCount)
 
 	*VertexBufferCount = VertexCount;
 	*IndexBufferCount = IndexCount;
+}
+
+void RtCountBufferSize(SceneMesh* Mesh, uint32_t* VertexBufferSize, uint32_t* IndexBufferSize)
+{
+	uint32_t VertexCount = 0;
+	uint32_t IndexCount = 0;
+
+	for (uint32_t i = 0; i < Mesh->MeshCount; i++)
+	{
+		VertexCount += Mesh->MeshData[i].VertexCount;
+		IndexCount += Mesh->MeshData[i].IndexCount;
+	}
+
+	*VertexBufferSize = VertexCount;
+	*IndexBufferSize = IndexCount;
 }
 
 void RtUpdateDescriptors(bool Update)
@@ -81,7 +95,7 @@ void RtUpdateDescriptors(bool Update)
 
 	if (!Update || RTR.DescriptorPoolBufferCount <= SceneMeshes.Size)
 	{
-		RTR.DescriptorPoolBufferCount += SceneMeshes.Size + 8;
+		RTR.DescriptorPoolBufferCount += SceneMeshes.Size + 8;//+8 so we have somme more storage
 
 		uint32_t DescriptorTypes[] =
 		{
@@ -94,6 +108,7 @@ void RtUpdateDescriptors(bool Update)
 		uint32_t DescriptorCounts[] = { 1, 1, 1, RTR.DescriptorPoolBufferCount, SceneTextures.Size };
 		RTR.DescriptorPool = OpenVkCreateDescriptorPool(OPENVK_DESCRIPTOR_POOL_UPDATABLE, 5, DescriptorTypes, DescriptorCounts);
 	}
+	// we also need to destroy the pool before recreating
 
 	uint32_t DescriptorTypes[] =
 	{
@@ -126,17 +141,36 @@ void RtUpdateDescriptors(bool Update)
 	}
 	TextureCount -= 1;
 
-	uint32_t DescriptorCounts[] = { 1, 1, 1, 1, 1, TextureCount };
+	uint32_t DescriptorCounts[] = { 1, 1, 1, VertexBufferCount, IndexBufferCount, TextureCount };
 
 	uint32_t Bindings[] = { 0, 1, 2, 3, 4, 5 };
 
 	uint32_t TopLevel[] = { RTR.TopLevelAS };
 
-	uint32_t Buffers[] = { RTR.UniformBuffer, RTR.VertexBuffer, RTR.IndexBuffer };
+//	uint32_t Buffers[] = { RTR.UniformBuffer, RTR.VertexBuffer, RTR.IndexBuffer };
+											// + 1 Uniform Buffer
+	RTR.Buffers = (uint32_t*)malloc((TotalBufferCount + 1) * sizeof(uint32_t));
+
+	RTR.Buffers[0] = RTR.UniformBuffer;
+	RTR.BufferCount = 1;
+
+	for (uint32_t i = 0; i < SceneMeshes.Size; i++)
+	{
+		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, i);
+		if (Mesh && Mesh->MeshCount > 0)
+		{
+			RTR.Buffers[RTR.BufferCount++] = Mesh->VertexBuffer;
+
+			if (Mesh->IndexBuffer != OPENVK_ERROR)
+				RTR.Buffers[RTR.BufferCount++] = Mesh->IndexBuffer;
+
+			
+		}
+	}
+
 	size_t Sizes[] = { sizeof(RaytracingUniformBufferObject), 0, 0 };
 
-	printf("VertexBuffer: %d\n", RTR.VertexBuffer);
-	printf("IndexBuffer: %d\n", RTR.IndexBuffer);
+	printf("BufferCount: %d\n", RTR.BufferCount);
 	printf("UniformBuffer: %d\n", RTR.UniformBuffer);
 
 	OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
@@ -145,7 +179,7 @@ void RtUpdateDescriptors(bool Update)
 	DescriptorSetCreateInfo.DescriptorWriteCount = ARRAY_SIZE(DescriptorTypes);
 	DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
 	DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
-	DescriptorSetCreateInfo.Buffers = Buffers;
+	DescriptorSetCreateInfo.Buffers = RTR.Buffers;
 	DescriptorSetCreateInfo.BufferSizes = Sizes;
 	DescriptorSetCreateInfo.ImageLayouts = RTR.ImageLayouts;
 	DescriptorSetCreateInfo.Images = RTR.Images;
@@ -189,14 +223,58 @@ void RaytracingInit()
 	RTR.InstanceCount = VertexBufferCount;
 	RTR.Instances = (uint32_t*)malloc(RTR.InstanceCount * sizeof(uint32_t));
 
+	RTR.TransformBufferCount = VertexBufferCount;
+	RTR.TransformBuffers = (uint32_t*)malloc(RTR.TransformBufferCount * sizeof(uint32_t));
+
+	RTR.BottomLevelASCount = VertexBufferCount;
+	RTR.BottomLevelAS = (uint32_t*)malloc(RTR.BottomLevelASCount * sizeof(uint32_t));
+
+	RTR.TransformBufferCount = 0;
 	RTR.InstanceCount = 0;
 	RTR.GeometryCount = 0;
+	RTR.BottomLevelASCount = 0;
 
 	for (uint32_t i = 0; i < EntityCount; i++)
 	{
 		if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
 		{
+			OpenVkRuntimeWarning("Yeah buddy: %d", RTR.InstanceCount);
 
+			SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
+			if (Mesh != NULL && Mesh->MeshCount > 0)
+			{
+				mat4 Model;
+				LoadMat4IdentityP(&Model);
+				Model = ScaleMat4P(&Model, &Entities[i].Scale);
+				Model = RotateXMat4P(&Model, ToRadians(Entities[i].Rotate.x));
+				Model = RotateYMat4P(&Model, ToRadians(Entities[i].Rotate.y));
+				Model = RotateZMat4P(&Model, ToRadians(Entities[i].Rotate.z));
+				Model = TranslateMat4P(&Model, &Entities[i].Translate);
+				OpenVkTransformMatrix ModelOVK;
+				memcpy(&ModelOVK, &Model, sizeof(OpenVkTransformMatrix));
+
+				RTR.TransformBuffers[RTR.TransformBufferCount++] = VkCreateTranformBuffer(ModelOVK);
+
+				uint32_t VertexSize = 0;
+				uint32_t IndexSize = 0;
+				RtCountBufferSize(Mesh, &VertexSize, &IndexSize);
+
+				OpenVkRaytracingGeometryCreateInfo GeometryInfo;
+				GeometryInfo.VertexFormat = OPENVK_FORMAT_RGBA32F;
+				GeometryInfo.VertexSize = sizeof(SceneVertex);
+				GeometryInfo.VertexBufferDynamic = 0;
+				GeometryInfo.VertexCount = VertexSize;
+				GeometryInfo.VertexBuffer = Mesh->VertexBuffer;
+				GeometryInfo.IndexBufferDynamic = 0;
+				GeometryInfo.IndexCount = IndexSize;
+				GeometryInfo.IndexBuffer = Mesh->IndexBuffer == OPENVK_ERROR ? 0 : Mesh->IndexBuffer;
+				GeometryInfo.TranformBuffer = RTR.TransformBuffers[RTR.TransformBufferCount - 1];
+
+				RTR.Geometry[RTR.GeometryCount++] = OpenVkCreateRaytracingGeometry(&GeometryInfo);
+				RTR.BottomLevelAS[RTR.BottomLevelASCount++] = OpenVkCreateBottomLevelAS(RTR.Geometry[RTR.GeometryCount - 1], OpenVkFalse, NULL);
+				RTR.Instances[RTR.InstanceCount++] = OpenVkCreateInstance(ModelOVK, OpenVkFalse, RTR.BottomLevelAS[RTR.BottomLevelASCount - 1]);
+				
+			}
 		}
 	}
 
@@ -213,10 +291,11 @@ void RaytracingInit()
 		}
 	}
 
-	RTR.Geometry[0] = VkCreateRaytracingGeometry(4, sizeof(Vertex), VertexCount, VertexBuffer, IndexCount, RTR.IndexBuffer, RTR.TransformBuffer);
-	RTR.BottomLevelAS[0] = VkCreateBottomLevelAccelerationStructure(Geometry[0], OpenVkFalse, NULL);
-	RTR.Instances[0] = VkCreateInstance(Matrix, OpenVkFalse, BottomLevelAS[0]);
-	RTR.TopLevelAS = OpenVkCreateTopLevelAS(RTR.GeometryCount, RTR.Instances, OpenVkTrue, NULL);
+	OpenVkRuntimeWarning("Instance Count: %d", RTR.InstanceCount);
+
+	RTR.TopLevelAS = OpenVkCreateTopLevelAS(RTR.InstanceCount, RTR.Instances, OpenVkTrue, NULL);
+
+	RTR.UniformBuffer = OpenVkCreateUniformBuffer(sizeof(RaytracingUniformBufferObject));
 
 	RtUpdateDescriptors(false);
 }

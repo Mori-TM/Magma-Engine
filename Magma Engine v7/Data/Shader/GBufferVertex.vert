@@ -1,9 +1,12 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-layout(location = 0) in vec3 InPosition;
-layout(location = 1) in vec2 InTexCoord;
-layout(location = 2) in vec3 InNormal;
+layout(location = 0) in vec4 InPositionTexX;
+layout(location = 1) in vec4 InNormalTexY;
+
+#define InPosition	InPositionTexX.xyz
+#define InTexCoord	vec2(InPositionTexX.w, InNormalTexY.w)
+#define InNormal	InNormalTexY.xyz
 
 layout(location = 0) out vec3 FragViewNormal;
 layout(location = 1) out vec3 FragNormal;

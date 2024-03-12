@@ -155,7 +155,7 @@ void CreateRenderer()
 	LuaInit();
 	ImGuiInit();
 	FpsCameraInit();
-	RaytracingInit();
+//	RaytracingInit();
 	
 	OpenVkRuntimeInfo("Engine was initilaized", "");
 //	exit(2);
@@ -234,14 +234,25 @@ void CreateRenderer()
 	
 //	
 //	AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
-	
+	/*
 	uint32_t ModelIndex= AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
 	AddEntity(COMPONENT_TYPE_MESH);
 	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
 	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;
 	if (Mesh)
 		strcpycut(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
-	
+	*/
+
+	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Documents/Sort.obj");
+	AddEntity(COMPONENT_TYPE_MESH);
+	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
+	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;
+	if (Mesh)
+		strcpycut(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
+
+	RaytracingInit();
+	OpenVkRuntimeInfo("Raytracing was initilaized", "");
+
 //	uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
 //	ResetEntityLight(&Entities[EntityIndex]);
 //	Entities[EntityIndex].Light.CastShadow = true;

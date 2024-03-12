@@ -72,12 +72,12 @@ void GenerateAABB(AABBData* AABB, uint32_t VertexCount, SceneVertex* Vertices)
 	for (uint32_t i = 0; i < VertexCount; i++)
 	{
 		Data = &Vertices[i];
-		AABB->Max.x = MAX(AABB->Max.x, Data->Pos.x);
-		AABB->Max.y = MAX(AABB->Max.y, Data->Pos.y);
-		AABB->Max.z = MAX(AABB->Max.z, Data->Pos.z);
+		AABB->Max.x = MAX(AABB->Max.x, Data->PosTexX.x);
+		AABB->Max.y = MAX(AABB->Max.y, Data->PosTexX.y);
+		AABB->Max.z = MAX(AABB->Max.z, Data->PosTexX.z);
 
-		AABB->Min.x = MIN(AABB->Min.x, Data->Pos.x);
-		AABB->Min.y = MIN(AABB->Min.y, Data->Pos.y);
-		AABB->Min.z = MIN(AABB->Min.z, Data->Pos.z);
+		AABB->Min.x = MIN(AABB->Min.x, Data->PosTexX.x);
+		AABB->Min.y = MIN(AABB->Min.y, Data->PosTexX.y);
+		AABB->Min.z = MIN(AABB->Min.z, Data->PosTexX.z);
 	}
 }

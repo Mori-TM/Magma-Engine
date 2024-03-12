@@ -1,8 +1,12 @@
 typedef struct
 {
-	vec3 Pos;
-	vec2 TexCoord;
-	vec3 Normal;
+	vec4 PosTexX;
+	vec4 NormalTexY;
+
+
+//	vec3 Pos;
+//	vec2 TexCoord;
+//	vec3 Normal;
 } SceneVertex;
 
 typedef struct

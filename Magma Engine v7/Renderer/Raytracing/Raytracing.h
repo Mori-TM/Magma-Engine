@@ -115,8 +115,8 @@ void RtUpdateDescriptors(bool Update)
 		OPENVK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE,
 		OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
 		OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-		OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-		OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+		OPENVK_DESCRIPTOR_TYPE_VERTEX_BUFFER,
+		OPENVK_DESCRIPTOR_TYPE_INDEX_BUFFER,
 		OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER
 	};
 
@@ -127,7 +127,7 @@ void RtUpdateDescriptors(bool Update)
 	RTR.ImageTypes[0] = OPENVK_IMAGE_TYPE_STORAGE;
 	RTR.ImageSampler[0] = -1; //Doesn't matter, I guess
 
-	for (uint32_t i = 1; i < SceneTextures.Size + 1; i++)
+	for (uint32_t i = 0; i < SceneTextures.Size; i++)
 	{
 		SceneTextureImage* Texture = (SceneTextureImage*)CMA_GetAt(&SceneTextures, i);
 		if (Texture)
@@ -168,6 +168,40 @@ void RtUpdateDescriptors(bool Update)
 		}
 	}
 
+	{
+		uint32_t DescriptorCounts[] = { 1, 1, 1, VertexBufferCount, IndexBufferCount, TextureCount };
+		uint32_t Bindings[] = { 0, 1, 2, 3, 4, 5 };
+		uint32_t DescriptorTypes[] =
+		{
+			OPENVK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE,
+			OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+			OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER
+		};
+		uint32_t DescriptorFlags[] =
+		{
+			OPENVK_DESCRIPTOR_FLAG_NONE,
+			OPENVK_DESCRIPTOR_FLAG_NONE,
+			OPENVK_DESCRIPTOR_FLAG_NONE,
+			OPENVK_DESCRIPTOR_FLAG_NONE,
+			OPENVK_DESCRIPTOR_FLAG_NONE,
+			OPENVK_DESCRIPTOR_FLAG_VARIABLE_DESCRIPTOR_COUNT
+		};
+		uint32_t ShaderTypes[] =
+		{
+			OPENVK_SHADER_TYPE_RAYGEN | OPENVK_SHADER_TYPE_CLOSEST_HIT,
+			OPENVK_SHADER_TYPE_RAYGEN,
+			OPENVK_SHADER_TYPE_RAYGEN | OPENVK_SHADER_TYPE_CLOSEST_HIT | OPENVK_SHADER_TYPE_MISS,
+			OPENVK_SHADER_TYPE_CLOSEST_HIT,
+			OPENVK_SHADER_TYPE_CLOSEST_HIT,
+			OPENVK_SHADER_TYPE_CLOSEST_HIT
+		};
+		RTR.DescriptorSetLayout = OpenVkCreateDescriptorSetLayout(ARRAY_SIZE(DescriptorTypes), Bindings, DescriptorCounts, DescriptorTypes, DescriptorFlags, ShaderTypes);
+		//	exit(0);
+	}
+
 	size_t Sizes[] = { sizeof(RaytracingUniformBufferObject), 0, 0 };
 
 	printf("BufferCount: %d\n", RTR.BufferCount);
@@ -191,6 +225,7 @@ void RtUpdateDescriptors(bool Update)
 	DescriptorSetCreateInfo.VariableDescriptorSetCount = TextureCount;
 	if (Update) DescriptorSetCreateInfo.DescriptorSet = &RTR.DescriptorSet;
 	RTR.DescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
+	OpenVkRuntimeInfo("LGTM!", "");
 }
 
 
@@ -297,16 +332,68 @@ void RaytracingInit()
 
 	RTR.UniformBuffer = OpenVkCreateUniformBuffer(sizeof(RaytracingUniformBufferObject));
 
+	RTR.StorageImage = OpenVkCreateStorageImage(WindowWidth, WindowHeight, OPENVK_FORMAT_DEFAULT);
+
 	RtUpdateDescriptors(false);
+
+	{
+		OpenVkPipelineLayoutCreateInfo LayoutCreateInfo;
+		LayoutCreateInfo.PushConstantCount = 0;
+		LayoutCreateInfo.PushConstantShaderTypes = NULL;
+		LayoutCreateInfo.PushConstantOffsets = NULL;
+		LayoutCreateInfo.PushConstantSizes = NULL;
+		LayoutCreateInfo.DescriptorSetLayoutCount = 1;
+		LayoutCreateInfo.DescriptorSetLayouts = &RTR.DescriptorSetLayout;
+		RTR.PipelineLayout = OpenVkCreatePipelineLayout(&LayoutCreateInfo);
+	}
+
+	{
+		uint32_t ShaderTypes[] = { OPENVK_SHADER_TYPE_RAYGEN, OPENVK_SHADER_TYPE_MISS, OPENVK_SHADER_TYPE_MISS, OPENVK_SHADER_TYPE_CLOSEST_HIT };
+		OpenVkFile Shader[] = { OpenVkReadFile("Data/Shader/Raytracing/raygen.spv"), OpenVkReadFile("Data/Shader/Raytracing/miss.spv"), OpenVkReadFile("Data/Shader/Raytracing/shadow.spv"), OpenVkReadFile("Data/Shader/Raytracing/closesthit.spv") };
+		RTR.RaytracingPipeline = VkCreateRaytracingPipeline(5, RTR.PipelineLayout, 4, ShaderTypes, Shader);
+
+		uint32_t HandleCounts[] = { 1, 2, 1 };
+		RTR.ShaderBindingTable = VkCreateShaderBindingTable(RTR.RaytracingPipeline, 3, HandleCounts);
+	}
 }
 
 void RaytracingUpdate()
 {
-
+	RaytracingUniformBufferObject UBO;
+	UBO.viewInverse = GBufferVertexUBO.View;
+	UBO.projInverse = GBufferVertexUBO.Projection;
+	UBO.viewInverse = InverseMat4(UBO.viewInverse);
+	UBO.projInverse = InverseMat4(UBO.projInverse);
+	UBO.LightDir = Vec4(5.0 * sin(SDL_GetTicks() * 0.0001), 10.976, 6.0 * cos(SDL_GetTicks() * 0.0001), 0.0);
+	Normalize4P(&UBO.LightDir);
+	UBO.Time = SDL_GetTicks();
+	OpenVkUpdateBuffer(sizeof(RaytracingUniformBufferObject), &UBO, RTR.UniformBuffer);
 }
 
 void RaytracingDraw()
 {
+	if (RenderRaytraced)
+	{
+
+		OpenVkBindPipeline(RTR.RaytracingPipeline, OPENVK_PIPELINE_TYPE_RAYTRACING);
+		OpenVkBindDescriptorSet(RTR.PipelineLayout, 0, RTR.DescriptorSet, OPENVK_PIPELINE_TYPE_RAYTRACING);
+
+		OpenVkTraceRaysInfo TraceRaysInfo;
+		TraceRaysInfo.Width = WindowWidth;
+		TraceRaysInfo.Height = WindowHeight;
+		TraceRaysInfo.RaygenShader = RTR.ShaderBindingTable[0];
+		TraceRaysInfo.RaygenHandleCount = 1;
+		TraceRaysInfo.MissShader = RTR.ShaderBindingTable[1];
+		TraceRaysInfo.MissHandleCount = 2;
+		TraceRaysInfo.HitShader = RTR.ShaderBindingTable[2];
+		TraceRaysInfo.HitHandleCount = 1;
+
+		OpenVkTraceRays(&TraceRaysInfo);
+
+		//	if (RenderRaytraced)
+		OpenVkCopyImage(WindowWidth, WindowHeight, RTR.StorageImage, SwapChain);
+		
+	}
 
 }
 

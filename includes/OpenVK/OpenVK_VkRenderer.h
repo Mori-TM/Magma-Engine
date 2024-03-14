@@ -144,6 +144,7 @@ uint32_t VkCreateRenderer(const char**(*GetExtensions)(uint32_t* ExtensionCount)
 	
 	memset(&VkRenderer, 0, sizeof(VkRendererInfo));
 	VkRenderer.ImageAttachments = CMA_Create(sizeof(VkImageInfo), "OpenVk Renderer, Image Attachments");
+	VkRenderer.Pipelines = CMA_Create(sizeof(VkPipeline), "OpenVk Renderer, Pipelines");
 	VkRenderer.DescriptorSets = CMA_Create(sizeof(VkDescriptorSetInfo), "OpenVk Renderer, Descriptor Sets");
 	VkRenderer.Images = CMA_Create(sizeof(VkImageInfo), "OpenVk Renderer, Images");
 	VkRenderer.Sampler = CMA_Create(sizeof(VkSampler), "OpenVk Renderer, Sampler");
@@ -609,7 +610,7 @@ uint32_t VkCreatePipelineLayout(OpenVkPipelineLayoutCreateInfo* Info)
 
 uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 {
-	VkRenderer.Pipelines = (VkPipeline*)OpenVkRealloc(VkRenderer.Pipelines, (VkRenderer.PipelineCount + 1) * sizeof(VkPipeline));
+//	VkRenderer.Pipelines = (VkPipeline*)OpenVkRealloc(VkRenderer.Pipelines, (VkRenderer.PipelineCount + 1) * sizeof(VkPipeline));
 
 	VkShaderModule VertexShaderModule;
 	VkCreateShaderModule(Info->VertexShader, &VertexShaderModule);
@@ -792,7 +793,9 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 	PipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 	PipelineInfo.basePipelineIndex = -1;
 
-	if (vkCreateGraphicsPipelines(VkRenderer.Device, VK_NULL_HANDLE, 1, &PipelineInfo, NULL, &VkRenderer.Pipelines[VkRenderer.PipelineCount]) != VK_SUCCESS)
+	VkPipeline Pipeline;
+
+	if (vkCreateGraphicsPipelines(VkRenderer.Device, VK_NULL_HANDLE, 1, &PipelineInfo, NULL, &Pipeline) != VK_SUCCESS)
 		return OpenVkRuntimeError("Failed to Create Graphics Pipeline");
 
 	vkDestroyShaderModule(VkRenderer.Device, VertexShaderModule, NULL);
@@ -802,9 +805,7 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 	if (Info->ColorBlendAttachments > 0)
 		OpenVkFree(ColorBlendAttachmentStates);
 
-	VkRenderer.PipelineCount++;
-
-	return VkRenderer.PipelineCount - 1;
+	return CMA_Push(&VkRenderer.Pipelines, &Pipeline);
 }
 /*
 //TO-DO Needs to be fixed, pipelines need to use cma
@@ -1029,7 +1030,9 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 	{
 		if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER ||
 			Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ||
-			Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER)
+			Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER ||
+			Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_VERTEX_BUFFER ||
+			Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_INDEX_BUFFER)
 			BufferCount += Info->DescriptorCounts[i];
 
 		else if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER ||
@@ -1046,7 +1049,7 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 	
 	VkDescriptorImageInfo* DescriptorImageInfos = NULL;
 	if (ImageCount > 0)	   
-		DescriptorImageInfos = (VkDescriptorImageInfo*)OpenVkMalloc(ImageCount * sizeof(VkDescriptorImageInfo));
+		DescriptorImageInfos = (VkDescriptorImageInfo*)OpenVkMalloc(ImageCount * 3 * sizeof(VkDescriptorImageInfo));
 
 	VkWriteDescriptorSetAccelerationStructureKHR* DescriptorASInfos = NULL;
 	if (ASCount > 0)							  
@@ -1062,7 +1065,9 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 		{
 			if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER ||
 				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ||
-				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER)
+				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER ||
+				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_VERTEX_BUFFER ||
+				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_INDEX_BUFFER)
 			{
 				uint32_t OldBufferCount = BufferCount;				
 				for (uint32_t m = 0; m < Info->DescriptorCounts[i]; m++)
@@ -1667,7 +1672,11 @@ void VkBindPipeline(uint32_t Pipeline, uint32_t PipelineType)
 	else if (PipelineType == OPENVK_PIPELINE_TYPE_RAYTRACING)
 		PipelineType = VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR;
 
-	vkCmdBindPipeline(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], (VkPipelineBindPoint)PipelineType, VkRenderer.Pipelines[Pipeline]);
+	VkPipeline* PipelinePTR = (VkPipeline*)CMA_GetAt(&VkRenderer.Pipelines, Pipeline);
+	if (PipelinePTR != NULL)
+		vkCmdBindPipeline(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], (VkPipelineBindPoint)PipelineType, *PipelinePTR);
+	else
+		OpenVkRuntimeError("Failed to find pipeline: %d, type: %s", Pipeline, (PipelineType == OPENVK_PIPELINE_TYPE_GRAPHICS ? "graphics" : "raytracing"));
 }
 
 void VkSetViewport(float x, float y, float Width, float Height)
@@ -1839,8 +1848,14 @@ void VkDestroyRenderer()
 {
 	vkDeviceWaitIdle(VkRenderer.Device);
 
-	for (uint32_t i = 0; i < VkRenderer.PipelineCount; i++)
-		vkDestroyPipeline(VkRenderer.Device, VkRenderer.Pipelines[i], NULL);
+	for (uint32_t i = 0; i < VkRenderer.Pipelines.Size; i++)
+	{
+		VkPipeline* Pipeline = (VkPipeline*)CMA_GetAt(&VkRenderer.Pipelines, i);
+		if (Pipeline != NULL)
+			vkDestroyPipeline(VkRenderer.Device, *Pipeline, NULL);
+	}		
+
+	CMA_Destroy(&VkRenderer.Pipelines);
 
 	for (uint32_t i = 0; i < VkRenderer.PipelineLayoutCount; i++)
 		vkDestroyPipelineLayout(VkRenderer.Device, VkRenderer.PipelineLayouts[i], NULL);

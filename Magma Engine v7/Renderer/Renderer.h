@@ -207,22 +207,22 @@ void CreateRenderer()
 //
 //	}
 	
-	int32_t RaageXZ = 100;
-	int32_t RaageY = 150;
-	
-	for (uint32_t i = 0; i < MAX_NUMBER_OF_LIGHTS - 1; i++)
-	{
-		uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
-		ResetEntityLight(&Entities[EntityIndex]);
-		Entities[EntityIndex].Light.CastShadow = false;
-		Entities[EntityIndex].Light.Type = LIGHT_POINT;
-		Entities[EntityIndex].Light.Strength = (float)RandomInt(80, 80000) / 10.0;
-		Entities[EntityIndex].Light.Color = Vec3((float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0);
-		Entities[EntityIndex].Translate = Vec3((float)RandomInt(-RaageXZ, RaageXZ) / 10.0, (float)RandomInt(0, RaageY) / 10.0, (float)RandomInt(-RaageXZ, RaageXZ) / 10.0);
-		
-		strcpy(Entities[EntityIndex].Light.Name, "Point Light");
-	//	OpenVkRuntimeInfo("Scene was initilaized", "");
-	}
+//	int32_t RaageXZ = 100;
+//	int32_t RaageY = 150;
+//	
+//	for (uint32_t i = 0; i < MAX_NUMBER_OF_LIGHTS - 1; i++)
+//	{
+//		uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
+//		ResetEntityLight(&Entities[EntityIndex]);
+//		Entities[EntityIndex].Light.CastShadow = false;
+//		Entities[EntityIndex].Light.Type = LIGHT_POINT;
+//		Entities[EntityIndex].Light.Strength = (float)RandomInt(80, 80000) / 10.0;
+//		Entities[EntityIndex].Light.Color = Vec3((float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0, (float)RandomInt(1, 100) / 100.0);
+//		Entities[EntityIndex].Translate = Vec3((float)RandomInt(-RaageXZ, RaageXZ) / 10.0, (float)RandomInt(0, RaageY) / 10.0, (float)RandomInt(-RaageXZ, RaageXZ) / 10.0);
+//		
+//		strcpy(Entities[EntityIndex].Light.Name, "Point Light");
+//	//	OpenVkRuntimeInfo("Scene was initilaized", "");
+//	}
 
 	
 	
@@ -243,7 +243,8 @@ void CreateRenderer()
 		strcpycut(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
 	*/
 
-	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Documents/Sort.obj");
+	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
+//	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
 	AddEntity(COMPONENT_TYPE_MESH);
 	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
 	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;
@@ -253,14 +254,14 @@ void CreateRenderer()
 	RaytracingInit();
 	OpenVkRuntimeInfo("Raytracing was initilaized", "");
 
-//	uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
-//	ResetEntityLight(&Entities[EntityIndex]);
-//	Entities[EntityIndex].Light.CastShadow = true;
-//	Entities[EntityIndex].Light.Type = LIGHT_DIRECTIONAL;
-//	Entities[EntityIndex].Light.Strength = 5.8;
-//	Entities[EntityIndex].Translate = Vec3(2.0, 16.5, 2.25);
-//	strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
-//	OpenVkRuntimeInfo("Scene was initilaized", "");
+	uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
+	ResetEntityLight(&Entities[EntityIndex]);
+	Entities[EntityIndex].Light.CastShadow = true;
+	Entities[EntityIndex].Light.Type = LIGHT_DIRECTIONAL;
+	Entities[EntityIndex].Light.Strength = 5.8;
+	Entities[EntityIndex].Translate = Vec3(2.0, 6.5, 2.25);
+	strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
+	OpenVkRuntimeInfo("Scene was initilaized", "");
 	
 }
 
@@ -299,6 +300,8 @@ void RendererUpdate()
 	SceneUpdateStorageBuffer();
 	SSRUpdateUniformBuffer();
 	
+	RaytracingUpdate();
+	
 	/*
 	Mutex.lock();
 	mat4 ViewProj = MultiplyMat4P(&SceneVertexUBO.Projection, &SceneVertexUBO.View);
@@ -332,14 +335,20 @@ void RendererDraw()
 
 	BeginFrameTime = GetExecutionTimeOpenVkBool(OpenVkBeginFrame);
 	{
-		if (ForceRenderOnce || RenderShadows)					ShadowRenderingTime = GetExecutionTime(ShadowDraw);
-																GBufferRenderingTime = GetExecutionTime(GBufferDraw);
-		if (ForceRenderOnce || RenderSSAO)						SSAORenderingTime = GetExecutionTime(SSAODraw);
-		if (ForceRenderOnce || RenderSSAO && RenderSSAOBlur)	SSAOBlurRenderingTime = GetExecutionTime(SSAOBlurDraw);
-							 									SceneRenderingTime = GetExecutionTime(SceneDraw);
-		if (ForceRenderOnce || RenderSSR)						SSRRenderingTime = GetExecutionTime(SSRDraw);
-		if (ForceRenderOnce || RenderFXAA)						FXAARenderingTime = GetExecutionTime(FXAADraw);
-																SwapChainRenderingTime = GetExecutionTime(SwapChainDraw);
+		if (!RenderRaytraced)
+		{
+			if (ForceRenderOnce || RenderShadows)					ShadowRenderingTime = GetExecutionTime(ShadowDraw);
+			GBufferRenderingTime = GetExecutionTime(GBufferDraw);
+			if (ForceRenderOnce || RenderSSAO)						SSAORenderingTime = GetExecutionTime(SSAODraw);
+			if (ForceRenderOnce || RenderSSAO && RenderSSAOBlur)	SSAOBlurRenderingTime = GetExecutionTime(SSAOBlurDraw);
+			SceneRenderingTime = GetExecutionTime(SceneDraw);
+			if (ForceRenderOnce || RenderSSR)						SSRRenderingTime = GetExecutionTime(SSRDraw);
+			if (ForceRenderOnce || RenderFXAA)						FXAARenderingTime = GetExecutionTime(FXAADraw);
+			SwapChainRenderingTime = GetExecutionTime(SwapChainDraw);
+
+		}
+		
+		RaytracingDraw();
 	}
 	EndFrameTime = GetExecutionTimeOpenVkBool(OpenVkEndFrame);
 
@@ -353,6 +362,8 @@ void RendererResize(OpenVkBool RecreateSwapChain)
 	else
 		OpenVkDestroySwapChainRelatives();
 
+	printf("Width: %d, Height: %d\n", WindowWidth, WindowHeight);
+
 	CreateRenderPasses();
 	CreateFramebuffers();
 	OpenVkDestroyDescriptorPool(DescriptorPool);
@@ -363,6 +374,13 @@ void RendererResize(OpenVkBool RecreateSwapChain)
 void RendererEvent()
 {
 	ImGuiEvent();
+
+	if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_F1)
+	{
+		OpenVkDeviceWaitIdle();
+		RenderRaytraced = !RenderRaytraced;
+	}
+		
 
 	if (ForceFullScreenEvent || (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_F11))
 	{
@@ -525,14 +543,20 @@ void RendererRender()
 
 		OpenVkDeviceWaitIdle();
 
-		for (uint32_t i = 0; i < VkRenderer.PipelineCount; i++)
+		// Use OpenVk function!!!
+		for (uint32_t i = 0; i < VkRenderer.Pipelines.Size; i++)
 		{
-		//	vkDestroyPipelineLayout(VkRenderer.Device, VkRenderer.PipelineLayouts[i], NULL);
-		//	if (i != OpenVkGUI.Pipeline)
-				vkDestroyPipeline(VkRenderer.Device, VkRenderer.Pipelines[i], NULL);
+			if (i != RTR.RaytracingPipeline)
+			{
+				VkPipeline* Pipeline = (VkPipeline*)CMA_GetAt(&VkRenderer.Pipelines, i);
+				if (Pipeline != NULL)
+					vkDestroyPipeline(VkRenderer.Device, *Pipeline, NULL);
+
+				CMA_Pop(&VkRenderer.Pipelines, i);
+			}
+
+			
 		}
-		
-		VkRenderer.PipelineCount = 0;
 		
 		OpenVkGUIRecreatePipeline();
 		CreateGraphicsPipelines();
@@ -542,5 +566,6 @@ void RendererRender()
 	GetDeltaTime();
 //	OpenVkDrawFrame(RendererDraw, RendererResize, RendererUpdate);
 	FrameTime = GetExecutionTimeOpenVkRender(OpenVkDrawFrame, RendererDraw, RendererResize, RendererUpdate);
-//	exit(22);
+//	if (RenderRaytraced)
+//		exit(22);
 }

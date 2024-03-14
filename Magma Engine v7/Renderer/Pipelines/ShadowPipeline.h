@@ -26,8 +26,8 @@ void CreateShadowLayout()
 
 void CreateShadowPipeline()
 {
-	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGB32F, OPENVK_FORMAT_RG32F };
-	uint32_t ShaderAttributeOffsets[] = { 0, 12 };
+	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGBA32F, OPENVK_FORMAT_RGBA32F };
+	uint32_t ShaderAttributeOffsets[] = { 0, 16 };
 
 	OpenVkFile VertexShader = OpenVkReadFile("Data/Shader/ShadowVertex.spv");
 	OpenVkFile FragmentShader = OpenVkReadFile("Data/Shader/ShadowFragment.spv");
@@ -403,7 +403,7 @@ void ShadowDraw()
 								LastTextureDescriptorSet = TextureDescriptorSet;
 
 								if (Mesh->IndexBuffer != OPENVK_ERROR)
-									OpenVkDrawIndices(Mesh->MeshData[m].IndexOffset, Mesh->MeshData[m].IndexCount, Mesh->MeshData[m].VertexOffset);								
+									OpenVkDrawIndices(Mesh->MeshData[m].IndexOffset, Mesh->MeshData[m].IndexCount, 0);//Mesh->MeshData[m].VertexOffset
 								else
 									OpenVkDrawVertices(Mesh->MeshData[m].VertexOffset, Mesh->MeshData[m].VertexCount);
 							}							

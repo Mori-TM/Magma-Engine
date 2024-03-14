@@ -677,7 +677,7 @@ void EngineDrawEditor()
 		ImGui::Text("Swapchain Image Count: %d", VkRenderer.SwapChainImageCount);
 		ImGui::Text("Image Count: %d", VkRenderer.ImageAttachments.Size);
 		ImGui::Text("Render Pass Count: %d", VkRenderer.RenderPassCount);
-		ImGui::Text("Pipeline Count: %d", VkRenderer.PipelineCount);
+		ImGui::Text("Pipeline Count: %d", VkRenderer.Pipelines.Size);
 		ImGui::Text("Pipeline Layout Count: %d", VkRenderer.PipelineLayoutCount);
 		ImGui::Text("Framebuffer Count: %d", VkRenderer.FramebufferCount);
 		ImGui::Text("Frames In Flight: %d", MAX_FRAMES_IN_FLIGHT);

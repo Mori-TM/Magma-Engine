@@ -573,7 +573,6 @@ OpenVkBool VkCreateTopLevelAS(uint32_t InstanceCount, uint32_t* Instances, OpenV
 
 uint32_t VkCreateRaytracingPipeline(uint32_t MaxPipelineRayRecursionDepth, uint32_t PipelineLayout, uint32_t ShaderCount, uint32_t* ShaderTypes, OpenVkFile* Shader)
 {
-	VkRenderer.Pipelines = (VkPipeline*)OpenVkRealloc(VkRenderer.Pipelines, (VkRenderer.PipelineCount + 1) * sizeof(VkPipeline));
 	VkPipelineShaderStageCreateInfo* ShaderStages = (VkPipelineShaderStageCreateInfo*)OpenVkMalloc(ShaderCount * sizeof(VkPipelineShaderStageCreateInfo));
 	VkRaytracer.ShaderGroups = (VkRayTracingShaderGroupCreateInfoKHR*)OpenVkRealloc(VkRaytracer.ShaderGroups, (VkRaytracer.ShaderGroupCount + ShaderCount) * sizeof(VkRayTracingShaderGroupCreateInfoKHR));
 
@@ -635,7 +634,9 @@ uint32_t VkCreateRaytracingPipeline(uint32_t MaxPipelineRayRecursionDepth, uint3
 	PipelineCreateInfo.basePipelineHandle = 0;
 	PipelineCreateInfo.basePipelineIndex = 0;
 
-	if (KHR.vkCreateRayTracingPipelines(VkRenderer.Device, VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &PipelineCreateInfo, NULL, &VkRenderer.Pipelines[VkRenderer.PipelineCount]) != VK_SUCCESS)
+	VkPipeline Pipeline;
+
+	if (KHR.vkCreateRayTracingPipelines(VkRenderer.Device, VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &PipelineCreateInfo, NULL, &Pipeline) != VK_SUCCESS)
 		return OpenVkRuntimeError("Failed to Create Raytracing Pipeline with Max Recursion: %d, Layout: %d, Shader: %d", MaxPipelineRayRecursionDepth, PipelineLayout, ShaderCount);
 
 	for (uint32_t i = 0; i < ShaderCount; i++)
@@ -643,11 +644,18 @@ uint32_t VkCreateRaytracingPipeline(uint32_t MaxPipelineRayRecursionDepth, uint3
 
 	OpenVkFree(ShaderStages);
 
-	return VkRenderer.PipelineCount++;
+	return CMA_Push(&VkRenderer.Pipelines, &Pipeline);
 }
 
 uint32_t* VkCreateShaderBindingTable(uint32_t Pipeline, uint32_t ShaderCount, uint32_t* HandleCount)
 {
+	VkPipeline* PipelinePTR = (VkPipeline*)CMA_GetAt(&VkRenderer.Pipelines, Pipeline);
+	if (PipelinePTR == NULL)
+	{
+		OpenVkRuntimeError("Failed to find Raytracing Pipeline: %d", Pipeline);
+		return NULL;
+	}
+
 	VkRaytracer.ShaderBindings = (uint32_t*)OpenVkRealloc(VkRaytracer.ShaderBindings, (VkRaytracer.ShaderBindingCount + ShaderCount) * sizeof(uint32_t));
 
 	const uint32_t HandleSize = VkRaytracer.RayTracingPipelineProperties.shaderGroupHandleSize;
@@ -656,7 +664,9 @@ uint32_t* VkCreateShaderBindingTable(uint32_t Pipeline, uint32_t ShaderCount, ui
 	const uint32_t SbtSize = GroupCount * HandleSizeAligned;
 
 	uint8_t* ShaderHandleStorage = (uint8_t*)OpenVkMalloc(SbtSize);
-	if (KHR.vkGetRayTracingShaderGroupHandles(VkRenderer.Device, VkRenderer.Pipelines[Pipeline], 0, GroupCount, SbtSize, ShaderHandleStorage) != VK_SUCCESS)
+		
+
+	if (KHR.vkGetRayTracingShaderGroupHandles(VkRenderer.Device, *PipelinePTR, 0, GroupCount, SbtSize, ShaderHandleStorage) != VK_SUCCESS)
 	{
 		OpenVkRuntimeError("Failed to get Raytracing Shader Group Handles, Pipeline: %d, Shader: %d", Pipeline, ShaderCount);
 		return NULL;

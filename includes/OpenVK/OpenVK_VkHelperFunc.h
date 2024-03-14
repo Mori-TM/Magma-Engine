@@ -86,8 +86,9 @@ typedef struct
 	uint32_t PipelineLayoutCount;
 	VkPipelineLayout* PipelineLayouts;
 
-	uint32_t PipelineCount;
-	VkPipeline* Pipelines;
+//	uint32_t PipelineCount;
+//	VkPipeline* Pipelines;
+	CMA_MemoryZone Pipelines;
 
 	uint32_t FramebufferCount;
 	VkFramebufferInfo* Framebuffers;
@@ -726,6 +727,8 @@ VkDescriptorType VkGetOpenVkDescriptorType(uint32_t DescriptorType)
 		break;
 
 	case OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+	case OPENVK_DESCRIPTOR_TYPE_VERTEX_BUFFER:
+	case OPENVK_DESCRIPTOR_TYPE_INDEX_BUFFER:
 		return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		break;
 

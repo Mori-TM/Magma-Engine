@@ -729,6 +729,8 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 		SceneMesh->Material.Color.z = ModelData->Materials[i].DiffuseColor.z;
 		SceneMesh->Material.Color.w = ModelSetZeroAlphaOne ? (ModelData->Materials[i].Dissolve < 0.01 ? 1.0 : ModelData->Materials[i].Dissolve) : ModelData->Materials[i].Dissolve;
 
+		uint32_t LastVertexCount = VertexCount;
+
 		for (uint32_t j = 0; j < SceneMesh->VertexCount; j++)
 		{
 			Vertices[VertexCount].PosTexX.x = WaveMesh->Vertices[j].Vertices.x;
@@ -741,12 +743,17 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 			Vertices[VertexCount].NormalTexY.x = WaveMesh->Vertices[j].Normals.x;
 			Vertices[VertexCount].NormalTexY.y = WaveMesh->Vertices[j].Normals.y;
 			Vertices[VertexCount].NormalTexY.z = WaveMesh->Vertices[j].Normals.z;
+
+			Vertices[VertexCount].Data.VertexOffset = LastVertexCount;
+			Vertices[VertexCount].Data.TextureIndex = (float)SceneMesh->Material.AlbedoIndex;
+			Vertices[VertexCount].Data.Unused0 = 0.0;
+			Vertices[VertexCount].Data.Unused1 = 0.0;
 			
 			VertexCount++;
 		}
 
 		for (uint32_t j = 0; j < SceneMesh->IndexCount; j++)
-			Indices[IndexCount++] = WaveMesh->Indices[j];
+			Indices[IndexCount++] = WaveMesh->Indices[j] + LastVertexCount;
 
 		GenerateAABB(&MeshInfo->MeshData[i].AABB, SceneMesh->VertexCount, Vertices + SceneMesh->VertexOffset);
 

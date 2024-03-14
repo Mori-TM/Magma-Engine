@@ -34,20 +34,22 @@ layout(binding = 2, set = 0) uniform UniformBufferObject
 
 layout(binding = 3, set = 0) buffer Vertices { vec4 v[]; } vertices;
 layout(binding = 4, set = 0) buffer Indices { uint i[]; } indices;
-layout(binding = 6, set = 0) uniform sampler2D textures[];
+layout(binding = 5, set = 0) uniform sampler2D textures[];
 
 struct VertexUnPacked
 {
 	vec3 Pos;
 	vec3 Normal;
 	vec2 TexCoord;
+	float VertexOffset;
+	float TexIndex;
 };
 
 VertexUnPacked unpack(uint index)
 {
 	// Unpack the vertices from the SSBO using the glTF vertex structure
 	// The multiplier is the size of the vertex divided by four float components (=16 bytes)
-	const int vertexSize = 16 * 2;
+	const int vertexSize = 16 * 3;
 	const int m = vertexSize / 16;
 
 	vec4 d0 = vertices.v[m * index + 0];
@@ -58,6 +60,8 @@ VertexUnPacked unpack(uint index)
 	v.Pos = d0.xyz;
 	v.Normal = d1.xyz;
 	v.TexCoord = vec2(d0.w, d1.w);
+	v.VertexOffset = d2.x;
+	v.TexIndex = d2.y;
 
 	return v;
 }
@@ -76,11 +80,12 @@ void main()
 	
 	vec3 normal = normalize(v0.Normal.xyz * BarycentricCoords.x + v1.Normal.xyz * BarycentricCoords.y + v2.Normal.xyz * BarycentricCoords.z);
 	vec2 texCoord = v0.TexCoord * BarycentricCoords.x + v1.TexCoord * BarycentricCoords.y + v2.TexCoord * BarycentricCoords.z;
-//	float TexIndex = v0.TexIndex * BarycentricCoords.x + v1.TexIndex * BarycentricCoords.y + v2.TexIndex * BarycentricCoords.z;
-	float TexIndex = 0;
+	float TexIndex = v0.TexIndex * BarycentricCoords.x + v1.TexIndex * BarycentricCoords.y + v2.TexIndex * BarycentricCoords.z;
+//	float TexIndex = 0;
 
 	float dot_product = max(dot(UBO.LightDir.xyz, normal), 0.2);
 	HitValue.HitValue = vec3(texture(textures[nonuniformEXT(int(TexIndex))], texCoord).xyz) * vec3(dot_product);
+//	HitValue.HitValue = vec3(dot_product);
 	
 	float Reflect = .3 - ((HitValue.HitValue.x + HitValue.HitValue.y + HitValue.HitValue.z) / 3);
 

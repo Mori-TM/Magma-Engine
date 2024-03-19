@@ -10,6 +10,7 @@ struct PayLoad
 	uint Index;
 	bool WasInShadow;
 	uint Time;
+    bool Reflect;
 };
 
 layout(location = 0) rayPayloadInEXT PayLoad HitValue;

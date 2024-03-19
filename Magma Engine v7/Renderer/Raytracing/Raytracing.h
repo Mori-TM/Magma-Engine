@@ -364,7 +364,9 @@ void RaytracingUpdate()
 	UBO.projInverse = GBufferVertexUBO.Projection;
 	UBO.viewInverse = InverseMat4(UBO.viewInverse);
 	UBO.projInverse = InverseMat4(UBO.projInverse);
-	UBO.LightDir = Vec4(5.0 * sin(SDL_GetTicks() * 0.0001), 10.976, 6.0 * cos(SDL_GetTicks() * 0.0001), 0.0);
+//	UBO.LightDir = Vec4(5.0 * sin(SDL_GetTicks() * 0.0001), 10.976, 6.0 * cos(SDL_GetTicks() * 0.0001), 0.0);
+	UBO.LightDir = Vec4(-3.6, 6.5, 2.75, 0.0);
+//	UBO.LightDir = ShadowDirection;
 	Normalize4P(&UBO.LightDir);
 	UBO.Time = SDL_GetTicks();
 	OpenVkUpdateBuffer(sizeof(RaytracingUniformBufferObject), &UBO, RTR.UniformBuffer);

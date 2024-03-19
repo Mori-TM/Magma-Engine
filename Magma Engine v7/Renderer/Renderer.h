@@ -259,7 +259,7 @@ void CreateRenderer()
 	Entities[EntityIndex].Light.CastShadow = true;
 	Entities[EntityIndex].Light.Type = LIGHT_DIRECTIONAL;
 	Entities[EntityIndex].Light.Strength = 5.8;
-	Entities[EntityIndex].Translate = Vec3(2.0, 6.5, 2.25);
+	Entities[EntityIndex].Translate = Vec3(-3.6, 6.5, 2.75);
 	strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
 	OpenVkRuntimeInfo("Scene was initilaized", "");
 	

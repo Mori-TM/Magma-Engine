@@ -11,6 +11,7 @@ struct PayLoad
 	uint Index;
 	bool WasInShadow;
 	uint Time;
+	bool Reflect;
 };
 
 layout(location = 0) rayPayloadInEXT PayLoad HitValue;
@@ -66,6 +67,19 @@ VertexUnPacked unpack(uint index)
 	return v;
 }
 
+
+vec3 Uncharted2Tonemap(vec3 x)
+{
+	const float A = 0.15;
+	const float B = 0.50;
+	const float C = 0.10;
+	const float D = 0.20;
+	const float E = 0.02;
+	const float F = 0.30;
+	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
+}
+
+
 void main()
 {
 	const vec3 BarycentricCoords = vec3(1.0f - Attribs.x - Attribs.y, Attribs.x, Attribs.y);
@@ -80,13 +94,27 @@ void main()
 	
 	vec3 normal = normalize(v0.Normal.xyz * BarycentricCoords.x + v1.Normal.xyz * BarycentricCoords.y + v2.Normal.xyz * BarycentricCoords.z);
 	vec2 texCoord = v0.TexCoord * BarycentricCoords.x + v1.TexCoord * BarycentricCoords.y + v2.TexCoord * BarycentricCoords.z;
-	float TexIndex = v0.TexIndex * BarycentricCoords.x + v1.TexIndex * BarycentricCoords.y + v2.TexIndex * BarycentricCoords.z;
-//	float TexIndex = 0;
+//	float TexIndex = v0.TexIndex * BarycentricCoords.x + v1.TexIndex * BarycentricCoords.y + v2.TexIndex * BarycentricCoords.z;
+	float TexIndex = v0.TexIndex;
 
-	float dot_product = max(dot(UBO.LightDir.xyz, normal), 0.2);
+	float dot_product = max(dot(UBO.LightDir.xyz, normal), 0.6) * 2.0;
 	HitValue.HitValue = vec3(texture(textures[nonuniformEXT(int(TexIndex))], texCoord).xyz) * vec3(dot_product);
 //	HitValue.HitValue = vec3(dot_product);
 	
+	if (TexIndex == 12)
+		HitValue.Reflect = true;
+	else
+		HitValue.Reflect = false;
+
+	float Exposure = 4.0;
+	float Gamma = 0.9;//1.3
+
+	HitValue.HitValue = Uncharted2Tonemap(HitValue.HitValue * Exposure);
+
+	const vec3 Uncharted2TonemapConst = (1.0f / Uncharted2Tonemap(vec3(11.2f)));
+	HitValue.HitValue = HitValue.HitValue * Uncharted2TonemapConst;	
+	HitValue.HitValue = pow(HitValue.HitValue, vec3(1.0f / Gamma));
+
 	float Reflect = .3 - ((HitValue.HitValue.x + HitValue.HitValue.y + HitValue.HitValue.z) / 3);
 
 //	HitValue.HitValue = vec3(texture(textures[nonuniformEXT(int(TexIndex))], texCoord).xyz * 0.6) * vec3(dot_product);
@@ -100,6 +128,8 @@ void main()
 //	else
 		HitValue.Reflector = .8;
  
+//	HitValue.HitValue = vec3(texture(textures[nonuniformEXT(int(TexIndex))], texCoord).xyz);
+
 	// Shadow casting
 	if (HitValue.Index == 0)
 	{
@@ -114,7 +144,7 @@ void main()
 		//	if (HitValue.HitValue.x > Ref.x &&
 		//		HitValue.HitValue.y > Ref.y &&
 		//		HitValue.HitValue.z > Ref.z)
-				HitValue.HitValue *= 0.15;
+				HitValue.HitValue *= 0.6;
 		//	HitValue.Reflector = -0.1;
 			HitValue.WasInShadow = true;
 		//	HitValue.Reflector = 0.0;

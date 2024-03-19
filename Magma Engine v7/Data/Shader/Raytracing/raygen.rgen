@@ -20,6 +20,7 @@ struct PayLoad
 	uint Index;
 	bool WasInShadow;
 	uint Time;
+	bool Reflect;
 };
 
 layout(location = 0) rayPayloadEXT PayLoad HitValue;
@@ -43,8 +44,12 @@ void main()
 	vec3 color = vec3(0.0);
 	int Iterations = 1;
 	HitValue.WasInShadow = false;
+	HitValue.Reflect = true;
 
 	for (int i = 0; i < 4; i++) {
+		if (HitValue.Reflect == false)
+			break;
+
 	HitValue.Index = i;
 		traceRayEXT(TopLevelAS, gl_RayFlagsOpaqueEXT, 0xff, 0, 0, 0, Origin.xyz, MinT, Direction.xyz, MaxT, 0);
 		vec3 hitColor = HitValue.HitValue;

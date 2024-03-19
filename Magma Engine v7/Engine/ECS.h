@@ -572,6 +572,8 @@ uint32_t AddTexture(char* Path, bool ShowInAssetBrowser)
 
 	SelectedTexture = CMA_Push(&SceneTextures, &Image);
 
+	printf("Texture Added, Name: %s, Index: %d\n", Path, SelectedTexture);
+
 	return SelectedTexture;
 }
 

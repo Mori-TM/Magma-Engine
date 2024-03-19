@@ -27,6 +27,7 @@ uint32_t ShadowMapDescriptorSet;
 
 ShadowVertexPushConstant ShadowVertexPc;
 
+vec4 ShadowDirection = { 0.2, 0.8, 0.0, 0.0 };
 //float CascadeSplitLambda = 0.973;
 //float CascadeNearClip = 0.01;
 //float CascadeFarClip = 1000.0;

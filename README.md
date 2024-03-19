@@ -12,6 +12,7 @@ A Game Engine written by Moritz Gooth using c/c++ and vulkan.
 - obj/stl model format support(gltf/glb in work)
 - Entity Component System(ECS)
 - Lua Scripting
+- Raytracing (WIP)
 
 ## Screen Shots
 ![Magma Engine v7 ImGui 1 89 WIP 16 07 2023 01_38_35](https://github.com/Mori-TM/Magma-Engine/assets/55063400/d3e39864-71d5-48fa-823f-aab212ef88ab)
@@ -21,6 +22,12 @@ A Game Engine written by Moritz Gooth using c/c++ and vulkan.
 ![Magma Engine v7 ImGui 1 89 WIP 16 07 2023 01_36_51](https://github.com/Mori-TM/Magma-Engine/assets/55063400/2217b0a1-cc5f-4078-8734-4b12114ae583)
 
 ![Magma Engine v7 ImGui 1 89 WIP 29 06 2023 14_38_13](https://github.com/Mori-TM/Magma-Engine/assets/55063400/8632024a-b322-4f0d-8285-11127a842f83)
+
+Raytracing:
+![Magma Engine v7 ImGui 1 89 WIP 17 03 2024 13_17_24](https://github.com/Mori-TM/Magma-Engine/assets/55063400/a0949673-bca2-4847-9354-1eeb84db1f0a)
+
+Rasterization:
+![Magma Engine v7 ImGui 1 89 WIP 17 03 2024 13_17_20](https://github.com/Mori-TM/Magma-Engine/assets/55063400/8d65ea06-1e87-49c2-98a8-d76b203be529)
 
 ![Magma Engine v7 ImGui 1 89 WIP 29 06 2023 14_38_43](https://github.com/Mori-TM/Magma-Engine/assets/55063400/4c2b3b6e-3f21-42d3-9b6d-f16fc9e56743)
 

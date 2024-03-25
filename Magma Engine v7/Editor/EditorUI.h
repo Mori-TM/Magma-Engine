@@ -858,7 +858,7 @@ void EngineDrawEditor()
 		}
 	}
 	ImGui::End();
-
+	
 	ImGui::Begin("Render Stages", NULL, ImGuiWindowFlags_NoScrollbar);
 	{
 		ImVec2 ImageSize = ImGui::GetWindowSize();
@@ -866,44 +866,32 @@ void EngineDrawEditor()
 		ImageSize.y = ImageSize.x / Aspect;
 		
 		ImGui::Checkbox("Render Debug View", &RenderDebugDescriptorSet);
-
-		for (uint32_t i = 0; i < ARRAY_SIZE(DebugDescriptorSets); i++)
+		if (!RenderRaytraced)
 		{
-			ImGui::Text(DebugAttachmentNames[i]);
-	//		ImGui::PushID(DebugDescriptorSets[i]);
-			if (ImGuiImageButtonID(DebugAttachmentNames[i], &GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
-				SceneRenderDescriptorSet = DebugDescriptorSets[i];
+			for (uint32_t i = 0; i < ARRAY_SIZE(DebugDescriptorSets); i++)
+			{
+				ImGui::Text(DebugAttachmentNames[i]);
+				//		ImGui::PushID(DebugDescriptorSets[i]);
+				if (ImGuiImageButtonID(DebugAttachmentNames[i], &GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+					SceneRenderDescriptorSet = DebugDescriptorSets[i];
 
+				ImGui::NewLine();
+				//	ImGui::Image(&GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize);
+		//			ImGui::PopID();
+			}
+		}
+		else
+		{
+			ImGui::Text("Raytracing Pass");
+			if (ImGuiImageButtonID("Raytraced Image ID", &GetDescriptorSet(SceneRenderDescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+				SceneRenderDescriptorSet = SceneOutputDescriptorSet;
 			ImGui::NewLine();
-		//	ImGui::Image(&GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize);
-//			ImGui::PopID();
+
+			ImGui::Text("FXAA Pass");
+			if (ImGuiImageButtonID("FXAA Image ID", &GetDescriptorSet(DebugDescriptorSets[ARRAY_SIZE(DebugDescriptorSets) - 1])[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+				SceneRenderDescriptorSet = DebugDescriptorSets[ARRAY_SIZE(DebugDescriptorSets) - 1];
 		}
 
-		/*
-		ImGui::Text("SSAO Pass");
-		ImGui::PushID("SSAO Pass Texture");
-		if (ImGui::ImageButton(&GetDescriptorSet(SSAOBlurDescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
-			SceneRenderDescriptorSet = SSAOBlurDescriptorSet;
-		ImGui::PopID();
-
-		ImGui::Text("Scene Pass");
-		ImGui::PushID("Scene Pass Texture");
-		if (ImGui::ImageButton(&GetDescriptorSet(SceneOutputDescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
-			SceneRenderDescriptorSet = SceneOutputDescriptorSet;
-		ImGui::PopID();
-
-		ImGui::Text("SSR Pass");
-		ImGui::PushID("SSR Pass Texture");
-		if (ImGui::ImageButton(&GetDescriptorSet(SSROutputDescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
-			SceneRenderDescriptorSet = SSROutputDescriptorSet;
-		ImGui::PopID();
-
-		ImGui::Text("FXAA Output");
-		ImGui::PushID("FXAA Output Texture");
-		if (ImGui::ImageButton(&GetDescriptorSet(FXAADescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
-			SceneRenderDescriptorSet = FXAADescriptorSet;
-		ImGui::PopID();
-		*/
 	}
 	ImGui::End();
 

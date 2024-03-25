@@ -82,6 +82,12 @@ Restart:
 	SDL_GetWindowWMInfo(Window, &WmInfo);
 	WaveHwnd = WmInfo.info.win.window;
 #endif	
+
+	if (RenderGamePreview)
+	{
+		SceneWidth = WindowWidth;
+		SceneHeight = WindowHeight;
+	}
 	
 	CreateRenderer();
 	Init = true;
@@ -100,6 +106,7 @@ Restart:
 		}
 		
 		RendererRender();
+	//	exit(3666);
 		FrameCount++;
 	}
 

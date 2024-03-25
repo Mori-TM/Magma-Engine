@@ -34,6 +34,8 @@
 #include "../Editor/Inspector.h"
 #include "../Editor/EditorUI.h"
 
+#include "Raytracing/Raytracing.h"
+
 #include "Pipelines/BlurPipeline.h"
 #include "Pipelines/DebugPipeline.h"
 #include "Pipelines/ShadowPipeline.h"
@@ -44,8 +46,6 @@
 #include "Pipelines/SSRPipeline.h"
 #include "Pipelines/FXAAPipeline.h"
 #include "Pipelines/SwapChainPipeline.h"
-
-#include "Raytracing/Raytracing.h"
 
 void CreateRenderPasses()
 {
@@ -243,7 +243,7 @@ void CreateRenderer()
 		strcpycut(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
 	*/
 
-	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
+	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/Sponza-master/sponza2.obj");
 //	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
 	AddEntity(COMPONENT_TYPE_MESH);
 	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
@@ -323,32 +323,41 @@ void RendererUpdate()
 
 void RendererDraw()
 {
-	if (!RenderDebugDescriptorSet)
-	{
-		if (RenderFXAA)
-			SceneRenderDescriptorSet = FXAADescriptorSet;
-		else if (!RenderFXAA && RenderSSR)
-			SceneRenderDescriptorSet = SSROutputDescriptorSet;
-		else
-			SceneRenderDescriptorSet = SceneOutputDescriptorSet;
-	}	
-
 	BeginFrameTime = GetExecutionTimeOpenVkBool(OpenVkBeginFrame);
 	{
 		if (!RenderRaytraced)
 		{
+			if (!RenderDebugDescriptorSet)
+			{
+				if (RenderFXAA)
+					SceneRenderDescriptorSet = FXAADescriptorSet;
+				else if (!RenderFXAA && RenderSSR)
+					SceneRenderDescriptorSet = SSROutputDescriptorSet;
+				else
+					SceneRenderDescriptorSet = SceneOutputDescriptorSet;
+			}
+
 			if (ForceRenderOnce || RenderShadows)					ShadowRenderingTime = GetExecutionTime(ShadowDraw);
 			GBufferRenderingTime = GetExecutionTime(GBufferDraw);
 			if (ForceRenderOnce || RenderSSAO)						SSAORenderingTime = GetExecutionTime(SSAODraw);
 			if (ForceRenderOnce || RenderSSAO && RenderSSAOBlur)	SSAOBlurRenderingTime = GetExecutionTime(SSAOBlurDraw);
 			SceneRenderingTime = GetExecutionTime(SceneDraw);
 			if (ForceRenderOnce || RenderSSR)						SSRRenderingTime = GetExecutionTime(SSRDraw);
-			if (ForceRenderOnce || RenderFXAA)						FXAARenderingTime = GetExecutionTime(FXAADraw);
-			SwapChainRenderingTime = GetExecutionTime(SwapChainDraw);
+		}
+		else
+		{
+			if (RenderFXAA)
+				SceneRenderDescriptorSet = FXAADescriptorSet;
+			else
+				SceneRenderDescriptorSet = SceneOutputDescriptorSet;
+
+			RaytracingDraw();
 
 		}
 		
-		RaytracingDraw();
+
+		if (ForceRenderOnce || RenderFXAA)						FXAARenderingTime = GetExecutionTime(FXAADraw);
+		SwapChainRenderingTime = GetExecutionTime(SwapChainDraw);
 	}
 	EndFrameTime = GetExecutionTimeOpenVkBool(OpenVkEndFrame);
 

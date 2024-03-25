@@ -109,8 +109,15 @@ void FXAADraw()
 		OpenVkBindPipeline(FXAAPipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
 		uint32_t DescriptorSet;
-		if (RenderSSR)	DescriptorSet = SSROutputDescriptorSet;
-		else			DescriptorSet = SceneOutputDescriptorSet;
+		if (RenderRaytraced)
+		{
+			DescriptorSet = SceneOutputDescriptorSet;
+		}
+		else
+		{
+			if (RenderSSR)	DescriptorSet = SSROutputDescriptorSet;
+			else			DescriptorSet = SceneOutputDescriptorSet;
+		}
 
 		OpenVkBindDescriptorSet(FXAALayout, 0, DescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 

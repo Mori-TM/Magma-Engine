@@ -39,6 +39,7 @@ typedef struct
 } RaytracingRenderer;
 
 RaytracingRenderer RTR;
+uint32_t RaytracingOutDescriptorSet;
 
 void RtCountBuffer(uint32_t* VertexBufferCount, uint32_t* IndexBufferCount)
 {
@@ -105,7 +106,7 @@ void RtUpdateDescriptors(bool Update)
 			OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER
 		};
-		uint32_t DescriptorCounts[] = { 1, 1, 1, RTR.DescriptorPoolBufferCount, SceneTextures.Size };
+		uint32_t DescriptorCounts[] = { 1, 1 + 1, 1, RTR.DescriptorPoolBufferCount, SceneTextures.Size + 1 }; //plus one storage image
 		RTR.DescriptorPool = OpenVkCreateDescriptorPool(OPENVK_DESCRIPTOR_POOL_UPDATABLE, 5, DescriptorTypes, DescriptorCounts);
 	}
 	// we also need to destroy the pool before recreating
@@ -336,6 +337,28 @@ void RaytracingInit()
 
 	RtUpdateDescriptors(false);
 
+	uint32_t DescriptorCounts[] = { 1 };
+	uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE };
+	uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_STORAGE };
+	uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_GENERAL_OUTPUT };
+	uint32_t Bindings[] = { 0 };
+
+	OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
+	DescriptorSetCreateInfo.DescriptorSetLayout = StorageImageDescriptorSetLayout;
+	DescriptorSetCreateInfo.DescriptorPool = RTR.DescriptorPool;
+	DescriptorSetCreateInfo.DescriptorWriteCount = 1;
+	DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
+	DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
+	DescriptorSetCreateInfo.Sampler = &ImageSampler;
+	DescriptorSetCreateInfo.ImageTypes = ImageTypes;
+	DescriptorSetCreateInfo.Images = &RTR.StorageImage;
+	DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
+	DescriptorSetCreateInfo.Bindings = Bindings;
+	DescriptorSetCreateInfo.DescriptorSet = NULL;
+	DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
+
+	RaytracingOutDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
+
 	{
 		OpenVkPipelineLayoutCreateInfo LayoutCreateInfo;
 		LayoutCreateInfo.PushConstantCount = 0;
@@ -392,8 +415,10 @@ void RaytracingDraw()
 
 		OpenVkTraceRays(&TraceRaysInfo);
 
+		
+
 		//	if (RenderRaytraced)
-		OpenVkCopyImage(WindowWidth, WindowHeight, RTR.StorageImage, SwapChain);
+		OpenVkCopyImage(SceneWidth, SceneHeight, OPENVK_IMAGE_TYPE_STORAGE, RTR.StorageImage, OPENVK_IMAGE_TYPE_ATTACHMENT, SceneAttachment);
 		
 	}
 

@@ -19,7 +19,7 @@ void		(*OpenVkEndRenderPass				)();
 uint32_t	(*OpenVkCreateTexture				)(OpenVkTextureCreateInfo* Info);
 uint32_t	(*OpenVkCreateStorageImage			)(uint32_t Width, uint32_t Height, uint32_t Format);
 void		(*OpenVkDestroyImage				)(uint32_t InImage);
-OpenVkBool	(*OpenVkCopyImage					)(uint32_t Width, uint32_t Height, uint32_t Src, uint32_t Dst);
+OpenVkBool	(*OpenVkCopyImage					)(uint32_t Width, uint32_t Height, uint32_t SrcType, uint32_t Src, uint32_t DstType, uint32_t Dst);
 uint32_t	(*OpenVkCreateImageSampler			)(uint32_t Filter, uint32_t AddressMode);
 void		(*OpenVkDestroySampler				)(uint32_t Sampler);
 uint32_t	(*OpenVkCreateColorImageAttachment	)(uint32_t Width, uint32_t Height, uint32_t MsaaSamples, OpenVkBool Sampled, uint32_t Format);

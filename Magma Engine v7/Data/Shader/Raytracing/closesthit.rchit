@@ -101,7 +101,7 @@ void main()
 	HitValue.HitValue = vec3(texture(textures[nonuniformEXT(int(TexIndex))], texCoord).xyz) * vec3(dot_product);
 //	HitValue.HitValue = vec3(dot_product);
 	
-	if (TexIndex == 12)
+	if (TexIndex == 17)
 		HitValue.Reflect = true;
 	else
 		HitValue.Reflect = false;

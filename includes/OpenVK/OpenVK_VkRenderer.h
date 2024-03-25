@@ -1,3 +1,9 @@
+/*
+* CopyImage function needs support for the other image types
+* Attachments and images can merge!?
+* Not all attachments should have VK_IMAGE_USAGE_TRANSFER_DST_BIT
+*/
+
 OpenVkBool VkCreateSwapChain(uint32_t* Width, uint32_t* Height)
 {
 	VkRenderer.SwapChainOld = VkRenderer.SwapChain;
@@ -347,13 +353,13 @@ uint32_t VkCreateColorImageAttachment(uint32_t Width, uint32_t Height, uint32_t 
 
 	if (Sampled)
 	{
-		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
+		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
 			return OpenVkRuntimeError("Failed to Create Sampled Attachment Image");
 		Image.ImageView = VkCreateImageView(Image.Image, ColorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 	}
 	else
 	{
-		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
+		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
 			return OpenVkRuntimeError("Failed to Create Msaa Attachment Image");
 		Image.ImageView = VkCreateImageView(Image.Image, ColorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 	}
@@ -648,7 +654,7 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 	VertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	VertexInputInfo.pNext = NULL;
 	VertexInputInfo.flags = 0;
-	VertexInputInfo.vertexBindingDescriptionCount = 1;
+	VertexInputInfo.vertexBindingDescriptionCount = (Info->BindingStride == 0 ? 0 : 1);
 	VertexInputInfo.pVertexBindingDescriptions = &BindingDescription;
 	VertexInputInfo.vertexAttributeDescriptionCount = AttributeDescriptionCount;
 	VertexInputInfo.pVertexAttributeDescriptions = AttributeDescriptions;
@@ -1469,14 +1475,14 @@ void VkDestroyImage(uint32_t InImage)
 	}	
 }
 
-OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t Src, uint32_t Dst)
+OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t SrcType, uint32_t Src, uint32_t DstType, uint32_t Dst)
 {
 	VkImageInfo* ImageInfo;
 	VkImage SrcImage;
 	VkImage DstImage;
 
 	if (Src == 0)
-		SrcImage = VkRenderer.SwapChainImages[VkRenderer.ImageIndex];
+		SrcImage = VkRenderer.SwapChainImages[VkRenderer.ImageIndex];//Shouldn't that be CurrentFrame?
 	else
 	{
 		ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.Images, Src);
@@ -1489,10 +1495,20 @@ OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t Src, uint32_t D
 		DstImage = VkRenderer.SwapChainImages[VkRenderer.ImageIndex];
 	else
 	{
-		ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.Images, Dst);
-		if (ImageInfo == NULL)
-			return OpenVkRuntimeError("Failed to find dst image for copying");
-		DstImage = ImageInfo->Image;
+		if (DstType == OPENVK_IMAGE_TYPE_ATTACHMENT)
+		{
+			ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.ImageAttachments, Dst);
+			if (ImageInfo == NULL)
+				return OpenVkRuntimeError("Failed to find dst image for copying");
+			DstImage = ImageInfo->Image;
+		}
+		else
+		{
+			ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.Images, Dst);
+			if (ImageInfo == NULL)
+				return OpenVkRuntimeError("Failed to find dst image for copying");
+			DstImage = ImageInfo->Image;
+		}		
 	}
 
 	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], DstImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, NULL);
@@ -1512,8 +1528,8 @@ OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t Src, uint32_t D
 	CopyRegion.extent = Extent;
 	vkCmdCopyImage(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], SrcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, DstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &CopyRegion);
 
-	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], DstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1, NULL);
-	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], SrcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, 1, NULL);
+	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], DstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1, NULL);
+	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], SrcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, DstType == OPENVK_IMAGE_TYPE_ATTACHMENT ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1, NULL);
 
 	return OpenVkTrue;
 }

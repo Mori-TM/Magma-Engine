@@ -43,8 +43,8 @@ void CreateGBufferLayout()
 
 void CreateGBufferPipeline()
 {
-	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGBA32F, OPENVK_FORMAT_RGBA32F, OPENVK_FORMAT_RGBA32F };
-	uint32_t ShaderAttributeOffsets[] = { 0, 16, 32 };
+	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGBA32F, OPENVK_FORMAT_RGBA32F };
+	uint32_t ShaderAttributeOffsets[] = { 0, 16 };
 
 	OpenVkFile VertexShader = OpenVkReadFile("Data/Shader/GBufferVertex.spv");
 	OpenVkFile FragmentShader = OpenVkReadFile("Data/Shader/GBufferFragment.spv");
@@ -56,7 +56,7 @@ void CreateGBufferPipeline()
 	GraphicsPipelineCreateInfo.VertexShader = VertexShader;
 	GraphicsPipelineCreateInfo.FragmentShader = FragmentShader;
 	GraphicsPipelineCreateInfo.BindingStride = sizeof(SceneVertex);
-	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 3;
+	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 2;
 	GraphicsPipelineCreateInfo.ShaderAttributeFormats = ShaderAttributeFormats;
 	GraphicsPipelineCreateInfo.ShaderAttributeOffsets = ShaderAttributeOffsets;
 	GraphicsPipelineCreateInfo.PrimitiveTopology = OPENVK_PRIMITIVE_TOPOLOGY_TRIANGLE;

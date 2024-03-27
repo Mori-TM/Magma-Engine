@@ -1020,6 +1020,7 @@ OpenVkBool VkDestroyDescriptorPool(uint32_t DescriptorPool)
 	return OpenVkTrue;
 }
 
+//This function is a nightmare
 uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 {
 	VkDescriptorSetInfo* DescriptorSetInfo = (VkDescriptorSetInfo*)CMA_GetAt(&VkRenderer.DescriptorSets, *Info->DescriptorSet);
@@ -1054,7 +1055,7 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 		DescriptorBufferInfos = (VkDescriptorBufferInfo*)OpenVkMalloc(BufferCount * sizeof(VkDescriptorBufferInfo));
 	
 	VkDescriptorImageInfo* DescriptorImageInfos = NULL;
-	if (ImageCount > 0)	   
+	if (ImageCount > 0)														//Quick and dirty solution * 3 I guess
 		DescriptorImageInfos = (VkDescriptorImageInfo*)OpenVkMalloc(ImageCount * 3 * sizeof(VkDescriptorImageInfo));
 
 	VkWriteDescriptorSetAccelerationStructureKHR* DescriptorASInfos = NULL;
@@ -1137,8 +1138,13 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 					else
 						return OpenVkRuntimeError("Failed to find Image for descriptor set");
 
-					if (Info->ImageTypes[k] != OPENVK_IMAGE_TYPE_STORAGE)
+					if (Info->DescriptorCounts[i] > 1)
 					{
+						OpenVkRuntimeError("Texture: %d, Sampler: %d", Info->Images[k], Info->Sampler[k]);
+					}
+
+					if (Info->ImageTypes[k] != OPENVK_IMAGE_TYPE_STORAGE)
+					{						
 						VkSampler* ImageSampler = (VkSampler*)CMA_GetAt(&VkRenderer.Sampler, Info->Sampler[k]);
 						if (ImageSampler != NULL)
 							ImageInfo->sampler = *ImageSampler;

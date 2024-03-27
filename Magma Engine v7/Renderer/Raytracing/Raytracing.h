@@ -106,7 +106,7 @@ void RtUpdateDescriptors(bool Update)
 			OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER
 		};
-		uint32_t DescriptorCounts[] = { 1, 1 + 1, 1, RTR.DescriptorPoolBufferCount, SceneTextures.Size + 1 }; //plus one storage image
+		uint32_t DescriptorCounts[] = { 1, 1, 1, RTR.DescriptorPoolBufferCount, SceneTextures.Size + 1 }; //plus one storage image?
 		RTR.DescriptorPool = OpenVkCreateDescriptorPool(OPENVK_DESCRIPTOR_POOL_UPDATABLE, 5, DescriptorTypes, DescriptorCounts);
 	}
 	// we also need to destroy the pool before recreating
@@ -126,7 +126,7 @@ void RtUpdateDescriptors(bool Update)
 	RTR.ImageLayouts[0] = OPENVK_IMAGE_LAYOUT_GENERAL_OUTPUT;
 	RTR.Images[0] = RTR.StorageImage;
 	RTR.ImageTypes[0] = OPENVK_IMAGE_TYPE_STORAGE;
-	RTR.ImageSampler[0] = -1; //Doesn't matter, I guess
+	RTR.ImageSampler[0] = ImageSampler; //Doesn't matter, I guess
 
 	for (uint32_t i = 0; i < SceneTextures.Size; i++)
 	{
@@ -137,6 +137,9 @@ void RtUpdateDescriptors(bool Update)
 			RTR.Images[TextureCount] = Texture->TextureImage;
 			RTR.ImageTypes[TextureCount] = OPENVK_IMAGE_TYPE_TEXTURE;
 			RTR.ImageSampler[TextureCount] = Texture->TextureSampler;
+
+			OpenVkRuntimeError("PP: Texture: %d, Sampler: %d", Texture->TextureImage, Texture->TextureSampler);
+
 			TextureCount++;
 		}
 	}
@@ -337,28 +340,6 @@ void RaytracingInit()
 
 	RtUpdateDescriptors(false);
 
-	uint32_t DescriptorCounts[] = { 1 };
-	uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE };
-	uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_STORAGE };
-	uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_GENERAL_OUTPUT };
-	uint32_t Bindings[] = { 0 };
-
-	OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
-	DescriptorSetCreateInfo.DescriptorSetLayout = StorageImageDescriptorSetLayout;
-	DescriptorSetCreateInfo.DescriptorPool = RTR.DescriptorPool;
-	DescriptorSetCreateInfo.DescriptorWriteCount = 1;
-	DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
-	DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
-	DescriptorSetCreateInfo.Sampler = &ImageSampler;
-	DescriptorSetCreateInfo.ImageTypes = ImageTypes;
-	DescriptorSetCreateInfo.Images = &RTR.StorageImage;
-	DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
-	DescriptorSetCreateInfo.Bindings = Bindings;
-	DescriptorSetCreateInfo.DescriptorSet = NULL;
-	DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
-
-	RaytracingOutDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
-
 	{
 		OpenVkPipelineLayoutCreateInfo LayoutCreateInfo;
 		LayoutCreateInfo.PushConstantCount = 0;
@@ -388,8 +369,9 @@ void RaytracingUpdate()
 	UBO.viewInverse = InverseMat4(UBO.viewInverse);
 	UBO.projInverse = InverseMat4(UBO.projInverse);
 //	UBO.LightDir = Vec4(5.0 * sin(SDL_GetTicks() * 0.0001), 10.976, 6.0 * cos(SDL_GetTicks() * 0.0001), 0.0);
-	UBO.LightDir = Vec4(-3.6, 6.5, 2.75, 0.0);
-//	UBO.LightDir = ShadowDirection;
+//	UBO.LightDir = Vec4(-3.6, 6.5, 2.75, 0.0);
+	UBO.LightDir = ShadowDirection;
+	UBO.LightDir.w = 0.0;
 	Normalize4P(&UBO.LightDir);
 	UBO.Time = SDL_GetTicks();
 	OpenVkUpdateBuffer(sizeof(RaytracingUniformBufferObject), &UBO, RTR.UniformBuffer);
@@ -404,8 +386,8 @@ void RaytracingDraw()
 		OpenVkBindDescriptorSet(RTR.PipelineLayout, 0, RTR.DescriptorSet, OPENVK_PIPELINE_TYPE_RAYTRACING);
 
 		OpenVkTraceRaysInfo TraceRaysInfo;
-		TraceRaysInfo.Width = WindowWidth;
-		TraceRaysInfo.Height = WindowHeight;
+		TraceRaysInfo.Width = SceneWidth;
+		TraceRaysInfo.Height = SceneHeight;
 		TraceRaysInfo.RaygenShader = RTR.ShaderBindingTable[0];
 		TraceRaysInfo.RaygenHandleCount = 1;
 		TraceRaysInfo.MissShader = RTR.ShaderBindingTable[1];

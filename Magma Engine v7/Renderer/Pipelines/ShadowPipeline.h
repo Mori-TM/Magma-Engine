@@ -141,9 +141,9 @@ void UpdateCascades()
 		}
 	}
 
-	ShadowDirection.x = LightDirection.x;
-	ShadowDirection.y = LightDirection.y;
-	ShadowDirection.z = LightDirection.z;
+	ShadowDirection.x = -LightDirection.x;
+	ShadowDirection.y = -LightDirection.y;
+	ShadowDirection.z = -LightDirection.z;
 
 	if (!IsShadow)
 	{

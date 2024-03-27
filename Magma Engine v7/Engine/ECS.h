@@ -275,7 +275,7 @@ void ResetEntityCollider(EntityInfo* Entity)
 	strcpy(Entity->Collider.Name, "None");
 	Entity->Collider.Collider = COLLIDER_BOX;
 }
-
+/*
 uint32_t AddEntity(uint32_t UsedComponent)
 {
 	if (!EntitiesCheckForResize())
@@ -319,6 +319,58 @@ uint32_t AddEntity(uint32_t UsedComponent)
 //	}
 //	else
 //		SelectedEntity = EntityCount - 1;
+
+	Mutex.unlock();
+
+	return SelectedEntity;
+}
+*/
+
+
+uint32_t AddEntity(uint32_t UsedComponent)
+{
+	if (!EntitiesCheckForResize())
+		return SelectedEntity;
+
+	Mutex.lock();
+	EntityInfo* Entity = &Entities[EntityCount];
+	SelectedEntity = EntityCount++;
+
+	memset(Entity->UsedComponents, 0, COMPONENT_COUNT);
+	//	for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
+	//		Entity.UsedComponents[i] = false;
+
+	if (UsedComponent != UINT32_MAX)
+		Entity->UsedComponents[UsedComponent] = true;
+
+	ResetEntityMesh(Entity);
+	ResetEntityMaterial(Entity);
+	ResetEntityCamera(Entity);
+	ResetEntityAnimation(Entity);
+	ResetEntityLight(Entity);
+
+	Entity->Translate = Vec3f(0.0);
+	Entity->Rotate = Vec3f(0.0);
+	Entity->Scale = Vec3f(1.0);
+	Entity->Selected = false;
+
+	uint32_t Count = 0;
+	for (uint32_t i = 0; i < EntityCount; i++)
+		if (strstr(Entities[i].Name, "Entity") != 0)
+			Count++;
+
+	if (Count > 0)
+		ssprintf(Entity->Name, "Entity (%d)", Count);
+	else
+		strcpycut(Entity->Name, "Entity");
+
+	//	Entities = (EntityInfo*)realloc(Entities, (EntityCount + 1) * sizeof(EntityInfo));
+	//	if (EntitiesCheckForResize())
+	//	{
+
+	//	}
+	//	else
+	//		SelectedEntity = EntityCount - 1;
 
 	Mutex.unlock();
 
@@ -555,6 +607,8 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 	DescriptorSetCreateInfo.Images = &Image->TextureImage;
 	DescriptorSetCreateInfo.DescriptorSet = NULL;
 	DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
+
+	OpenVkRuntimeError("Texture go Brr: %d, Sampler go: %d", Image->TextureImage, Image->TextureSampler);
 
 	return OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 }

@@ -476,28 +476,25 @@ C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRe
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1416,72): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1451,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1453,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1465,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1467,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1484,66): warning C4100: 'SrcType': unreferenced formal parameter
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1660,33): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1561,33): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1668,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1569,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1733,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1634,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1744,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1645,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-  (compiling source file 'main.cpp')
-  
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1789,154): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1888,154): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(228,9): warning C4244: 'return': conversion from 'float' to 'uint32_t', possible loss of data
@@ -1392,19 +1389,22 @@ C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pi
   C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(178,5):
   consider using '%I64d' in the format string
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(419,29): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(233,20): warning C4101: 'Img2': unreferenced local variable
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(420,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(431,29): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(424,33): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(432,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(425,35): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(436,33): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(443,33): warning C4100: 'TextureImage': unreferenced formal parameter
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(437,35): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(455,33): warning C4100: 'TextureImage': unreferenced formal parameter
   (compiling source file 'main.cpp')
   
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\main.cpp(149,11): warning C4456: declaration of 'ViewProj' hides previous local declaration
@@ -1430,17 +1430,8 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.3313
      Creating library C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.lib and object C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exp
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  Previous IPDB and IOBJ mismatch, fall back to full compilation.
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ScriptEngine.h(115): warning C4701: potentially uninitialized local variable 'Key' used
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(874): warning C4701: potentially uninitialized local variable 'MinX' used
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(887): warning C4701: potentially uninitialized local variable 'MinY' used
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(951): warning C4172: returning address of local variable or temporary: Line
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(848): warning C4702: unreachable code
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\stb\dxt\stb_dxt.c(641): warning C4702: unreachable code
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ImageCompression.h(92): warning C4702: unreachable code
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(397): warning C4706: assignment within conditional expression
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(389): warning C4701: potentially uninitialized local variable 'BottomLevelAS' used
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(539): warning C4701: potentially uninitialized local variable 'TopLevelAS' used
-  All 4682 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  3 of 4682 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    86 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Magma Engine v7.vcxproj -> C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exe

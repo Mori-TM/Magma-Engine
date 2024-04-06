@@ -332,7 +332,7 @@ void RaytracingInit()
 
 	OpenVkRuntimeWarning("Instance Count: %d", RTR.InstanceCount);
 
-	RTR.TopLevelAS = OpenVkCreateTopLevelAS(RTR.InstanceCount, RTR.Instances, OpenVkTrue, NULL);
+	RTR.TopLevelAS = OpenVkCreateTopLevelAS(RTR.InstanceCount, RTR.Instances, OpenVkFalse, NULL);
 
 	RTR.UniformBuffer = OpenVkCreateUniformBuffer(sizeof(RaytracingUniformBufferObject));
 
@@ -400,7 +400,7 @@ void RaytracingDraw()
 		
 
 		//	if (RenderRaytraced)
-		OpenVkCopyImage(SceneWidth, SceneHeight, OPENVK_IMAGE_TYPE_STORAGE, RTR.StorageImage, OPENVK_IMAGE_TYPE_ATTACHMENT, SceneAttachment);
+		OpenVkCopyImage(SceneWidth, SceneHeight, OPENVK_IMAGE_TYPE_STORAGE, RTR.StorageImage, OPENVK_IMAGE_TYPE_ATTACHMENT, SceneAttachment, OpenVkTrue);
 		
 	}
 

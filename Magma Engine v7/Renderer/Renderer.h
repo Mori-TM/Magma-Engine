@@ -225,12 +225,23 @@ void CreateRenderer()
 //	}
 
 	
+//	AddTexture((char*)"C:/Users/Moritz Laptop/Pictures/img.png", true);
+
+//	SceneTextureImage Img;
+//	LoadTexture((char*)"C:/Users/Moritz Laptop/Pictures/img2.png", &Img);
+//	
+	SceneTextureImage Img2;
 	
+	LoadTextureCompressed = true;
+	AddTexture((char*)"C:/Users/Moritz Laptop/Pictures/Bitmap.bmp", true);
+	LoadTextureCompressed = false;
+//	LoadTexture((char*)"C:/Users/Moritz Laptop/Pictures/img.png", &Img2);
 	
+//
+//
+//	OpenVkCopyImage(Img.Width, Img.Height, OPENVK_IMAGE_TYPE_TEXTURE, Img.TextureImage, OPENVK_IMAGE_TYPE_TEXTURE, Img2.TextureImage, OpenVkFalse);
 	
-	
-	
-	
+//	exit(22);
 	
 //	
 //	AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
@@ -244,6 +255,7 @@ void CreateRenderer()
 	*/
 
 	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/Sponza-master/sponza2.obj");
+//	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/TestMesh.obj");
 //	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
 	AddEntity(COMPONENT_TYPE_MESH);
 	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);

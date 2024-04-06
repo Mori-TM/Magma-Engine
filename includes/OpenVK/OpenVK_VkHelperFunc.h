@@ -921,6 +921,8 @@ void VkSetImageLayout(VkCommandBuffer CommandBuffer, VkImage Image, VkImageLayou
 	VkPipelineStageFlags SourceStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 	VkPipelineStageFlags DestinationStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
+	/*
+
 		 if (OldImageLayout == VK_IMAGE_LAYOUT_UNDEFINED)						SourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 	else if (OldImageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)			SourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 	else if (OldImageLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)		SourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -932,6 +934,47 @@ void VkSetImageLayout(VkCommandBuffer CommandBuffer, VkImage Image, VkImageLayou
 	else if (NewImageLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)		DestinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	else if (NewImageLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)DestinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 	else if (NewImageLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)		DestinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	*/
+
+	switch (OldImageLayout) 
+	{
+	case VK_IMAGE_LAYOUT_UNDEFINED:
+		SourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+		SourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		SourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+		SourceStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+		SourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		break;
+	default:
+		break;
+	}
+
+	switch (NewImageLayout) 
+	{
+	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+		DestinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		DestinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+		DestinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+		DestinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		break;
+	default:
+		break;
+	}
 
 	vkCmdPipelineBarrier(
 		CommandBuffer,
@@ -972,7 +1015,11 @@ void VkGenerateMipmaps(VkImage Image, VkFormat ImageFormat, int32_t TextureWidth
 	VkFormatProperties FormatProperties;
 	vkGetPhysicalDeviceFormatProperties(VkRenderer.PhysicalDevice, ImageFormat, &FormatProperties);
 	if (!(FormatProperties.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
+	{
+		OpenVkRuntimeError("No Linear Filter, No Mipmaps");
 		return;
+	}
+		
 
 //	OpenVkRuntimeError("Supports Blit: %d", SupportsBlit);
 

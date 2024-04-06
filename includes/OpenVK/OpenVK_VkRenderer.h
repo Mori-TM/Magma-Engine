@@ -1421,21 +1421,23 @@ uint32_t VkCreateTexture(OpenVkTextureCreateInfo* Info)
 	else
 		VkRenderer.MipLevels = 1;
 
-
 	//Check if all mip level image size are above the minimum size
 
 	OpenVkBool SupportsBlit = VkIsBlittingSupported(TextureImage.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+//	if (Info->UseCustomMipmaps == OpenVkFalse)
 	if (SupportsBlit == OpenVkFalse && Info->UseCustomMipmaps == OpenVkFalse)
 		VkRenderer.MipLevels = 1;
+	
+
 
 	VkCreateAndUploadImage(Info->Pixels[0], Info->Width, Info->Height, ImageSize, VkRenderer.MipLevels, TextureImage.Format, &TextureImage.Image, &TextureImage.ImageMemory);
-	
+
 	if (VkRenderer.MipLevels > 1 && Info->GenerateMipmaps == OpenVkTrue)
 	{
 		if (Info->UseCustomMipmaps)
 			VkUploadMipmaps(Info->Pixels, TextureImage.Image, Info->Width, Info->Height, ImageSize, VkRenderer.MipLevels, TextureImage.Format);
 		else
-			VkGenerateMipmaps(TextureImage.Image, TextureImage.Format, Info->Width, Info->Height, VkRenderer.MipLevels);		
+			VkGenerateMipmaps(TextureImage.Image, TextureImage.Format, Info->Width, Info->Height, VkRenderer.MipLevels);
 	}
 	else
 	{
@@ -1481,7 +1483,7 @@ void VkDestroyImage(uint32_t InImage)
 	}	
 }
 
-OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t SrcType, uint32_t Src, uint32_t DstType, uint32_t Dst)
+OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t SrcType, uint32_t Src, uint32_t DstType, uint32_t Dst, OpenVkBool DuringRendering)
 {
 	VkImageInfo* ImageInfo;
 	VkImage SrcImage;
@@ -1491,10 +1493,20 @@ OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t SrcType, uint32
 		SrcImage = VkRenderer.SwapChainImages[VkRenderer.ImageIndex];//Shouldn't that be CurrentFrame?
 	else
 	{
-		ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.Images, Src);
-		if (ImageInfo == NULL)
-			return OpenVkRuntimeError("Failed to find src image for copying");
-		SrcImage = ImageInfo->Image;
+		if (SrcType == OPENVK_IMAGE_TYPE_ATTACHMENT)
+		{
+			ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.ImageAttachments, Src);
+			if (ImageInfo == NULL)
+				return OpenVkRuntimeError("Failed to find src attachment image for copying");
+			SrcImage = ImageInfo->Image;
+		}
+		else
+		{
+			ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.Images, Src);
+			if (ImageInfo == NULL)
+				return OpenVkRuntimeError("Failed to find src image for copying");
+			SrcImage = ImageInfo->Image;
+		}
 	}
 		
 	if (Dst == 0)
@@ -1505,7 +1517,7 @@ OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t SrcType, uint32
 		{
 			ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.ImageAttachments, Dst);
 			if (ImageInfo == NULL)
-				return OpenVkRuntimeError("Failed to find dst image for copying");
+				return OpenVkRuntimeError("Failed to find dst attachment image for copying");
 			DstImage = ImageInfo->Image;
 		}
 		else
@@ -1517,15 +1529,101 @@ OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t SrcType, uint32
 		}		
 	}
 
-	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], DstImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, NULL);
-	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], SrcImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1, NULL);
-	
+	VkImageLayout SrcOldLayout;
+	VkImageLayout DstOldLayout;
+
+	VkImageLayout SrcNewLayout;
+	VkImageLayout DstNewLayout;
+	switch (SrcType)
+	{
+	case OPENVK_IMAGE_TYPE_TEXTURE:
+		SrcOldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		SrcNewLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		break;
+	case OPENVK_IMAGE_TYPE_ATTACHMENT:
+		SrcOldLayout = VK_IMAGE_LAYOUT_GENERAL;
+		SrcNewLayout = VK_IMAGE_LAYOUT_GENERAL;
+		break;
+	case OPENVK_IMAGE_TYPE_STORAGE:
+		SrcOldLayout = VK_IMAGE_LAYOUT_GENERAL;
+		SrcNewLayout = VK_IMAGE_LAYOUT_GENERAL;
+		break;
+	case OPENVK_IMAGE_TYPE_SWAPCHAIN:
+		SrcOldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		SrcNewLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		break;
+	default:
+		SrcOldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		SrcNewLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		break;
+	}
+
+
+	switch (DstType)
+	{
+	case OPENVK_IMAGE_TYPE_TEXTURE:
+		DstOldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		DstNewLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		break;
+	case OPENVK_IMAGE_TYPE_ATTACHMENT:
+		DstOldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		DstNewLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		break;
+	case OPENVK_IMAGE_TYPE_STORAGE:
+		DstOldLayout = VK_IMAGE_LAYOUT_GENERAL;
+		DstNewLayout = VK_IMAGE_LAYOUT_GENERAL;
+		break;
+	case OPENVK_IMAGE_TYPE_SWAPCHAIN:
+		DstOldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		DstNewLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		break;
+	default:
+		DstOldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		DstNewLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		break;
+	}
+
+	VkCommandBuffer CommandBuffer;
+
+	if (DuringRendering)
+		CommandBuffer = VkRenderer.CommandBuffers[VkRenderer.ImageIndex];
+	else
+		CommandBuffer = VkBeginSingleTimeCommands();
+
+	VkSetImageLayout(CommandBuffer, DstImage, DstOldLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, NULL);
+	VkSetImageLayout(CommandBuffer, SrcImage, SrcOldLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1, NULL);
+
 	VkImageSubresourceLayers SrcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
 	VkOffset3D				 SrcOffset = { 0, 0, 0 };
 	VkImageSubresourceLayers DstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
 	VkOffset3D				 DstOffset = { 0, 0, 0 };
 	VkExtent3D				 Extent = { Width, Height, 1 };
-	
+
+	VkImageCopy CopyRegion;
+	CopyRegion.srcSubresource = SrcSubresource;
+	CopyRegion.srcOffset = SrcOffset;
+	CopyRegion.dstSubresource = DstSubresource;
+	CopyRegion.dstOffset = DstOffset;
+	CopyRegion.extent = Extent;
+	vkCmdCopyImage(CommandBuffer, SrcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, DstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &CopyRegion);
+
+	VkSetImageLayout(CommandBuffer, DstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, DstNewLayout, 1, NULL);
+	VkSetImageLayout(CommandBuffer, SrcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, SrcNewLayout, 1, NULL);
+
+
+	if (!DuringRendering)
+		VkEndSingleTimeCommandBuffer(CommandBuffer);
+
+	/*
+	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], DstImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, NULL);
+	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], SrcImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1, NULL);
+
+	VkImageSubresourceLayers SrcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
+	VkOffset3D				 SrcOffset = { 0, 0, 0 };
+	VkImageSubresourceLayers DstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
+	VkOffset3D				 DstOffset = { 0, 0, 0 };
+	VkExtent3D				 Extent = { Width, Height, 1 };
+
 	VkImageCopy CopyRegion;
 	CopyRegion.srcSubresource = SrcSubresource;
 	CopyRegion.srcOffset = SrcOffset;
@@ -1536,6 +1634,7 @@ OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t SrcType, uint32
 
 	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], DstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1, NULL);
 	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], SrcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, DstType == OPENVK_IMAGE_TYPE_ATTACHMENT ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1, NULL);
+	*/
 
 	return OpenVkTrue;
 }

@@ -179,6 +179,9 @@
     <ClInclude Include="Renderer\Raytracing\Raytracing.h">
       <Filter>Header Files\Renderer\Raytracing</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\FileDialog.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Shader\BlurFragment.frag">

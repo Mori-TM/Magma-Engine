@@ -263,8 +263,8 @@ float GetShadow(float Ambient)
 			 
 	vec4 ShadowCoord = (UBO.CascadeProjectionView[CascadeIndex]) * WorldPos;	
 
-	ShadowCoord.x /= SHADOW_MAP_CASCADE_COUNT;
-	ShadowCoord.x += (1.0 / SHADOW_MAP_CASCADE_COUNT) * float(CascadeIndex); 
+	ShadowCoord.x /= float(SHADOW_MAP_CASCADE_COUNT);
+	ShadowCoord.x += (1.0 / float(SHADOW_MAP_CASCADE_COUNT)) * float(CascadeIndex); 
 
 	float Shadow = 0.0;
 	if (UBO.CascadeRange[CascadeIndex] > 0.1)

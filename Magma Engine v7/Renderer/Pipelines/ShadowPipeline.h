@@ -162,7 +162,7 @@ void UpdateCascades()
 
 	for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
 	{
-		float p = (i + 1) / (float)SHADOW_MAP_CASCADE_COUNT;
+		float p = (float)(i + 1) / (float)SHADOW_MAP_CASCADE_COUNT;
 		float Log = MinZ * powf(Ratio, p);
 		float Uniform = MinZ + Range * p;
 		float d = CascadeSplitLambda * (Log - Uniform) + Uniform;

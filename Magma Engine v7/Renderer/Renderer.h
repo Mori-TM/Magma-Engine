@@ -26,6 +26,7 @@
 #include "../Engine/FpsCamera.h"
 #include "../Engine/ScriptEngine.h"
 #include "../Engine/FrustumCulling.h"
+#include "../Engine/FileDialog.h"
 
 #include "../Editor/Editor.h"
 #include "../Editor/SceneManager.h"
@@ -254,9 +255,9 @@ void CreateRenderer()
 		strcpycut(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
 	*/
 
-	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/Sponza-master/sponza2.obj");
+//	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/Sponza-master/sponza2.obj");
 //	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/TestMesh.obj");
-//	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
+	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
 	AddEntity(COMPONENT_TYPE_MESH);
 	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
 	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;

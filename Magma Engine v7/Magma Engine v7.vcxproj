@@ -167,6 +167,7 @@
     <ClInclude Include="Engine\CameraPath.h" />
     <ClInclude Include="Engine\ECS.h" />
     <ClInclude Include="Engine\Engine.h" />
+    <ClInclude Include="Engine\FileDialog.h" />
     <ClInclude Include="Engine\FpsCamera.h" />
     <ClInclude Include="Engine\FrustumCulling.h" />
     <ClInclude Include="Engine\ImageCompression.h" />

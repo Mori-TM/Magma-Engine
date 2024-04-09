@@ -43,6 +43,7 @@ const char* LightNames[] =
 	"Spot"
 };
 
+//Maybe add _TYPE_
 typedef enum
 {
 	COLLIDER_BOX = 0,

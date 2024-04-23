@@ -17,6 +17,8 @@
 #include "Helper/Sampler.h"
 #include "Helper/GUI.h"
 
+#include "Raytracing/Raytracing.h"
+
 #include "../Engine/Engine.h"
 #include "../Engine/CameraPath.h"
 #include "../Engine/Physics.h"
@@ -34,8 +36,6 @@
 #include "../Editor/EntityManager.h"
 #include "../Editor/Inspector.h"
 #include "../Editor/EditorUI.h"
-
-#include "Raytracing/Raytracing.h"
 
 #include "Pipelines/BlurPipeline.h"
 #include "Pipelines/DebugPipeline.h"
@@ -121,6 +121,8 @@ void CreateRenderer()
 {
 	OpenVkInitThreads();
 	SwapChain = OpenVkCreateRenderer(OPENVK_VULKAN | OPENVK_VALIDATION_LAYER | OPENVK_RAYTRACING, GetExtensions, GetSurface, GetWindowSize);
+	RaytracingInit();
+	OpenVkRuntimeInfo("Raytracing was initilaized", "");
 
 	CreateRenderPasses();
 	/*
@@ -128,6 +130,7 @@ void CreateRenderer()
 	* 30, "Data/Fonts/Roboto-Medium.TTF"
 	*/
 	OpenVkGUIInit(WindowWidth, WindowHeight, SwapChainRenderPass, 1, 30, "Data/Fonts/Roboto-Medium.TTF", GetMousePos);
+	
 	CreateDescriptorSetLayout();
 	CreateSSAONoiseImage();
 	CreatePipelineLayouts();
@@ -145,6 +148,7 @@ void CreateRenderer()
 	CreateSSRUniformBuffer();
 	
 	CreateImGuiDescriptorPool();
+	
 	CreateDescriptors();
 
 	EntitiesInit();
@@ -152,13 +156,15 @@ void CreateRenderer()
 	
 	EngineInit();
 	EngineInitEditor();
-
+	
 	LuaInit();
 	ImGuiInit();
 	FpsCameraInit();
 //	RaytracingInit();
-	
+
 	OpenVkRuntimeInfo("Engine was initilaized", "");
+	
+//	exit(3666);
 //	exit(2);
 	//Set up deafult test scene
 //	SceneMesh Mesh;
@@ -233,9 +239,9 @@ void CreateRenderer()
 //	
 	SceneTextureImage Img2;
 	
-	LoadTextureCompressed = true;
-	AddTexture((char*)"C:/Users/Moritz Laptop/Pictures/Bitmap.bmp", true);
-	LoadTextureCompressed = false;
+//	LoadTextureCompressed = true;
+//	AddTexture((char*)"C:/Users/Moritz Laptop/Pictures/Bitmap.bmp", true);
+//	LoadTextureCompressed = false;
 //	LoadTexture((char*)"C:/Users/Moritz Laptop/Pictures/img.png", &Img2);
 	
 //
@@ -259,13 +265,10 @@ void CreateRenderer()
 //	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/TestMesh.obj");
 	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
 	AddEntity(COMPONENT_TYPE_MESH);
-	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
-	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;
-	if (Mesh)
-		strcpycut(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
+	AddMeshToEntity(SelectedEntity, ModelIndex);
 
-	RaytracingInit();
-	OpenVkRuntimeInfo("Raytracing was initilaized", "");
+	AddEntity(COMPONENT_TYPE_MESH);
+	AddMeshToEntity(SelectedEntity, ModelIndex);
 
 	uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
 	ResetEntityLight(&Entities[EntityIndex]);
@@ -275,7 +278,11 @@ void CreateRenderer()
 	Entities[EntityIndex].Translate = Vec3(-3.6, 6.5, 2.75);
 	strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
 	OpenVkRuntimeInfo("Scene was initilaized", "");
-	
+//	exit(3666);
+
+//	RaytracingUpdateAssets();
+
+//	exit(3666);
 }
 
 void DestroyRenderer()
@@ -390,6 +397,7 @@ void RendererResize(OpenVkBool RecreateSwapChain)
 	CreateFramebuffers();
 	OpenVkDestroyDescriptorPool(DescriptorPool);
 	CreateDescriptors();
+	RaytracingResize();
 	ForceRenderOnce = true;
 }
 

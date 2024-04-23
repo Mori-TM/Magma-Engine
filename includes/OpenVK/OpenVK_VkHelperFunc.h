@@ -702,6 +702,20 @@ VkShaderStageFlags VkGetOpenVkShader(uint32_t Shader)
 	return StageFlags;
 }
 
+VkDescriptorSetLayoutCreateFlags VkGetOpenVkDescriptorSetLayoutFlags(uint32_t DescriptorSetLayoutFlags)
+{
+	if (DescriptorSetLayoutFlags == 0)
+		return 0;
+
+	VkDescriptorSetLayoutCreateFlags Flags = 0;
+	if (DescriptorSetLayoutFlags & OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_UPDATE_AFTER_BIND_POOL)	Flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
+	if (DescriptorSetLayoutFlags & OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_PUSH_DESCRIPTOR)			Flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR;
+	if (DescriptorSetLayoutFlags & OPENVK_DESCRIPTOR_SET_LAYOUT_HOST_ONLY_POOL_BIT_VALVE)		Flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_HOST_ONLY_POOL_BIT_VALVE;
+
+	return Flags;
+}
+
+
 VkDescriptorType VkGetOpenVkDescriptorType(uint32_t DescriptorType)
 {
 	switch (DescriptorType)

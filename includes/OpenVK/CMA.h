@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #define CMA_BLOCK_SIZE 64
-#define CMA_MAX_GARBAGE_COUNT 4
+#define CMA_MAX_GARBAGE_COUNT 4 //FIX - isn't that a bit too often?
 
 typedef enum
 {

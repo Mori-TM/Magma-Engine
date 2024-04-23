@@ -18,6 +18,97 @@ layout(location = 0) rayPayloadInEXT PayLoad HitValue;
 layout(location = 1) rayPayloadEXT bool shadowed;
 hitAttributeEXT vec2 Attribs;
 
+
+layout(binding = 0, set = 0) uniform accelerationStructureEXT topLevelAS;
+layout(binding = 2, set = 0) uniform UniformBufferObject 
+{
+	mat4 ViewInverse;
+	mat4 ProjInverse;
+	vec4 LightDir;
+	uint Time;
+} UBO;
+
+layout(binding = 3, set = 0) uniform sampler2D textures[];
+
+
+vec3 Uncharted2Tonemap(vec3 x)
+{
+	const float A = 0.15;
+	const float B = 0.50;
+	const float C = 0.10;
+	const float D = 0.20;
+	const float E = 0.02;
+	const float F = 0.30;
+	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
+}
+
+
+void main()
+{
+	const vec3 BarycentricCoords = vec3(1.0f - Attribs.x - Attribs.y, Attribs.x, Attribs.y);
+
+
+//	ivec3 index = ivec3(indices.i[3 * gl_PrimitiveID], indices.i[3 * gl_PrimitiveID + 1], indices.i[3 * gl_PrimitiveID + 2]);
+
+	
+//	HitValue.HitValue = vec3(texture(textures[nonuniformEXT(int(BarycentricCoords.z) > 49 ? 49 : int(BarycentricCoords.z) )], BarycentricCoords.xy).xyz);
+	HitValue.HitValue = vec3(BarycentricCoords);
+	
+	float Exposure = 4.0;
+	float Gamma = 0.9;//1.3
+
+	HitValue.HitValue = Uncharted2Tonemap(HitValue.HitValue * Exposure);
+
+	const vec3 Uncharted2TonemapConst = (1.0f / Uncharted2Tonemap(vec3(11.2f)));
+	HitValue.HitValue = HitValue.HitValue * Uncharted2TonemapConst;	
+	HitValue.HitValue = pow(HitValue.HitValue, vec3(1.0f / Gamma));
+
+	float Reflect = .3 - ((HitValue.HitValue.x + HitValue.HitValue.y + HitValue.HitValue.z) / 3);
+
+	HitValue.Distance = gl_RayTmaxEXT;
+	HitValue.Normal = vec3(0.0);
+//	if (normal.y > 0.99)
+//		HitValue.Reflector = -0.9;
+//	else
+		HitValue.Reflector = .8;
+ 
+//	HitValue.HitValue = vec3(texture(textures[nonuniformEXT(int(TexIndex))], texCoord).xyz);
+
+	// Shadow casting
+	if (HitValue.Index == 0)
+	{
+		float tmin = 0.001;
+		float tmax = 10000.0;
+		vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT;
+		shadowed = true;  
+		// Trace shadow ray and offset indices to match shadow hit/miss shader group indices
+		traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT, 0xFF, 1, 0, 1, origin, tmin, UBO.LightDir.xyz, tmax, 1);
+		if (shadowed) {
+			vec3 Ref = vec3(0.6) * 0.2;
+		//	if (HitValue.HitValue.x > Ref.x &&
+		//		HitValue.HitValue.y > Ref.y &&
+		//		HitValue.HitValue.z > Ref.z)
+				HitValue.HitValue *= 0.6;
+		//	HitValue.Reflector = -0.1;
+			HitValue.WasInShadow = true;
+		//	HitValue.Reflector = 0.0;
+		}
+	}
+	else
+	{
+	//	if (HitValue.WasInShadow)
+	//	{
+	//		HitValue.HitValue *= 0.3;
+	//	//	HitValue.Reflector = 0.0;
+	//	}
+	}
+
+	
+
+//	HitValue = texture(Texture, texCoord).xyz
+}
+
+/*
 struct Vertex
 {
 	vec4 pos;
@@ -163,3 +254,4 @@ void main()
 
 //	HitValue = texture(Texture, texCoord).xyz
 }
+*/

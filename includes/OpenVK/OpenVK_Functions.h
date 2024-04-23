@@ -6,7 +6,7 @@ uint32_t	(*OpenVkCreateRenderPass			)(uint32_t AttachmentCount, uint32_t* Attach
 uint32_t	(*OpenVkCreateGraphicsPipeline		)(OpenVkGraphicsPipelineCreateInfo* Info);
 uint32_t	(*OpenVkCreatePipelineLayout		)(OpenVkPipelineLayoutCreateInfo* Info);
 uint32_t	(*OpenVkCreateFramebuffer			)(OpenVkFramebufferCreateInfo* Info);
-uint32_t	(*OpenVkCreateDescriptorSetLayout	)(uint32_t BindingCount, uint32_t* Bindings, uint32_t* DescriptorCounts, uint32_t* DescriptorTypes, uint32_t* DescriptorFlags, uint32_t* ShaderTypes);
+uint32_t	(*OpenVkCreateDescriptorSetLayout	)(OpenVkDescriptorSetLayoutCreateInfo* Info);
 uint32_t	(*OpenVkCreateDescriptorPool		)(uint32_t DescriptorPoolType, uint32_t PoolSizeCount, uint32_t* DescriptorTypes, uint32_t* DescriptorCounts);
 OpenVkBool	(*OpenVkFreeDescriptorSet			)(uint32_t DescriptorPool, uint32_t DescriptorSet);
 OpenVkBool	(*OpenVkDestroyDescriptorPool		)(uint32_t DescriptorPool);
@@ -49,8 +49,10 @@ void		(*OpenVkPushConstant				)(uint32_t PipelineLayout, uint32_t ShaderType, ui
 //Raytracing
 uint32_t	(*OpenVkCreateTranformBuffer		)(OpenVkTransformMatrix Matrix);
 uint32_t	(*OpenVkCreateRaytracingGeometry	)(OpenVkRaytracingGeometryCreateInfo* Info);
+void		(*OpenVkDestroyRaytracingGeometry	)(uint32_t Geometry);
 uint32_t	(*OpenVkCreateBottomLevelAS			)(uint32_t InGeometry, OpenVkBool AllowUpdate, uint32_t* OldBottomLevelAS);
 uint32_t	(*OpenVkCreateInstance				)(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS);
+void		(*OpenVkDestroyInstance				)(uint32_t Instance);
 OpenVkBool	(*OpenVkUpdateInstance				)(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS, uint32_t Instance);
 OpenVkBool	(*OpenVkCreateTopLevelAS			)(uint32_t InstanceCount, uint32_t* Instances, OpenVkBool AllowUpdate, uint32_t* OldTopLevelAS);
 uint32_t 	(*OpenVkCreateRaytracingPipeline	)(uint32_t MaxPipelineRayRecursionDepth, uint32_t PipelineLayout, uint32_t ShaderCount, uint32_t* ShaderTypes, OpenVkFile* Shader);
@@ -119,8 +121,11 @@ uint32_t OpenVkCreateRenderer(uint32_t RendererFlags, const char** (*GetExtensio
 		{
 			OpenVkCreateTranformBuffer = VkCreateTranformBuffer;
 			OpenVkCreateRaytracingGeometry = VkCreateRaytracingGeometry;
+			OpenVkDestroyRaytracingGeometry = VkDestroyRaytracingGeometry;
 			OpenVkCreateBottomLevelAS = VkCreateBottomLevelAS;
+			//FIX - this naming is kinda confusing
 			OpenVkCreateInstance = VkCreateInstance;
+			OpenVkDestroyInstance = VkDestroyInstance;
 			OpenVkUpdateInstance = VkUpdateInstance;
 			OpenVkCreateTopLevelAS = VkCreateTopLevelAS;
 			OpenVkCreateRaytracingPipeline = VkCreateRaytracingPipeline;

@@ -93,7 +93,10 @@ void SceneInit()
 	Image.TextureDescriptorSet = SceneCreateDefaultTexture(&Image);
 	strcpy(Image.Name, "None");
 	strcpy(Image.Path, "None");
-	CMA_Push(&SceneTextures, &Image);
+	size_t DefaultTextureIndex = CMA_Push(&SceneTextures, &Image);
+	
+	//FIX - add a check if raytracing is even compatibale with hardware or enabled
+	RaytracingAddTexture(DefaultTextureIndex);
 
 	//	LoadTextureCompressed = true;
 	//	GenerateMipMaps = true;

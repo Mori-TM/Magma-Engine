@@ -63,6 +63,7 @@ typedef struct
 VkRaytracerInfo VkRaytracer;
 
 /*
+* FIX - Check if features a even usavle on current hardware!
 * ....
 * 
 if (vkCreateDevice(VkRenderer.PhysicalDevice, &CreateInfo, NULL, &VkRenderer.Device) != VK_SUCCESS)
@@ -80,6 +81,8 @@ void VkGetRaytracingFeatures(VkDeviceCreateInfo* DeviceCreateInfo)
 	VkRaytracer.EnabledDescriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
 	VkRaytracer.EnabledDescriptorIndexingFeatures.runtimeDescriptorArray = VK_TRUE;
 	VkRaytracer.EnabledDescriptorIndexingFeatures.descriptorBindingVariableDescriptorCount = VK_TRUE;
+	VkRaytracer.EnabledDescriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
+	VkRaytracer.EnabledDescriptorIndexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
 
 	VkRaytracer.EnabledBufferDeviceAddresFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
 	VkRaytracer.EnabledBufferDeviceAddresFeatures.bufferDeviceAddress = VK_TRUE;
@@ -326,6 +329,11 @@ uint32_t VkCreateRaytracingGeometry(OpenVkRaytracingGeometryCreateInfo* Info)
 	return CMA_Push(&VkRaytracer.Geometry, &GeometryInfo);
 }
 
+void VkDestroyRaytracingGeometry(uint32_t Geometry)
+{
+	CMA_Pop(&VkRaytracer.Geometry, Geometry);
+}
+
 uint32_t VkCreateBottomLevelAS(uint32_t InGeometry, OpenVkBool AllowUpdate, uint32_t* OldBottomLevelAS)
 {
 	VkRaytracingGeometryInfo* Geometry = (VkRaytracingGeometryInfo*)CMA_GetAt(&VkRaytracer.Geometry, InGeometry);
@@ -351,7 +359,7 @@ uint32_t VkCreateBottomLevelAS(uint32_t InGeometry, OpenVkBool AllowUpdate, uint
 	AccelerationStructureBuildGeometryInfo.scratchData.deviceAddress = 0;
 	AccelerationStructureBuildGeometryInfo.scratchData.hostAddress = NULL;
 
-	const uint32_t NumTriangles = Geometry->IndexCount / 3;
+	const uint32_t NumTriangles = (Geometry->IndexCount != 0 ? Geometry->IndexCount / 3 : Geometry->VertexCount / 3);
 	VkAccelerationStructureBuildSizesInfoKHR AccelerationStructureBuildSizesInfo;
 	AccelerationStructureBuildSizesInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
 	AccelerationStructureBuildSizesInfo.pNext = NULL;
@@ -362,7 +370,7 @@ uint32_t VkCreateBottomLevelAS(uint32_t InGeometry, OpenVkBool AllowUpdate, uint
 	VkAccelerationStructure BottomLevelAS;
 	if (OldBottomLevelAS)
 	{
-		VkAccelerationStructure* BLAS = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.TopLevelAS, *OldBottomLevelAS);
+		VkAccelerationStructure* BLAS = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.BottomLevelAS, *OldBottomLevelAS);
 		BottomLevelAS = *BLAS;
 	}
 
@@ -415,7 +423,7 @@ uint32_t VkCreateBottomLevelAS(uint32_t InGeometry, OpenVkBool AllowUpdate, uint
 	return CMA_Push(&VkRaytracer.BottomLevelAS, &BottomLevelAS);
 }
 
-//make VkRaytracer.InstanceStorage CMA and add a destroy/free function
+//FIX - make VkRaytracer.InstanceStorage CMA and add a destroy/free function
 uint32_t VkCreateInstance(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS)
 {
 	VkRaytracer.InstanceStorage = (VkAccelerationStructureInstanceKHR*)OpenVkRealloc(VkRaytracer.InstanceStorage, (VkRaytracer.Instances.Size + 1) * sizeof(VkAccelerationStructureInstanceKHR));
@@ -433,6 +441,11 @@ uint32_t VkCreateInstance(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFront
 	Instance.accelerationStructureReference = AccelerationStructure->DeviceAddress;
 
 	return CMA_Push(&VkRaytracer.Instances, &Instance);
+}
+
+void VkDestroyInstance(uint32_t Insance)
+{
+	CMA_Pop(&VkRaytracer.Instances, Insance);
 }
 
 OpenVkBool VkUpdateInstance(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS, uint32_t Instance)
@@ -663,6 +676,8 @@ uint32_t* VkCreateShaderBindingTable(uint32_t Pipeline, uint32_t ShaderCount, ui
 	const uint32_t GroupCount = VkRaytracer.ShaderGroupCount;
 	const uint32_t SbtSize = GroupCount * HandleSizeAligned;
 
+
+	//FIX - doesn't this need to get freed in this function?
 	uint8_t* ShaderHandleStorage = (uint8_t*)OpenVkMalloc(SbtSize);
 		
 

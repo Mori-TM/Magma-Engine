@@ -878,48 +878,49 @@ uint32_t VkCreateFramebuffer(OpenVkFramebufferCreateInfo* Info)
 }
 
 //Add OPENVK_DESCRIPTOR_TYPE_VERTEX_BUFFER and OPENVK_DESCRIPTOR_TYPE_INDEX_BUFFER
-uint32_t VkCreateDescriptorSetLayout(uint32_t BindingCount, uint32_t* Bindings, uint32_t* DescriptorCounts, uint32_t* DescriptorTypes, uint32_t* DescriptorFlags, uint32_t* ShaderTypes)
+uint32_t VkCreateDescriptorSetLayout(OpenVkDescriptorSetLayoutCreateInfo* Info)
 {
 	VkRenderer.DescriptorSetLayouts = (VkDescriptorSetLayout*)OpenVkRealloc(VkRenderer.DescriptorSetLayouts, (VkRenderer.DescriptorSetLayoutCount + 1) * sizeof(VkDescriptorSetLayout));
 
-	VkDescriptorSetLayoutBinding* LayoutBindings = (VkDescriptorSetLayoutBinding*)OpenVkMalloc(BindingCount * sizeof(VkDescriptorSetLayoutBinding));
+	VkDescriptorSetLayoutBinding* LayoutBindings = (VkDescriptorSetLayoutBinding*)OpenVkMalloc(Info->BindingCount * sizeof(VkDescriptorSetLayoutBinding));
 	
-	for (uint32_t i = 0; i < BindingCount; i++)
+	for (uint32_t i = 0; i < Info->BindingCount; i++)
 	{
-		LayoutBindings[i].binding = Bindings[i];
-		LayoutBindings[i].descriptorType = VkGetOpenVkDescriptorType(DescriptorTypes[i]);
-		LayoutBindings[i].descriptorCount = DescriptorCounts[i];
-		LayoutBindings[i].stageFlags = VkGetOpenVkShader(ShaderTypes[i]);
+		LayoutBindings[i].binding = Info->Bindings[i];
+		LayoutBindings[i].descriptorType = VkGetOpenVkDescriptorType(Info->DescriptorTypes[i]);
+		LayoutBindings[i].descriptorCount = Info->DescriptorCounts[i];
+		LayoutBindings[i].stageFlags = VkGetOpenVkShader(Info->ShaderTypes[i]);
 		LayoutBindings[i].pImmutableSamplers = NULL;
 	}
 
 	VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo;
 	DescriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 	DescriptorSetLayoutCreateInfo.pNext = NULL;
-	DescriptorSetLayoutCreateInfo.flags = 0;
-	DescriptorSetLayoutCreateInfo.bindingCount = BindingCount;
+	DescriptorSetLayoutCreateInfo.flags = VkGetOpenVkDescriptorSetLayoutFlags(Info->Flags);
+	DescriptorSetLayoutCreateInfo.bindingCount = Info->BindingCount;
 	DescriptorSetLayoutCreateInfo.pBindings = LayoutBindings;
 
 	VkDescriptorBindingFlags* LayoutBindingFlags = NULL;
 	VkDescriptorSetLayoutBindingFlagsCreateInfo SetLayoutBindingFlags;
 
-	if (DescriptorFlags != NULL)
+	if (Info->DescriptorFlags != NULL)
 	{
-		LayoutBindingFlags = (VkDescriptorBindingFlags*)OpenVkMalloc(BindingCount * sizeof(VkDescriptorBindingFlags));
+		LayoutBindingFlags = (VkDescriptorBindingFlags*)OpenVkMalloc(Info->BindingCount * sizeof(VkDescriptorBindingFlags));
 	
 		SetLayoutBindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
 		SetLayoutBindingFlags.pNext = NULL;
-		SetLayoutBindingFlags.bindingCount = BindingCount;
+		SetLayoutBindingFlags.bindingCount = Info->BindingCount;
 		SetLayoutBindingFlags.pBindingFlags = LayoutBindingFlags;
 		DescriptorSetLayoutCreateInfo.pNext = &SetLayoutBindingFlags;
 		
-		for (uint32_t i = 0; i < BindingCount; i++)
+		for (uint32_t i = 0; i < Info->BindingCount; i++)
 		{
-			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_NONE)						LayoutBindingFlags[i] = 0;
-			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_UPDATE_AFTER_BIND)			LayoutBindingFlags[i] = VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
-			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_UNUSED_WHILE_PENDING)		LayoutBindingFlags[i] = VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT;
-			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_PARTIALLY_BOUND_BIT)		LayoutBindingFlags[i] = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT;
-			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_VARIABLE_DESCRIPTOR_COUNT)	LayoutBindingFlags[i] = VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT;
+			LayoutBindingFlags[i] = 0;
+//			if (Info->DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_NONE)						LayoutBindingFlags[i] = 0;
+			if (Info->DescriptorFlags[i] & OPENVK_DESCRIPTOR_FLAG_UPDATE_AFTER_BIND)			LayoutBindingFlags[i] |= VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+			if (Info->DescriptorFlags[i] & OPENVK_DESCRIPTOR_FLAG_UNUSED_WHILE_PENDING)			LayoutBindingFlags[i] |= VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT;
+			if (Info->DescriptorFlags[i] & OPENVK_DESCRIPTOR_FLAG_PARTIALLY_BOUND)				LayoutBindingFlags[i] |= VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT;
+			if (Info->DescriptorFlags[i] & OPENVK_DESCRIPTOR_FLAG_VARIABLE_DESCRIPTOR_COUNT)	LayoutBindingFlags[i] |= VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT;
 		}
 	}
 
@@ -951,9 +952,9 @@ uint32_t VkCreateDescriptorPool(uint32_t DescriptorPoolType, uint32_t PoolSizeCo
 	PoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	PoolInfo.pNext = NULL;
 	PoolInfo.maxSets = MaxSets;	//maximum number of descriptor sets that may be allocated
-	if (DescriptorPoolType == OPENVK_DESCRIPTOR_POOL_DEFAULT)	PoolInfo.flags = 0;
-	if (DescriptorPoolType == OPENVK_DESCRIPTOR_POOL_FREEABLE)	PoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-	if (DescriptorPoolType == OPENVK_DESCRIPTOR_POOL_UPDATABLE)	PoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
+	PoolInfo.flags = 0;
+	if (DescriptorPoolType & OPENVK_DESCRIPTOR_POOL_FREEABLE)	PoolInfo.flags |= VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+	if (DescriptorPoolType & OPENVK_DESCRIPTOR_POOL_UPDATABLE)	PoolInfo.flags |= VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
 	PoolInfo.poolSizeCount = PoolSizeCount;
 	PoolInfo.pPoolSizes = PoolSizes;
 
@@ -1138,10 +1139,11 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 					else
 						return OpenVkRuntimeError("Failed to find Image for descriptor set");
 
-					if (Info->DescriptorCounts[i] > 1)
-					{
-						OpenVkRuntimeError("Texture: %d, Sampler: %d", Info->Images[k], Info->Sampler[k]);
-					}
+				//	Debugging purpose
+				//	if (Info->DescriptorCounts[i] > 1)
+				//	{
+				//		OpenVkRuntimeError("Texture: %d, Sampler: %d", Info->Images[k], Info->Sampler[k]);
+				//	}
 
 					if (Info->ImageTypes[k] != OPENVK_IMAGE_TYPE_STORAGE)
 					{						
@@ -1179,7 +1181,7 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 				{
 					VkAccelerationStructure* AS = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.TopLevelAS, Info->TopLevelAS[m + ASCount]);
 					if (AS == NULL)
-						return OpenVkRuntimeError("Failed to find Acceleration Structure for descriptor set");
+						return OpenVkRuntimeError("Failed to find Top Level Acceleration Structure for descriptor set");
 					else					
 					DescriptorASInfos[m].pAccelerationStructures = &AS->Handle;
 					DescriptorASInfos[m].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;

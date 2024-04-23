@@ -517,7 +517,16 @@ void OpenVkGUIInit(uint32_t Width, uint32_t Height, uint32_t RenderPass, uint32_
 	uint32_t DescriptorCounts[] = { 1 };
 	uint32_t Bindings[] = { 0 };
 
-	OpenVkGUI.DescriptorSetLayout = OpenVkCreateDescriptorSetLayout(1, Bindings, DescriptorCounts, DescriptorTypes, NULL, ShaderTypes);
+	OpenVkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo;
+	DescriptorSetLayoutCreateInfo.Flags = OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_NONE;
+	DescriptorSetLayoutCreateInfo.BindingCount = 1;
+	DescriptorSetLayoutCreateInfo.Bindings = Bindings;
+	DescriptorSetLayoutCreateInfo.DescriptorCounts = DescriptorCounts;
+	DescriptorSetLayoutCreateInfo.DescriptorTypes = DescriptorTypes;
+	DescriptorSetLayoutCreateInfo.DescriptorFlags = NULL;
+	DescriptorSetLayoutCreateInfo.ShaderTypes = ShaderTypes;
+	OpenVkGUI.DescriptorSetLayout = OpenVkCreateDescriptorSetLayout(&DescriptorSetLayoutCreateInfo);
+
 	OpenVkGUI.DescriptorPool = OpenVkCreateDescriptorPool(OPENVK_DESCRIPTOR_POOL_DEFAULT, 1, DescriptorTypes, DescriptorCounts);
 
 

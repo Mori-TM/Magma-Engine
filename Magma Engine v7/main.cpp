@@ -49,9 +49,10 @@ extern "C"
 #include <Wave/WaveLayer.h>
 #include <Wave/WavePhysics.h>
 
-#include "Md2Loader.h"
-
+#include <DynamicArray/DynamicArray.h>
+#include <Md2Loader/Md2Loader.h>
 #include <OpenVK/OpenVK.h>
+
 #include "Helper.h"
 
 #include <ImGui/FileDialog/ImFileDialog.cpp>
@@ -163,7 +164,27 @@ void CullingThread()
 }
 
 int32_t main(int32_t argc, char** argv)
-{
+{/*
+	DynamicArray Arr = DynamicArrayCreate(sizeof(SceneTextureImage), "Texture Images");
+
+	for (uint32_t i = 0; i < 3245; i++)
+	{
+		SceneTextureImage Data;
+		Data.Format = i;
+
+		DynamicArrayPush(&Data, &Arr);
+	}
+
+	for (uint32_t i = 0; i < 453; i++)
+	{
+		DynamicArrayPop(0, &Arr);
+	}
+
+	DynamicArrayDestroy(&Arr);
+
+	return 0;
+	*/
+
 	/*
 	int32_t Width = 0;;
 	int32_t Height = 0;

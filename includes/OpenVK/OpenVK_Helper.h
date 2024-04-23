@@ -79,6 +79,7 @@ typedef uint32_t OpenVkBool;
 
 #define OPENVK_ERROR 0xffffffffui32
 
+//FIX - nameing inconsistencie
 typedef enum
 {
 	OPENVK_VULKAN = 0x1,
@@ -139,6 +140,14 @@ typedef enum
 
 typedef enum
 {
+	OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_NONE = 0x0,
+	OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_UPDATE_AFTER_BIND_POOL = 0x1,
+	OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_PUSH_DESCRIPTOR = 0x2,
+	OPENVK_DESCRIPTOR_SET_LAYOUT_HOST_ONLY_POOL_BIT_VALVE = 0x4,
+} OpenVkDescriptorSetLayoutFlags;
+
+typedef enum
+{
 	OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER = 0x0,
 	OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER = 0x1,
 	OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER = 0x2,
@@ -154,8 +163,8 @@ typedef enum
 	OPENVK_DESCRIPTOR_FLAG_NONE = 0x0,
 	OPENVK_DESCRIPTOR_FLAG_UPDATE_AFTER_BIND = 0x1,
 	OPENVK_DESCRIPTOR_FLAG_UNUSED_WHILE_PENDING = 0x2,
-	OPENVK_DESCRIPTOR_FLAG_PARTIALLY_BOUND_BIT = 0x3,
-	OPENVK_DESCRIPTOR_FLAG_VARIABLE_DESCRIPTOR_COUNT = 0x4,
+	OPENVK_DESCRIPTOR_FLAG_PARTIALLY_BOUND = 0x4,
+	OPENVK_DESCRIPTOR_FLAG_VARIABLE_DESCRIPTOR_COUNT = 0x8,
 } OpenVkDescriptorFlags;
 
 typedef enum
@@ -300,6 +309,17 @@ typedef struct
 	uint32_t	Width;
 	uint32_t	Height;
 } OpenVkFramebufferCreateInfo;
+
+typedef struct
+{
+	uint32_t	Flags;
+	uint32_t	BindingCount;
+	uint32_t*	Bindings;
+	uint32_t*	DescriptorCounts;
+	uint32_t*	DescriptorTypes;
+	uint32_t*	DescriptorFlags;
+	uint32_t*	ShaderTypes;
+} OpenVkDescriptorSetLayoutCreateInfo;
 
 typedef struct
 {

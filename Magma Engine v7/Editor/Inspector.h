@@ -34,8 +34,9 @@ void EditorEntityInspector()
 								{
 									if (ImGui::Button(Mesh->Name))
 									{
-										Entities[SelectedEntity].Mesh.MeshIndex = i;
-										strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
+										AddMeshToEntity(SelectedEntity, i);
+									//	Entities[SelectedEntity].Mesh.MeshIndex = i;
+									//	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
 									}
 								}						
 							}

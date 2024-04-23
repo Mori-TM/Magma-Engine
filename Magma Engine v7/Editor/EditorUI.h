@@ -50,7 +50,7 @@ EditorDraggingState EditorIsDragging(ImRect Rect, bool* IsDragging)
 void EditorWindowBar()
 {
 	ImGuiWindow* window = ImGui::GetCurrentWindow();
-//	ImRect Rect = window->MenuBarRect();
+	ImRect Rect = window->MenuBarRect();
 
 	int32_t MouseGX;
 	int32_t MouseGY;
@@ -60,7 +60,7 @@ void EditorWindowBar()
 	static int32_t MouseY = 0;
 	static bool IsDragging = false;
 	static bool IsDoubleClicked = false;
-
+	/*
 	if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 		IsDoubleClicked = true;
 
@@ -99,23 +99,31 @@ void EditorWindowBar()
 	{
 	//	SDL_GetMouseState(&MouseX, &MouseY);
 	}
-
+	*/
 //	if (!ImGui::IsMouseDragging(ImGuiMouseButton_Left))
 //		IsDoubleClicked = false;
 	
-	/*
+	
 	if (ImGui::IsMouseHoveringRect(Rect.Min, Rect.Max) || IsDragging)
 	{
-		if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+		
 		{
-			IsDragging = true;
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
-			SDL_SetWindowPosition(Window, MouseGX - MouseX, MouseGY - MouseY);
+			if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+			{
+				IsDragging = true;
+				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+
+				if (FullScreen)
+					ForceFullScreenEvent = true;
+				else
+					SDL_SetWindowPosition(Window, MouseGX - MouseX, MouseGY - MouseY);
+			}
+			else
+			{
+				SDL_GetMouseState(&MouseX, &MouseY);
+			}
 		}
-		else
-		{
-			SDL_GetMouseState(&MouseX, &MouseY);
-		}
+		
 	}
 	
 	
@@ -125,7 +133,7 @@ void EditorWindowBar()
 		IsDragging = false;
 	//	ImGui::ReleaseMouseCapture();
 	}
-	*/
+	
 
 	/*
 	if (MouseState == 1 && WinBarMouseState == 0 &&

@@ -380,10 +380,18 @@ uint32_t AddEntity(uint32_t UsedComponent)
 
 void AddMeshToEntity(uint32_t EntityIndex, uint32_t MeshIndex)
 {
+	/*
 	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshIndex);
 	
 	Entities[EntityIndex].Mesh.MeshIndex = MeshIndex;
 	strcpy(Entities[EntityIndex].Mesh.Name, Mesh->Name);
+	*/
+	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshIndex);
+	Entities[EntityIndex].Mesh.MeshIndex = MeshIndex;
+	if (Mesh)
+		strcpycut(Entities[EntityIndex].Mesh.Name, Mesh->Name);
+
+	RaytracingAddMesh(SelectedMesh);
 }
 
 uint32_t AddMesh(const char* Name, SceneMesh* MeshInfo)
@@ -609,7 +617,7 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 	DescriptorSetCreateInfo.DescriptorSet = NULL;
 	DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
-	OpenVkRuntimeError("Texture go Brr: %d, Sampler go: %d", Image->TextureImage, Image->TextureSampler);
+	OpenVkRuntimeWarning("Texture go Brr: %d, Sampler go: %d", Image->TextureImage, Image->TextureSampler);
 
 	return OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 }
@@ -628,6 +636,9 @@ uint32_t AddTexture(char* Path, bool ShowInAssetBrowser)
 	SelectedTexture = CMA_Push(&SceneTextures, &Image);
 
 	printf("Texture Added, Name: %s, Index: %d\n", Path, SelectedTexture);
+
+	//FIX - add a check if raytracing is even compatibale with hardware or enabled
+	RaytracingAddTexture(SelectedTexture);
 
 	return SelectedTexture;
 }

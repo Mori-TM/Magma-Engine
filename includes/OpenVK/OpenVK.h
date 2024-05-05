@@ -32,6 +32,7 @@ void Free(void* Data)
 //#define realloc Realloc
 //#define malloc Malloc
 #include "CMA.h"
+#include "DynamicArray.h"
 //#undef free
 //#undef realloc
 //#undef malloc

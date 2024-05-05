@@ -903,7 +903,7 @@ uint32_t VkCreateDescriptorSetLayout(OpenVkDescriptorSetLayoutCreateInfo* Info)
 	VkDescriptorBindingFlags* LayoutBindingFlags = NULL;
 	VkDescriptorSetLayoutBindingFlagsCreateInfo SetLayoutBindingFlags;
 
-	if (Info->DescriptorFlags != NULL)
+	if (Info->DescriptorFlags != NULL && Info->Flags != OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_NONE)
 	{
 		LayoutBindingFlags = (VkDescriptorBindingFlags*)OpenVkMalloc(Info->BindingCount * sizeof(VkDescriptorBindingFlags));
 	
@@ -1179,7 +1179,7 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 				uint32_t OldASCount = ASCount;
 				for (uint32_t m = 0; m < Info->DescriptorCounts[i]; m++)
 				{
-					VkAccelerationStructure* AS = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.TopLevelAS, Info->TopLevelAS[m + ASCount]);
+					VkAccelerationStructure* AS = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.AccelerationStructures, Info->TopLevelAS[m + ASCount]);
 					if (AS == NULL)
 						return OpenVkRuntimeError("Failed to find Top Level Acceleration Structure for descriptor set");
 					else					

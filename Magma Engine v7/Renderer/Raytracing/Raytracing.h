@@ -1,4 +1,5 @@
 #define RAYTRACING_MAX_TEXTURE_COUNT 512
+#define RAYTRACING_MAX_PRIMITVE_COUNT 32
 
 typedef struct
 {
@@ -10,6 +11,12 @@ typedef struct
 
 typedef struct
 {
+	uint32_t TransformBuffer;
+	uint32_t Geometry;
+} RaytracingGeometry;
+
+typedef struct
+{
 	bool WasInit;
 	uint32_t DescriptorSetLayout;
 	uint32_t DescriptorPoolBufferCount;
@@ -18,16 +25,21 @@ typedef struct
 	uint32_t UniformBuffer;
 	uint32_t PipelineLayout;
 
-	DynamicArray TransformBuffers;
-	DynamicArray Buffers;
-	DynamicArray Geometry;
+//	DynamicArray TransformBuffers;
+//	DynamicArray Geometry;
 	DynamicArray Instances;
-	DynamicArray BottomLevelAS;
+//	DynamicArray BottomLevelAS;
+	CMA_MemoryZone Geometry;
+	CMA_MemoryZone BottomLevelAS;
+//	CMA_MemoryZone BottomLevelAS;
+	DynamicArray Buffers;
 	DynamicArray Images;
 	DynamicArray ImageLayouts;
 	DynamicArray ImageTypes;
 	DynamicArray ImageSampler;
 	
+	DynamicArray Meshes;
+
 	uint64_t CurRenderHash;
 
 	uint32_t TopLevelAS;
@@ -133,16 +145,18 @@ void RaytracingInit()
 	RTR.TopLevelAS = OPENVK_ERROR;
 
 	//FIX - Also Destroy these!!!
-	RTR.TransformBuffers	= DynamicArrayCreate(sizeof(uint32_t), "Transform Buffers");
+//	RTR.TransformBuffers	= DynamicArrayCreate(sizeof(uint32_t), "Transform Buffers");
+	RTR.Geometry			= CMA_Create(sizeof(RaytracingGeometry), "Geometry");
+	RTR.BottomLevelAS		= CMA_Create(sizeof(uint32_t), "Bottom Level AS");
 	RTR.Buffers				= DynamicArrayCreate(sizeof(uint32_t), "Buffers");
-	RTR.Geometry			= DynamicArrayCreate(sizeof(uint32_t), "Geometry");
 	RTR.Instances			= DynamicArrayCreate(sizeof(uint32_t), "Instances");
-	RTR.BottomLevelAS		= DynamicArrayCreate(sizeof(uint32_t), "Bottom Level AS");
 	RTR.Images				= DynamicArrayCreate(sizeof(uint32_t), "Images");
 	RTR.ImageLayouts		= DynamicArrayCreate(sizeof(uint32_t), "Image Layouts");
 	RTR.Images				= DynamicArrayCreate(sizeof(uint32_t), "Images");
 	RTR.ImageTypes			= DynamicArrayCreate(sizeof(uint32_t), "Image Types");
 	RTR.ImageSampler		= DynamicArrayCreate(sizeof(uint32_t), "Image Sampler");
+
+	RTR.Meshes = DynamicArrayCreate(sizeof(uint32_t), "Meshes");
 
 	/*
 	uint32_t VertexBufferCount = 0;
@@ -383,6 +397,60 @@ bool RaytracingAddTexture(uint32_t SceneTexture)
 	return true;
 }
 
+void RaytracingAddGeometry(uint32_t SceneMeshIndex)
+{
+	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, SceneMeshIndex);
+	if (Mesh == NULL || Mesh->MeshCount == 0)
+	{
+		printf("Damnn!\n");
+		return;
+	}
+
+	{
+		mat4 Model;
+		LoadMat4IdentityP(&Model);
+		printf("Hello: %zu\n", RTR.Instances.Size);
+	//	if (RTR.Instances.Size == 0)
+			Model = ScaleMat4(Model, Vec3(1.0, 1.0, 1.0));
+	//	else
+	//		Model = ScaleMat4(Model, Vec3((float)RandomInt(1, 1000) / 100.0, (float)RandomInt(1, 1000) / 100.0, (float)RandomInt(1, 1000) / 100.0));
+		OpenVkTransformMatrix ModelOVK;
+		memcpy(&ModelOVK, &Model, sizeof(OpenVkTransformMatrix));
+
+		uint32_t TransformBuffer = VkCreateTranformBuffer(ModelOVK);
+		
+
+		uint32_t VertexSize = 0;
+		uint32_t IndexSize = 0;
+		RtCountBufferSize(Mesh, &VertexSize, &IndexSize);
+
+		OpenVkRaytracingGeometryCreateInfo GeometryInfo;
+		GeometryInfo.VertexFormat = OPENVK_FORMAT_RGBA32F;
+		GeometryInfo.VertexSize = sizeof(SceneVertex);
+		GeometryInfo.VertexBufferDynamic = 0;
+		GeometryInfo.VertexCount = VertexSize;
+		GeometryInfo.VertexBuffer = Mesh->VertexBuffer;
+		GeometryInfo.IndexBufferDynamic = 0;
+		GeometryInfo.IndexCount = IndexSize;
+		GeometryInfo.IndexBuffer = Mesh->IndexBuffer == OPENVK_ERROR ? 0 : Mesh->IndexBuffer;
+		GeometryInfo.TranformBuffer = TransformBuffer;
+
+		uint32_t Geometry = OpenVkCreateRaytracingGeometry(&GeometryInfo);
+
+		RaytracingGeometry RtGeometry;
+		RtGeometry.Geometry = Geometry;
+		RtGeometry.TransformBuffer = TransformBuffer;
+		CMA_Push(&RTR.Geometry, &RtGeometry);
+
+		uint32_t BottomLevelAS = OpenVkCreateBottomLevelAS(1, &Geometry, OpenVkFalse, NULL);		
+		Mesh->BottomLevelAS = CMA_Push(&RTR.BottomLevelAS, &BottomLevelAS);
+	}
+}
+
+uint64_t RtLastBuildHash = 0;
+
+bool RtUpdateTLAS = false;
+
 void RaytracingAddMesh(uint32_t SceneMeshIndex)
 {
 	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, SceneMeshIndex);
@@ -393,6 +461,7 @@ void RaytracingAddMesh(uint32_t SceneMeshIndex)
 	}
 		
 	{
+		/*
 		mat4 Model;
 		LoadMat4IdentityP(&Model);
 	//	Model = ScaleMat4P(&Model, &Entities[i].Scale);
@@ -429,19 +498,148 @@ void RaytracingAddMesh(uint32_t SceneMeshIndex)
 		GeometryInfo.TranformBuffer = TransformBuffer;
 
 		uint32_t Geometry = OpenVkCreateRaytracingGeometry(&GeometryInfo);
-		uint32_t BottomLevelAS = OpenVkCreateBottomLevelAS(Geometry, OpenVkFalse, NULL);
-		uint32_t Instance = OpenVkCreateInstance(ModelOVK, OpenVkFalse, BottomLevelAS);
+		uint32_t BottomLevelAS = OpenVkCreateBottomLevelAS(1, &Geometry, OpenVkFalse, NULL);
+		*/
 
-		DynamicArrayPush(&RTR.Geometry, &Geometry);
-		DynamicArrayPush(&RTR.BottomLevelAS, &BottomLevelAS);
+		mat4 Model;
+		LoadMat4IdentityP(&Model);
+		//	Model = ScaleMat4P(&Model, &Entities[i].Scale);
+		//	Model = RotateXMat4P(&Model, ToRadians(Entities[i].Rotate.x));
+		//	Model = RotateYMat4P(&Model, ToRadians(Entities[i].Rotate.y));
+		//	Model = RotateZMat4P(&Model, ToRadians(Entities[i].Rotate.z));
+		//	Model = TranslateMat4P(&Model, &Entities[i].Translate);
+		//	Model = ScaleMat4(Model, Vec3((RTR.Instances.Size == 1 ? 0 : 1) * 5.0, RTR.Instances.Size * 5.0, 1.0));
+		//	Model = TranslateMat4(Model, Vec3(41, 0.0, 0.0));
+		printf("Hello: %zu\n", RTR.Instances.Size);
+		if (RTR.Instances.Size == 0)
+			Model = ScaleMat4(Model, Vec3(1.0, 1.0, 1.0));
+		else
+			Model = ScaleMat4(Model, Vec3((float)RandomInt(1, 1000) / 100.0, (float)RandomInt(1, 1000) / 100.0, (float)RandomInt(1, 1000) / 100.0));
+		OpenVkTransformMatrix ModelOVK;
+		memcpy(&ModelOVK, &Model, sizeof(OpenVkTransformMatrix));
+
+		uint32_t* BottomLevelAS = (uint32_t*)CMA_GetAt(&RTR.BottomLevelAS, Mesh->BottomLevelAS);
+		if (!BottomLevelAS)
+		{
+			printf("Failed to find BLAS\n");
+			return;
+		}
+
+		uint32_t Instance = OpenVkCreateInstance(ModelOVK, OpenVkFalse, *BottomLevelAS);
+
+	//	DynamicArrayPush(&RTR.Geometry, &Geometry);
+	//	DynamicArrayPush(&RTR.BottomLevelAS, &BottomLevelAS);
 		DynamicArrayPush(&RTR.Instances, &Instance);
+
+		RtUpdateTLAS = true;
 	}
 
-	if (RTR.TopLevelAS == OPENVK_ERROR)
-		RTR.TopLevelAS = OpenVkCreateTopLevelAS(RTR.Instances.Size, (uint32_t*)RTR.Instances.Data, OpenVkTrue, NULL);
-	else
-		OpenVkCreateTopLevelAS(RTR.Instances.Size, (uint32_t*)RTR.Instances.Data, OpenVkTrue, &RTR.TopLevelAS);
+	
+}
 
+
+/*
+typedef struct
+{
+	uint32_t BottomLevelAS;
+
+	uint32_t VertexCount;
+} RtBottomLevelAS;
+
+typedef struct
+{
+	DynamicArray BottomLevelAS;
+
+
+} RtFrameBuilder;
+*/
+
+uint64_t LastBuildHash = -1;
+
+uint64_t CurrentBuildHash = 0;
+
+void RaytracingHashMesh(SceneMesh* Mesh)
+{
+	CurrentBuildHash += Mesh->IndexBuffer;
+	CurrentBuildHash += Mesh->VertexBuffer;
+	CurrentBuildHash += Mesh->MeshCount;
+	CurrentBuildHash += Mesh->Destroyable;
+}
+
+unsigned long
+hash(char* str)
+{
+	unsigned long hash = 5381;
+	int c;
+
+	while (c = *str++)
+		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+	return hash;
+}
+
+void RaytracingAddEntityMesh(uint32_t MeshIndex, SceneMesh* Mesh)
+{
+	CurrentBuildHash += Mesh->IndexBuffer;
+	CurrentBuildHash += Mesh->VertexBuffer;
+	CurrentBuildHash += Mesh->MeshCount;
+	CurrentBuildHash += Mesh->Destroyable;
+//	CurrentBuildHash += hash(Mesh->Name);
+
+	DynamicArrayPush(&RTR.Meshes, &MeshIndex);
+//	printf("Push it\n");
+}
+
+void RaytracingBuild()
+{
+	
+//	uint64_t CurrentBuildHash = -1;//HashUint64
+
+
+	CurrentBuildHash = HashUint64(CurrentBuildHash);
+
+
+	if (CurrentBuildHash == LastBuildHash)
+		return;
+
+	for (uint32_t i = 0; i < RTR.Instances.Size; i++)
+	{
+		uint32_t* Instance = (uint32_t*)DynamicArrayGetAt(&RTR.Instances, i);
+		OpenVkDestroyInstance(*Instance);
+	}
+
+	DynamicArrayClear(&RTR.Instances);
+
+	for (uint32_t i = 0; i < RTR.Meshes.Size; i++)
+	{
+		uint32_t* Mesh = (uint32_t*)DynamicArrayGetAt(&RTR.Meshes, i);
+		RaytracingAddMesh(*Mesh);
+	}
+
+	
+	
+	
+	LastBuildHash = CurrentBuildHash;
+
+	if (RTR.Meshes.Size == 0)
+	{
+		RTR.Render = false;
+		return;
+	}
+
+//	RtUpdateTLAS = false;
+
+	if (RTR.TopLevelAS == OPENVK_ERROR)
+		RTR.TopLevelAS = OpenVkCreateTopLevelAS(RTR.Instances.Size, (uint32_t*)RTR.Instances.Data, RAYTRACING_MAX_PRIMITVE_COUNT, OpenVkTrue, NULL);
+	else
+	{
+		VkDestroAccelerationStructure(RTR.TopLevelAS);
+		CMA_Pop(&VkRaytracer.AccelerationStructures, RTR.TopLevelAS);
+		RTR.TopLevelAS = OpenVkCreateTopLevelAS(RTR.Instances.Size, (uint32_t*)RTR.Instances.Data, RTR.Instances.Size, OpenVkTrue, NULL);
+		//	OpenVkCreateTopLevelAS(RTR.Instances.Size, (uint32_t*)RTR.Instances.Data, RAYTRACING_MAX_PRIMITVE_COUNT, OpenVkTrue, &RTR.TopLevelAS);
+	}
+
+	printf("Hey there, created tlas\n");
 	RTR.Render = true;
 
 	uint32_t DescriptorTypes[] =
@@ -456,7 +654,194 @@ void RaytracingAddMesh(uint32_t SceneMeshIndex)
 	uint32_t Bindings[] = { 0, 1, 2 };
 
 	RtCreateDescriptorSet(true, ARRAY_SIZE(DescriptorTypes), DescriptorTypes, DescriptorCounts, BufferSizes, Bindings);
+	/*
+	uint32_t AlbedoDescriptorSet = 0;
+	uint32_t NormalDescriptorSet = 0;
+	uint32_t MetallicDescriptorSet = 0;
+	uint32_t RoughnessDescriptorSet = 0;
+	uint32_t OcclusionDescriptorSet = 0;
+
+	uint32_t LastAlbedoDescriptorSet = 0;
+	uint32_t LastNormalDescriptorSet = 0;
+	uint32_t LastMetallicDescriptorSet = 0;
+	uint32_t LastRoughnessDescriptorSet = 0;
+	uint32_t LastOcclusionDescriptorSet = 0;
+
+	for (uint32_t i = 0; i < EntityCount; i++)
+	{
+	//	if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] ||
+	//		Entities[i].UsedComponents[COMPONENT_TYPE_ANIMATION])
+		if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
+		{
+		//	LoadMat4IdentityP(&GBufferVertexPc.Model);
+		//	GBufferVertexPc.Model = ScaleMat4P(&GBufferVertexPc.Model, &Entities[i].Scale);
+		//	GBufferVertexPc.Model = RotateXMat4P(&GBufferVertexPc.Model, ToRadians(Entities[i].Rotate.x));
+		//	GBufferVertexPc.Model = RotateYMat4P(&GBufferVertexPc.Model, ToRadians(Entities[i].Rotate.y));
+		//	GBufferVertexPc.Model = RotateZMat4P(&GBufferVertexPc.Model, ToRadians(Entities[i].Rotate.z));
+		//	GBufferVertexPc.Model = TranslateMat4P(&GBufferVertexPc.Model, &Entities[i].Translate);
+
+			SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Entities[i].Material.MaterialIndex);
+			if (Material == NULL)
+				Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, 0);
+
+			SceneTextureImage* Albedo;
+			SceneTextureImage* Normal;
+			SceneTextureImage* Metallic;
+			SceneTextureImage* Roughness;
+			SceneTextureImage* Occlusion;
+			if (Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
+			{
+				Albedo = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->AlbedoIndex);
+				Normal = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->NormalIndex);
+				Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->MetallicIndex);
+				Roughness = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->RoughnessIndex);
+				Occlusion = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->OcclusionIndex);
+			}
+
+			else
+			{
+				Albedo = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
+				Normal = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
+				Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
+				Roughness = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
+				Occlusion = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
+			}
+
+			if (Albedo != NULL) AlbedoDescriptorSet = Albedo->TextureDescriptorSet;
+			if (Normal != NULL) NormalDescriptorSet = Normal->TextureDescriptorSet;
+			if (Metallic != NULL) MetallicDescriptorSet = Metallic->TextureDescriptorSet;
+			if (Roughness != NULL) RoughnessDescriptorSet = Roughness->TextureDescriptorSet;
+			if (Occlusion != NULL) OcclusionDescriptorSet = Occlusion->TextureDescriptorSet;
+
+			if (Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
+			{
+			//	GBufferFragmentPc.Color = Material->Color;
+			//	GBufferFragmentPc.Metallic = Material->Metallic;
+			//	GBufferFragmentPc.Roughness = Material->Roughness;
+			//	GBufferFragmentPc.Occlusion = Material->Occlusion;
+			//	GBufferFragmentPc.NearPlane = NearPlane;
+			//	GBufferFragmentPc.FarPlane = FarPlane;
+			}
+			else
+			{
+			//	GBufferFragmentPc.Color = Vec4f(1.0);
+			//	GBufferFragmentPc.Metallic = 0.0;
+			//	GBufferFragmentPc.Roughness = 1.0;
+			//	GBufferFragmentPc.Occlusion = 1.0;
+			//	GBufferFragmentPc.NearPlane = NearPlane;
+			//	GBufferFragmentPc.FarPlane = FarPlane;
+			}
+
+			if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
+			{
+				SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
+				if (Mesh != NULL && Mesh->MeshCount > 0)
+				{
+				//	OpenVkPushConstant(GBufferLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(GBufferVertexPushConstant), &GBufferVertexPc);
+				//	OpenVkPushConstant(GBufferLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(GBufferFragmentPushConstant), &GBufferFragmentPc);
+				//
+				//	if (Mesh->IndexBuffer != OPENVK_ERROR)
+				//		OpenVkBindIndexBuffer(Mesh->VertexBuffer, Mesh->IndexBuffer);
+				//	else
+				//		OpenVkBindVertexBuffer(Mesh->VertexBuffer);
+
+
+					for (uint32_t m = 0; m < Mesh->MeshCount; m++)
+					{
+						if (Mesh->MeshData[m].Render[RENDER_TYPE_DEFAULT])
+						{
+							if (!Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
+							{
+							//	GBufferFragmentPc.Color = Mesh->MeshData[m].Material.Color;
+							//	GBufferFragmentPc.Metallic = Mesh->MeshData[m].Material.Metallic;
+							//	GBufferFragmentPc.Roughness = Mesh->MeshData[m].Material.Roughness;
+							//	GBufferFragmentPc.Occlusion = Mesh->MeshData[m].Material.Occlusion;
+							//	GBufferFragmentPc.NearPlane = NearPlane;
+							//	GBufferFragmentPc.FarPlane = FarPlane;
+							//	OpenVkPushConstant(GBufferLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(GBufferFragmentPushConstant), &GBufferFragmentPc);
+
+								Albedo = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.AlbedoIndex);
+								Normal = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.NormalIndex);
+								Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.MetallicIndex);
+								Roughness = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.RoughnessIndex);
+								Occlusion = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.OcclusionIndex);
+
+								if (Albedo != NULL) AlbedoDescriptorSet = Albedo->TextureDescriptorSet;
+								if (Normal != NULL) NormalDescriptorSet = Normal->TextureDescriptorSet;
+								if (Metallic != NULL) MetallicDescriptorSet = Metallic->TextureDescriptorSet;
+								if (Roughness != NULL) RoughnessDescriptorSet = Roughness->TextureDescriptorSet;
+								if (Occlusion != NULL) OcclusionDescriptorSet = Occlusion->TextureDescriptorSet;
+							}
+
+						//	if (LastAlbedoDescriptorSet != AlbedoDescriptorSet)
+						//		OpenVkBindDescriptorSet(GBufferLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+						//	if (LastNormalDescriptorSet != NormalDescriptorSet)
+						//		OpenVkBindDescriptorSet(GBufferLayout, 1, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+						//	if (LastMetallicDescriptorSet != MetallicDescriptorSet)
+						//		OpenVkBindDescriptorSet(GBufferLayout, 2, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+						//	if (LastRoughnessDescriptorSet != RoughnessDescriptorSet)
+						//		OpenVkBindDescriptorSet(GBufferLayout, 3, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+						//	if (LastOcclusionDescriptorSet != OcclusionDescriptorSet)
+						//		OpenVkBindDescriptorSet(GBufferLayout, 4, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+
+							LastAlbedoDescriptorSet = AlbedoDescriptorSet;
+							LastNormalDescriptorSet = NormalDescriptorSet;
+							LastMetallicDescriptorSet = MetallicDescriptorSet;
+							LastRoughnessDescriptorSet = RoughnessDescriptorSet;
+							LastOcclusionDescriptorSet = OcclusionDescriptorSet;
+
+						//	if (Mesh->IndexBuffer != OPENVK_ERROR)
+						//		OpenVkDrawIndices(Mesh->MeshData[m].IndexOffset, Mesh->MeshData[m].IndexCount, 0);//Mesh->MeshData[m].VertexOffset
+						//	else
+						//		OpenVkDrawVertices(Mesh->MeshData[m].VertexOffset, Mesh->MeshData[m].VertexCount);
+						}
+					}
+				}
+			}
+			else
+			{
+				if (Entities[i].Animation.AnimationIndex != 0)
+				{
+					SceneAnimation* Animation = (SceneAnimation*)CMA_GetAt(&SceneAnimations, Entities[i].Animation.AnimationIndex);
+					if (Animation != NULL)
+					{
+						OpenVkPushConstant(GBufferLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(GBufferVertexPushConstant), &GBufferVertexPc);
+						OpenVkPushConstant(GBufferLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(GBufferFragmentPushConstant), &GBufferFragmentPc);
+
+						if (LastAlbedoDescriptorSet != AlbedoDescriptorSet)
+							OpenVkBindDescriptorSet(GBufferLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+						if (LastNormalDescriptorSet != NormalDescriptorSet)
+							OpenVkBindDescriptorSet(GBufferLayout, 1, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+						if (LastMetallicDescriptorSet != MetallicDescriptorSet)
+							OpenVkBindDescriptorSet(GBufferLayout, 2, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+						if (LastRoughnessDescriptorSet != RoughnessDescriptorSet)
+							OpenVkBindDescriptorSet(GBufferLayout, 3, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+						if (LastOcclusionDescriptorSet != OcclusionDescriptorSet)
+							OpenVkBindDescriptorSet(GBufferLayout, 4, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+
+						LastAlbedoDescriptorSet = AlbedoDescriptorSet;
+						LastNormalDescriptorSet = NormalDescriptorSet;
+						LastMetallicDescriptorSet = MetallicDescriptorSet;
+						LastRoughnessDescriptorSet = RoughnessDescriptorSet;
+						LastOcclusionDescriptorSet = OcclusionDescriptorSet;
+
+						OpenVkBindDynamicVertexBuffer(Animation->VertexBuffer);
+						OpenVkDrawVertices(0, Animation->MeshData.NumTriangles * 3);
+					}
+				}
+			}
+		}
+		
+	}
+	*/
+
+	if (RtLastBuildHash != CurrentBuildHash)
+	{
+
+	}
+	
 }
+
 /*
 //FIX - Make sure to free some mem again at some point
 void RaytracingUpdateAssets()
@@ -702,6 +1087,10 @@ void RaytracingUpdateAssets()
 }
 */
 
+
+
+
+
 void RaytracingResize()
 {
 	if (RTR.StorageImageWidth >= WindowWidth &&
@@ -749,6 +1138,8 @@ void RaytracingUpdate()
 
 void RaytracingDraw()
 {
+	
+
 	if (RTR.Render)
 	{
 		OpenVkBindPipeline(RTR.RaytracingPipeline, OPENVK_PIPELINE_TYPE_RAYTRACING);

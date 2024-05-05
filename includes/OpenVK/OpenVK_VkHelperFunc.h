@@ -363,6 +363,42 @@ uint32_t VkFindMemoryType(uint32_t TypeFilter, VkMemoryPropertyFlags Properties)
 	return OpenVkRuntimeError("Failed To find a Suitable Memory Type");
 }
 
+OpenVkBool VkCheckDeviceExtensionSupport(uint32_t RequiredExtensionCount, const char** RequiredExtensions)
+{
+	uint32_t ExtensionCount = 0;
+	vkEnumerateDeviceExtensionProperties(VkRenderer.PhysicalDevice, NULL, &ExtensionCount, NULL);
+
+	VkExtensionProperties* AvailableExtensions = (VkExtensionProperties*)OpenVkMalloc(ExtensionCount * sizeof(VkExtensionProperties));
+	vkEnumerateDeviceExtensionProperties(VkRenderer.PhysicalDevice, NULL, &ExtensionCount, AvailableExtensions);
+
+//	OpenVkRuntimeInfo("Available Device Extensions:\n");
+	for (uint32_t i = 0; i < ExtensionCount; i++)
+	{
+		OpenVkRuntimeInfo("Available Device Extension:", AvailableExtensions[i].extensionName);
+	}
+
+	for (uint32_t i = 0; i < RequiredExtensionCount; i++)
+	{
+		OpenVkBool Found = OpenVkFalse;
+		for (uint32_t j = 0; j < ExtensionCount; j++)
+		{
+			if (strcmp(RequiredExtensions[i], AvailableExtensions[j].extensionName) == 0)
+			{
+				Found = OpenVkTrue;
+				break;
+			}
+		}
+		if (Found == OpenVkFalse)
+		{
+			free(AvailableExtensions);
+			return OpenVkRuntimeError("Required Extension %s, is not supported by device!", RequiredExtensions[i]);
+		}
+	}
+
+	free(AvailableExtensions);
+	return OpenVkTrue;
+}
+
 VkCommandBuffer VkBeginSingleTimeCommands()
 {
 	VkCommandBufferAllocateInfo AllocateInfo;

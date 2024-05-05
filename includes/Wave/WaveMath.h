@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 //For cross platform cpu define WAVE_CROSS_PLATFORM
-//Amd platform untested
+//Arm platform untested
 
 //#define WAVE_CROSS_PLATFORM
 

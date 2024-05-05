@@ -140,6 +140,7 @@ typedef struct
 
 	uint32_t VertexBuffer;
 	uint32_t IndexBuffer; //if OPENVK_ERROR then not used
+	uint32_t BottomLevelAS;//Only for Raytracing
 	SceneMeshData* MeshData;
 } SceneMesh;
 

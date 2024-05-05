@@ -908,6 +908,8 @@ uint32_t AddModel(uint32_t Settings, const char* FileName)
 	WaveFreeModel(&Model);
 
 	SelectedTexture = LastTexture;
+
+	RaytracingAddGeometry(MeshIndex);
 	return MeshIndex;
 }
 
@@ -931,7 +933,9 @@ uint32_t AddPlane()
 	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
 	MeshInfo.MeshData[0].AABB = PlaneAABB;
 
-	return AddMesh("Plane", &MeshInfo);
+	uint32_t MeshIndex = AddMesh("Plane", &MeshInfo);
+	RaytracingAddGeometry(MeshIndex);
+	return MeshIndex;
 }
 
 uint32_t AddCube()
@@ -954,7 +958,9 @@ uint32_t AddCube()
 	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
 	MeshInfo.MeshData[0].AABB = CubeAABB;
 
-	return AddMesh("Cube", &MeshInfo);
+	uint32_t MeshIndex = AddMesh("Cube", &MeshInfo);
+	RaytracingAddGeometry(MeshIndex);
+	return MeshIndex;
 }
 
 uint32_t AddSphere()
@@ -977,7 +983,9 @@ uint32_t AddSphere()
 	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
 	MeshInfo.MeshData[0].AABB = SphereAABB;
 
-	return AddMesh("Sphere", &MeshInfo);
+	uint32_t MeshIndex = AddMesh("Sphere", &MeshInfo);
+	RaytracingAddGeometry(MeshIndex);
+	return MeshIndex;
 }
 
 uint32_t AddBean()
@@ -1001,5 +1009,7 @@ uint32_t AddBean()
 	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
 	MeshInfo.MeshData[0].AABB = BeanAABB;
 
-	return AddMesh("Bean", &MeshInfo);
+	uint32_t MeshIndex = AddMesh("Bean", &MeshInfo);
+	RaytracingAddGeometry(MeshIndex);
+	return MeshIndex;
 }

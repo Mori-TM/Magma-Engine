@@ -336,6 +336,7 @@ void GBufferDraw()
 						else
 							OpenVkBindVertexBuffer(Mesh->VertexBuffer);
 
+					//	RaytracingAddEntityMesh(Entities[i].Mesh.MeshIndex, Mesh);
 
 						for (uint32_t m = 0; m < Mesh->MeshCount; m++)
 						{

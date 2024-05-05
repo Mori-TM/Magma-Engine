@@ -371,6 +371,11 @@ void RendererDraw()
 			else
 				SceneRenderDescriptorSet = SceneOutputDescriptorSet;
 
+			
+			
+
+			
+
 			RaytracingDraw();
 
 		}
@@ -593,8 +598,35 @@ void RendererRender()
 		RendererResize(false);
 	}
 
+//	RaytracingBuild();
+
 	GetDeltaTime();
 //	OpenVkDrawFrame(RendererDraw, RendererResize, RendererUpdate);
+
+	{
+		CurrentBuildHash = 0;
+		DynamicArrayClear(&RTR.Meshes);
+
+		for (uint32_t i = 0; i < EntityCount; i++)
+		{
+			if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] ||
+				Entities[i].UsedComponents[COMPONENT_TYPE_ANIMATION])
+			{
+				if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
+				{
+					SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
+					if (Mesh != NULL && Mesh->MeshCount > 0)
+					{
+						RaytracingAddEntityMesh(Entities[i].Mesh.MeshIndex, Mesh);
+					}
+				}
+			}
+		}
+
+		RaytracingBuild();
+	}
+
+
 	FrameTime = GetExecutionTimeOpenVkRender(OpenVkDrawFrame, RendererDraw, RendererResize, RendererUpdate);
 //	if (RenderRaytraced)
 //		exit(22);

@@ -50,11 +50,11 @@ void		(*OpenVkPushConstant				)(uint32_t PipelineLayout, uint32_t ShaderType, ui
 uint32_t	(*OpenVkCreateTranformBuffer		)(OpenVkTransformMatrix Matrix);
 uint32_t	(*OpenVkCreateRaytracingGeometry	)(OpenVkRaytracingGeometryCreateInfo* Info);
 void		(*OpenVkDestroyRaytracingGeometry	)(uint32_t Geometry);
-uint32_t	(*OpenVkCreateBottomLevelAS			)(uint32_t InGeometry, OpenVkBool AllowUpdate, uint32_t* OldBottomLevelAS);
+uint32_t	(*OpenVkCreateBottomLevelAS			)(uint32_t GeometryCount, uint32_t* InGeometry, OpenVkBool AllowUpdate, uint32_t* OldBottomLevelAS);
 uint32_t	(*OpenVkCreateInstance				)(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS);
 void		(*OpenVkDestroyInstance				)(uint32_t Instance);
 OpenVkBool	(*OpenVkUpdateInstance				)(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS, uint32_t Instance);
-OpenVkBool	(*OpenVkCreateTopLevelAS			)(uint32_t InstanceCount, uint32_t* Instances, OpenVkBool AllowUpdate, uint32_t* OldTopLevelAS);
+OpenVkBool	(*OpenVkCreateTopLevelAS			)(uint32_t InstanceCount, uint32_t* Instances, uint32_t MaxPrimitiveCount, OpenVkBool AllowUpdate, uint32_t* OldTopLevelAS);
 uint32_t 	(*OpenVkCreateRaytracingPipeline	)(uint32_t MaxPipelineRayRecursionDepth, uint32_t PipelineLayout, uint32_t ShaderCount, uint32_t* ShaderTypes, OpenVkFile* Shader);
 uint32_t*	(*OpenVkCreateShaderBindingTable	)(uint32_t Pipeline, uint32_t ShaderCount, uint32_t* HandleCount);
 OpenVkBool	(*OpenVkTraceRays					)(OpenVkTraceRaysInfo* Info);

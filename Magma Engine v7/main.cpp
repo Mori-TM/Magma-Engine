@@ -49,7 +49,6 @@ extern "C"
 #include <Wave/WaveLayer.h>
 #include <Wave/WavePhysics.h>
 
-#include <DynamicArray/DynamicArray.h>
 #include <Md2Loader/Md2Loader.h>
 #include <OpenVK/OpenVK.h>
 

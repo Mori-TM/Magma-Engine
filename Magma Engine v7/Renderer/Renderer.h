@@ -121,6 +121,7 @@ void RendererCreate()
 {
 	OpenVkInitThreads();
 	SwapChain = OpenVkCreateRenderer(OPENVK_VULKAN | OPENVK_VALIDATION_LAYER | OPENVK_RAYTRACING, GetExtensions, GetSurface, GetWindowSize);
+	
 	RaytracingInit();
 	OpenVkRuntimeInfo("Raytracing was initilaized", "");
 
@@ -160,31 +161,8 @@ void RendererCreate()
 	LuaInit();
 	ImGuiInit();
 	FpsCameraInit();
-//	RaytracingInit();
 
 	OpenVkRuntimeInfo("Engine was initilaized", "");
-	
-//	exit(3666);
-//	exit(2);
-	//Set up deafult test scene
-//	SceneMesh Mesh;
-	
-	/*
-	uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_MESH);
-	uint32_t MeshIndex = AddPlane();
-	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshIndex);
-	Entities[EntityIndex].Mesh.MeshIndex = MeshIndex;
-	Entities[EntityIndex].Scale = Vec3f(8.0);
-	strcpy(Entities[EntityIndex].Mesh.Name, Mesh->Name);
-
-
-	EntityIndex = AddEntity(COMPONENT_TYPE_MESH);
-	MeshIndex = AddCube();
-	Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshIndex);
-	Entities[EntityIndex].Mesh.MeshIndex = MeshIndex;
-	Entities[EntityIndex].Translate = Vec3(0.0, 2.0, 0.0);
-	strcpy(Entities[EntityIndex].Mesh.Name, Mesh->Name);
-	*/
 
 //	uint32_t PlaneIndex = AddPlane();
 //	uint32_t CubeIndex = AddBean();
@@ -231,56 +209,24 @@ void RendererCreate()
 //	//	OpenVkRuntimeInfo("Scene was initilaized", "");
 //	}
 
-	
-//	AddTexture((char*)"C:/Users/Moritz Laptop/Pictures/img.png", true);
-
-//	SceneTextureImage Img;
-//	LoadTexture((char*)"C:/Users/Moritz Laptop/Pictures/img2.png", &Img);
-//	
-	SceneTextureImage Img2;
-	
-//	LoadTextureCompressed = true;
-//	AddTexture((char*)"C:/Users/Moritz Laptop/Pictures/Bitmap.bmp", true);
-//	LoadTextureCompressed = false;
-//	LoadTexture((char*)"C:/Users/Moritz Laptop/Pictures/img.png", &Img2);
-	
-//
-//
-//	OpenVkCopyImage(Img.Width, Img.Height, OPENVK_IMAGE_TYPE_TEXTURE, Img.TextureImage, OPENVK_IMAGE_TYPE_TEXTURE, Img2.TextureImage, OpenVkFalse);
-	
-//	exit(22);
-	
-//	
-//	AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
-	/*
-	uint32_t ModelIndex= AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
-	AddEntity(COMPONENT_TYPE_MESH);
-	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelIndex);
-	Entities[SelectedEntity].Mesh.MeshIndex = ModelIndex;
-	if (Mesh)
-		strcpycut(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
-	*/
-
+//	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
 //	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/Sponza-master/sponza2.obj");
 //	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/TestMesh.obj");
-			uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
-			AddEntity(COMPONENT_TYPE_MESH);
-			AddMeshToEntity(SelectedEntity, ModelIndex);
+		uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
+		AddEntity(COMPONENT_TYPE_MESH);
+		AddMeshToEntity(SelectedEntity, ModelIndex);
 		
-			AddEntity(COMPONENT_TYPE_MESH);
-			AddMeshToEntity(SelectedEntity, ModelIndex);
+		AddEntity(COMPONENT_TYPE_MESH);
+		AddMeshToEntity(SelectedEntity, ModelIndex);
 		
-			uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
-			ResetEntityLight(&Entities[EntityIndex]);
-			Entities[EntityIndex].Light.CastShadow = true;
-			Entities[EntityIndex].Light.Type = LIGHT_DIRECTIONAL;
-			Entities[EntityIndex].Light.Strength = 5.8;
-			Entities[EntityIndex].Translate = Vec3(-3.6, 6.5, 2.75);
-			strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
+		uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
+		ResetEntityLight(&Entities[EntityIndex]);
+		Entities[EntityIndex].Light.CastShadow = true;
+		Entities[EntityIndex].Light.Type = LIGHT_DIRECTIONAL;
+		Entities[EntityIndex].Light.Strength = 5.8;
+		Entities[EntityIndex].Translate = Vec3(-3.6, 6.5, 2.75);
+		strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
 	OpenVkRuntimeInfo("Scene was initilaized", "");
-//	exit(3666);
-
-//	RaytracingUpdateAssets();
 
 //	exit(3666);
 }
@@ -323,25 +269,7 @@ void RendererUpdate()
 	SSRUpdateUniformBuffer();
 	
 	RaytracingUpdate();
-	
-	/*
-	Mutex.lock();
-	mat4 ViewProj = MultiplyMat4P(&SceneVertexUBO.Projection, &SceneVertexUBO.View);
-	Mutex.unlock();
-
-	RunFrustumCulling(ViewProj, RENDER_TYPE_DEFAULT);
-	for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
-	{
-		Mutex.lock();
-		mat4 ViewProj = CullingCascades[i];
-		Mutex.unlock();
-		RunFrustumCulling(ViewProj, i + 1);
-	}
-	*/
-//	SSRUpdateUniform();	
 }
-
-
 
 void RendererDraw()
 {
@@ -551,9 +479,14 @@ void RendererRun()
 						OpenVkDestroyBuffer(Mesh->IndexBuffer);
 				}
 			}
+
+			free(Mesh->MeshData);
 		}
 
+		printf("Oi: %zu\n", SceneMeshes.Size);
 		CMA_Pop(&SceneMeshes, MeshToDelete);
+		SelectedMesh = 0;
+		printf("steve: %zu\n", SceneMeshes.Size);
 
 		for (uint32_t i = 1; i < SceneMeshes.Size; i++)
 			if (CMA_GetAt(&SceneMeshes, i) != NULL)

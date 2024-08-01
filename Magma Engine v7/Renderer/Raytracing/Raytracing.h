@@ -463,10 +463,6 @@ void RaytracingAddGeometry(uint32_t SceneMeshIndex)
 	}
 }
 
-uint64_t RtLastBuildHash = 0;
-
-bool RtUpdateTLAS = false;
-
 uint32_t RaytracingAddMesh(uint32_t SceneMeshIndex)
 {
 	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, SceneMeshIndex);
@@ -477,60 +473,9 @@ uint32_t RaytracingAddMesh(uint32_t SceneMeshIndex)
 	}
 		
 	{
-		/*
 		mat4 Model;
 		LoadMat4IdentityP(&Model);
-	//	Model = ScaleMat4P(&Model, &Entities[i].Scale);
-	//	Model = RotateXMat4P(&Model, ToRadians(Entities[i].Rotate.x));
-	//	Model = RotateYMat4P(&Model, ToRadians(Entities[i].Rotate.y));
-	//	Model = RotateZMat4P(&Model, ToRadians(Entities[i].Rotate.z));
-	//	Model = TranslateMat4P(&Model, &Entities[i].Translate);
-	//	Model = ScaleMat4(Model, Vec3((RTR.Instances.Size == 1 ? 0 : 1) * 5.0, RTR.Instances.Size * 5.0, 1.0));
-	//	Model = TranslateMat4(Model, Vec3(41, 0.0, 0.0));
 		printf("Hello: %zu\n", RTR.Instances.Size);
-		if (RTR.Instances.Size == 0)
-			Model = ScaleMat4(Model, Vec3(1.0, 1.0, 1.0));
-		else
-			Model = ScaleMat4(Model, Vec3(0.5, 2.0, 0.5));
-		OpenVkTransformMatrix ModelOVK;
-		memcpy(&ModelOVK, &Model, sizeof(OpenVkTransformMatrix));
-
-		uint32_t TransformBuffer = VkCreateTranformBuffer(ModelOVK);
-		DynamicArrayPush(&RTR.TransformBuffers, &TransformBuffer);
-
-		uint32_t VertexSize = 0;
-		uint32_t IndexSize = 0;
-		RtCountBufferSize(Mesh, &VertexSize, &IndexSize);
-
-		OpenVkRaytracingGeometryCreateInfo GeometryInfo;
-		GeometryInfo.VertexFormat = OPENVK_FORMAT_RGBA32F;
-		GeometryInfo.VertexSize = sizeof(SceneVertex);
-		GeometryInfo.VertexBufferDynamic = 0;
-		GeometryInfo.VertexCount = VertexSize;
-		GeometryInfo.VertexBuffer = Mesh->VertexBuffer;
-		GeometryInfo.IndexBufferDynamic = 0;
-		GeometryInfo.IndexCount = IndexSize;
-		GeometryInfo.IndexBuffer = Mesh->IndexBuffer == OPENVK_ERROR ? 0 : Mesh->IndexBuffer;
-		GeometryInfo.TranformBuffer = TransformBuffer;
-
-		uint32_t Geometry = OpenVkCreateRaytracingGeometry(&GeometryInfo);
-		uint32_t BottomLevelAS = OpenVkCreateBottomLevelAS(1, &Geometry, OpenVkFalse, NULL);
-		*/
-
-		mat4 Model;
-		LoadMat4IdentityP(&Model);
-		//	Model = ScaleMat4P(&Model, &Entities[i].Scale);
-		//	Model = RotateXMat4P(&Model, ToRadians(Entities[i].Rotate.x));
-		//	Model = RotateYMat4P(&Model, ToRadians(Entities[i].Rotate.y));
-		//	Model = RotateZMat4P(&Model, ToRadians(Entities[i].Rotate.z));
-		//	Model = TranslateMat4P(&Model, &Entities[i].Translate);
-		//	Model = ScaleMat4(Model, Vec3((RTR.Instances.Size == 1 ? 0 : 1) * 5.0, RTR.Instances.Size * 5.0, 1.0));
-		//	Model = TranslateMat4(Model, Vec3(41, 0.0, 0.0));
-		printf("Hello: %zu\n", RTR.Instances.Size);
-		if (RTR.Instances.Size == 0)
-			Model = ScaleMat4(Model, Vec3(1.0, 1.0, 1.0));
-		else
-			Model = ScaleMat4(Model, Vec3((float)RandomInt(1, 1000) / 100.0, (float)RandomInt(1, 1000) / 100.0, (float)RandomInt(1, 1000) / 100.0));
 		OpenVkTransformMatrix ModelOVK;
 		memcpy(&ModelOVK, &Model, sizeof(OpenVkTransformMatrix));
 
@@ -543,17 +488,10 @@ uint32_t RaytracingAddMesh(uint32_t SceneMeshIndex)
 
 		uint32_t Instance = OpenVkCreateInstance(ModelOVK, OpenVkFalse, *BottomLevelAS);
 
-	//	DynamicArrayPush(&RTR.Geometry, &Geometry);
-	//	DynamicArrayPush(&RTR.BottomLevelAS, &BottomLevelAS);
-
-		RtUpdateTLAS = true;
-
 		DynamicArrayPush(&RTR.Instances, &Instance);
 
 		return RTR.Instances.Size - 1;
 	}
-
-	
 }
 
 

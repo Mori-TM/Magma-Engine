@@ -765,7 +765,7 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 		memset(&SceneMesh->Render, 1, ARRAY_SIZE(SceneMesh->Render) * sizeof(bool));
 
 		SetDefaultMaterial(&SceneMesh->Material, "MESH");
-		if (strcmp(ModelData->Materials[i].MaterialName, WaveEmptyMaterial.MaterialName) != 0)
+		if (strcmp(ModelData->Materials[i].MaterialName, WaveEmptyMaterial.MaterialName) != 0)//FIX - don't use strncpy
 			strncpy(SceneMesh->Material.Name, ModelData->Materials[i].MaterialName, sizeof(SceneMesh->Material.Name));
 
 		SceneMesh->VertexCount = WaveMesh->VertexCount;
@@ -915,7 +915,8 @@ uint32_t AddModel(uint32_t Settings, const char* FileName)
 
 	WaveFreeModel(&Model);
 
-	SelectedTexture = LastTexture;
+	if (LastTexture != 0)
+		SelectedTexture = LastTexture;
 
 	RaytracingAddGeometry(MeshIndex);
 	return MeshIndex;

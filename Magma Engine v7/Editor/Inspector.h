@@ -432,7 +432,7 @@ void EditorMeshInspector()
 {
 	ImGui::Begin("Mesh Inspector");
 	{
-		if (SceneMeshes.Size > 1)
+		if (SceneMeshes.Size > 1 && SelectedMesh != 0)
 		{
 			SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, SelectedMesh);
 			if (Mesh != NULL)
@@ -717,8 +717,8 @@ void EditorVSInspector()
 void EditorInspector()
 {
 	EditorEntityInspector();
-	EditorTextureInspector();
 	EditorMeshInspector();
+	EditorTextureInspector();
 	EditorMaterialInspector();
 	EditorScriptInspector();
 //	EditorVSInspector();

@@ -227,7 +227,10 @@ void* CMA_GetAt(CMA_MemoryZone* Zone, size_t Index)
 
 void CMA_Pop(CMA_MemoryZone* Zone, size_t Index)
 {
-	if (Zone->Mem != NULL && Index < Zone->Size && Zone->Mem[Index].State & ICMA_DATA_STATE_USED)
+	if (Zone->Mem == NULL)
+		return;
+
+	if (Index < Zone->Size && Zone->Mem[Index].State & ICMA_DATA_STATE_USED)
 		Zone->Mem[Index].State = ICMA_DATA_STATE_UNUSED | ICMA_DATA_STATE_ALLOCATED;
 	else
 		return;

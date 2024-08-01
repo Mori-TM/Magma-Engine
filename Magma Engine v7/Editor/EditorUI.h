@@ -728,6 +728,35 @@ void EngineDrawEditor()
 		ImGui::Text("Max Push Constants Size: %d", VkRenderer.PhysicalDeviceProperties.limits.maxPushConstantsSize);
 		ImGui::Text("Max Viewport Dimensions: %d %d", VkRenderer.PhysicalDeviceProperties.limits.maxViewportDimensions[0], VkRenderer.PhysicalDeviceProperties.limits.maxViewportDimensions[1]);
 		ImGui::Text("Max Viewports: %d", VkRenderer.PhysicalDeviceProperties.limits.maxViewports);
+
+#ifdef MAGMA_ENGINE_TRACK_MEMORY
+
+		ImGui::NewLine();
+		ImGui::Text("Current Memory Stats:");
+		ImGui::Text("Blocks In Use: %zu", s_MemBlocks.Size);
+
+		for (size_t i = 0; i < s_MemBlocks.Size; i++)
+		{
+			s_MemBlockInfo* Block = (s_MemBlockInfo*)DynamicArrayGetAt(&s_MemBlocks, i);
+
+			ImGui::NewLine();
+			ImGui::Text("Block %zu: Size: %zu/%zu, Elements: %zu/%zu", i, Block->Size, Block->AllocatedSize, Block->AllocatedElements.Size, Block->AllocatedElements.SizeAllocated);
+
+			for (size_t j = 0; j < Block->AllocatedElements.Size; j++)
+			{
+				s_AllocatedElementInfo* Element = (s_AllocatedElementInfo*)DynamicArrayGetAt(&Block->AllocatedElements, j);
+
+				if (Element->InUse == 1)
+				{
+					ImGui::Text("\tElement %zu: Address: %p, Size: %zu/%zu\n", j, Element->Data, Element->Size, Element->PotentialSize);
+				//	Element->
+				}
+			}
+
+			//	printf("[Malloc Sucks]: Failed to free: %p, Free2: %td\n", Block->Data, Block->DataAddress);
+		}
+		ImGui::NewLine();
+#endif
 	}
 	ImGui::End();
 

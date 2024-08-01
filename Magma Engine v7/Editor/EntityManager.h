@@ -23,8 +23,8 @@ void EditorEntities()
 	//	ImGui::BeginChild("Pop Up");
 		if (ImGui::BeginPopupContextWindow())
 		{
-			if (ImGui::Selectable("Add Empty Entity"))
-				AddEntity(UINT32_MAX);
+		//	if (ImGui::Selectable("Add Empty Entity"))
+		//		AddEntity(COMPONENT_TYPE_EMPTY);
 
 			for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
 			{

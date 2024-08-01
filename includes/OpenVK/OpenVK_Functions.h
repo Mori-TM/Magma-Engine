@@ -192,9 +192,7 @@ uint32_t OpenVkCreateRenderer(uint32_t RendererFlags, const char** (*GetExtensio
 		return OpenVkRuntimeError("OpenGL not supported");
 	//	return GLCreateRenderer();
 	}
-	else
-	{
-		OpenVkRuntimeInfo("Renderer: ", "None");
-		return OpenVkRuntimeError("No valid rendering backend selected");
-	}
+
+	OpenVkRuntimeInfo("Renderer: ", "None");
+	return OpenVkRuntimeError("No valid rendering backend selected");
 }

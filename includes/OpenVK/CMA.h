@@ -1,10 +1,15 @@
+#ifndef CMA_IMPLEMENTATION
+#define CMA_IMPLEMENTATION
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 
+// if CMA_STORE_DEBUG_NAME_IN_RAM than every allocation will have the debug name in it for debugging
+
 #define CMA_BLOCK_SIZE 64
-#define CMA_MAX_GARBAGE_COUNT 4 //FIX - isn't that a bit too often?
+#define CMA_MAX_GARBAGE_COUNT 8 //FIX - isn't that a bit too often?
 
 typedef enum
 {
@@ -32,11 +37,27 @@ typedef struct
 	size_t PushCountReused;
 } CMA_MemoryZone;
 
+void ICMA_AllocateAt(size_t i, CMA_MemoryZone* Zone)
+{
+#ifdef CMA_STORE_DEBUG_NAME_IN_RAM
+	Zone->Mem[i].Data = malloc(Zone->MemSize + 65);
+	if (Zone->Mem[i].Data)
+	{
+		char src = '\0';
+		memcpy(((char*)Zone->Mem[i].Data) + Zone->MemSize, &src, 1);
+		strcpy(((char*)Zone->Mem[i].Data) + Zone->MemSize + 1, Zone->Name);
+	}
+#else
+	Zone->Mem[i].Data = malloc(Zone->MemSize);
+#endif
+}
+
 void ICMA_Resize(size_t Start, CMA_MemoryZone* Zone)
 {
 	for (size_t i = Start; i < Zone->AllocateSize; i++)
 	{
-		Zone->Mem[i].Data = malloc(Zone->MemSize);
+		ICMA_AllocateAt(i, Zone);
+		
 		if (!Zone->Mem[i].Data)
 		{
 			Zone->AllocateSize = i;
@@ -110,7 +131,22 @@ size_t CMA_Push(CMA_MemoryZone* Zone, void* Data)
 				 Zone->Mem[i].State & ICMA_DATA_STATE_UNALLOCATED)
 		{
 			Zone->Mem[i].State = ICMA_DATA_STATE_USED | ICMA_DATA_STATE_ALLOCATED;
-			Zone->Mem[i].Data = malloc(Zone->MemSize);
+		//	Zone->Mem[i].Data = malloc(Zone->MemSize);
+
+		//	if (strstr(Zone->Name, "OpenVk") != 0)
+		//	{
+		//		Zone->Mem[i].Data = malloc(Zone->MemSize + 65);
+		//		if (Zone->Mem[i].Data)
+		//		{
+		//			char src = '\0';
+		//			memcpy(((char*)Zone->Mem[i].Data) + Zone->MemSize, &src, 1);
+		//			strcpy(((char*)Zone->Mem[i].Data) + Zone->MemSize + 1, Zone->Name);
+		//		}
+		//
+		//	}
+
+			ICMA_AllocateAt(i, Zone);
+
 			memcpy(Zone->Mem[i].Data, Data, Zone->MemSize);
 			Zone->PushCountReused++;
 			return i;
@@ -148,7 +184,22 @@ size_t CMA_Push(CMA_MemoryZone* Zone, void* Data)
 			 Zone->Mem[Zone->Size].State & ICMA_DATA_STATE_UNALLOCATED)
 	{
 		Zone->Mem[Zone->Size].State = ICMA_DATA_STATE_USED | ICMA_DATA_STATE_ALLOCATED;
-		Zone->Mem[Zone->Size].Data = malloc(Zone->MemSize);
+	//	Zone->Mem[Zone->Size].Data = malloc(Zone->MemSize);
+
+	//	if (strstr(Zone->Name, "OpenVk") != 0)
+	//	{
+	//		Zone->Mem[Zone->Size].Data = malloc(Zone->MemSize + 65);
+	//		if (Zone->Mem[Zone->Size].Data)
+	//		{
+	//			char src = '\0';
+	//			memcpy(((char*)Zone->Mem[Zone->Size].Data) + Zone->MemSize, &src, 1);
+	//			strcpy(((char*)Zone->Mem[Zone->Size].Data) + Zone->MemSize + 1, Zone->Name);
+	//		}
+	//
+	//	}
+
+		ICMA_AllocateAt(Zone->Size, Zone);
+
 		if (!Zone->Mem[Zone->Size].Data)
 		{
 			printf("CMA Error: Failed to allocate data for your push data: %s\n", Zone->Name);
@@ -168,7 +219,7 @@ size_t CMA_GetSize(CMA_MemoryZone* Zone)
 
 void* CMA_GetAt(CMA_MemoryZone* Zone, size_t Index)
 {
-	if (Zone->Mem != NULL && Index < Zone->Size && Zone->Mem[Index].State & ICMA_DATA_STATE_USED)
+	if (Zone != NULL && Zone->Mem != NULL && Index < Zone->Size && Zone->Mem[Index].State & ICMA_DATA_STATE_USED)
 		return Zone->Mem[Index].Data;
 
 	return NULL;
@@ -176,7 +227,10 @@ void* CMA_GetAt(CMA_MemoryZone* Zone, size_t Index)
 
 void CMA_Pop(CMA_MemoryZone* Zone, size_t Index)
 {
-	Zone->Mem[Index].State = ICMA_DATA_STATE_UNUSED | ICMA_DATA_STATE_ALLOCATED;
+	if (Zone->Mem != NULL && Index < Zone->Size && Zone->Mem[Index].State & ICMA_DATA_STATE_USED)
+		Zone->Mem[Index].State = ICMA_DATA_STATE_UNUSED | ICMA_DATA_STATE_ALLOCATED;
+	else
+		return;
 	/*
 	if (Zone->PopCount >= CMA_MAX_GARBAGE_COUNT)
 	{
@@ -225,7 +279,7 @@ void CMA_Pop(CMA_MemoryZone* Zone, size_t Index)
 	{
 		Zone->PopCount = 0;
 
-		for (size_t i = Zone->Size - 1; i > 0; i--)
+		for (long long i = Zone->Size - 1; i > 0; i--)
 		{
 			if (Zone->Mem[i].State & ICMA_DATA_STATE_USED)
 				break;
@@ -236,8 +290,14 @@ void CMA_Pop(CMA_MemoryZone* Zone, size_t Index)
 			Zone->Size--;
 		}
 
-		if (Zone->AllocateSize != Zone->Size)
+		if (Zone->AllocateSize > Zone->Size)
 		{
+			for (uint32_t i = Zone->Size; i < Zone->AllocateSize; i++)
+			{
+				if (Zone->Mem[i].State & ICMA_DATA_STATE_ALLOCATED)
+					free(Zone->Mem[i].Data);
+			}
+
 			
 			CMA_Memory* Memory = (CMA_Memory*)realloc(Zone->Mem, Zone->Size * sizeof(CMA_Memory));
 			if (!Memory)
@@ -291,3 +351,4 @@ uint32_t CMA_Compare(CMA_MemoryZone* Zone0, size_t Index0, CMA_MemoryZone* Zone1
 
 	return 0;
 }
+#endif

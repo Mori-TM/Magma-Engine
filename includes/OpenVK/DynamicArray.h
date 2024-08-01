@@ -1,3 +1,5 @@
+#ifndef DYNAMIC_ARRAY_IMPLEMENTATION
+#define DYNAMIC_ARRAY_IMPLEMENTATION
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,7 +7,7 @@
 #define DYNAMIC_ARRAY_BLOCK_COUNT 32
 #define DYNAMIC_ARRAY_MAX_GARBAGE_COUNT 16
 #define DYNAMIC_ARRAY_MAX_NAME_LENGTH 32
-#define DYNAMIC_ARRAY_PRINT_DEBUG_INFO
+//#define DYNAMIC_ARRAY_PRINT_DEBUG_INFO
 
 typedef struct
 {
@@ -32,7 +34,7 @@ DynamicArray DynamicArrayCreate(size_t SizeOfBlock, const char* Name)
 		printf("[Dynamic Array]: Failed to init: %s\n", Name);
 		return Arr;
 	}
-	
+
 	return Arr;
 }
 
@@ -84,8 +86,11 @@ bool DynamicArrayPush(DynamicArray* Array, void* Data)
 
 bool DynamicArrayPop(DynamicArray* Array, size_t Index)
 {
-//	char* DataPTR = (char*)Array->Data;
-//	DataPTR += Index * Array->SizeOfBlock;
+	//	char* DataPTR = (char*)Array->Data;
+	//	DataPTR += Index * Array->SizeOfBlock;
+
+	if (Array->Size == 0)
+		return false;
 
 	for (size_t i = Index; i < Array->Size - 1; i++)
 	{
@@ -127,7 +132,7 @@ void* DynamicArrayGetAt(DynamicArray* Array, size_t Index)
 {
 	if (Index > Array->Size)
 	{
-		printf("[Dynamic Array]: Index out of range: %zu, max size is: %zu\n", Index, Array->Size);
+		printf("[Dynamic Array]: \"%s\" Index out of range: %zu, max size is: %zu\n", Array->Name, Index, Array->Size);
 		return NULL;
 	}
 
@@ -140,3 +145,4 @@ void DynamicArrayDestroy(DynamicArray* Array)
 	free(Array->Data);
 	memset(Array, 0, sizeof(DynamicArray));
 }
+#endif

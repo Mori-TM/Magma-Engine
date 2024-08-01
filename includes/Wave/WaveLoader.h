@@ -1098,6 +1098,8 @@ WAVE_BOOL WaveLoadMTL(const char* FilePath, const char* FileName, WaveModelData*
 		}
 	}
 
+	free(MatBuffer);
+
 	return WAVE_TRUE;
 }
 

@@ -3,7 +3,8 @@
 typedef enum
 {
 	//Add Empty entity
-	COMPONENT_TYPE_MESH = 0,
+	COMPONENT_TYPE_EMPTY = 0,
+	COMPONENT_TYPE_MESH,
 	COMPONENT_TYPE_MATERIAL,
 	COMPONENT_TYPE_CAMERA,
 	COMPONENT_TYPE_AUDIO,
@@ -16,6 +17,7 @@ typedef enum
 
 const char* ComponentNames[] = 
 { 
+	"Empty",
 	"Mesh", 
 	"Material", 
 	"Camera", 
@@ -341,7 +343,7 @@ uint32_t AddEntity(uint32_t UsedComponent)
 	//	for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
 	//		Entity.UsedComponents[i] = false;
 
-	if (UsedComponent != UINT32_MAX)
+	if (UsedComponent < COMPONENT_COUNT)
 		Entity->UsedComponents[UsedComponent] = true;
 
 	ResetEntityMesh(Entity);
@@ -378,6 +380,7 @@ uint32_t AddEntity(uint32_t UsedComponent)
 	return SelectedEntity;
 }
 
+//FIX - check for valid MeshIndex
 void AddMeshToEntity(uint32_t EntityIndex, uint32_t MeshIndex)
 {
 	/*
@@ -387,11 +390,16 @@ void AddMeshToEntity(uint32_t EntityIndex, uint32_t MeshIndex)
 	strcpy(Entities[EntityIndex].Mesh.Name, Mesh->Name);
 	*/
 	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshIndex);
-	Entities[EntityIndex].Mesh.MeshIndex = MeshIndex;
 	if (Mesh)
+	{
+		Entities[EntityIndex].Mesh.MeshIndex = MeshIndex;
 		strcpycut(Entities[EntityIndex].Mesh.Name, Mesh->Name);
 
-	RaytracingAddMesh(SelectedMesh);
+		RaytracingAddMesh(SelectedMesh);
+		return;
+	}
+	
+	printf("No Mesh to add to Entity\n");
 }
 
 uint32_t AddMesh(const char* Name, SceneMesh* MeshInfo)

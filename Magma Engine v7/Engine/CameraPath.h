@@ -57,6 +57,11 @@ void CameraPlayRecordedPath()
 		CameraPath.FrameLast = 0;
 }
 
+void CameraDestroyPath()
+{
+	free(CameraPath.Frames);
+}
+
 void CameraUpdateRecordingPath()
 {
 	CameraPath.FrameCount++;

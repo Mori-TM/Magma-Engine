@@ -242,9 +242,10 @@ typedef enum
 	OPENVK_RENDER_PASS_COLOR_ACCESS_READ_AND_WRITE = 0x10,
 } OpenVkRenderPassOptions;
 
-typedef struct
+typedef union
 {
 	float Matrix[3][4];
+	float M[12];
 } OpenVkTransformMatrix;
 
 typedef struct
@@ -416,28 +417,70 @@ OpenVkBool OpenVkRuntimeError(const char* Msg, ...)
 
 void* OpenVkMalloc(size_t Size)
 {
+	if (Size == 0)
+		return NULL;
+
+#ifdef OPENVK_STORE_DEBUG_NAME_IN_RAM
+	void* Mem = malloc(Size + 9);
+	if (Mem == NULL)
+		OpenVkRuntimeError("Failed to allocate Memory! Size: %zu", Size);
+
+	char src = '\0';
+	memcpy(((char*)Mem) + Size, &src, 1);
+	strcpy(((char*)Mem) + Size + 1, "OpenVkM");
+#else
 	void* Mem = malloc(Size);
 	if (Mem == NULL)
-		OpenVkRuntimeError("Failed to allocate Memory!");
+		OpenVkRuntimeError("Failed to allocate Memory! Size: %zu", Size);
+#endif
+	
 
 	return Mem;
 }
 
 void* OpenVkCalloc(size_t Count, size_t Size)
 {
+	if (Size == 0 || Count == 0)
+		return NULL;
+
+#ifdef OPENVK_STORE_DEBUG_NAME_IN_RAM
+	void* Mem = malloc(Size * Count + 9);
+	if (Mem == NULL)
+		OpenVkRuntimeError("Failed to clear allocate Memory! Size: %zu", Size);
+
+	memset(Mem, 0, Size * Count);
+
+	char src = '\0';
+	memcpy(((char*)Mem) + Size, &src, 1);
+	strcpy(((char*)Mem) + Size + 1, "OpenVkC");
+#else
 	void* Mem = calloc(Count, Size);
 	if (Mem == NULL)
-		OpenVkRuntimeError("Failed to clear allocate Memory!");
+		OpenVkRuntimeError("Failed to clear allocate Memory! Size: %zu", Size);
 
+#endif
 	return Mem;
 }
 
 
 void* OpenVkRealloc(void* Data, size_t Size)
 {
-	void* Mem = realloc(Data, Size);
+	if (Size == 0)
+		return NULL;
+
+#ifdef OPENVK_STORE_DEBUG_NAME_IN_RAM
+	void* Mem = realloc(Data, Size + 9);
 	if (Mem == NULL)
-		OpenVkRuntimeError("Failed to reallocate Memory!");
+		OpenVkRuntimeError("Failed to reallocate Memory! Size: %zu", Size);
+
+	char src = '\0';
+	memcpy(((char*)Mem) + Size, &src, 1);
+	strcpy(((char*)Mem) + Size + 1, "OpenVkR");
+#else
+	void* Mem = realloc(Data, Size + 9);
+	if (Mem == NULL)
+		OpenVkRuntimeError("Failed to reallocate Memory! Size: %zu", Size);
+#endif
 
 	return Mem;
 }
@@ -447,7 +490,7 @@ void OpenVkFree(void* Data)
 	if (Data != NULL)
 		free(Data);	
 	else
-		OpenVkRuntimeError("No Memory to free!");
+		OpenVkRuntimeWarning("No Memory to free!");
 }
 
 OpenVkFile OpenVkReadFile(const char* Path)

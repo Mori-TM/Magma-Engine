@@ -10,32 +10,8 @@
 //#define VK_NO_PROTOTYPES
 #include <vulkan/vulkan.h>
 
-void* Malloc(size_t Size)
-{
-	printf("Malloc\n");
-	return malloc(Size);
-}
-
-void* Realloc(void* Data, size_t Size)
-{
-	printf("Realloc\n");
-	return realloc(Data, Size);
-}
-
-void Free(void* Data)
-{
-	printf("Free\n");
-	free(Data);
-}
-
-//#define free Free
-//#define realloc Realloc
-//#define malloc Malloc
 #include "CMA.h"
 #include "DynamicArray.h"
-//#undef free
-//#undef realloc
-//#undef malloc
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"

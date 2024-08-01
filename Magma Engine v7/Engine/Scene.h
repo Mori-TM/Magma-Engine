@@ -176,6 +176,15 @@ void SceneInit()
 
 void SceneDestroy()
 {
+	for (size_t i = 0; i < SceneMeshes.Size; i++)
+	{
+		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, i);
+		if (Mesh)
+		{
+			free(Mesh->MeshData);
+		}
+	}
+
 	CMA_Destroy(&SceneTextures);
 	CMA_Destroy(&SceneMaterials);
 	CMA_Destroy(&SceneMeshes);

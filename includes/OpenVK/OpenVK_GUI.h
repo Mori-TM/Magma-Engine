@@ -119,7 +119,7 @@ void OpenVkGUIResizeBuffer(OpenVkGUIBuffer* Buffer, OpenVkBool VertexBuffer)
 
 		if (VertexBuffer)
 		{
-			void* Data = realloc(Buffer->Data, Buffer->AllocatedSize * sizeof(OpenVkGUIVertex));
+			void* Data = OpenVkRealloc(Buffer->Data, Buffer->AllocatedSize * sizeof(OpenVkGUIVertex));
 			if (!Data)
 			{
 				OpenVkRuntimeError("Failed to Make GUI Vertex Buffer Bigger: %d", Buffer->AllocatedSize * (uint32_t)sizeof(OpenVkGUIVertex));
@@ -138,7 +138,7 @@ void OpenVkGUIResizeBuffer(OpenVkGUIBuffer* Buffer, OpenVkBool VertexBuffer)
 
 		else
 		{
-			void* Data = realloc(Buffer->Data, Buffer->AllocatedSize * sizeof(uint32_t));
+			void* Data = OpenVkRealloc(Buffer->Data, Buffer->AllocatedSize * sizeof(uint32_t));
 			if (!Data)
 			{
 				OpenVkRuntimeError("Failed to Make GUI Index Buffer Bigger: %d", Buffer->AllocatedSize * (uint32_t)sizeof(uint32_t));
@@ -708,7 +708,7 @@ void OpenVkGUIBeginRender(uint32_t Width, uint32_t Height)
 	if (OpenVkGUI.WindowCount >= OpenVkGUI.WindowSize)
 	{
 		OpenVkGUI.WindowSize += OPENVK_GUI_ALLOCATE_BLOCK;
-		OpenVkGUIWindow* Windows = (OpenVkGUIWindow*)realloc(OpenVkGUI.Windows, OpenVkGUI.WindowSize * sizeof(OpenVkGUIWindow));
+		OpenVkGUIWindow* Windows = (OpenVkGUIWindow*)OpenVkRealloc(OpenVkGUI.Windows, OpenVkGUI.WindowSize * sizeof(OpenVkGUIWindow));
 		if (!Windows)
 			OpenVkGUI.WindowSize -= OPENVK_GUI_ALLOCATE_BLOCK;
 		else

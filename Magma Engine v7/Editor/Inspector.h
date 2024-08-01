@@ -208,7 +208,7 @@ void EditorEntityInspector()
 			{				
 				ImGui::Text("Components");
 				
-				for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
+				for (uint32_t i = 1; i < COMPONENT_COUNT; i++)
 				{
 					if (ImGui::Button(ComponentNames[i]))
 						Entities[SelectedEntity].UsedComponents[i] = true;

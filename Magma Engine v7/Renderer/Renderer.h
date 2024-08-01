@@ -117,7 +117,7 @@ void CreateDescriptors()
 	CreateFXAADescriptorSet();
 }
 
-void CreateRenderer()
+void RendererCreate()
 {
 	OpenVkInitThreads();
 	SwapChain = OpenVkCreateRenderer(OPENVK_VULKAN | OPENVK_VALIDATION_LAYER | OPENVK_RAYTRACING, GetExtensions, GetSurface, GetWindowSize);
@@ -263,20 +263,20 @@ void CreateRenderer()
 
 //	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/Sponza-master/sponza2.obj");
 //	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/TestMesh.obj");
-	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
-	AddEntity(COMPONENT_TYPE_MESH);
-	AddMeshToEntity(SelectedEntity, ModelIndex);
-
-	AddEntity(COMPONENT_TYPE_MESH);
-	AddMeshToEntity(SelectedEntity, ModelIndex);
-
-	uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
-	ResetEntityLight(&Entities[EntityIndex]);
-	Entities[EntityIndex].Light.CastShadow = true;
-	Entities[EntityIndex].Light.Type = LIGHT_DIRECTIONAL;
-	Entities[EntityIndex].Light.Strength = 5.8;
-	Entities[EntityIndex].Translate = Vec3(-3.6, 6.5, 2.75);
-	strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
+			uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
+			AddEntity(COMPONENT_TYPE_MESH);
+			AddMeshToEntity(SelectedEntity, ModelIndex);
+		
+			AddEntity(COMPONENT_TYPE_MESH);
+			AddMeshToEntity(SelectedEntity, ModelIndex);
+		
+			uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_LIGHT);
+			ResetEntityLight(&Entities[EntityIndex]);
+			Entities[EntityIndex].Light.CastShadow = true;
+			Entities[EntityIndex].Light.Type = LIGHT_DIRECTIONAL;
+			Entities[EntityIndex].Light.Strength = 5.8;
+			Entities[EntityIndex].Translate = Vec3(-3.6, 6.5, 2.75);
+			strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
 	OpenVkRuntimeInfo("Scene was initilaized", "");
 //	exit(3666);
 
@@ -285,7 +285,7 @@ void CreateRenderer()
 //	exit(3666);
 }
 
-void DestroyRenderer()
+void RendererDestroy()
 {
 	ImGuiDestroy();
 	SceneDestroy();
@@ -294,6 +294,8 @@ void DestroyRenderer()
 
 	EngineDestroy();
 	EngineDestroyEditor();
+	CameraDestroyPath();
+	RaytracingDestroy();
 	
 	OpenVkGUIDestroy();
 	OpenVkDestroyRenderer();
@@ -371,13 +373,7 @@ void RendererDraw()
 			else
 				SceneRenderDescriptorSet = SceneOutputDescriptorSet;
 
-			
-			
-
-			
-
 			RaytracingDraw();
-
 		}
 		
 
@@ -490,7 +486,7 @@ void DeleteMeshTexture(uint32_t TextureImage, uint32_t TextureIndex)
 	}
 }
 
-void RendererRender()
+void RendererRun()
 {
 	if (ImGuiTexturesToDelete.size() != 0)
 	{
@@ -604,8 +600,7 @@ void RendererRender()
 //	OpenVkDrawFrame(RendererDraw, RendererResize, RendererUpdate);
 
 	{
-		CurrentBuildHash = 0;
-		DynamicArrayClear(&RTR.Meshes);
+		RaytracingRestBuild();
 
 		for (uint32_t i = 0; i < EntityCount; i++)
 		{
@@ -617,7 +612,17 @@ void RendererRender()
 					SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
 					if (Mesh != NULL && Mesh->MeshCount > 0)
 					{
-						RaytracingAddEntityMesh(Entities[i].Mesh.MeshIndex, Mesh);
+						mat4 Model;
+						LoadMat4IdentityP(&Model);
+						Model = ScaleMat4P(&Model, &Entities[i].Scale);
+						Model = RotateXMat4P(&Model, ToRadians(Entities[i].Rotate.x));
+						Model = RotateYMat4P(&Model, ToRadians(Entities[i].Rotate.y));
+						Model = RotateZMat4P(&Model, ToRadians(Entities[i].Rotate.z));
+						Model = TranslateMat4P(&Model, &Entities[i].Translate);
+
+						Model = TransposeMat4(&Model);
+
+						RaytracingAddEntityMesh(Entities[i].Mesh.MeshIndex, &Model, Mesh);
 					}
 				}
 			}

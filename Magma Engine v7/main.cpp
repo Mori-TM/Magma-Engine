@@ -12,6 +12,18 @@
 #include <chrono>
 #include <condition_variable>
 
+#define MAGMA_ENGINE_TRACK_MEMORY
+#define CMA_STORE_DEBUG_NAME_IN_RAM
+#define OPENVK_STORE_DEBUG_NAME_IN_RAM
+
+#ifdef MAGMA_ENGINE_TRACK_MEMORY
+#include <MallocSucks/MallocSucks.h>
+#define malloc s_malloc
+#define calloc s_calloc
+#define realloc s_realloc
+#define free s_free
+#endif
+
 extern "C"
 {
 #include <lua/lua.h>
@@ -30,7 +42,7 @@ extern "C"
 #include <ImGui/imgui_draw.cpp>
 #include <ImGui/imgui_widgets.cpp>
 #include <ImGui/imgui_demo.cpp>
-#include <ImGui/imgui_impl_sdl.cpp>
+#include <ImGui/imgui_impl_sdl2.cpp>
 #include <ImGui/imgui_impl_vulkan_but_better.h>
 
 #include <assimp/Importer.hpp>
@@ -89,7 +101,7 @@ Restart:
 		SceneHeight = WindowHeight;
 	}
 	
-	CreateRenderer();
+	RendererCreate();
 	Init = true;
 
 	while (Run)
@@ -105,12 +117,12 @@ Restart:
 				Run = false;
 		}
 		
-		RendererRender();
+		RendererRun();
 	//	exit(3666);
 		FrameCount++;
 	}
 
-	DestroyRenderer();
+	RendererDestroy();
 	SDL_DestroyWindow(Window);
 	SDL_Quit();
 	printf("%f\n", WaveGetUsedMemory() * 0.000001);
@@ -163,7 +175,11 @@ void CullingThread()
 }
 
 int32_t main(int32_t argc, char** argv)
-{/*
+{
+#ifdef MAGMA_ENGINE_TRACK_MEMORY
+	s_init();
+#endif
+	/*
 	DynamicArray Arr = DynamicArrayCreate(sizeof(SceneTextureImage), "Texture Images");
 
 	for (uint32_t i = 0; i < 3245; i++)
@@ -267,6 +283,11 @@ int32_t main(int32_t argc, char** argv)
 	RenderThread();
 //	t1.join();
 //	t2.join();
+
+#ifdef MAGMA_ENGINE_TRACK_MEMORY
+	s_checkForLeaks();
+	s_destroy();
+#endif
 
 	return 0;
 }

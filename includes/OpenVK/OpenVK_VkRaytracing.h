@@ -493,6 +493,17 @@ OpenVkBool VkUpdateInstance(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFro
 	return OpenVkTrue;
 }
 
+OpenVkBool VkUpdateInstanceTransform(OpenVkTransformMatrix Matrix, uint32_t Instance)
+{
+	VkAccelerationStructureInstanceKHR* InstancePTR = (VkAccelerationStructureInstanceKHR*)CMA_GetAt(&VkRaytracer.Instances, Instance);
+	if (InstancePTR == NULL)
+		return OpenVkRuntimeError("Failed to find instance");
+
+	memcpy(&InstancePTR->transform, &Matrix, sizeof(VkTransformMatrixKHR));
+
+	return OpenVkTrue;
+}
+
 OpenVkBool VkCreateTopLevelAS(uint32_t InstanceCount, uint32_t* Instances, uint32_t MaxPrimitiveCount, OpenVkBool AllowUpdate, uint32_t* OldTopLevelAS)
 {
 	DynamicArrayClear(&VkRaytracer.InstanceStorage);
@@ -595,6 +606,9 @@ OpenVkBool VkCreateTopLevelAS(uint32_t InstanceCount, uint32_t* Instances, uint3
 		&AccelerationStructureBuildGeometryInfo,
 		&AccelerationBuildStructureRangeInfos);
 	VkEndSingleTimeCommandBuffer(commandBuffer);
+
+	printf("Yeah\n");
+	
 
 	VkAccelerationStructureDeviceAddressInfoKHR AccelerationDeviceAddressInfo;
 	AccelerationDeviceAddressInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
@@ -745,6 +759,7 @@ uint32_t* VkCreateShaderBindingTable(uint32_t Pipeline, uint32_t ShaderCount, ui
 		j += HandleCount[i];
 	}
 
+	OpenVkFree(ShaderHandleStorage);
 
 	return VkRaytracer.ShaderBindings + (VkRaytracer.ShaderBindingCount - ShaderCount);
 }

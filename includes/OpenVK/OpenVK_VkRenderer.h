@@ -1990,6 +1990,11 @@ void VkDestroyRenderer()
 
 	VkCleanupSwapChain();
 
+	OpenVkFree(VkRenderer.Framebuffers);
+
+	OpenVkFree(VkRenderer.SwapChainImageViews);
+	OpenVkFree(VkRenderer.SwapChainImages);
+
 	for (uint32_t i = 0; i < VkRenderer.DescriptorPools.Size; i++)
 		VkDestroyDescriptorPool(i);
 
@@ -2079,13 +2084,15 @@ void VkDestroyRenderer()
 	CMA_Destroy(&VkRenderer.Images);
 	CMA_Destroy(&VkRenderer.ImageAttachments);
 
+
+
 //	OpenVkFree(VkRenderer.Pipelines);
-//	OpenVkFree(VkRenderer.PipelineLayouts);
+	OpenVkFree(VkRenderer.PipelineLayouts);
+
+	OpenVkFree(VkRenderer.RenderPasses);
+//	OpenVkFree(VkRenderer.DescriptorSets);
+	OpenVkFree(VkRenderer.DescriptorSetLayouts);
 	
-//	OpenVkFree(VkRenderer.RenderPasses);
-	//	OpenVkFree(VkRenderer.DescriptorSets);
-//	OpenVkFree(VkRenderer.DescriptorSetLayouts);
-//	
 //	OpenVkFree(VkRenderer.DynamicDescriptorPools.DescriptorPools);
 //	OpenVkFree(VkRenderer.StaticDescriptorPools.DescriptorPools);
 

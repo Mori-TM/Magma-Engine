@@ -973,6 +973,8 @@ void ImGui_ImplVulkan_Shutdown()
 				vkFreeMemory(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.Buffers[i].IndexBufferMemory, NULL);
 			}
 		}
+
+		free(ImGui_ImplVulkan_Renderer_Info.Buffers);
 	}
 
 //	vkDestroyDescriptorSetLayout(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.DescriptorSetLayout, NULL);

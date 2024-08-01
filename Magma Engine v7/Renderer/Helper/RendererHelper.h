@@ -11,12 +11,12 @@ vec3 ClearColor = { 0.15, 0.3, 0.7 };
 bool ForceResizeEvent = false;
 bool FullScreen = false;
 bool ForceFullScreenEvent = false;
-bool RenderGamePreview = true;
+bool RenderGamePreview = false;
 bool GamePerformanceOverlay = true;
 
 uint32_t MsaaSamples = 1;
 
-bool RenderRaytraced = true;
+bool RenderRaytraced = false;
 bool RenderShadows = true;
 bool RenderSSAO = true;
 bool RenderSSAOBlur = true;

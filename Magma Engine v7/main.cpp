@@ -197,6 +197,8 @@ Restart:
 	RendererCreate();
 	bool Run = true;
 
+//	exit(3666);
+
 	while (Run)
 	{
 		if (RestartEngine)

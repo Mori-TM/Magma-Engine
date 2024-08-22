@@ -270,6 +270,7 @@ uint32_t VkCreateRenderer(const char**(*GetExtensions)(uint32_t* ExtensionCount)
 	DeviceFeatures.wideLines = VK_TRUE;
 	DeviceFeatures.depthClamp = VK_TRUE;
 	DeviceFeatures.independentBlend = VK_TRUE;
+	DeviceFeatures.shaderInt64 = VK_TRUE;
 
 	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 

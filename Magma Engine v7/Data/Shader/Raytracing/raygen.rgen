@@ -55,23 +55,23 @@ void main()
 		traceRayEXT(TopLevelAS, gl_RayFlagsOpaqueEXT, 0xff, 0, 0, 0, Origin.xyz, MinT, Direction.xyz, MaxT, 0);
 		vec3 hitColor = HitValue.HitValue;
 
-		if (HitValue.Reflector < 0.0f) 
-		{
+	//	if (HitValue.Reflector < 0.0f) 
+	//	{
 			color += hitColor;
-			break;
-
-			
-		} 
-		else 
-		{
-			const vec4 hitPos = Origin + Direction * HitValue.Distance;
-			Origin.xyz = hitPos.xyz + HitValue.Normal * 0.001f;
-			Direction.xyz = reflect(Direction.xyz, HitValue.Normal);
-			color += hitColor;
-			Iterations++;
-			if (HitValue.Reflector < 0.0)
-				break;
-		}
+	//		break;
+	//
+	//		
+	//	} 
+	//	else 
+	//	{
+	//		const vec4 hitPos = Origin + Direction * HitValue.Distance;
+	//		Origin.xyz = hitPos.xyz + HitValue.Normal * 0.001f;
+	//		Direction.xyz = reflect(Direction.xyz, HitValue.Normal);
+	//		color += hitColor;
+	//		Iterations++;
+	//		if (HitValue.Reflector < 0.0)
+	//			break;
+	//	}
 
 	//	if (HitValue.Distance < 0.0f) {
 	//		color += hitColor;

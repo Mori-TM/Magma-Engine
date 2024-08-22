@@ -87,8 +87,9 @@ void VkGetRaytracingFeatures(VkDeviceCreateInfo* DeviceCreateInfo)
 	VkRaytracer.EnabledDescriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
 	VkRaytracer.EnabledDescriptorIndexingFeatures.runtimeDescriptorArray = VK_TRUE;
 	VkRaytracer.EnabledDescriptorIndexingFeatures.descriptorBindingVariableDescriptorCount = VK_TRUE;
-	VkRaytracer.EnabledDescriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
 	VkRaytracer.EnabledDescriptorIndexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
+	VkRaytracer.EnabledDescriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
+	VkRaytracer.EnabledDescriptorIndexingFeatures.descriptorBindingStorageBufferUpdateAfterBind = VK_TRUE;
 
 	VkRaytracer.EnabledBufferDeviceAddresFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
 	VkRaytracer.EnabledBufferDeviceAddresFeatures.bufferDeviceAddress = VK_TRUE;
@@ -275,6 +276,12 @@ uint64_t VkGetBufferDeviceAddress(VkBuffer Buffer)
 	BufferDeviceAI.pNext = NULL;
 	BufferDeviceAI.buffer = Buffer;
 	return KHR.vkGetBufferDeviceAddress(VkRenderer.Device, &BufferDeviceAI);
+}
+
+uint64_t VkGetBufferAddress(uint32_t Buffer)
+{
+	VkStaticBufferInfo* BufferAddress = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Buffer);
+	return VkGetBufferDeviceAddress(BufferAddress->Buffer);
 }
 
 uint32_t VkCreateTranformBuffer(OpenVkTransformMatrix Matrix)

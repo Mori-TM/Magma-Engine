@@ -1,5 +1,6 @@
 #define RAYTRACING_MAX_TEXTURE_COUNT 512
 #define RAYTRACING_MAX_PRIMITVE_COUNT 32
+#define RAYTRACING_MAX_MODEL_COUNT 256
 
 typedef struct
 {
@@ -24,13 +25,29 @@ typedef struct
 
 typedef struct
 {
+	uint64_t      txtOffset;             // Texture index offset in the array of textures
+	uint64_t vertexAddress;         // Address of the Vertex buffer
+	uint64_t indexAddress;          // Address of the index buffer
+	uint64_t materialAddress;       // Address of the material buffer
+	uint64_t materialIndexAddress;  // Address of the triangle material index buffer
+	uint64_t Allignment;
+
+
+	uint64_t bs1;
+	uint64_t bs2;
+} RaytracingBufferDescription;
+
+typedef struct
+{
 	bool WasInit;
-	uint32_t DescriptorSetLayout;
+	uint32_t DescriptorSetLayouts[2];
 	uint32_t DescriptorPoolBufferCount;
 	uint32_t DescriptorPool;
-	uint32_t DescriptorSet;
+	uint32_t DescriptorSets[2];
 	uint32_t UniformBuffer;
 	uint32_t PipelineLayout;
+
+	uint32_t DescriptionBuffer;
 
 //	DynamicArray TransformBuffers;
 //	DynamicArray Geometry;
@@ -39,7 +56,7 @@ typedef struct
 	CMA_MemoryZone Geometry;
 	CMA_MemoryZone BottomLevelAS;
 //	CMA_MemoryZone BottomLevelAS;
-	DynamicArray Buffers;
+	DynamicArray DescriptionBuffers;
 	DynamicArray Images;
 	DynamicArray ImageLayouts;
 	DynamicArray ImageTypes;
@@ -121,16 +138,17 @@ void RtCountBufferSize(SceneMesh* Mesh, uint32_t* VertexBufferSize, uint32_t* In
 	*IndexBufferSize = IndexCount;
 }
 
-void RtCreateDescriptorSet(bool Update, uint32_t DescriptorWriteCount, uint32_t* DescriptorTypes, uint32_t* DescriptorCounts, size_t* BufferSizes, uint32_t* Bindings)
+void RtCreateDescriptorSet(bool Update, uint32_t DescriptorWriteCount, uint32_t* DescriptorTypes, uint32_t* DescriptorCounts, uint32_t* Bindings)
 {
 	OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
-	DescriptorSetCreateInfo.DescriptorSetLayout = RTR.DescriptorSetLayout;
+	DescriptorSetCreateInfo.DescriptorSetLayout = RTR.DescriptorSetLayouts[0];
 	DescriptorSetCreateInfo.DescriptorPool = RTR.DescriptorPool;
 	DescriptorSetCreateInfo.DescriptorWriteCount = DescriptorWriteCount;
 	DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
 	DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
 	
-	DescriptorSetCreateInfo.Buffers = (uint32_t*)RTR.Buffers.Data;
+	size_t BufferSizes[] = { sizeof(RaytracingUniformBufferObject) };
+	DescriptorSetCreateInfo.Buffers = &RTR.UniformBuffer;
 	DescriptorSetCreateInfo.BufferSizes = BufferSizes;
 	
 	DescriptorSetCreateInfo.ImageLayouts = (uint32_t*)RTR.ImageLayouts.Data;
@@ -143,8 +161,37 @@ void RtCreateDescriptorSet(bool Update, uint32_t DescriptorWriteCount, uint32_t*
 	DescriptorSetCreateInfo.Bindings = Bindings;
 	DescriptorSetCreateInfo.VariableDescriptorSetCount = RAYTRACING_MAX_TEXTURE_COUNT;
 	DescriptorSetCreateInfo.DescriptorSet = NULL;
-	if (Update) DescriptorSetCreateInfo.DescriptorSet = &RTR.DescriptorSet;
-	RTR.DescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
+	if (Update) DescriptorSetCreateInfo.DescriptorSet = &RTR.DescriptorSets[0];
+	RTR.DescriptorSets[0] = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
+}
+
+void RtCreateDescriptorSetBufferDescriptions(uint32_t DescriptionBuffer)
+{
+
+	uint32_t DescriptorTypes[] =
+	{
+		OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER
+	};
+
+	uint32_t DescriptorCounts[] = { 1 };
+	uint32_t Bindings[] = { 0 };
+
+	OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
+	DescriptorSetCreateInfo.DescriptorSetLayout = RTR.DescriptorSetLayouts[1];
+	DescriptorSetCreateInfo.DescriptorPool = RTR.DescriptorPool;
+	DescriptorSetCreateInfo.DescriptorWriteCount = 1;
+	DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
+	DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
+
+	size_t BufferSizes[] = { RTR.DescriptionBuffers.Size * sizeof(RaytracingBufferDescription) };//
+	DescriptorSetCreateInfo.Buffers = &DescriptionBuffer;
+	DescriptorSetCreateInfo.BufferSizes = BufferSizes;
+
+	DescriptorSetCreateInfo.Bindings = Bindings;
+	DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;//
+	DescriptorSetCreateInfo.DescriptorSet = NULL;
+	if (RTR.DescriptorSets[1] != OPENVK_ERROR) DescriptorSetCreateInfo.DescriptorSet = &RTR.DescriptorSets[1];
+	RTR.DescriptorSets[1] = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 }
 
 void RaytracingInit()
@@ -152,14 +199,16 @@ void RaytracingInit()
 	memset(&RTR, 0, sizeof(RaytracingRenderer));
 
 	RTR.DescriptorPool = OPENVK_ERROR;
-	RTR.DescriptorSet = OPENVK_ERROR;
+	RTR.DescriptorSets[0] = OPENVK_ERROR;
+	RTR.DescriptorSets[1] = OPENVK_ERROR;
 	RTR.TopLevelAS = OPENVK_ERROR;
+	RTR.DescriptionBuffer = OPENVK_ERROR;
 
 	//FIX - Also Destroy these!!!
 //	RTR.TransformBuffers	= DynamicArrayCreate(sizeof(uint32_t), "Transform Buffers");
 	RTR.Geometry			= CMA_Create(sizeof(RaytracingGeometry), "Geometry");
 	RTR.BottomLevelAS		= CMA_Create(sizeof(uint32_t), "Bottom Level AS");
-	RTR.Buffers				= DynamicArrayCreate(sizeof(uint32_t), "Buffers");
+	RTR.DescriptionBuffers = DynamicArrayCreate(sizeof(RaytracingBufferDescription), "Description Buffers");
 	RTR.Instances			= DynamicArrayCreate(sizeof(uint32_t), "Instances");
 	RTR.Images				= DynamicArrayCreate(sizeof(uint32_t), "Images");
 	RTR.ImageLayouts		= DynamicArrayCreate(sizeof(uint32_t), "Image Layouts");
@@ -174,85 +223,8 @@ void RaytracingInit()
 	RTR.LastTransformHash = -1;
 	RTR.CurrentTransformHash = 0;
 
-	/*
-	uint32_t VertexBufferCount = 0;
-	uint32_t IndexBufferCount = 0;
-	RtCountBuffer(&VertexBufferCount, &IndexBufferCount);
-
-	RTR.GeometryCount = VertexBufferCount;
-	RTR.Geometry = (uint32_t*)malloc(RTR.GeometryCount * sizeof(uint32_t));
-
-	RTR.InstanceCount = VertexBufferCount;
-	RTR.Instances = (uint32_t*)malloc(RTR.InstanceCount * sizeof(uint32_t));
-	RTR.InstanceCount = 0;
-	RTR.GeometryCount = 0;
-	RTR.BottomLevelASCount = 0;
-
-	for (uint32_t i = 0; i < EntityCount; i++)
-	{
-		if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
-		{
-		//	OpenVkRuntimeWarning("Yeah buddy: %d", RTR.InstanceCount);
-
-			SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
-			if (Mesh != NULL && Mesh->MeshCount > 0)
-			{
-				mat4 Model;
-				LoadMat4IdentityP(&Model);
-				Model = ScaleMat4P(&Model, &Entities[i].Scale);
-				Model = RotateXMat4P(&Model, ToRadians(Entities[i].Rotate.x));
-				Model = RotateYMat4P(&Model, ToRadians(Entities[i].Rotate.y));
-				Model = RotateZMat4P(&Model, ToRadians(Entities[i].Rotate.z));
-				Model = TranslateMat4P(&Model, &Entities[i].Translate);
-				OpenVkTransformMatrix ModelOVK;
-				memcpy(&ModelOVK, &Model, sizeof(OpenVkTransformMatrix));
-
-				RTR.TransformBuffers[RTR.TransformBufferCount++] = VkCreateTranformBuffer(ModelOVK);
-
-				uint32_t VertexSize = 0;
-				uint32_t IndexSize = 0;
-				RtCountBufferSize(Mesh, &VertexSize, &IndexSize);
-
-				OpenVkRaytracingGeometryCreateInfo GeometryInfo;
-				GeometryInfo.VertexFormat = OPENVK_FORMAT_RGBA32F;
-				GeometryInfo.VertexSize = sizeof(SceneVertex);
-				GeometryInfo.VertexBufferDynamic = 0;
-				GeometryInfo.VertexCount = VertexSize;
-				GeometryInfo.VertexBuffer = Mesh->VertexBuffer;
-				GeometryInfo.IndexBufferDynamic = 0;
-				GeometryInfo.IndexCount = IndexSize;
-				GeometryInfo.IndexBuffer = Mesh->IndexBuffer == OPENVK_ERROR ? 0 : Mesh->IndexBuffer;
-				GeometryInfo.TranformBuffer = RTR.TransformBuffers[RTR.TransformBufferCount - 1];
-
-				RTR.Geometry[RTR.GeometryCount++] = OpenVkCreateRaytracingGeometry(&GeometryInfo);
-				RTR.BottomLevelAS[RTR.BottomLevelASCount++] = OpenVkCreateBottomLevelAS(RTR.Geometry[RTR.GeometryCount - 1], OpenVkFalse, NULL);
-				RTR.Instances[RTR.InstanceCount++] = OpenVkCreateInstance(ModelOVK, OpenVkFalse, RTR.BottomLevelAS[RTR.BottomLevelASCount - 1]);
-				
-			}
-		}
-	}
-
-
-	for (uint32_t i = 0; i < SceneMeshes.Size; i++)
-	{
-		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, i);
-		if (Mesh)
-		{
-			if (Mesh->IndexBuffer != OPENVK_ERROR)
-			{
-
-			}
-		}
-	}
-
-	OpenVkRuntimeWarning("Instance Count: %d", RTR.InstanceCount);
 	
-	RTR.TopLevelAS = OpenVkCreateTopLevelAS(RTR.InstanceCount, RTR.Instances, OpenVkFalse, NULL);
-	
-	*/
 	RTR.UniformBuffer = OpenVkCreateUniformBuffer(sizeof(RaytracingUniformBufferObject));
-	DynamicArrayPush(&RTR.Buffers, &RTR.UniformBuffer);
-
 
 	RTR.StorageImageWidth = WindowWidth;
 	RTR.StorageImageHeight = WindowHeight;
@@ -312,7 +284,35 @@ void RaytracingInit()
 		DescriptorSetLayoutCreateInfo.DescriptorTypes = DescriptorTypes;
 		DescriptorSetLayoutCreateInfo.DescriptorFlags = DescriptorFlags;
 		DescriptorSetLayoutCreateInfo.ShaderTypes = ShaderTypes;
-		RTR.DescriptorSetLayout = OpenVkCreateDescriptorSetLayout(&DescriptorSetLayoutCreateInfo);
+		RTR.DescriptorSetLayouts[0] = OpenVkCreateDescriptorSetLayout(&DescriptorSetLayoutCreateInfo);
+	}
+
+	{
+		uint32_t DescriptorCounts[] = { 1 };
+		uint32_t Bindings[] = { 0 };
+		uint32_t DescriptorTypes[] =
+		{
+			OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER
+		};
+		uint32_t DescriptorFlags[] =
+		{
+			OPENVK_DESCRIPTOR_FLAG_NONE
+		};
+		uint32_t ShaderTypes[] =
+		{
+			OPENVK_SHADER_TYPE_CLOSEST_HIT
+		};
+
+		OpenVkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo;
+		DescriptorSetLayoutCreateInfo.Flags = OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_UPDATE_AFTER_BIND_POOL;
+		DescriptorSetLayoutCreateInfo.BindingCount = ARRAY_SIZE(DescriptorTypes);
+		DescriptorSetLayoutCreateInfo.Bindings = Bindings;
+		DescriptorSetLayoutCreateInfo.DescriptorCounts = DescriptorCounts;
+		DescriptorSetLayoutCreateInfo.DescriptorTypes = DescriptorTypes;
+		DescriptorSetLayoutCreateInfo.DescriptorFlags = DescriptorFlags;
+		DescriptorSetLayoutCreateInfo.ShaderTypes = ShaderTypes;
+		RTR.DescriptorSetLayouts[1] = OpenVkCreateDescriptorSetLayout(&DescriptorSetLayoutCreateInfo);
+
 	}
 
 	{
@@ -321,8 +321,8 @@ void RaytracingInit()
 		LayoutCreateInfo.PushConstantShaderTypes = NULL;
 		LayoutCreateInfo.PushConstantOffsets = NULL;
 		LayoutCreateInfo.PushConstantSizes = NULL;
-		LayoutCreateInfo.DescriptorSetLayoutCount = 1;
-		LayoutCreateInfo.DescriptorSetLayouts = &RTR.DescriptorSetLayout;
+		LayoutCreateInfo.DescriptorSetLayoutCount = 2;
+		LayoutCreateInfo.DescriptorSetLayouts = RTR.DescriptorSetLayouts;
 		RTR.PipelineLayout = OpenVkCreatePipelineLayout(&LayoutCreateInfo);
 	}
 
@@ -353,9 +353,10 @@ void RaytracingInit()
 		OPENVK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE,
 		OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
 		OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-		OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER
+		OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER,
+		OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER
 	};
-	uint32_t DescriptorCounts[] = { 1, 1, 1, RAYTRACING_MAX_TEXTURE_COUNT }; //plus one storage image?
+	uint32_t DescriptorCounts[] = { 1, 1, 1, RAYTRACING_MAX_TEXTURE_COUNT, RAYTRACING_MAX_MODEL_COUNT }; //plus one storage image?
 	RTR.DescriptorPool = OpenVkCreateDescriptorPool(OPENVK_DESCRIPTOR_POOL_UPDATABLE, ARRAY_SIZE(DescriptorTypes), DescriptorTypes, DescriptorCounts);
 
 	{
@@ -367,8 +368,7 @@ void RaytracingInit()
 
 		uint32_t DescriptorCounts[] = { 1, 1 };
 		uint32_t Bindings[] = { 1, 2 };
-		size_t BufferSizes[] = { sizeof(RaytracingUniformBufferObject) };
-		RtCreateDescriptorSet(false, ARRAY_SIZE(DescriptorTypes), DescriptorTypes, DescriptorCounts, BufferSizes, Bindings);
+		RtCreateDescriptorSet(false, ARRAY_SIZE(DescriptorTypes), DescriptorTypes, DescriptorCounts, Bindings);
 	}
 	
 
@@ -404,11 +404,13 @@ bool RaytracingAddTexture(uint32_t SceneTexture)
 		OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER
 	};
 
+//	if (SceneTextures.Size != RTR.Images.Size - 1)
+//		exit(3666);
+
 	uint32_t DescriptorCounts[] = { 1, 1, RTR.Images.Size - 1 };
-	size_t BufferSizes[] = { sizeof(RaytracingUniformBufferObject) };
 	uint32_t Bindings[] = { 1, 2, 3 };
 
-	RtCreateDescriptorSet(true, ARRAY_SIZE(DescriptorTypes), DescriptorTypes, DescriptorCounts, BufferSizes, Bindings);
+	RtCreateDescriptorSet(true, ARRAY_SIZE(DescriptorTypes), DescriptorTypes, DescriptorCounts, Bindings);
 
 	return true;
 }
@@ -486,7 +488,7 @@ uint32_t RaytracingAddMesh(uint32_t SceneMeshIndex)
 			return OPENVK_ERROR;
 		}
 
-		uint32_t Instance = OpenVkCreateInstance(ModelOVK, OpenVkFalse, *BottomLevelAS);
+		uint32_t Instance = OpenVkCreateInstance(ModelOVK, OpenVkTrue, *BottomLevelAS);
 
 		DynamicArrayPush(&RTR.Instances, &Instance);
 
@@ -515,6 +517,7 @@ void RaytracingRestBuild()
 {
 	RTR.CurrentBuildHash = 0;
 	DynamicArrayClear(&RTR.Meshes);
+	DynamicArrayClear(&RTR.DescriptionBuffers);
 }
 
 void RaytracingAddEntityMesh(uint32_t MeshIndex, mat4* Transform, SceneMesh* Mesh)
@@ -553,6 +556,14 @@ void RaytracingAddEntityMesh(uint32_t MeshIndex, mat4* Transform, SceneMesh* Mes
 	}
 
 	DynamicArrayPush(&RTR.Meshes, &RTMesh);
+
+	RaytracingBufferDescription BufferDescription;
+	BufferDescription.vertexAddress = VkGetBufferAddress(Mesh->VertexBuffer);
+	BufferDescription.indexAddress = VkGetBufferAddress(Mesh->IndexBuffer);
+	DynamicArrayPush(&RTR.DescriptionBuffers, &BufferDescription);
+
+	
+
 //	printf("Push it\n");
 }
 
@@ -595,6 +606,14 @@ void RaytracingBuild()
 		return;
 	}
 
+	{
+		if (RTR.DescriptionBuffer != OPENVK_ERROR) OpenVkDestroyDynamicBuffer(RTR.DescriptionBuffer);
+		RTR.DescriptionBuffer = OpenVkCreateStorageBuffer(RTR.DescriptionBuffers.Size * sizeof(RaytracingBufferDescription));
+		
+		RtCreateDescriptorSetBufferDescriptions(RTR.DescriptionBuffer);
+
+	}
+
 //	RtUpdateTLAS = false;
 
 	if (RTR.TopLevelAS == OPENVK_ERROR)
@@ -621,253 +640,10 @@ void RaytracingBuild()
 	size_t BufferSizes[] = { sizeof(RaytracingUniformBufferObject) };
 	uint32_t Bindings[] = { 0, 1, 2 };
 
-	RtCreateDescriptorSet(true, ARRAY_SIZE(DescriptorTypes), DescriptorTypes, DescriptorCounts, BufferSizes, Bindings);
+	RtCreateDescriptorSet(true, ARRAY_SIZE(DescriptorTypes), DescriptorTypes, DescriptorCounts, Bindings);
 }
 
-/*
-//FIX - Make sure to free some mem again at some point
-void RaytracingUpdateAssets()
-{
-//	OpenVkDeviceWaitIdle();
 
-	bool Update = true;
-
-	if (RTR.ImageCount <= SceneTextures.Size)
-	{
-		Update = true;
-
-		RTR.ImageCount = SceneTextures.Size + 32;
-
-		RTR.ImageLayouts = (uint32_t*)realloc(RTR.ImageLayouts, RTR.ImageCount * sizeof(uint32_t));
-		RTR.Images = (uint32_t*)realloc(RTR.Images, RTR.ImageCount * sizeof(uint32_t));
-		RTR.ImageTypes = (uint32_t*)realloc(RTR.ImageTypes, RTR.ImageCount * sizeof(uint32_t));
-		RTR.ImageSampler = (uint32_t*)realloc(RTR.ImageSampler, RTR.ImageCount * sizeof(uint32_t));
-	}
-
-	RTR.GeometryCount = 0;
-	for (uint32_t i = 0; i < EntityCount; i++)
-	{
-		if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
-		{
-			SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
-			if (Mesh != NULL && Mesh->MeshCount > 0)
-				RTR.GeometryCount++;
-		}
-	}
-
-	if (RTR.GeometryAllocatedCount <= RTR.GeometryCount)
-	{
-		Update = true;
-
-		RTR.GeometryAllocatedCount			+= RTR.GeometryCount + 32;
-		RTR.InstanceAllocatedCount			+= RTR.GeometryCount + 32;
-		RTR.TransformBufferAllocatedCount	+= RTR.GeometryCount + 32;
-		RTR.BottomLevelASAllocatedCount		+= RTR.GeometryCount + 32;
-
-		RTR.Geometry = (uint32_t*)realloc(RTR.Geometry, RTR.GeometryAllocatedCount * sizeof(uint32_t));
-		RTR.Instances = (uint32_t*)realloc(RTR.Instances, RTR.InstanceAllocatedCount * sizeof(uint32_t));
-		RTR.TransformBuffers = (uint32_t*)realloc(RTR.TransformBuffers, RTR.TransformBufferAllocatedCount * sizeof(uint32_t));
-		RTR.BottomLevelAS = (uint32_t*)realloc(RTR.BottomLevelAS, RTR.BottomLevelASAllocatedCount * sizeof(uint32_t));
-
-		memset(&RTR.Geometry[RTR.GeometryCount], OPENVK_ERROR, RTR.GeometryAllocatedCount * sizeof(uint32_t) - RTR.GeometryCount);
-		memset(&RTR.Instances[RTR.InstanceAllocatedCount], OPENVK_ERROR, RTR.InstanceAllocatedCount * sizeof(uint32_t) - RTR.GeometryCount);
-		memset(&RTR.TransformBuffers[RTR.TransformBufferAllocatedCount], OPENVK_ERROR, RTR.TransformBufferAllocatedCount * sizeof(uint32_t) - RTR.GeometryCount);
-		memset(&RTR.BottomLevelAS[RTR.BottomLevelASAllocatedCount], OPENVK_ERROR, RTR.BottomLevelASAllocatedCount * sizeof(uint32_t) - RTR.GeometryCount);
-
-	//	RTR.GeometryAllocatedCount += 32;
-	//	RTR.InstanceAllocatedCount += 32;
-	//	RTR.TransformBufferAllocatedCount += 32;
-	//	RTR.BottomLevelASAllocatedCount += 32;
-	}
-
-	uint32_t VertexBufferCount = 0;
-	uint32_t IndexBufferCount = 0;
-	RtCountBuffer(&VertexBufferCount, &IndexBufferCount);
-	uint32_t TotalBufferCount = VertexBufferCount + IndexBufferCount;
-
-	
-	//FIX - Later add also update is there are more vertex/index buffers than allocated
-	if (Update || RTR.DescriptorPool == OPENVK_ERROR)
-	{
-		OpenVkRuntimeWarning("Hmmmm");
-
-		if (RTR.DescriptorPool != OPENVK_ERROR)
-		{
-		//	OpenVkDeviceWaitIdle();
-		//	OpenVkDestroyDescriptorPool(RTR.DescriptorPool);
-		}
-			
-		else
-			Update = false;
-
-
-
-		RTR.DescriptorPoolBufferCount += SceneMeshes.Size + 8;//+8 so we have somme more storage
-
-	}
-	// we also need to destroy the pool before recreating
-
-	uint32_t DescriptorTypes[] =
-	{
-		OPENVK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE,
-		OPENVK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-		OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-		OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER
-	};
-
-	uint32_t TextureCount = 1;
-
-	RTR.ImageLayouts[0] = OPENVK_IMAGE_LAYOUT_GENERAL_OUTPUT;
-	RTR.Images[0] = RTR.StorageImage;
-	RTR.ImageTypes[0] = OPENVK_IMAGE_TYPE_STORAGE;
-	RTR.ImageSampler[0] = ImageSampler; //Doesn't matter, I guess
-
-	for (uint32_t i = 0; i < SceneTextures.Size; i++)
-	{
-		SceneTextureImage* Texture = (SceneTextureImage*)CMA_GetAt(&SceneTextures, i);
-		if (Texture)
-		{
-			RTR.ImageLayouts[TextureCount] = OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT;
-			RTR.Images[TextureCount] = Texture->TextureImage;
-			RTR.ImageTypes[TextureCount] = OPENVK_IMAGE_TYPE_TEXTURE;
-			RTR.ImageSampler[TextureCount] = Texture->TextureSampler;
-
-		//	OpenVkRuntimeError("PP: Texture: %d, Sampler: %d", Texture->TextureImage, Texture->TextureSampler);
-
-			TextureCount++;
-		}
-	}
-	TextureCount -= 1;
-
-	uint32_t DescriptorCounts[] = { 1, 1, 1, TextureCount };
-
-	uint32_t Bindings[] = { 0, 1, 2, 3 };
-
-//	uint32_t TopLevel[] = { RTR.TopLevelAS };
-
-	//	uint32_t Buffers[] = { RTR.UniformBuffer, RTR.VertexBuffer, RTR.IndexBuffer };
-												// + 1 Uniform Buffer
-	RTR.Buffers = (uint32_t*)malloc((TotalBufferCount + 1) * sizeof(uint32_t));
-
-	RTR.Buffers[0] = RTR.UniformBuffer;
-	RTR.BufferCount = 1;
-	
-	//very inefficent, sort out what needs to be recreated
-	for (uint32_t i = 0; i < RTR.GeometryCount; i++)
-	{
-		if (RTR.TransformBuffers[i] != OPENVK_ERROR)
-			OpenVkDestroyBuffer(RTR.TransformBuffers[i]);
-
-		if (RTR.Geometry[i] != OPENVK_ERROR)
-			OpenVkDestroyRaytracingGeometry(RTR.Geometry[i]);
-		
-		if (RTR.Instances[i] != OPENVK_ERROR)
-			OpenVkDestroyInstance(RTR.Instances[i]);
-
-	}
-
-
-	for (uint32_t i = 0; i < EntityCount; i++)
-	{
-		if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
-		{
-			//	OpenVkRuntimeWarning("Yeah buddy: %d", RTR.InstanceCount);
-
-			SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
-			if (Mesh != NULL && Mesh->MeshCount > 0)
-			{
-				mat4 Model;
-				LoadMat4IdentityP(&Model);
-				Model = ScaleMat4P(&Model, &Entities[i].Scale);
-				Model = RotateXMat4P(&Model, ToRadians(Entities[i].Rotate.x));
-				Model = RotateYMat4P(&Model, ToRadians(Entities[i].Rotate.y));
-				Model = RotateZMat4P(&Model, ToRadians(Entities[i].Rotate.z));
-				Model = TranslateMat4P(&Model, &Entities[i].Translate);
-				OpenVkTransformMatrix ModelOVK;
-				memcpy(&ModelOVK, &Model, sizeof(OpenVkTransformMatrix));
-
-				RTR.TransformBuffers[RTR.TransformBufferCount++] = VkCreateTranformBuffer(ModelOVK);
-
-				uint32_t VertexSize = 0;
-				uint32_t IndexSize = 0;
-				RtCountBufferSize(Mesh, &VertexSize, &IndexSize);
-
-				OpenVkRaytracingGeometryCreateInfo GeometryInfo;
-				GeometryInfo.VertexFormat = OPENVK_FORMAT_RGBA32F;
-				GeometryInfo.VertexSize = sizeof(SceneVertex);
-				GeometryInfo.VertexBufferDynamic = 0;
-				GeometryInfo.VertexCount = VertexSize;
-				GeometryInfo.VertexBuffer = Mesh->VertexBuffer;
-				GeometryInfo.IndexBufferDynamic = 0;
-				GeometryInfo.IndexCount = IndexSize;
-				GeometryInfo.IndexBuffer = Mesh->IndexBuffer == OPENVK_ERROR ? 0 : Mesh->IndexBuffer;
-				GeometryInfo.TranformBuffer = RTR.TransformBuffers[RTR.TransformBufferCount - 1];
-
-				RTR.Geometry[RTR.GeometryCount++] = OpenVkCreateRaytracingGeometry(&GeometryInfo);
-
-				if (RTR.BottomLevelAS[RTR.BottomLevelASCount] == OPENVK_ERROR)
-					RTR.BottomLevelAS[RTR.BottomLevelASCount++] = OpenVkCreateBottomLevelAS(RTR.Geometry[RTR.GeometryCount - 1], OpenVkTrue, NULL);
-				else
-					OpenVkCreateBottomLevelAS(RTR.Geometry[RTR.GeometryCount - 1], OpenVkTrue, &RTR.BottomLevelAS[RTR.BottomLevelASCount]);
-
-				RTR.Instances[RTR.InstanceCount++] = OpenVkCreateInstance(ModelOVK, OpenVkFalse, RTR.BottomLevelAS[RTR.BottomLevelASCount - 1]);
-
-			}
-		}
-	}
-
-	OpenVkRuntimeWarning("Instance Count: %d", RTR.InstanceCount);
-
-	if (RTR.TopLevelAS == OPENVK_ERROR)
-		RTR.TopLevelAS = OpenVkCreateTopLevelAS(RTR.InstanceCount, RTR.Instances, OpenVkTrue, NULL);
-	else
-		OpenVkCreateTopLevelAS(RTR.InstanceCount, RTR.Instances, OpenVkTrue, &RTR.TopLevelAS);
-
-
-	for (uint32_t i = 0; i < SceneMeshes.Size; i++)
-	{
-		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, i);
-		if (Mesh && Mesh->MeshCount > 0)
-		{
-			RTR.Render = true;
-
-		//	RTR.Buffers[RTR.BufferCount++] = Mesh->VertexBuffer;
-		//
-		//	if (Mesh->IndexBuffer != OPENVK_ERROR)
-		//		RTR.Buffers[RTR.BufferCount++] = Mesh->IndexBuffer;
-
-
-		}
-	}
-	
-
-	size_t BufferSizes[] = { sizeof(RaytracingUniformBufferObject) };
-
-	printf("Update: %d\n", Update);
-
-	OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
-	DescriptorSetCreateInfo.DescriptorSetLayout = RTR.DescriptorSetLayout;
-	DescriptorSetCreateInfo.DescriptorPool = RTR.DescriptorPool;
-	DescriptorSetCreateInfo.DescriptorWriteCount = ARRAY_SIZE(DescriptorTypes);
-	DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
-	DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
-	DescriptorSetCreateInfo.Buffers = RTR.Buffers;
-	DescriptorSetCreateInfo.BufferSizes = BufferSizes;
-	DescriptorSetCreateInfo.ImageLayouts = RTR.ImageLayouts;
-	DescriptorSetCreateInfo.Images = RTR.Images;
-	DescriptorSetCreateInfo.ImageTypes = RTR.ImageTypes;
-	DescriptorSetCreateInfo.Sampler = RTR.ImageSampler;
-	DescriptorSetCreateInfo.TopLevelAS = &RTR.TopLevelAS;
-	DescriptorSetCreateInfo.Bindings = Bindings;
-	DescriptorSetCreateInfo.DescriptorSet = NULL;
-	DescriptorSetCreateInfo.VariableDescriptorSetCount = TextureCount;
-	if (RTR.DescriptorSet != OPENVK_ERROR) DescriptorSetCreateInfo.DescriptorSet = &RTR.DescriptorSet;
-	RTR.DescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
-	OpenVkRuntimeInfo("LGTM!", "");
-
-	free(RTR.Buffers);
-}
-*/
 
 
 
@@ -895,10 +671,9 @@ void RaytracingResize()
 	};
 
 	uint32_t DescriptorCounts[] = { 1, 1 };
-	size_t BufferSizes[] = { sizeof(RaytracingUniformBufferObject) };
 	uint32_t Bindings[] = { 1, 2 };
 
-	RtCreateDescriptorSet(true, ARRAY_SIZE(DescriptorTypes), DescriptorTypes, DescriptorCounts, BufferSizes, Bindings);
+	RtCreateDescriptorSet(true, ARRAY_SIZE(DescriptorTypes), DescriptorTypes, DescriptorCounts, Bindings);
 //	RaytracingUpdateAssets();
 }
 
@@ -964,16 +739,20 @@ void RaytracingUpdate()
 		RtUpdateInstances();
 		RTR.LastTransformHash = RTR.CurrentTransformHash;
 	}
+
+	OpenVkUpdateBuffer(RTR.DescriptionBuffers.Size * sizeof(RaytracingBufferDescription), RTR.DescriptionBuffers.Data, RTR.DescriptionBuffer);
+
 	
 	RTR.CurrentTransformHash = 0;
 }
 
 void RaytracingDraw()
 {
-	if (RTR.Render)
+	if (RTR.Render && RTR.DescriptionBuffers.Size > 0)
 	{
 		OpenVkBindPipeline(RTR.RaytracingPipeline, OPENVK_PIPELINE_TYPE_RAYTRACING);
-		OpenVkBindDescriptorSet(RTR.PipelineLayout, 0, RTR.DescriptorSet, OPENVK_PIPELINE_TYPE_RAYTRACING);
+		OpenVkBindDescriptorSet(RTR.PipelineLayout, 0, RTR.DescriptorSets[0], OPENVK_PIPELINE_TYPE_RAYTRACING);
+		OpenVkBindDescriptorSet(RTR.PipelineLayout, 1, RTR.DescriptorSets[1], OPENVK_PIPELINE_TYPE_RAYTRACING);
 
 		OpenVkTraceRaysInfo TraceRaysInfo;
 		TraceRaysInfo.Width = SceneWidth;
@@ -999,7 +778,7 @@ void RaytracingDestroy()
 {
 	CMA_Destroy(&RTR.Geometry);
 	CMA_Destroy(&RTR.BottomLevelAS);
-	DynamicArrayDestroy(&RTR.Buffers);
+	DynamicArrayDestroy(&RTR.DescriptionBuffers);
 	DynamicArrayDestroy(&RTR.Instances);
 	DynamicArrayDestroy(&RTR.ImageLayouts);
 	DynamicArrayDestroy(&RTR.Images);

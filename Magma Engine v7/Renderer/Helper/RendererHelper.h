@@ -12,11 +12,11 @@ bool ForceResizeEvent = false;
 bool FullScreen = false;
 bool ForceFullScreenEvent = false;
 bool RenderGamePreview = false;
-bool GamePerformanceOverlay = true;
+bool GamePerformanceOverlay = false;
 
 uint32_t MsaaSamples = 1;
 
-bool RenderRaytraced = false;
+bool RenderRaytraced = true;
 bool RenderShadows = true;
 bool RenderSSAO = true;
 bool RenderSSAOBlur = true;

@@ -1,6 +1,11 @@
 #version 460
 #extension GL_EXT_ray_tracing : require
 #extension GL_EXT_nonuniform_qualifier : enable
+#extension GL_EXT_scalar_block_layout : enable
+#extension GL_GOOGLE_include_directive : enable
+
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_EXT_buffer_reference2 : require
 
 struct PayLoad
 {
@@ -28,7 +33,33 @@ layout(binding = 2, set = 0) uniform UniformBufferObject
 	uint Time;
 } UBO;
 
+struct ObjDesc
+{
+  uint64_t      txtOffset;             // Texture index offset in the array of textures
+  uint64_t vertexAddress;         // Address of the Vertex buffer
+ 
+	uint64_t indexAddress;          // Address of the index buffer
+  uint64_t materialAddress;       // Address of the material buffer
+
+	uint64_t materialIndexAddress;  // Address of the triangle material index buffer
+	uint64_t Allignment;
+
+	uint64_t bs1;
+	uint64_t bs2;
+};
+
+struct Vertex  // See ObjLoader, copy of VertexObj, could be compressed for device
+{
+  vec4 PosTexX;
+vec4 NormalTexY;
+  vec4 BS;
+};
+
 layout(binding = 3, set = 0) uniform sampler2D textures[];
+
+layout(buffer_reference, scalar) buffer Vertices {Vertex v[]; }; // Positions of an object
+layout(buffer_reference, scalar) buffer Indices {uint i[]; };
+layout(set = 1, binding = 0, scalar) buffer ObjDesc_ { ObjDesc i[]; } objDesc;
 
 
 vec3 Uncharted2Tonemap(vec3 x)
@@ -48,11 +79,32 @@ void main()
 	const vec3 BarycentricCoords = vec3(1.0f - Attribs.x - Attribs.y, Attribs.x, Attribs.y);
 
 
-//	ivec3 index = ivec3(indices.i[3 * gl_PrimitiveID], indices.i[3 * gl_PrimitiveID + 1], indices.i[3 * gl_PrimitiveID + 2]);
+	ObjDesc    objResource = objDesc.i[gl_InstanceCustomIndexEXT];
+	Indices    indices     = Indices(objResource.indexAddress);
+	Vertices   vertices    = Vertices(objResource.vertexAddress);
+
+	// Indices of the triangle
+//	ivec3 ind = indices.i[gl_PrimitiveID];
+	ivec3 ind = ivec3(indices.i[3 * gl_PrimitiveID], indices.i[3 * gl_PrimitiveID + 1], indices.i[3 * gl_PrimitiveID + 2]);
+
+	// Vertex of the triangle
+	Vertex v0 = vertices.v[ind.x];
+	Vertex v1 = vertices.v[ind.y];
+	Vertex v2 = vertices.v[ind.z];
+
+
+
+//	vec3 normal = normalize(v0.Normal.xyz * BarycentricCoords.x + v1.Normal.xyz * BarycentricCoords.y + v2.Normal.xyz * BarycentricCoords.z);
+	// normal = normalize(vec3(normal * gl_WorldToObjectEXT));
+	vec2 texCoord = vec2(v0.PosTexX.w, v0.NormalTexY.w) * BarycentricCoords.x + vec2(v1.PosTexX.w, v1.NormalTexY.w)  * BarycentricCoords.y + vec2(v2.PosTexX.w, v2.NormalTexY.w)  * BarycentricCoords.z;
+
+	float TexIndex = v0.BS.y;// * BarycentricCoords.x + v1.BS.y * BarycentricCoords.y + v2.BS.y * BarycentricCoords.z;
+
 
 	
 //	HitValue.HitValue = vec3(texture(textures[nonuniformEXT(int(BarycentricCoords.z) > 49 ? 49 : int(BarycentricCoords.z) )], BarycentricCoords.xy).xyz);
-	HitValue.HitValue = vec3(BarycentricCoords);
+	HitValue.HitValue = vec3(texture(textures[nonuniformEXT(int(TexIndex))], texCoord.xy).xyz);
+//	HitValue.HitValue = vec3(texCoord.xy, TexIndex);
 	
 	float Exposure = 4.0;
 	float Gamma = 0.9;//1.3
@@ -60,8 +112,8 @@ void main()
 	HitValue.HitValue = Uncharted2Tonemap(HitValue.HitValue * Exposure);
 
 	const vec3 Uncharted2TonemapConst = (1.0f / Uncharted2Tonemap(vec3(11.2f)));
-	HitValue.HitValue = HitValue.HitValue * Uncharted2TonemapConst;	
-	HitValue.HitValue = pow(HitValue.HitValue, vec3(1.0f / Gamma));
+//	HitValue.HitValue = HitValue.HitValue * Uncharted2TonemapConst;	
+//	HitValue.HitValue = pow(HitValue.HitValue, vec3(1.0f / Gamma));
 
 	float Reflect = .3 - ((HitValue.HitValue.x + HitValue.HitValue.y + HitValue.HitValue.z) / 3);
 
@@ -109,11 +161,7 @@ void main()
 }
 
 /*
-struct Vertex
-{
-	vec4 pos;
-	vec4 normal;
-};
+
 
 layout(binding = 0, set = 0) uniform accelerationStructureEXT topLevelAS;
 layout(binding = 2, set = 0) uniform UniformBufferObject 
@@ -127,6 +175,12 @@ layout(binding = 2, set = 0) uniform UniformBufferObject
 layout(binding = 3, set = 0) buffer Vertices { vec4 v[]; } vertices;
 layout(binding = 4, set = 0) buffer Indices { uint i[]; } indices;
 layout(binding = 5, set = 0) uniform sampler2D textures[];
+
+struct Vertex
+{
+	vec4 pos;
+	vec4 normal;
+};
 
 struct VertexUnPacked
 {

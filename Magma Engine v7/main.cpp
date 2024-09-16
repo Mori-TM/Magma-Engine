@@ -197,6 +197,7 @@ Restart:
 	RendererCreate();
 	bool Run = true;
 
+//	Run = false;
 //	exit(3666);
 
 	while (Run)
@@ -216,6 +217,8 @@ Restart:
 		//	exit(3666);
 		FrameCount++;
 	}
+	
+	SceneSave("ExampleScene.lva");
 
 	RendererDestroy();
 	SDL_DestroyWindow(Window);

@@ -432,10 +432,12 @@ void EditorDrawMainMenuBar()
 			EditorBarButtonPressed = true;
 			if (ImGui::MenuItem("Open Scene", "STRG+O"))
 			{
+				ifd::FileDialog::Instance().Open("SceneLoad", "Load Scene", "Magma Scene (*.lva;*.magma;*.mgs;*.mag){.lva,.magma,.mgs,.mag},.*", false);
 			}
 
 			if (ImGui::MenuItem("Save Scene", "STRG+S"))
 			{
+				ifd::FileDialog::Instance().Save("SceneSave", "Save Scene", "Magma Scene (*.lva;*.magma;*.mgs){.lva,.magma,.mgs},.*");
 			}
 
 			if (ImGui::MenuItem("New Scene", "STRG+N"))
@@ -607,6 +609,19 @@ void EngineDrawEditor()
 	{
 		if (ifd::FileDialog::Instance().HasResult())
 			SaveScript((const char*)ifd::FileDialog::Instance().GetResult().u8string().c_str());
+		ifd::FileDialog::Instance().Close();
+	}
+
+	if (ifd::FileDialog::Instance().IsDone("SceneLoad"))
+	{
+		if (ifd::FileDialog::Instance().HasResult())
+			SceneLoad((const char*)ifd::FileDialog::Instance().GetResult().u8string().c_str());
+		ifd::FileDialog::Instance().Close();
+	}
+	if (ifd::FileDialog::Instance().IsDone("SceneSave"))
+	{
+		if (ifd::FileDialog::Instance().HasResult())
+			SceneSave((const char*)ifd::FileDialog::Instance().GetResult().u8string().c_str());
 		ifd::FileDialog::Instance().Close();
 	}
 
@@ -830,6 +845,12 @@ void EngineDrawEditor()
 		//	ImGui::Checkbox("Scene Backface Culling", &SceneBackfaceCulling);
 
 	//	ImGui::Checkbox("Render Shadows", &RenderShadows);
+		if (ImGui::Checkbox("Render Render Depth Pre Pass", &RenderDepthPrePass))
+		{
+			//FIX - create a function for this garbage
+			ForceResizeEvent = true;
+			PushEventSDL(0, 0);
+		}
 		ImGui::Checkbox("Render Raytraced", &RenderRaytraced);
 		ImGui::Checkbox("Render SSAO", &RenderSSAO);
 		if (ImGui::Checkbox("Render SSAO Blur", &RenderSSAOBlur))

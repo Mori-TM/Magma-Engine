@@ -207,6 +207,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Shader\BlurFragment.frag" />
+    <None Include="Data\Shader\DepthPrePassFragment.frag" />
+    <None Include="Data\Shader\DepthPrePassVertex.vert" />
     <None Include="Data\Shader\FXAAFragment.frag" />
     <None Include="Data\Shader\GBufferFragment.frag" />
     <None Include="Data\Shader\GBufferVertex.vert" />

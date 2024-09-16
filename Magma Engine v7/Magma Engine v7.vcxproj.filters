@@ -256,5 +256,11 @@
     <None Include="Data\Shader\Raytracing\Vertex.vert">
       <Filter>Resource Files\Raytracing</Filter>
     </None>
+    <None Include="Data\Shader\DepthPrePassFragment.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\Shader\DepthPrePassVertex.vert">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

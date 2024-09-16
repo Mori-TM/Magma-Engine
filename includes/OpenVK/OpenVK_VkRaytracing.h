@@ -281,6 +281,9 @@ uint64_t VkGetBufferDeviceAddress(VkBuffer Buffer)
 uint64_t VkGetBufferAddress(uint32_t Buffer)
 {
 	VkStaticBufferInfo* BufferAddress = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Buffer);
+	if (BufferAddress == NULL)
+		return 0;
+
 	return VkGetBufferDeviceAddress(BufferAddress->Buffer);
 }
 
@@ -304,7 +307,7 @@ uint32_t VkCreateRaytracingGeometry(OpenVkRaytracingGeometryCreateInfo* Info)
 
 	VertexBufferDeviceAddress.deviceAddress = VkGetBufferDeviceAddress(Vertex->Buffer);
 
-	if (Info->IndexCount != 0)
+	if (Info->IndexCount != 0 && Info->IndexBuffer != OPENVK_ERROR)
 	{
 		VkStaticBufferInfo* Index = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Info->IndexBuffer);
 		if (!Index)	return OpenVkRuntimeError("Failed to find Index Buffer: %d with Count: %d", Info->IndexBuffer, Info->IndexCount);
@@ -312,7 +315,6 @@ uint32_t VkCreateRaytracingGeometry(OpenVkRaytracingGeometryCreateInfo* Info)
 	}
 	else
 	{
-		//works maybe
 		IndexBufferDeviceAddress.deviceAddress = 0;
 		IndexBufferDeviceAddress.hostAddress = NULL;
 	//	IndexCount = VertexCount;
@@ -332,7 +334,7 @@ uint32_t VkCreateRaytracingGeometry(OpenVkRaytracingGeometryCreateInfo* Info)
 	AccelerationStructureGeometry.geometry.triangles.vertexData = VertexBufferDeviceAddress;
 	AccelerationStructureGeometry.geometry.triangles.maxVertex = Info->VertexCount;
 	AccelerationStructureGeometry.geometry.triangles.vertexStride = Info->VertexSize;
-	AccelerationStructureGeometry.geometry.triangles.indexType = VK_INDEX_TYPE_UINT32;
+	AccelerationStructureGeometry.geometry.triangles.indexType = (Info->IndexCount == 0 ? VK_INDEX_TYPE_NONE_KHR : VK_INDEX_TYPE_UINT32);
 	AccelerationStructureGeometry.geometry.triangles.indexData = IndexBufferDeviceAddress;
 	AccelerationStructureGeometry.geometry.triangles.transformData.deviceAddress = 0;
 	AccelerationStructureGeometry.geometry.triangles.transformData.hostAddress = NULL;

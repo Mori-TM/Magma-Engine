@@ -981,4 +981,8 @@ void ImGui_ImplVulkan_Shutdown()
 	vkDestroyPipelineLayout(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.PipelineLayout, NULL);
 	vkDestroyPipeline(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.Pipeline, NULL);
 	vkDestroyPipeline(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.OpaquePipeline, NULL);
+
+	ImGuiIO* IO = &ImGui::GetIO();
+	IO->BackendRendererName = NULL;
+	IO->BackendRendererUserData = NULL;
 }

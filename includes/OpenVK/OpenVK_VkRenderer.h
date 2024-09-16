@@ -397,9 +397,9 @@ uint32_t VkCreateDepthImageAttachment(uint32_t Width, uint32_t Height, uint32_t 
 	return CMA_Push(&VkRenderer.ImageAttachments, &Image);
 }
 
-//This functions sucks, wtf is ResolveAttachments as pointer used for?
-//And how is it ordered with the frame buffer create function
-uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uint32_t* AttachmentFormats, uint32_t* MsaaSamples, uint32_t RenderPassOptions)
+//This functions sucks, wtf is ResolveAttachments as pointer used for? - Not sure but I think this is no longer relevant
+//And how is it ordered with the frame buffer create function - like the user gives it to the function wtf this question?
+uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uint32_t* AttachmentFormats, uint32_t* AttachDesc, uint32_t* MsaaSamples, uint32_t RenderPassOptions)
 {
 	VkRenderer.RenderPasses = (VkRenderPass*)OpenVkRealloc(VkRenderer.RenderPasses, (VkRenderer.RenderPassCount + 1) * sizeof(VkRenderPass));
 
@@ -447,17 +447,18 @@ uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uin
 			Attachment->flags = 0;
 			Attachment->format = VkGetOpenVkFormat(AttachmentFormats[i], NULL);
 			Attachment->samples = Samples;
-			Attachment->loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			Attachment->loadOp = (AttachDesc[i] & OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD);
 			Attachment->storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 			Attachment->stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			Attachment->stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			Attachment->initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			Attachment->initialLayout = (AttachDesc[i] & OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);//VK_IMAGE_LAYOUT_UNDEFINED;
 			Attachment->finalLayout = ((Samples > 1) ? (RenderPassOptions & OPENVK_RENDER_PASS_RESOLVE_ATTACHMENTS ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) : (RenderPassOptions & OPENVK_RENDER_PASS_SAMPLED ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR));
 			ColorAttachmentReferences[ColorAttachmentCount].attachment = AttachmentDescriptionIndex - 1;
 			ColorAttachmentReferences[ColorAttachmentCount].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 			if (RenderPassOptions & OPENVK_RENDER_PASS_RESOLVE_ATTACHMENTS)
-			{			
+			{		
+				//FIX ? - Add AttachmentDescription like load operation load and load operation clear attachment
 				Attachment = &AttachmentDescriptions[AttachmentDescriptionIndex++];
 				ColorAttachmentResolveReferences[ColorAttachmentCount].attachment = (Samples > 1) ? AttachmentDescriptionIndex - 1 : VK_ATTACHMENT_UNUSED;
 				ColorAttachmentResolveReferences[ColorAttachmentCount].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -483,11 +484,11 @@ uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uin
 			Attachment->flags = 0;
 			Attachment->format = AttachmentFormats[i] == OPENVK_FORMAT_DEFAULT ? VkFindDepthFormat() : VkGetOpenVkFormat(AttachmentFormats[i], NULL);
 			Attachment->samples = Samples;
-			Attachment->loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			Attachment->loadOp = (AttachDesc[i] & OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD);
 			Attachment->storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 			Attachment->stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			Attachment->stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			Attachment->initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			Attachment->initialLayout = (AttachDesc[i] & OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);//VK_IMAGE_LAYOUT_UNDEFINED;;
 			Attachment->finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			if (HasColorAttachment)
 			{

@@ -1,6 +1,9 @@
 @echo off
 glslc.exe Data/Shader/OffscreenVertex.vert -o Data/Shader/OffscreenVertex.spv
 
+glslc.exe Data/Shader/DepthPrePassVertex.vert -o Data/Shader/DepthPrePassVertex.spv
+glslc.exe Data/Shader/DepthPrePassFragment.frag -o Data/Shader/DepthPrePassFragment.spv
+
 glslc.exe Data/Shader/SceneVertex.vert -o Data/Shader/SceneVertex.spv
 glslc.exe Data/Shader/SceneFragment.frag -o Data/Shader/SceneFragment.spv
 

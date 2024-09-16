@@ -5,7 +5,8 @@ void CreateShadowRenderPass()
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_DEPTH };
 	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_DEFAULT };
 	uint32_t MsaaSamples[] = { 1 };
-	ShadowRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
+	uint32_t AttachmentDescriptions[] = { OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR };
+	ShadowRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, AttachmentDescriptions, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
 }
 
 void CreateShadowLayout()

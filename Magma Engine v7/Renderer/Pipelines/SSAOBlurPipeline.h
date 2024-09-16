@@ -4,8 +4,9 @@ void CreateSSAOBlurRenderPass()
 
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR };
 	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_R };
+	uint32_t AttachmentDescriptions[] = { OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR };
 	uint32_t MsaaSamples[] = { 1 };
-	SSAOBlurRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
+	SSAOBlurRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, AttachmentDescriptions, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
 }
 
 void CreateSSAOBlurLayout()

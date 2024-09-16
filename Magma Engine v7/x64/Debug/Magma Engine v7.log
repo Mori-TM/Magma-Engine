@@ -1,12 +1,12 @@
 ﻿  main.cpp
 D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(87,10): warning C4129: 'A': unrecognized character escape sequence
-D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(133,50): warning C4100: 'i': unreferenced formal parameter
-D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(171,43): warning C4100: 'i': unreferenced formal parameter
-D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(296,44): warning C4389: '==': signed/unsigned mismatch
-D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(306,19): warning C4456: declaration of 'j' hides previous local declaration
-D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(283,19): message : see declaration of 'j'
-D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(308,32): warning C4456: declaration of 'Element' hides previous local declaration
-D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(287,29): message : see declaration of 'Element'
+D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(135,50): warning C4100: 'i': unreferenced formal parameter
+D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(173,43): warning C4100: 'i': unreferenced formal parameter
+D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(298,44): warning C4389: '==': signed/unsigned mismatch
+D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(308,19): warning C4456: declaration of 'j' hides previous local declaration
+D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(285,19): message : see declaration of 'j'
+D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(310,32): warning C4456: declaration of 'Element' hides previous local declaration
+D:\GitHub\Magma-Engine\includes\MallocSucks\MallocSucks.h(289,29): message : see declaration of 'Element'
 D:\GitHub\Magma-Engine\includes\stb\dxt\stb_dxt.c(30,66): warning C4244: 'return': conversion from 'int' to 'unsigned short', possible loss of data
 D:\GitHub\Magma-Engine\includes\stb\dxt\stb_dxt.c(47,24): warning C4244: '=': conversion from 'int' to 'unsigned char', possible loss of data
 D:\GitHub\Magma-Engine\includes\stb\dxt\stb_dxt.c(48,24): warning C4244: '=': conversion from 'int' to 'unsigned char', possible loss of data
@@ -112,19 +112,19 @@ D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(751,2): warning C5033: 'register
 D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(766,2): warning C5033: 'register' is no longer a supported storage class
 D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(767,2): warning C5033: 'register' is no longer a supported storage class
 D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(768,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1141,2): warning C5033: 'register' is no longer a supported storage class
 D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1142,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1156,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1143,2): warning C5033: 'register' is no longer a supported storage class
 D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1157,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1171,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1158,2): warning C5033: 'register' is no longer a supported storage class
 D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1172,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1260,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1260,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1260,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1293,2): warning C5033: 'register' is no longer a supported storage class
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1293,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1293,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1475,23): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1173,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1261,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1261,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1261,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1294,2): warning C5033: 'register' is no longer a supported storage class
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1294,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1294,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1476,23): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(690,11): warning C4189: 'j': local variable is initialized but not referenced
 D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(913,20): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(1304,32): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
@@ -145,38 +145,38 @@ D:\GitHub\Magma-Engine\includes\Wave\WaveAudio.h(16,10): warning C4189: 'Success
 D:\GitHub\Magma-Engine\includes\Wave\WavePhysics.h(157,84): warning C4100: 'Plane': unreferenced formal parameter
 D:\GitHub\Magma-Engine\includes\Wave\WavePhysics.h(157,61): warning C4100: 'Sphere': unreferenced formal parameter
 D:\GitHub\Magma-Engine\includes\Wave\WavePhysics.h(192,35): warning C4305: 'initializing': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\includes\OpenVK\CMA.h(295,20): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\CMA.h(298,20): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkHelperFunc.h(566,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkHelperFunc.h(573,50): warning C4244: 'argument': conversion from 'VkDeviceSize' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkHelperFunc.h(573,34): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkHelperFunc.h(584,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(339,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(381,84): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(453,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(471,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(616,17): warning C4267: 'return': conversion from 'size_t' to 'OpenVkBool', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(707,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(343,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(350,81): warning C4018: '<': signed/unsigned mismatch
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(367,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(381,81): warning C4018: '<': signed/unsigned mismatch
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(396,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(443,83): warning C4018: '<': signed/unsigned mismatch
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(479,83): warning C4018: '<': signed/unsigned mismatch
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(640,34): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(714,86): warning C4018: '<': signed/unsigned mismatch
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(814,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(971,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1256,29): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1418,39): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1418,72): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1455,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1469,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1662,33): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1670,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1735,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1746,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1890,154): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(348,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(390,84): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(462,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(480,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(639,17): warning C4267: 'return': conversion from 'size_t' to 'OpenVkBool', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(730,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(344,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(351,81): warning C4018: '<': signed/unsigned mismatch
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(368,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(382,81): warning C4018: '<': signed/unsigned mismatch
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(397,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(444,83): warning C4018: '<': signed/unsigned mismatch
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(481,83): warning C4018: '<': signed/unsigned mismatch
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(642,34): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(716,86): warning C4018: '<': signed/unsigned mismatch
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(816,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(973,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1258,29): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1420,39): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1420,72): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1457,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1471,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1664,33): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1672,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1737,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1748,17): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRenderer.h(1892,154): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(228,9): warning C4244: 'return': conversion from 'float' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(445,21): warning C4244: '=': conversion from 'double' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(446,30): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
@@ -610,20 +610,21 @@ D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\GUI.h(318,69): warning C4
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\GUI.h(416,83): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\GUI.h(417,82): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\GUI.h(419,83): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(345,12): warning C4456: declaration of 'DescriptorTypes' hides previous local declaration
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(334,11): message : see declaration of 'DescriptorTypes'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(351,12): warning C4456: declaration of 'DescriptorCounts' hides previous local declaration
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(341,11): message : see declaration of 'DescriptorCounts'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(390,56): warning C4838: conversion from 'size_t' to 'uint32_t' requires a narrowing conversion
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(390,56): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(445,33): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(516,130): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(516,95): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(516,60): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(556,24): warning C4245: 'initializing': conversion from 'int' to 'uint64_t', signed/unsigned mismatch
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(632,56): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(637,107): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(637,56): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(220,23): warning C4245: '=': conversion from 'int' to 'uint64_t', signed/unsigned mismatch
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(223,27): warning C4245: '=': conversion from 'int' to 'uint64_t', signed/unsigned mismatch
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(363,12): warning C4456: declaration of 'DescriptorTypes' hides previous local declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(351,11): message : see declaration of 'DescriptorTypes'
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(369,12): warning C4456: declaration of 'DescriptorCounts' hides previous local declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(359,11): message : see declaration of 'DescriptorCounts'
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(410,56): warning C4838: conversion from 'size_t' to 'uint32_t' requires a narrowing conversion
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(410,56): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(464,33): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(495,29): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(620,56): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(625,107): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(625,56): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(640,9): warning C4189: 'BufferSizes': local variable is initialized but not referenced
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(717,38): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Engine.h(38,24): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Engine.h(46,12): warning C4459: declaration of 'Event' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Helper.h(45,11): message : see declaration of 'Event'
@@ -647,19 +648,19 @@ D:\GitHub\Magma-Engine\Magma Engine v7\Engine\CameraPath.h(90,23): warning C4456
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\CameraPath.h(82,22): message : see declaration of 'Frames'
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\CameraPath.h(110,36): warning C4305: 'argument': truncation from 'double' to 'float'
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\CameraPath.h(111,33): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(254,29): warning C4305: '=': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(403,25): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(416,29): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(451,39): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(451,24): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(637,28): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(665,30): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(799,33): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(816,46): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(860,7): warning C4459: declaration of 'LastPath' hides global declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(256,29): warning C4305: '=': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(410,25): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(423,29): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(458,39): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(458,24): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(644,28): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(672,30): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(806,33): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(823,46): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(867,7): warning C4459: declaration of 'LastPath' hides global declaration
 D:\GitHub\Magma-Engine\includes\Wave\WaveLayer.h(22,6): message : see declaration of 'LastPath'
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(863,18): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(860,7): warning C4101: 'LastPath': unreferenced local variable
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(870,18): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(867,7): warning C4101: 'LastPath': unreferenced local variable
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(99,23): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(34,28): warning C4459: declaration of 'CameraPos' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(6,6): message : see declaration of 'CameraPos'
@@ -724,30 +725,30 @@ D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(366,54): warning C4305:
 D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(367,57): warning C4305: 'argument': truncation from 'double' to 'float'
 D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(373,71): warning C4305: 'argument': truncation from 'double' to 'float'
 D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(373,64): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(461,37): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(515,57): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(463,37): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(517,57): warning C4305: 'argument': truncation from 'double' to 'float'
 D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(427,11): warning C4189: 'IO': local variable is initialized but not referenced
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(738,81): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(739,62): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(740,56): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(829,85): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(830,79): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(857,20): warning C4244: 'initializing': conversion from 'float' to 'int32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(858,70): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(858,65): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(859,94): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(860,110): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(860,100): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(860,90): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(861,88): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(862,41): warning C4244: '=': conversion from 'int32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(541,11): warning C4189: 'IO': local variable is initialized but not referenced
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(8,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(782,81): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(783,62): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(784,56): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(879,85): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(880,79): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(907,20): warning C4244: 'initializing': conversion from 'float' to 'int32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(908,70): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(908,65): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(909,94): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(910,110): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(910,100): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(910,90): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(911,88): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(912,41): warning C4244: '=': conversion from 'int32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Editor\EditorUI.h(543,11): warning C4189: 'IO': local variable is initialized but not referenced
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(9,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(17,10): message : see declaration of 'MsaaSamples'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(40,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(41,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(104,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(104,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(41,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(42,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(105,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\BlurPipeline.h(105,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\DebugPipeline.h(37,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\DebugPipeline.h(38,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\DebugPipeline.h(85,32): warning C4838: conversion from 'OpenVkImageLayouts' to 'uint32_t' requires a narrowing conversion
@@ -757,82 +758,79 @@ D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\DebugPipeline.h(132,34
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\DebugPipeline.h(133,64): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(7,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(17,10): message : see declaration of 'MsaaSamples'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(47,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(48,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(224,25): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(224,33): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(239,70): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(314,28): warning C4305: '=': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(48,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(49,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(225,25): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(225,33): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(240,70): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(315,28): warning C4305: '=': truncation from 'double' to 'float'
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(316,28): warning C4305: '=': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(333,50): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(333,33): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(333,22): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(399,29): warning C4456: declaration of 'Image' hides previous local declaration
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(372,24): message : see declaration of 'Image'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\GBufferPipeline.h(14,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(317,28): warning C4305: '=': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(334,50): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(334,33): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(334,22): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(400,29): warning C4456: declaration of 'Image' hides previous local declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ShadowPipeline.h(373,24): message : see declaration of 'Image'
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\GBufferPipeline.h(15,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(17,10): message : see declaration of 'MsaaSamples'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\GBufferPipeline.h(65,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\GBufferPipeline.h(66,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\GBufferPipeline.h(227,39): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\GBufferPipeline.h(227,27): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(7,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\GBufferPipeline.h(66,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\GBufferPipeline.h(67,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\GBufferPipeline.h(228,39): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\GBufferPipeline.h(228,27): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(8,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(17,10): message : see declaration of 'MsaaSamples'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(35,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(36,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(71,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(99,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(188,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(188,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOBlurPipeline.h(7,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(36,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(37,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(72,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(100,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(189,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOPipeline.h(189,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOBlurPipeline.h(8,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(17,10): message : see declaration of 'MsaaSamples'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOBlurPipeline.h(35,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOBlurPipeline.h(36,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOBlurPipeline.h(91,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOBlurPipeline.h(91,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ScenePipeline.h(7,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOBlurPipeline.h(36,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOBlurPipeline.h(37,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOBlurPipeline.h(92,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSAOBlurPipeline.h(92,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ScenePipeline.h(8,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(17,10): message : see declaration of 'MsaaSamples'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ScenePipeline.h(35,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ScenePipeline.h(36,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ScenePipeline.h(303,39): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ScenePipeline.h(303,27): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSRPipeline.h(7,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ScenePipeline.h(36,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ScenePipeline.h(37,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ScenePipeline.h(304,39): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\ScenePipeline.h(304,27): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSRPipeline.h(8,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(17,10): message : see declaration of 'MsaaSamples'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSRPipeline.h(35,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSRPipeline.h(36,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSRPipeline.h(145,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSRPipeline.h(145,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\FXAAPipeline.h(7,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSRPipeline.h(36,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSRPipeline.h(37,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSRPipeline.h(146,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SSRPipeline.h(146,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\FXAAPipeline.h(8,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(17,10): message : see declaration of 'MsaaSamples'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\FXAAPipeline.h(35,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\FXAAPipeline.h(36,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\FXAAPipeline.h(92,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\FXAAPipeline.h(92,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(5,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\FXAAPipeline.h(36,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\FXAAPipeline.h(37,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\FXAAPipeline.h(93,38): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\FXAAPipeline.h(93,26): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(6,11): warning C4459: declaration of 'MsaaSamples' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(17,10): message : see declaration of 'MsaaSamples'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(33,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(34,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(66,28): warning C4305: '=': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(34,37): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(35,38): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(67,28): warning C4305: '=': truncation from 'double' to 'float'
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(68,28): warning C4305: '=': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(88,41): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(88,28): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(178,5): warning C4477: '_snprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'uint64_t'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(178,5): message : consider using '%lld' in the format string
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(178,5): message : consider using '%Id' in the format string
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(178,5): message : consider using '%I64d' in the format string
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(277,43): warning C4305: '=': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(278,44): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(240,20): warning C4101: 'Img2': unreferenced local variable
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(447,29): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(448,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(452,33): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(453,35): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(471,33): warning C4100: 'TextureImage': unreferenced formal parameter
-D:\GitHub\Magma-Engine\Magma Engine v7\main.cpp(162,11): warning C4456: declaration of 'ViewProj' hides previous local declaration
-D:\GitHub\Magma-Engine\Magma Engine v7\main.cpp(155,10): message : see declaration of 'ViewProj'
-D:\GitHub\Magma-Engine\Magma Engine v7\main.cpp(178,35): warning C4100: 'argv': unreferenced formal parameter
-D:\GitHub\Magma-Engine\Magma Engine v7\main.cpp(178,22): warning C4100: 'argc': unreferenced formal parameter
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(69,28): warning C4305: '=': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(89,41): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(89,28): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(179,5): warning C4477: '_snprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'uint64_t'
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(179,5): message : consider using '%lld' in the format string
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(179,5): message : consider using '%Id' in the format string
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(179,5): message : consider using '%I64d' in the format string
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(229,42): warning C4305: '=': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(230,43): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(372,29): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(373,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(377,33): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(378,35): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(396,33): warning C4100: 'TextureImage': unreferenced formal parameter
+D:\GitHub\Magma-Engine\Magma Engine v7\main.cpp(73,35): warning C4100: 'argv': unreferenced formal parameter
+D:\GitHub\Magma-Engine\Magma Engine v7\main.cpp(73,22): warning C4100: 'argc': unreferenced formal parameter
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\algorithm(3446,24): warning C4244: '=': conversion from 'int' to 'char', possible loss of data
 D:\GitHub\Magma-Engine\includes\ImGui\FileDialog\ImFileDialog.cpp(1309,18): message : see reference to function template instantiation '_OutIt std::transform<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,int(__cdecl *)(int)>(const _InIt,const _InIt,_OutIt,_Fn)' being compiled
           with
@@ -846,14 +844,13 @@ D:\GitHub\Magma-Engine\includes\stb\dxt\stb_dxt.c(641): warning C4702: unreachab
 D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(951): warning C4172: returning address of local variable or temporary: Line
 D:\GitHub\Magma-Engine\includes\Wave\WaveLayer.h(36): warning C4172: returning address of local variable or temporary: Out
 D:\GitHub\Magma-Engine\includes\Wave\WaveLayer.h(48): warning C4172: returning address of local variable or temporary: Out
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(427): warning C4701: potentially uninitialized local variable 'BottomLevelAS' used
-D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(580): warning C4701: potentially uninitialized local variable 'TopLevelAS' used
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(436): warning C4701: potentially uninitialized local variable 'BottomLevelAS' used
+D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(600): warning C4701: potentially uninitialized local variable 'TopLevelAS' used
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(883): warning C4701: potentially uninitialized local variable 'MinX' used
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(896): warning C4701: potentially uninitialized local variable 'MinY' used
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Raytracing\Raytracing.h(574): warning C4706: assignment within conditional expression
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ImageCompression.h(92): warning C4702: unreachable code
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ScriptEngine.h(115): warning C4701: potentially uninitialized local variable 'Key' used
-D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(425): warning C4706: assignment within conditional expression
+D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(350): warning C4706: assignment within conditional expression
 D:\GitHub\Magma-Engine\includes\ImGui\FileDialog\filesystem.cpp(163): warning C4702: unreachable code
 D:\GitHub\Magma-Engine\includes\ImGui\FileDialog\filesystem.cpp(204): warning C4702: unreachable code
 D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(848): warning C4702: unreachable code

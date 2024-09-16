@@ -210,13 +210,14 @@ void RendererCreate()
 //	}
 
 //	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
-	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/Sponza-master/sponza2.obj");
+//	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/Sponza-master/sponza2.obj");
 //	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/TestMesh.obj");
-//		uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
+	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
 		AddEntity(COMPONENT_TYPE_MESH);
 		AddMeshToEntity(SelectedEntity, ModelIndex);
 		
-		ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/TestMesh.obj");
+	//	ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/TestMesh.obj");
+		ModelIndex = AddModel(0, "D:/3D Models/Teapot.obj");
 		uint32_t EntityIndex = AddEntity(COMPONENT_TYPE_MESH);
 		Entities[EntityIndex].Translate = Vec3(0.0, 0.0, 25.0);
 		AddMeshToEntity(SelectedEntity, ModelIndex);

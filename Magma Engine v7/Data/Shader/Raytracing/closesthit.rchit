@@ -80,13 +80,26 @@ void main()
 
 
 	ObjDesc    objResource = objDesc.i[gl_InstanceCustomIndexEXT];
-	Indices    indices     = Indices(objResource.indexAddress);
+	
 	Vertices   vertices    = Vertices(objResource.vertexAddress);
 
 	// Indices of the triangle
 //	ivec3 ind = indices.i[gl_PrimitiveID];
-	ivec3 ind = ivec3(indices.i[3 * gl_PrimitiveID], indices.i[3 * gl_PrimitiveID + 1], indices.i[3 * gl_PrimitiveID + 2]);
 
+	ivec3 ind;
+
+	if (objResource.indexAddress == 0)
+	{
+		ind = ivec3(3 * gl_PrimitiveID, 3 * gl_PrimitiveID + 1, 3 * gl_PrimitiveID + 2);
+	}
+	else
+	{
+		Indices    indices     = Indices(objResource.indexAddress);
+		ind = ivec3(indices.i[3 * gl_PrimitiveID], indices.i[3 * gl_PrimitiveID + 1], indices.i[3 * gl_PrimitiveID + 2]);
+
+	}
+
+	
 	// Vertex of the triangle
 	Vertex v0 = vertices.v[ind.x];
 	Vertex v1 = vertices.v[ind.y];
@@ -109,9 +122,9 @@ void main()
 	float Exposure = 4.0;
 	float Gamma = 0.9;//1.3
 
-	HitValue.HitValue = Uncharted2Tonemap(HitValue.HitValue * Exposure);
-
-	const vec3 Uncharted2TonemapConst = (1.0f / Uncharted2Tonemap(vec3(11.2f)));
+//	HitValue.HitValue = Uncharted2Tonemap(HitValue.HitValue * Exposure);
+//
+//	const vec3 Uncharted2TonemapConst = (1.0f / Uncharted2Tonemap(vec3(11.2f)));
 //	HitValue.HitValue = HitValue.HitValue * Uncharted2TonemapConst;	
 //	HitValue.HitValue = pow(HitValue.HitValue, vec3(1.0f / Gamma));
 

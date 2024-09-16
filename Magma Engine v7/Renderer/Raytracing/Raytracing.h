@@ -450,7 +450,7 @@ void RaytracingAddGeometry(uint32_t SceneMeshIndex)
 		GeometryInfo.VertexBuffer = Mesh->VertexBuffer;
 		GeometryInfo.IndexBufferDynamic = 0;
 		GeometryInfo.IndexCount = IndexSize;
-		GeometryInfo.IndexBuffer = Mesh->IndexBuffer == OPENVK_ERROR ? 0 : Mesh->IndexBuffer;
+		GeometryInfo.IndexBuffer = Mesh->IndexBuffer;
 		GeometryInfo.TranformBuffer = TransformBuffer;
 
 		uint32_t Geometry = OpenVkCreateRaytracingGeometry(&GeometryInfo);
@@ -522,7 +522,7 @@ void RaytracingRestBuild()
 
 void RaytracingAddEntityMesh(uint32_t MeshIndex, mat4* Transform, SceneMesh* Mesh)
 {
-	RTR.CurrentBuildHash += Mesh->IndexBuffer;
+	RTR.CurrentBuildHash += Mesh->IndexBuffer == OPENVK_ERROR ? 0 : Mesh->IndexBuffer;
 	RTR.CurrentBuildHash += Mesh->VertexBuffer;
 	RTR.CurrentBuildHash += Mesh->MeshCount;
 	RTR.CurrentBuildHash += Mesh->Destroyable;
@@ -559,7 +559,7 @@ void RaytracingAddEntityMesh(uint32_t MeshIndex, mat4* Transform, SceneMesh* Mes
 
 	RaytracingBufferDescription BufferDescription;
 	BufferDescription.vertexAddress = VkGetBufferAddress(Mesh->VertexBuffer);
-	BufferDescription.indexAddress = VkGetBufferAddress(Mesh->IndexBuffer);
+	BufferDescription.indexAddress = (Mesh->IndexBuffer == OPENVK_ERROR ? 0 : VkGetBufferAddress(Mesh->IndexBuffer));
 	DynamicArrayPush(&RTR.DescriptionBuffers, &BufferDescription);
 
 	

@@ -40,7 +40,7 @@ vec3 GetNormalFromMap()
 {
 	vec3 Normal = texture(NormalMap, FragTexCoord).xyz;
 
-	if (Normal.x == 1.0 &&	Normal.y == 1.0 &&	Normal.z == 1.0)
+	if (Normal.x >= 0.99999 &&	Normal.y >= 0.99999 &&	Normal.z >= 0.99999)
 		return normalize(FragNormal);
 
 	vec3 tangentNormal = Normal * 2.0 - 1.0;
@@ -61,15 +61,17 @@ vec3 GetNormalFromMap()
 
 void main() 
 {
+	OutAlbedo = texture(AlbedoMap, FragTexCoord) * PushConst.Color;
+	//	OutAlbedo.xyz = PushConst.Color.xyz * PushConst.Color.w +  PushConst.Color.xyz * (1.0 - PushConst.Color.w);
+	//	OutAlbedo.w = 1.0;
+	if (OutAlbedo.w < 0.9)
+		discard;
+
 	vec3 Normal = GetNormalFromMap();//normalize(FragNormal);
 	OutPosition = vec4(FragPosRelToCam.xyz, LinearDepth(gl_FragCoord.z));
 	OutViewNormal = vec4(normalize(FragViewNormal), Normal.x);				//use GetNormalFromMap
 //	float PrevAlpha = OutAlbedo.w;
-	OutAlbedo = texture(AlbedoMap, FragTexCoord) * PushConst.Color;
-//	OutAlbedo.xyz = PushConst.Color.xyz * PushConst.Color.w +  PushConst.Color.xyz * (1.0 - PushConst.Color.w);
-//	OutAlbedo.w = 1.0;
-	if (OutAlbedo.w < 0.9)
-		discard;
+	
 	OutPBR.r = texture(MetallicMap, FragTexCoord).r * PushConst.Metallic;
 	OutPBR.g = texture(RoughnessMap, FragTexCoord).r * PushConst.Roughness;
 	OutPBR.b = texture(OcclusionMap, FragTexCoord).r * PushConst.Occlusion;

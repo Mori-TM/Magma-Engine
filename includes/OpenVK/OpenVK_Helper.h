@@ -79,6 +79,7 @@ typedef uint32_t OpenVkBool;
 
 #define OPENVK_ERROR 0xffffffffui32
 
+//FIX - nameing inconsistencie
 typedef enum
 {
 	OPENVK_VULKAN = 0x1,
@@ -92,6 +93,12 @@ typedef enum
 	OPENVK_ATTACHMENT_COLOR = 0x0,
 	OPENVK_ATTACHMENT_DEPTH = 0x1,
 } OpenVkAttachmentTypes;
+
+typedef enum
+{
+	OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR = 0x1,
+	OPENVK_ATTACHMENT_DESCRIPTION_LOAD_PREV = 0x2,
+} OpenVkAttachmentDescriptions;
 
 typedef enum
 {
@@ -139,6 +146,14 @@ typedef enum
 
 typedef enum
 {
+	OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_NONE = 0x0,
+	OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_UPDATE_AFTER_BIND_POOL = 0x1,
+	OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_PUSH_DESCRIPTOR = 0x2,
+	OPENVK_DESCRIPTOR_SET_LAYOUT_HOST_ONLY_POOL_BIT_VALVE = 0x4,
+} OpenVkDescriptorSetLayoutFlags;
+
+typedef enum
+{
 	OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER = 0x0,
 	OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER = 0x1,
 	OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER = 0x2,
@@ -154,8 +169,8 @@ typedef enum
 	OPENVK_DESCRIPTOR_FLAG_NONE = 0x0,
 	OPENVK_DESCRIPTOR_FLAG_UPDATE_AFTER_BIND = 0x1,
 	OPENVK_DESCRIPTOR_FLAG_UNUSED_WHILE_PENDING = 0x2,
-	OPENVK_DESCRIPTOR_FLAG_PARTIALLY_BOUND_BIT = 0x3,
-	OPENVK_DESCRIPTOR_FLAG_VARIABLE_DESCRIPTOR_COUNT = 0x4,
+	OPENVK_DESCRIPTOR_FLAG_PARTIALLY_BOUND = 0x4,
+	OPENVK_DESCRIPTOR_FLAG_VARIABLE_DESCRIPTOR_COUNT = 0x8,
 } OpenVkDescriptorFlags;
 
 typedef enum
@@ -215,6 +230,7 @@ typedef enum
 	OPENVK_IMAGE_TYPE_TEXTURE = 0x0,
 	OPENVK_IMAGE_TYPE_ATTACHMENT = 0x1,
 	OPENVK_IMAGE_TYPE_STORAGE = 0x2,
+	OPENVK_IMAGE_TYPE_SWAPCHAIN = 0x3,
 } OpenVkImageTypes;
 
 typedef enum
@@ -232,9 +248,10 @@ typedef enum
 	OPENVK_RENDER_PASS_COLOR_ACCESS_READ_AND_WRITE = 0x10,
 } OpenVkRenderPassOptions;
 
-typedef struct
+typedef union
 {
 	float Matrix[3][4];
+	float M[12];
 } OpenVkTransformMatrix;
 
 typedef struct
@@ -299,6 +316,17 @@ typedef struct
 	uint32_t	Width;
 	uint32_t	Height;
 } OpenVkFramebufferCreateInfo;
+
+typedef struct
+{
+	uint32_t	Flags;
+	uint32_t	BindingCount;
+	uint32_t*	Bindings;
+	uint32_t*	DescriptorCounts;
+	uint32_t*	DescriptorTypes;
+	uint32_t*	DescriptorFlags;
+	uint32_t*	ShaderTypes;
+} OpenVkDescriptorSetLayoutCreateInfo;
 
 typedef struct
 {
@@ -395,28 +423,70 @@ OpenVkBool OpenVkRuntimeError(const char* Msg, ...)
 
 void* OpenVkMalloc(size_t Size)
 {
+	if (Size == 0)
+		return NULL;
+
+#ifdef OPENVK_STORE_DEBUG_NAME_IN_RAM
+	void* Mem = malloc(Size + 9);
+	if (Mem == NULL)
+		OpenVkRuntimeError("Failed to allocate Memory! Size: %zu", Size);
+
+	char src = '\0';
+	memcpy(((char*)Mem) + Size, &src, 1);
+	strcpy(((char*)Mem) + Size + 1, "OpenVkM");
+#else
 	void* Mem = malloc(Size);
 	if (Mem == NULL)
-		OpenVkRuntimeError("Failed to allocate Memory!");
+		OpenVkRuntimeError("Failed to allocate Memory! Size: %zu", Size);
+#endif
+	
 
 	return Mem;
 }
 
 void* OpenVkCalloc(size_t Count, size_t Size)
 {
+	if (Size == 0 || Count == 0)
+		return NULL;
+
+#ifdef OPENVK_STORE_DEBUG_NAME_IN_RAM
+	void* Mem = malloc(Size * Count + 9);
+	if (Mem == NULL)
+		OpenVkRuntimeError("Failed to clear allocate Memory! Size: %zu", Size);
+
+	memset(Mem, 0, Size * Count);
+
+	char src = '\0';
+	memcpy(((char*)Mem) + Size, &src, 1);
+	strcpy(((char*)Mem) + Size + 1, "OpenVkC");
+#else
 	void* Mem = calloc(Count, Size);
 	if (Mem == NULL)
-		OpenVkRuntimeError("Failed to clear allocate Memory!");
+		OpenVkRuntimeError("Failed to clear allocate Memory! Size: %zu", Size);
 
+#endif
 	return Mem;
 }
 
 
 void* OpenVkRealloc(void* Data, size_t Size)
 {
-	void* Mem = realloc(Data, Size);
+	if (Size == 0)
+		return NULL;
+
+#ifdef OPENVK_STORE_DEBUG_NAME_IN_RAM
+	void* Mem = realloc(Data, Size + 9);
 	if (Mem == NULL)
-		OpenVkRuntimeError("Failed to reallocate Memory!");
+		OpenVkRuntimeError("Failed to reallocate Memory! Size: %zu", Size);
+
+	char src = '\0';
+	memcpy(((char*)Mem) + Size, &src, 1);
+	strcpy(((char*)Mem) + Size + 1, "OpenVkR");
+#else
+	void* Mem = realloc(Data, Size + 9);
+	if (Mem == NULL)
+		OpenVkRuntimeError("Failed to reallocate Memory! Size: %zu", Size);
+#endif
 
 	return Mem;
 }
@@ -426,7 +496,7 @@ void OpenVkFree(void* Data)
 	if (Data != NULL)
 		free(Data);	
 	else
-		OpenVkRuntimeError("No Memory to free!");
+		OpenVkRuntimeWarning("No Memory to free!");
 }
 
 OpenVkFile OpenVkReadFile(const char* Path)

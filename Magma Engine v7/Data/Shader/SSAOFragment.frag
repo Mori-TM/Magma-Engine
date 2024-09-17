@@ -24,11 +24,11 @@ void main()
 {
 	// Get G-Buffer values
 	vec3 FragPos = texture(SamplerPositionDepth, FragTexCoord).rgb;
-	if (FragPos.z > MAX_SSAO_DIST || FragPos.z < -MAX_SSAO_DIST)
-	{
-		OutColor = 1.0;
-		return;
-	}
+//	if (FragPos.z > MAX_SSAO_DIST || FragPos.z < -MAX_SSAO_DIST)
+//	{
+//		OutColor = 1.0;
+//		return;
+//	}
 
 //	vec3 normal = normalize(texture(SamplerViewNormal, FragTexCoord).rgb * 2.0 - 1.0);
 	vec4 NormalTex = texture(SamplerViewNormal, FragTexCoord);
@@ -53,7 +53,8 @@ void main()
 	// Calculate occlusion value
 	float occlusion = 0.0f;
 	// remove banding
-	const float bias = 0.025f;
+//	const float bias = 0.025f;
+	const float bias = 0.055f;
 	for(int i = 0; i < SSAO_KERNEL_SIZE; i++)
 	{		
 		vec3 samplePos = TBN * UBO.Samples[i].xyz; 

@@ -1,12 +1,12 @@
 void		(*OpenVkDestroyRenderer				)();
 void		(*OpenVkDeviceWaitIdle				)();
 void		(*OpenVkRecreateSwapChain			)(uint32_t* Width, uint32_t* Height);
-void		(*OpenVkDestroySwapChainRelatives		)();
-uint32_t	(*OpenVkCreateRenderPass			)(uint32_t AttachmentCount, uint32_t* Attachments, uint32_t* AttachmentFormats, uint32_t* MsaaSamples, uint32_t RenderPassOptions);
+void		(*OpenVkDestroySwapChainRelatives	)();
+uint32_t	(*OpenVkCreateRenderPass			)(uint32_t AttachmentCount, uint32_t* Attachments, uint32_t* AttachmentFormats, uint32_t* AttachmentDescriptions, uint32_t* MsaaSamples, uint32_t RenderPassOptions);
 uint32_t	(*OpenVkCreateGraphicsPipeline		)(OpenVkGraphicsPipelineCreateInfo* Info);
 uint32_t	(*OpenVkCreatePipelineLayout		)(OpenVkPipelineLayoutCreateInfo* Info);
 uint32_t	(*OpenVkCreateFramebuffer			)(OpenVkFramebufferCreateInfo* Info);
-uint32_t	(*OpenVkCreateDescriptorSetLayout	)(uint32_t BindingCount, uint32_t* Bindings, uint32_t* DescriptorCounts, uint32_t* DescriptorTypes, uint32_t* DescriptorFlags, uint32_t* ShaderTypes);
+uint32_t	(*OpenVkCreateDescriptorSetLayout	)(OpenVkDescriptorSetLayoutCreateInfo* Info);
 uint32_t	(*OpenVkCreateDescriptorPool		)(uint32_t DescriptorPoolType, uint32_t PoolSizeCount, uint32_t* DescriptorTypes, uint32_t* DescriptorCounts);
 OpenVkBool	(*OpenVkFreeDescriptorSet			)(uint32_t DescriptorPool, uint32_t DescriptorSet);
 OpenVkBool	(*OpenVkDestroyDescriptorPool		)(uint32_t DescriptorPool);
@@ -19,7 +19,7 @@ void		(*OpenVkEndRenderPass				)();
 uint32_t	(*OpenVkCreateTexture				)(OpenVkTextureCreateInfo* Info);
 uint32_t	(*OpenVkCreateStorageImage			)(uint32_t Width, uint32_t Height, uint32_t Format);
 void		(*OpenVkDestroyImage				)(uint32_t InImage);
-OpenVkBool	(*OpenVkCopyImage					)(uint32_t Width, uint32_t Height, uint32_t Src, uint32_t Dst);
+OpenVkBool	(*OpenVkCopyImage					)(uint32_t Width, uint32_t Height, uint32_t SrcType, uint32_t Src, uint32_t DstType, uint32_t Dst, OpenVkBool DuringRendering);
 uint32_t	(*OpenVkCreateImageSampler			)(uint32_t Filter, uint32_t AddressMode);
 void		(*OpenVkDestroySampler				)(uint32_t Sampler);
 uint32_t	(*OpenVkCreateColorImageAttachment	)(uint32_t Width, uint32_t Height, uint32_t MsaaSamples, OpenVkBool Sampled, uint32_t Format);
@@ -49,10 +49,12 @@ void		(*OpenVkPushConstant				)(uint32_t PipelineLayout, uint32_t ShaderType, ui
 //Raytracing
 uint32_t	(*OpenVkCreateTranformBuffer		)(OpenVkTransformMatrix Matrix);
 uint32_t	(*OpenVkCreateRaytracingGeometry	)(OpenVkRaytracingGeometryCreateInfo* Info);
-uint32_t	(*OpenVkCreateBottomLevelAS			)(uint32_t InGeometry, OpenVkBool AllowUpdate, uint32_t* OldBottomLevelAS);
+void		(*OpenVkDestroyRaytracingGeometry	)(uint32_t Geometry);
+uint32_t	(*OpenVkCreateBottomLevelAS			)(uint32_t GeometryCount, uint32_t* InGeometry, OpenVkBool AllowUpdate, uint32_t* OldBottomLevelAS);
 uint32_t	(*OpenVkCreateInstance				)(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS);
+void		(*OpenVkDestroyInstance				)(uint32_t Instance);
 OpenVkBool	(*OpenVkUpdateInstance				)(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS, uint32_t Instance);
-OpenVkBool	(*OpenVkCreateTopLevelAS			)(uint32_t InstanceCount, uint32_t* Instances, OpenVkBool AllowUpdate, uint32_t* OldTopLevelAS);
+OpenVkBool	(*OpenVkCreateTopLevelAS			)(uint32_t InstanceCount, uint32_t* Instances, uint32_t MaxPrimitiveCount, OpenVkBool AllowUpdate, uint32_t* OldTopLevelAS);
 uint32_t 	(*OpenVkCreateRaytracingPipeline	)(uint32_t MaxPipelineRayRecursionDepth, uint32_t PipelineLayout, uint32_t ShaderCount, uint32_t* ShaderTypes, OpenVkFile* Shader);
 uint32_t*	(*OpenVkCreateShaderBindingTable	)(uint32_t Pipeline, uint32_t ShaderCount, uint32_t* HandleCount);
 OpenVkBool	(*OpenVkTraceRays					)(OpenVkTraceRaysInfo* Info);
@@ -119,8 +121,11 @@ uint32_t OpenVkCreateRenderer(uint32_t RendererFlags, const char** (*GetExtensio
 		{
 			OpenVkCreateTranformBuffer = VkCreateTranformBuffer;
 			OpenVkCreateRaytracingGeometry = VkCreateRaytracingGeometry;
+			OpenVkDestroyRaytracingGeometry = VkDestroyRaytracingGeometry;
 			OpenVkCreateBottomLevelAS = VkCreateBottomLevelAS;
+			//FIX - this naming is kinda confusing
 			OpenVkCreateInstance = VkCreateInstance;
+			OpenVkDestroyInstance = VkDestroyInstance;
 			OpenVkUpdateInstance = VkUpdateInstance;
 			OpenVkCreateTopLevelAS = VkCreateTopLevelAS;
 			OpenVkCreateRaytracingPipeline = VkCreateRaytracingPipeline;
@@ -187,9 +192,7 @@ uint32_t OpenVkCreateRenderer(uint32_t RendererFlags, const char** (*GetExtensio
 		return OpenVkRuntimeError("OpenGL not supported");
 	//	return GLCreateRenderer();
 	}
-	else
-	{
-		OpenVkRuntimeInfo("Renderer: ", "None");
-		return OpenVkRuntimeError("No valid rendering backend selected");
-	}
+
+	OpenVkRuntimeInfo("Renderer: ", "None");
+	return OpenVkRuntimeError("No valid rendering backend selected");
 }

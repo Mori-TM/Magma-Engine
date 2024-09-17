@@ -4,8 +4,9 @@ void CreateFXAARenderPass()
 
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR };
 	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_RGBA };
+	uint32_t AttachmentDescriptions[] = { OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR };
 	uint32_t MsaaSamples[] = { 1 };
-	FXAARenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
+	FXAARenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, AttachmentDescriptions, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
 }
 
 void CreateFXAALayout()
@@ -109,8 +110,15 @@ void FXAADraw()
 		OpenVkBindPipeline(FXAAPipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
 		uint32_t DescriptorSet;
-		if (RenderSSR)	DescriptorSet = SSROutputDescriptorSet;
-		else			DescriptorSet = SceneOutputDescriptorSet;
+		if (RenderRaytraced)
+		{
+			DescriptorSet = SceneOutputDescriptorSet;
+		}
+		else
+		{
+			if (RenderSSR)	DescriptorSet = SSROutputDescriptorSet;
+			else			DescriptorSet = SceneOutputDescriptorSet;
+		}
 
 		OpenVkBindDescriptorSet(FXAALayout, 0, DescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 

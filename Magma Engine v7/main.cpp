@@ -12,6 +12,18 @@
 #include <chrono>
 #include <condition_variable>
 
+#define MAGMA_ENGINE_TRACK_MEMORY
+#define CMA_STORE_DEBUG_NAME_IN_RAM
+#define OPENVK_STORE_DEBUG_NAME_IN_RAM
+
+#ifdef MAGMA_ENGINE_TRACK_MEMORY
+#include <MallocSucks/MallocSucks.h>
+#define malloc s_malloc
+#define calloc s_calloc
+#define realloc s_realloc
+#define free s_free
+#endif
+
 extern "C"
 {
 #include <lua/lua.h>
@@ -30,7 +42,7 @@ extern "C"
 #include <ImGui/imgui_draw.cpp>
 #include <ImGui/imgui_widgets.cpp>
 #include <ImGui/imgui_demo.cpp>
-#include <ImGui/imgui_impl_sdl.cpp>
+#include <ImGui/imgui_impl_sdl2.cpp>
 #include <ImGui/imgui_impl_vulkan_but_better.h>
 
 #include <assimp/Importer.hpp>
@@ -49,114 +61,42 @@ extern "C"
 #include <Wave/WaveLayer.h>
 #include <Wave/WavePhysics.h>
 
-#include "Md2Loader.h"
-
+#include <Md2Loader/Md2Loader.h>
 #include <OpenVK/OpenVK.h>
+
 #include "Helper.h"
 
 #include <ImGui/FileDialog/ImFileDialog.cpp>
 
 #include "Renderer/Renderer.h"
 
-static std::atomic<bool> Run = true;
-static std::atomic<bool> Init = false;
-
-void RenderThread()
-{
-Restart:
-#ifdef _WIN32
-	system("GLSLCompiler.bat");
-#endif
-#ifdef __linux__
-	system("clear");
-	system("./GLSLCompiler.sh");
-#endif
-	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_TIMER);
-	Window = SDL_CreateWindow("Magma Engine v7 ImGui " IMGUI_VERSION, 0, 0, WindowWidth, WindowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_VULKAN | SDL_WINDOW_BORDERLESS);
-	SDL_SetWindowMinimumSize(Window, 800, 540);
-	SDL_GetWindowSize(Window, (int*)&WindowWidth, (int*)&WindowHeight);
-	SDL_SetWindowPosition(Window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-#ifdef _WIN32
-	SDL_SysWMinfo WmInfo;
-	SDL_VERSION(&WmInfo.version);
-	SDL_GetWindowWMInfo(Window, &WmInfo);
-	WaveHwnd = WmInfo.info.win.window;
-#endif	
-	
-	CreateRenderer();
-	Init = true;
-
-	while (Run)
-	{
-		if (RestartEngine)
-			Run = false;
-
-		while (SDL_PollEvent(&Event))
-		{
-			RendererEvent();
-
-			if (Event.type == SDL_QUIT)
-				Run = false;
-		}
-		
-		RendererRender();
-		FrameCount++;
-	}
-
-	DestroyRenderer();
-	SDL_DestroyWindow(Window);
-	SDL_Quit();
-	printf("%f\n", WaveGetUsedMemory() * 0.000001);
-
-	if (RestartEngine)
-	{
-		RestartEngine = false;
-		Run = true;
-		goto Restart;
-	}
-}
-
-void CullingThread()
-{
-	auto lastTime = std::chrono::steady_clock::now();
-	double frameTime = 1.0 / 60.0;
-
-	while (Run)
-	{
-		if (Init)
-		{
-			
-
-			auto currentTime = std::chrono::steady_clock::now();
-			auto deltaTime = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - lastTime).count();
-
-			if (deltaTime >= frameTime) {
-				Mutex.lock();
-				mat4 ViewProj = MultiplyMat4P(&GBufferVertexUBO.Projection, &GBufferVertexUBO.View);
-				Mutex.unlock();
-
-				RunFrustumCulling(ViewProj, RENDER_TYPE_DEFAULT);
-				for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
-				{
-					Mutex.lock();
-					mat4 ViewProj = CullingCascades[i];
-					Mutex.unlock();
-					RunFrustumCulling(ViewProj, i + 1);
-				}
-				lastTime = currentTime;
-			}
-
-			// sleep for a short duration to avoid using too much CPU
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		}
-		
-	}
-//	while (Run)
-//		RunFrustumCulling();
-}
-
 int32_t main(int32_t argc, char** argv)
 {
+Restart:
+#ifdef MAGMA_ENGINE_TRACK_MEMORY
+	s_init();
+#endif
+	/*
+	DynamicArray Arr = DynamicArrayCreate(sizeof(SceneTextureImage), "Texture Images");
+
+	for (uint32_t i = 0; i < 3245; i++)
+	{
+		SceneTextureImage Data;
+		Data.Format = i;
+
+		DynamicArrayPush(&Data, &Arr);
+	}
+
+	for (uint32_t i = 0; i < 453; i++)
+	{
+		DynamicArrayPop(0, &Arr);
+	}
+
+	DynamicArrayDestroy(&Arr);
+
+	return 0;
+	*/
+
 	/*
 	int32_t Width = 0;;
 	int32_t Height = 0;
@@ -229,17 +169,73 @@ int32_t main(int32_t argc, char** argv)
 //	printf("%s\n%s\n%s\n", s1, s2, s3);
 //	return 0;
 	
-//	std::future Rendering = std::async(std::launch::async, RenderThread);
-//	std::future Culling = std::async(std::launch::async, CullingThread);
-//
-//	Rendering.wait();
-//	Culling.wait();
-//	std::thread t1(RenderThread);
-//	std::thread t2(CullingThread);
+#ifdef _WIN32
+	system("GLSLCompiler.bat");
+#endif
+#ifdef __linux__
+	system("clear");
+	system("./GLSLCompiler.sh");
+#endif
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_TIMER);
+	Window = SDL_CreateWindow("Magma Engine v7 ImGui " IMGUI_VERSION, 0, 0, WindowWidth, WindowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_VULKAN | SDL_WINDOW_BORDERLESS);
+	SDL_SetWindowMinimumSize(Window, 800, 540);
+	SDL_GetWindowSize(Window, (int*)&WindowWidth, (int*)&WindowHeight);
+	SDL_SetWindowPosition(Window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+#ifdef _WIN32
+	SDL_SysWMinfo WmInfo;
+	SDL_VERSION(&WmInfo.version);
+	SDL_GetWindowWMInfo(Window, &WmInfo);
+	WaveHwnd = WmInfo.info.win.window;
+#endif	
 
-	RenderThread();
-//	t1.join();
-//	t2.join();
+	if (RenderGamePreview)
+	{
+		SceneWidth = WindowWidth;
+		SceneHeight = WindowHeight;
+	}
+
+	RendererCreate();
+	bool Run = true;
+
+//	Run = false;
+//	exit(3666);
+
+	while (Run)
+	{
+		if (RestartEngine)
+			Run = false;
+
+		while (SDL_PollEvent(&Event))
+		{
+			RendererEvent();
+
+			if (Event.type == SDL_QUIT)
+				Run = false;
+		}
+
+		RendererRun();
+		//	exit(3666);
+		FrameCount++;
+	}
+	
+	SceneSave("ExampleScene.lva");
+
+	RendererDestroy();
+	SDL_DestroyWindow(Window);
+	SDL_Quit();
+	printf("%f\n", WaveGetUsedMemory() * 0.000001);
+
+#ifdef MAGMA_ENGINE_TRACK_MEMORY
+	s_checkForLeaks();
+	s_destroy();
+#endif
+
+	if (RestartEngine)
+	{
+		RestartEngine = false;
+		Run = true;
+		goto Restart;
+	}
 
 	return 0;
 }

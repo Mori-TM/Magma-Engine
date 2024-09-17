@@ -1,8 +1,20 @@
 typedef struct
 {
-	vec3 Pos;
-	vec2 TexCoord;
-	vec3 Normal;
+	float VertexOffset;//Used for Indices offset
+	float TextureIndex;
+	float Unused0;
+	float Unused1;
+} SceneVertexExtData;
+
+typedef struct
+{
+	vec4 PosTexX;
+	vec4 NormalTexY;
+	SceneVertexExtData Data;
+
+//	vec3 Pos;
+//	vec2 TexCoord;
+//	vec3 Normal;
 } SceneVertex;
 
 typedef struct
@@ -127,7 +139,8 @@ typedef struct
 	bool Destroyable;
 
 	uint32_t VertexBuffer;
-	uint32_t IndexBuffer;
+	uint32_t IndexBuffer; //if OPENVK_ERROR then not used
+	uint32_t BottomLevelAS;//Only for Raytracing
 	SceneMeshData* MeshData;
 } SceneMesh;
 

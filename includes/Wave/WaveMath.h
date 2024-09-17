@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 //For cross platform cpu define WAVE_CROSS_PLATFORM
-//Amd platform untested
+//Arm platform untested
 
 //#define WAVE_CROSS_PLATFORM
 
@@ -859,6 +859,7 @@ typedef union
 {
 	Wave128 Fast[4];
 	float m[4][4];
+	float m1D[16];
 	vec4 m4[4];
 } mat4;
 

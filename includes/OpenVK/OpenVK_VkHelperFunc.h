@@ -86,8 +86,9 @@ typedef struct
 	uint32_t PipelineLayoutCount;
 	VkPipelineLayout* PipelineLayouts;
 
-	uint32_t PipelineCount;
-	VkPipeline* Pipelines;
+//	uint32_t PipelineCount;
+//	VkPipeline* Pipelines;
+	CMA_MemoryZone Pipelines;
 
 	uint32_t FramebufferCount;
 	VkFramebufferInfo* Framebuffers;
@@ -360,6 +361,42 @@ uint32_t VkFindMemoryType(uint32_t TypeFilter, VkMemoryPropertyFlags Properties)
 			return i;
 
 	return OpenVkRuntimeError("Failed To find a Suitable Memory Type");
+}
+
+OpenVkBool VkCheckDeviceExtensionSupport(uint32_t RequiredExtensionCount, const char** RequiredExtensions)
+{
+	uint32_t ExtensionCount = 0;
+	vkEnumerateDeviceExtensionProperties(VkRenderer.PhysicalDevice, NULL, &ExtensionCount, NULL);
+
+	VkExtensionProperties* AvailableExtensions = (VkExtensionProperties*)OpenVkMalloc(ExtensionCount * sizeof(VkExtensionProperties));
+	vkEnumerateDeviceExtensionProperties(VkRenderer.PhysicalDevice, NULL, &ExtensionCount, AvailableExtensions);
+
+//	OpenVkRuntimeInfo("Available Device Extensions:\n");
+	for (uint32_t i = 0; i < ExtensionCount; i++)
+	{
+		OpenVkRuntimeInfo("Available Device Extension:", AvailableExtensions[i].extensionName);
+	}
+
+	for (uint32_t i = 0; i < RequiredExtensionCount; i++)
+	{
+		OpenVkBool Found = OpenVkFalse;
+		for (uint32_t j = 0; j < ExtensionCount; j++)
+		{
+			if (strcmp(RequiredExtensions[i], AvailableExtensions[j].extensionName) == 0)
+			{
+				Found = OpenVkTrue;
+				break;
+			}
+		}
+		if (Found == OpenVkFalse)
+		{
+			free(AvailableExtensions);
+			return OpenVkRuntimeError("Required Extension %s, is not supported by device!", RequiredExtensions[i]);
+		}
+	}
+
+	free(AvailableExtensions);
+	return OpenVkTrue;
 }
 
 VkCommandBuffer VkBeginSingleTimeCommands()
@@ -701,6 +738,20 @@ VkShaderStageFlags VkGetOpenVkShader(uint32_t Shader)
 	return StageFlags;
 }
 
+VkDescriptorSetLayoutCreateFlags VkGetOpenVkDescriptorSetLayoutFlags(uint32_t DescriptorSetLayoutFlags)
+{
+	if (DescriptorSetLayoutFlags == 0)
+		return 0;
+
+	VkDescriptorSetLayoutCreateFlags Flags = 0;
+	if (DescriptorSetLayoutFlags & OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_UPDATE_AFTER_BIND_POOL)	Flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
+	if (DescriptorSetLayoutFlags & OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_PUSH_DESCRIPTOR)			Flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR;
+	if (DescriptorSetLayoutFlags & OPENVK_DESCRIPTOR_SET_LAYOUT_HOST_ONLY_POOL_BIT_VALVE)		Flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_HOST_ONLY_POOL_BIT_VALVE;
+
+	return Flags;
+}
+
+
 VkDescriptorType VkGetOpenVkDescriptorType(uint32_t DescriptorType)
 {
 	switch (DescriptorType)
@@ -726,6 +777,8 @@ VkDescriptorType VkGetOpenVkDescriptorType(uint32_t DescriptorType)
 		break;
 
 	case OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+	case OPENVK_DESCRIPTOR_TYPE_VERTEX_BUFFER:
+	case OPENVK_DESCRIPTOR_TYPE_INDEX_BUFFER:
 		return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		break;
 
@@ -918,6 +971,8 @@ void VkSetImageLayout(VkCommandBuffer CommandBuffer, VkImage Image, VkImageLayou
 	VkPipelineStageFlags SourceStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 	VkPipelineStageFlags DestinationStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
+	/*
+
 		 if (OldImageLayout == VK_IMAGE_LAYOUT_UNDEFINED)						SourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 	else if (OldImageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)			SourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 	else if (OldImageLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)		SourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -929,6 +984,47 @@ void VkSetImageLayout(VkCommandBuffer CommandBuffer, VkImage Image, VkImageLayou
 	else if (NewImageLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)		DestinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	else if (NewImageLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)DestinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 	else if (NewImageLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)		DestinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	*/
+
+	switch (OldImageLayout) 
+	{
+	case VK_IMAGE_LAYOUT_UNDEFINED:
+		SourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+		SourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		SourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+		SourceStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+		SourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		break;
+	default:
+		break;
+	}
+
+	switch (NewImageLayout) 
+	{
+	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+		DestinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		DestinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+		DestinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		break;
+	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+		DestinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		break;
+	default:
+		break;
+	}
 
 	vkCmdPipelineBarrier(
 		CommandBuffer,
@@ -969,7 +1065,11 @@ void VkGenerateMipmaps(VkImage Image, VkFormat ImageFormat, int32_t TextureWidth
 	VkFormatProperties FormatProperties;
 	vkGetPhysicalDeviceFormatProperties(VkRenderer.PhysicalDevice, ImageFormat, &FormatProperties);
 	if (!(FormatProperties.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
+	{
+		OpenVkRuntimeError("No Linear Filter, No Mipmaps");
 		return;
+	}
+		
 
 //	OpenVkRuntimeError("Supports Blit: %d", SupportsBlit);
 

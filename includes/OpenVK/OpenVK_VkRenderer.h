@@ -1,3 +1,9 @@
+/*
+* CopyImage function needs support for the other image types
+* Attachments and images can merge!?
+* Not all attachments should have VK_IMAGE_USAGE_TRANSFER_DST_BIT
+*/
+
 OpenVkBool VkCreateSwapChain(uint32_t* Width, uint32_t* Height)
 {
 	VkRenderer.SwapChainOld = VkRenderer.SwapChain;
@@ -144,6 +150,7 @@ uint32_t VkCreateRenderer(const char**(*GetExtensions)(uint32_t* ExtensionCount)
 	
 	memset(&VkRenderer, 0, sizeof(VkRendererInfo));
 	VkRenderer.ImageAttachments = CMA_Create(sizeof(VkImageInfo), "OpenVk Renderer, Image Attachments");
+	VkRenderer.Pipelines = CMA_Create(sizeof(VkPipeline), "OpenVk Renderer, Pipelines");
 	VkRenderer.DescriptorSets = CMA_Create(sizeof(VkDescriptorSetInfo), "OpenVk Renderer, Descriptor Sets");
 	VkRenderer.Images = CMA_Create(sizeof(VkImageInfo), "OpenVk Renderer, Images");
 	VkRenderer.Sampler = CMA_Create(sizeof(VkSampler), "OpenVk Renderer, Sampler");
@@ -263,6 +270,7 @@ uint32_t VkCreateRenderer(const char**(*GetExtensions)(uint32_t* ExtensionCount)
 	DeviceFeatures.wideLines = VK_TRUE;
 	DeviceFeatures.depthClamp = VK_TRUE;
 	DeviceFeatures.independentBlend = VK_TRUE;
+	DeviceFeatures.shaderInt64 = VK_TRUE;
 
 	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
@@ -346,13 +354,13 @@ uint32_t VkCreateColorImageAttachment(uint32_t Width, uint32_t Height, uint32_t 
 
 	if (Sampled)
 	{
-		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
+		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
 			return OpenVkRuntimeError("Failed to Create Sampled Attachment Image");
 		Image.ImageView = VkCreateImageView(Image.Image, ColorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 	}
 	else
 	{
-		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
+		if (VkCreateImage(Width, Height, 1, Samples, ColorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &Image.Image, &Image.ImageMemory) == OPENVK_ERROR)
 			return OpenVkRuntimeError("Failed to Create Msaa Attachment Image");
 		Image.ImageView = VkCreateImageView(Image.Image, ColorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 	}
@@ -389,9 +397,9 @@ uint32_t VkCreateDepthImageAttachment(uint32_t Width, uint32_t Height, uint32_t 
 	return CMA_Push(&VkRenderer.ImageAttachments, &Image);
 }
 
-//This functions sucks, wtf is ResolveAttachments as pointer used for?
-//And how is it ordered with the frame buffer create function
-uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uint32_t* AttachmentFormats, uint32_t* MsaaSamples, uint32_t RenderPassOptions)
+//This functions sucks, wtf is ResolveAttachments as pointer used for? - Not sure but I think this is no longer relevant
+//And how is it ordered with the frame buffer create function - like the user gives it to the function wtf this question?
+uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uint32_t* AttachmentFormats, uint32_t* AttachDesc, uint32_t* MsaaSamples, uint32_t RenderPassOptions)
 {
 	VkRenderer.RenderPasses = (VkRenderPass*)OpenVkRealloc(VkRenderer.RenderPasses, (VkRenderer.RenderPassCount + 1) * sizeof(VkRenderPass));
 
@@ -439,17 +447,18 @@ uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uin
 			Attachment->flags = 0;
 			Attachment->format = VkGetOpenVkFormat(AttachmentFormats[i], NULL);
 			Attachment->samples = Samples;
-			Attachment->loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			Attachment->loadOp = (AttachDesc[i] & OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD);
 			Attachment->storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 			Attachment->stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			Attachment->stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			Attachment->initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			Attachment->initialLayout = (AttachDesc[i] & OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);//VK_IMAGE_LAYOUT_UNDEFINED;
 			Attachment->finalLayout = ((Samples > 1) ? (RenderPassOptions & OPENVK_RENDER_PASS_RESOLVE_ATTACHMENTS ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) : (RenderPassOptions & OPENVK_RENDER_PASS_SAMPLED ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR));
 			ColorAttachmentReferences[ColorAttachmentCount].attachment = AttachmentDescriptionIndex - 1;
 			ColorAttachmentReferences[ColorAttachmentCount].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 			if (RenderPassOptions & OPENVK_RENDER_PASS_RESOLVE_ATTACHMENTS)
-			{			
+			{		
+				//FIX ? - Add AttachmentDescription like load operation load and load operation clear attachment
 				Attachment = &AttachmentDescriptions[AttachmentDescriptionIndex++];
 				ColorAttachmentResolveReferences[ColorAttachmentCount].attachment = (Samples > 1) ? AttachmentDescriptionIndex - 1 : VK_ATTACHMENT_UNUSED;
 				ColorAttachmentResolveReferences[ColorAttachmentCount].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -475,11 +484,11 @@ uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uin
 			Attachment->flags = 0;
 			Attachment->format = AttachmentFormats[i] == OPENVK_FORMAT_DEFAULT ? VkFindDepthFormat() : VkGetOpenVkFormat(AttachmentFormats[i], NULL);
 			Attachment->samples = Samples;
-			Attachment->loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			Attachment->loadOp = (AttachDesc[i] & OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD);
 			Attachment->storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 			Attachment->stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			Attachment->stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			Attachment->initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			Attachment->initialLayout = (AttachDesc[i] & OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);//VK_IMAGE_LAYOUT_UNDEFINED;;
 			Attachment->finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			if (HasColorAttachment)
 			{
@@ -609,7 +618,7 @@ uint32_t VkCreatePipelineLayout(OpenVkPipelineLayoutCreateInfo* Info)
 
 uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 {
-	VkRenderer.Pipelines = (VkPipeline*)OpenVkRealloc(VkRenderer.Pipelines, (VkRenderer.PipelineCount + 1) * sizeof(VkPipeline));
+//	VkRenderer.Pipelines = (VkPipeline*)OpenVkRealloc(VkRenderer.Pipelines, (VkRenderer.PipelineCount + 1) * sizeof(VkPipeline));
 
 	VkShaderModule VertexShaderModule;
 	VkCreateShaderModule(Info->VertexShader, &VertexShaderModule);
@@ -647,7 +656,7 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 	VertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	VertexInputInfo.pNext = NULL;
 	VertexInputInfo.flags = 0;
-	VertexInputInfo.vertexBindingDescriptionCount = 1;
+	VertexInputInfo.vertexBindingDescriptionCount = (Info->BindingStride == 0 ? 0 : 1);
 	VertexInputInfo.pVertexBindingDescriptions = &BindingDescription;
 	VertexInputInfo.vertexAttributeDescriptionCount = AttributeDescriptionCount;
 	VertexInputInfo.pVertexAttributeDescriptions = AttributeDescriptions;
@@ -792,7 +801,9 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 	PipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 	PipelineInfo.basePipelineIndex = -1;
 
-	if (vkCreateGraphicsPipelines(VkRenderer.Device, VK_NULL_HANDLE, 1, &PipelineInfo, NULL, &VkRenderer.Pipelines[VkRenderer.PipelineCount]) != VK_SUCCESS)
+	VkPipeline Pipeline;
+
+	if (vkCreateGraphicsPipelines(VkRenderer.Device, VK_NULL_HANDLE, 1, &PipelineInfo, NULL, &Pipeline) != VK_SUCCESS)
 		return OpenVkRuntimeError("Failed to Create Graphics Pipeline");
 
 	vkDestroyShaderModule(VkRenderer.Device, VertexShaderModule, NULL);
@@ -802,9 +813,7 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 	if (Info->ColorBlendAttachments > 0)
 		OpenVkFree(ColorBlendAttachmentStates);
 
-	VkRenderer.PipelineCount++;
-
-	return VkRenderer.PipelineCount - 1;
+	return CMA_Push(&VkRenderer.Pipelines, &Pipeline);
 }
 /*
 //TO-DO Needs to be fixed, pipelines need to use cma
@@ -871,48 +880,49 @@ uint32_t VkCreateFramebuffer(OpenVkFramebufferCreateInfo* Info)
 }
 
 //Add OPENVK_DESCRIPTOR_TYPE_VERTEX_BUFFER and OPENVK_DESCRIPTOR_TYPE_INDEX_BUFFER
-uint32_t VkCreateDescriptorSetLayout(uint32_t BindingCount, uint32_t* Bindings, uint32_t* DescriptorCounts, uint32_t* DescriptorTypes, uint32_t* DescriptorFlags, uint32_t* ShaderTypes)
+uint32_t VkCreateDescriptorSetLayout(OpenVkDescriptorSetLayoutCreateInfo* Info)
 {
 	VkRenderer.DescriptorSetLayouts = (VkDescriptorSetLayout*)OpenVkRealloc(VkRenderer.DescriptorSetLayouts, (VkRenderer.DescriptorSetLayoutCount + 1) * sizeof(VkDescriptorSetLayout));
 
-	VkDescriptorSetLayoutBinding* LayoutBindings = (VkDescriptorSetLayoutBinding*)OpenVkMalloc(BindingCount * sizeof(VkDescriptorSetLayoutBinding));
+	VkDescriptorSetLayoutBinding* LayoutBindings = (VkDescriptorSetLayoutBinding*)OpenVkMalloc(Info->BindingCount * sizeof(VkDescriptorSetLayoutBinding));
 	
-	for (uint32_t i = 0; i < BindingCount; i++)
+	for (uint32_t i = 0; i < Info->BindingCount; i++)
 	{
-		LayoutBindings[i].binding = Bindings[i];
-		LayoutBindings[i].descriptorType = VkGetOpenVkDescriptorType(DescriptorTypes[i]);
-		LayoutBindings[i].descriptorCount = DescriptorCounts[i];
-		LayoutBindings[i].stageFlags = VkGetOpenVkShader(ShaderTypes[i]);
+		LayoutBindings[i].binding = Info->Bindings[i];
+		LayoutBindings[i].descriptorType = VkGetOpenVkDescriptorType(Info->DescriptorTypes[i]);
+		LayoutBindings[i].descriptorCount = Info->DescriptorCounts[i];
+		LayoutBindings[i].stageFlags = VkGetOpenVkShader(Info->ShaderTypes[i]);
 		LayoutBindings[i].pImmutableSamplers = NULL;
 	}
 
 	VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo;
 	DescriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 	DescriptorSetLayoutCreateInfo.pNext = NULL;
-	DescriptorSetLayoutCreateInfo.flags = 0;
-	DescriptorSetLayoutCreateInfo.bindingCount = BindingCount;
+	DescriptorSetLayoutCreateInfo.flags = VkGetOpenVkDescriptorSetLayoutFlags(Info->Flags);
+	DescriptorSetLayoutCreateInfo.bindingCount = Info->BindingCount;
 	DescriptorSetLayoutCreateInfo.pBindings = LayoutBindings;
 
 	VkDescriptorBindingFlags* LayoutBindingFlags = NULL;
 	VkDescriptorSetLayoutBindingFlagsCreateInfo SetLayoutBindingFlags;
 
-	if (DescriptorFlags != NULL)
+	if (Info->DescriptorFlags != NULL && Info->Flags != OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_NONE)
 	{
-		LayoutBindingFlags = (VkDescriptorBindingFlags*)OpenVkMalloc(BindingCount * sizeof(VkDescriptorBindingFlags));
+		LayoutBindingFlags = (VkDescriptorBindingFlags*)OpenVkMalloc(Info->BindingCount * sizeof(VkDescriptorBindingFlags));
 	
 		SetLayoutBindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
 		SetLayoutBindingFlags.pNext = NULL;
-		SetLayoutBindingFlags.bindingCount = BindingCount;
+		SetLayoutBindingFlags.bindingCount = Info->BindingCount;
 		SetLayoutBindingFlags.pBindingFlags = LayoutBindingFlags;
 		DescriptorSetLayoutCreateInfo.pNext = &SetLayoutBindingFlags;
 		
-		for (uint32_t i = 0; i < BindingCount; i++)
+		for (uint32_t i = 0; i < Info->BindingCount; i++)
 		{
-			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_NONE)						LayoutBindingFlags[i] = 0;
-			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_UPDATE_AFTER_BIND)			LayoutBindingFlags[i] = VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
-			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_UNUSED_WHILE_PENDING)		LayoutBindingFlags[i] = VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT;
-			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_PARTIALLY_BOUND_BIT)		LayoutBindingFlags[i] = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT;
-			if (DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_VARIABLE_DESCRIPTOR_COUNT)	LayoutBindingFlags[i] = VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT;
+			LayoutBindingFlags[i] = 0;
+//			if (Info->DescriptorFlags[i] == OPENVK_DESCRIPTOR_FLAG_NONE)						LayoutBindingFlags[i] = 0;
+			if (Info->DescriptorFlags[i] & OPENVK_DESCRIPTOR_FLAG_UPDATE_AFTER_BIND)			LayoutBindingFlags[i] |= VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+			if (Info->DescriptorFlags[i] & OPENVK_DESCRIPTOR_FLAG_UNUSED_WHILE_PENDING)			LayoutBindingFlags[i] |= VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT;
+			if (Info->DescriptorFlags[i] & OPENVK_DESCRIPTOR_FLAG_PARTIALLY_BOUND)				LayoutBindingFlags[i] |= VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT;
+			if (Info->DescriptorFlags[i] & OPENVK_DESCRIPTOR_FLAG_VARIABLE_DESCRIPTOR_COUNT)	LayoutBindingFlags[i] |= VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT;
 		}
 	}
 
@@ -944,9 +954,9 @@ uint32_t VkCreateDescriptorPool(uint32_t DescriptorPoolType, uint32_t PoolSizeCo
 	PoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	PoolInfo.pNext = NULL;
 	PoolInfo.maxSets = MaxSets;	//maximum number of descriptor sets that may be allocated
-	if (DescriptorPoolType == OPENVK_DESCRIPTOR_POOL_DEFAULT)	PoolInfo.flags = 0;
-	if (DescriptorPoolType == OPENVK_DESCRIPTOR_POOL_FREEABLE)	PoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-	if (DescriptorPoolType == OPENVK_DESCRIPTOR_POOL_UPDATABLE)	PoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
+	PoolInfo.flags = 0;
+	if (DescriptorPoolType & OPENVK_DESCRIPTOR_POOL_FREEABLE)	PoolInfo.flags |= VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+	if (DescriptorPoolType & OPENVK_DESCRIPTOR_POOL_UPDATABLE)	PoolInfo.flags |= VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
 	PoolInfo.poolSizeCount = PoolSizeCount;
 	PoolInfo.pPoolSizes = PoolSizes;
 
@@ -1013,6 +1023,7 @@ OpenVkBool VkDestroyDescriptorPool(uint32_t DescriptorPool)
 	return OpenVkTrue;
 }
 
+//This function is a nightmare
 uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 {
 	VkDescriptorSetInfo* DescriptorSetInfo = (VkDescriptorSetInfo*)CMA_GetAt(&VkRenderer.DescriptorSets, *Info->DescriptorSet);
@@ -1029,7 +1040,9 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 	{
 		if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER ||
 			Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ||
-			Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER)
+			Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER ||
+			Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_VERTEX_BUFFER ||
+			Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_INDEX_BUFFER)
 			BufferCount += Info->DescriptorCounts[i];
 
 		else if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER ||
@@ -1045,8 +1058,8 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 		DescriptorBufferInfos = (VkDescriptorBufferInfo*)OpenVkMalloc(BufferCount * sizeof(VkDescriptorBufferInfo));
 	
 	VkDescriptorImageInfo* DescriptorImageInfos = NULL;
-	if (ImageCount > 0)	   
-		DescriptorImageInfos = (VkDescriptorImageInfo*)OpenVkMalloc(ImageCount * sizeof(VkDescriptorImageInfo));
+	if (ImageCount > 0)														//Quick and dirty solution * 3 I guess
+		DescriptorImageInfos = (VkDescriptorImageInfo*)OpenVkMalloc(ImageCount * 3 * sizeof(VkDescriptorImageInfo));
 
 	VkWriteDescriptorSetAccelerationStructureKHR* DescriptorASInfos = NULL;
 	if (ASCount > 0)							  
@@ -1062,7 +1075,9 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 		{
 			if (Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER ||
 				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ||
-				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER)
+				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_DYNAMIC_UNIFORM_BUFFER ||
+				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_VERTEX_BUFFER ||
+				Info->DescriptorTypes[i] == OPENVK_DESCRIPTOR_TYPE_INDEX_BUFFER)
 			{
 				uint32_t OldBufferCount = BufferCount;				
 				for (uint32_t m = 0; m < Info->DescriptorCounts[i]; m++)
@@ -1075,7 +1090,7 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 					{
 						VkStaticBufferInfo* Buffer = (VkStaticBufferInfo*)CMA_GetAt(&VkRenderer.StaticBuffers, Info->Buffers[k]);
 						if (Buffer == NULL)
-							return OpenVkRuntimeError("Failed to find buffer for descriptor set");
+							return OpenVkRuntimeError("Failed to find vertex/index buffer for descriptor set");
 
 						BufferVk = Buffer->Buffer;
 					}
@@ -1083,7 +1098,7 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 					{
 						VkDynamicBufferInfo* Buffer = (VkDynamicBufferInfo*)CMA_GetAt(&VkRenderer.DynamicBuffers, Info->Buffers[k]);
 						if (Buffer == NULL)
-							return OpenVkRuntimeError("Failed to find buffer for descriptor set");
+							return OpenVkRuntimeError("Failed to find buffer for descriptor set, Index: %d, Itteration: %d", Info->Buffers[k], k);
 						
 						BufferVk = Buffer->Buffers[j];
 					}
@@ -1126,8 +1141,14 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 					else
 						return OpenVkRuntimeError("Failed to find Image for descriptor set");
 
+				//	Debugging purpose
+				//	if (Info->DescriptorCounts[i] > 1)
+				//	{
+				//		OpenVkRuntimeError("Texture: %d, Sampler: %d", Info->Images[k], Info->Sampler[k]);
+				//	}
+
 					if (Info->ImageTypes[k] != OPENVK_IMAGE_TYPE_STORAGE)
-					{
+					{						
 						VkSampler* ImageSampler = (VkSampler*)CMA_GetAt(&VkRenderer.Sampler, Info->Sampler[k]);
 						if (ImageSampler != NULL)
 							ImageInfo->sampler = *ImageSampler;
@@ -1160,9 +1181,9 @@ uint32_t VkUpdateDescriptorSet(OpenVkDescriptorSetCreateInfo* Info)
 				uint32_t OldASCount = ASCount;
 				for (uint32_t m = 0; m < Info->DescriptorCounts[i]; m++)
 				{
-					VkAccelerationStructure* AS = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.TopLevelAS, Info->TopLevelAS[m + ASCount]);
+					VkAccelerationStructure* AS = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.AccelerationStructures, Info->TopLevelAS[m + ASCount]);
 					if (AS == NULL)
-						return OpenVkRuntimeError("Failed to find Acceleration Structure for descriptor set");
+						return OpenVkRuntimeError("Failed to find Top Level Acceleration Structure for descriptor set");
 					else					
 					DescriptorASInfos[m].pAccelerationStructures = &AS->Handle;
 					DescriptorASInfos[m].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
@@ -1404,21 +1425,23 @@ uint32_t VkCreateTexture(OpenVkTextureCreateInfo* Info)
 	else
 		VkRenderer.MipLevels = 1;
 
-
 	//Check if all mip level image size are above the minimum size
 
 	OpenVkBool SupportsBlit = VkIsBlittingSupported(TextureImage.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+//	if (Info->UseCustomMipmaps == OpenVkFalse)
 	if (SupportsBlit == OpenVkFalse && Info->UseCustomMipmaps == OpenVkFalse)
 		VkRenderer.MipLevels = 1;
+	
+
 
 	VkCreateAndUploadImage(Info->Pixels[0], Info->Width, Info->Height, ImageSize, VkRenderer.MipLevels, TextureImage.Format, &TextureImage.Image, &TextureImage.ImageMemory);
-	
+
 	if (VkRenderer.MipLevels > 1 && Info->GenerateMipmaps == OpenVkTrue)
 	{
 		if (Info->UseCustomMipmaps)
 			VkUploadMipmaps(Info->Pixels, TextureImage.Image, Info->Width, Info->Height, ImageSize, VkRenderer.MipLevels, TextureImage.Format);
 		else
-			VkGenerateMipmaps(TextureImage.Image, TextureImage.Format, Info->Width, Info->Height, VkRenderer.MipLevels);		
+			VkGenerateMipmaps(TextureImage.Image, TextureImage.Format, Info->Width, Info->Height, VkRenderer.MipLevels);
 	}
 	else
 	{
@@ -1464,41 +1487,147 @@ void VkDestroyImage(uint32_t InImage)
 	}	
 }
 
-OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t Src, uint32_t Dst)
+OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t SrcType, uint32_t Src, uint32_t DstType, uint32_t Dst, OpenVkBool DuringRendering)
 {
 	VkImageInfo* ImageInfo;
 	VkImage SrcImage;
 	VkImage DstImage;
 
 	if (Src == 0)
-		SrcImage = VkRenderer.SwapChainImages[VkRenderer.ImageIndex];
+		SrcImage = VkRenderer.SwapChainImages[VkRenderer.ImageIndex];//Shouldn't that be CurrentFrame?
 	else
 	{
-		ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.Images, Src);
-		if (ImageInfo == NULL)
-			return OpenVkRuntimeError("Failed to find src image for copying");
-		SrcImage = ImageInfo->Image;
+		if (SrcType == OPENVK_IMAGE_TYPE_ATTACHMENT)
+		{
+			ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.ImageAttachments, Src);
+			if (ImageInfo == NULL)
+				return OpenVkRuntimeError("Failed to find src attachment image for copying");
+			SrcImage = ImageInfo->Image;
+		}
+		else
+		{
+			ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.Images, Src);
+			if (ImageInfo == NULL)
+				return OpenVkRuntimeError("Failed to find src image for copying");
+			SrcImage = ImageInfo->Image;
+		}
 	}
 		
 	if (Dst == 0)
 		DstImage = VkRenderer.SwapChainImages[VkRenderer.ImageIndex];
 	else
 	{
-		ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.Images, Dst);
-		if (ImageInfo == NULL)
-			return OpenVkRuntimeError("Failed to find dst image for copying");
-		DstImage = ImageInfo->Image;
+		if (DstType == OPENVK_IMAGE_TYPE_ATTACHMENT)
+		{
+			ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.ImageAttachments, Dst);
+			if (ImageInfo == NULL)
+				return OpenVkRuntimeError("Failed to find dst attachment image for copying");
+			DstImage = ImageInfo->Image;
+		}
+		else
+		{
+			ImageInfo = (VkImageInfo*)CMA_GetAt(&VkRenderer.Images, Dst);
+			if (ImageInfo == NULL)
+				return OpenVkRuntimeError("Failed to find dst image for copying");
+			DstImage = ImageInfo->Image;
+		}		
 	}
 
-	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], DstImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, NULL);
-	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], SrcImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1, NULL);
-	
+	VkImageLayout SrcOldLayout;
+	VkImageLayout DstOldLayout;
+
+	VkImageLayout SrcNewLayout;
+	VkImageLayout DstNewLayout;
+	switch (SrcType)
+	{
+	case OPENVK_IMAGE_TYPE_TEXTURE:
+		SrcOldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		SrcNewLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		break;
+	case OPENVK_IMAGE_TYPE_ATTACHMENT:
+		SrcOldLayout = VK_IMAGE_LAYOUT_GENERAL;
+		SrcNewLayout = VK_IMAGE_LAYOUT_GENERAL;
+		break;
+	case OPENVK_IMAGE_TYPE_STORAGE:
+		SrcOldLayout = VK_IMAGE_LAYOUT_GENERAL;
+		SrcNewLayout = VK_IMAGE_LAYOUT_GENERAL;
+		break;
+	case OPENVK_IMAGE_TYPE_SWAPCHAIN:
+		SrcOldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		SrcNewLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		break;
+	default:
+		SrcOldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		SrcNewLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		break;
+	}
+
+
+	switch (DstType)
+	{
+	case OPENVK_IMAGE_TYPE_TEXTURE:
+		DstOldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		DstNewLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		break;
+	case OPENVK_IMAGE_TYPE_ATTACHMENT:
+		DstOldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		DstNewLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		break;
+	case OPENVK_IMAGE_TYPE_STORAGE:
+		DstOldLayout = VK_IMAGE_LAYOUT_GENERAL;
+		DstNewLayout = VK_IMAGE_LAYOUT_GENERAL;
+		break;
+	case OPENVK_IMAGE_TYPE_SWAPCHAIN:
+		DstOldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		DstNewLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		break;
+	default:
+		DstOldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		DstNewLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		break;
+	}
+
+	VkCommandBuffer CommandBuffer;
+
+	if (DuringRendering)
+		CommandBuffer = VkRenderer.CommandBuffers[VkRenderer.ImageIndex];
+	else
+		CommandBuffer = VkBeginSingleTimeCommands();
+
+	VkSetImageLayout(CommandBuffer, DstImage, DstOldLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, NULL);
+	VkSetImageLayout(CommandBuffer, SrcImage, SrcOldLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1, NULL);
+
 	VkImageSubresourceLayers SrcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
 	VkOffset3D				 SrcOffset = { 0, 0, 0 };
 	VkImageSubresourceLayers DstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
 	VkOffset3D				 DstOffset = { 0, 0, 0 };
 	VkExtent3D				 Extent = { Width, Height, 1 };
-	
+
+	VkImageCopy CopyRegion;
+	CopyRegion.srcSubresource = SrcSubresource;
+	CopyRegion.srcOffset = SrcOffset;
+	CopyRegion.dstSubresource = DstSubresource;
+	CopyRegion.dstOffset = DstOffset;
+	CopyRegion.extent = Extent;
+	vkCmdCopyImage(CommandBuffer, SrcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, DstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &CopyRegion);
+
+	VkSetImageLayout(CommandBuffer, DstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, DstNewLayout, 1, NULL);
+	VkSetImageLayout(CommandBuffer, SrcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, SrcNewLayout, 1, NULL);
+
+
+	if (!DuringRendering)
+		VkEndSingleTimeCommandBuffer(CommandBuffer);
+
+	/*
+	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], DstImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, NULL);
+	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], SrcImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1, NULL);
+
+	VkImageSubresourceLayers SrcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
+	VkOffset3D				 SrcOffset = { 0, 0, 0 };
+	VkImageSubresourceLayers DstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
+	VkOffset3D				 DstOffset = { 0, 0, 0 };
+	VkExtent3D				 Extent = { Width, Height, 1 };
+
 	VkImageCopy CopyRegion;
 	CopyRegion.srcSubresource = SrcSubresource;
 	CopyRegion.srcOffset = SrcOffset;
@@ -1507,8 +1636,9 @@ OpenVkBool VkCopyImage(uint32_t Width, uint32_t Height, uint32_t Src, uint32_t D
 	CopyRegion.extent = Extent;
 	vkCmdCopyImage(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], SrcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, DstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &CopyRegion);
 
-	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], DstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1, NULL);
-	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], SrcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, 1, NULL);
+	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], DstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1, NULL);
+	VkSetImageLayout(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], SrcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, DstType == OPENVK_IMAGE_TYPE_ATTACHMENT ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1, NULL);
+	*/
 
 	return OpenVkTrue;
 }
@@ -1667,7 +1797,11 @@ void VkBindPipeline(uint32_t Pipeline, uint32_t PipelineType)
 	else if (PipelineType == OPENVK_PIPELINE_TYPE_RAYTRACING)
 		PipelineType = VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR;
 
-	vkCmdBindPipeline(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], (VkPipelineBindPoint)PipelineType, VkRenderer.Pipelines[Pipeline]);
+	VkPipeline* PipelinePTR = (VkPipeline*)CMA_GetAt(&VkRenderer.Pipelines, Pipeline);
+	if (PipelinePTR != NULL)
+		vkCmdBindPipeline(VkRenderer.CommandBuffers[VkRenderer.ImageIndex], (VkPipelineBindPoint)PipelineType, *PipelinePTR);
+	else
+		OpenVkRuntimeError("Failed to find pipeline: %d, type: %s", Pipeline, (PipelineType == OPENVK_PIPELINE_TYPE_GRAPHICS ? "graphics" : "raytracing"));
 }
 
 void VkSetViewport(float x, float y, float Width, float Height)
@@ -1839,8 +1973,14 @@ void VkDestroyRenderer()
 {
 	vkDeviceWaitIdle(VkRenderer.Device);
 
-	for (uint32_t i = 0; i < VkRenderer.PipelineCount; i++)
-		vkDestroyPipeline(VkRenderer.Device, VkRenderer.Pipelines[i], NULL);
+	for (uint32_t i = 0; i < VkRenderer.Pipelines.Size; i++)
+	{
+		VkPipeline* Pipeline = (VkPipeline*)CMA_GetAt(&VkRenderer.Pipelines, i);
+		if (Pipeline != NULL)
+			vkDestroyPipeline(VkRenderer.Device, *Pipeline, NULL);
+	}		
+
+	CMA_Destroy(&VkRenderer.Pipelines);
 
 	for (uint32_t i = 0; i < VkRenderer.PipelineLayoutCount; i++)
 		vkDestroyPipelineLayout(VkRenderer.Device, VkRenderer.PipelineLayouts[i], NULL);
@@ -1851,6 +1991,11 @@ void VkDestroyRenderer()
 	vkDestroySwapchainKHR(VkRenderer.Device, VkRenderer.SwapChain, NULL);
 
 	VkCleanupSwapChain();
+
+	OpenVkFree(VkRenderer.Framebuffers);
+
+	OpenVkFree(VkRenderer.SwapChainImageViews);
+	OpenVkFree(VkRenderer.SwapChainImages);
 
 	for (uint32_t i = 0; i < VkRenderer.DescriptorPools.Size; i++)
 		VkDestroyDescriptorPool(i);
@@ -1941,13 +2086,15 @@ void VkDestroyRenderer()
 	CMA_Destroy(&VkRenderer.Images);
 	CMA_Destroy(&VkRenderer.ImageAttachments);
 
+
+
 //	OpenVkFree(VkRenderer.Pipelines);
-//	OpenVkFree(VkRenderer.PipelineLayouts);
+	OpenVkFree(VkRenderer.PipelineLayouts);
+
+	OpenVkFree(VkRenderer.RenderPasses);
+//	OpenVkFree(VkRenderer.DescriptorSets);
+	OpenVkFree(VkRenderer.DescriptorSetLayouts);
 	
-//	OpenVkFree(VkRenderer.RenderPasses);
-	//	OpenVkFree(VkRenderer.DescriptorSets);
-//	OpenVkFree(VkRenderer.DescriptorSetLayouts);
-//	
 //	OpenVkFree(VkRenderer.DynamicDescriptorPools.DescriptorPools);
 //	OpenVkFree(VkRenderer.StaticDescriptorPools.DescriptorPools);
 

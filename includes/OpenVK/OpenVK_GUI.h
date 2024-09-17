@@ -119,7 +119,7 @@ void OpenVkGUIResizeBuffer(OpenVkGUIBuffer* Buffer, OpenVkBool VertexBuffer)
 
 		if (VertexBuffer)
 		{
-			void* Data = realloc(Buffer->Data, Buffer->AllocatedSize * sizeof(OpenVkGUIVertex));
+			void* Data = OpenVkRealloc(Buffer->Data, Buffer->AllocatedSize * sizeof(OpenVkGUIVertex));
 			if (!Data)
 			{
 				OpenVkRuntimeError("Failed to Make GUI Vertex Buffer Bigger: %d", Buffer->AllocatedSize * (uint32_t)sizeof(OpenVkGUIVertex));
@@ -138,7 +138,7 @@ void OpenVkGUIResizeBuffer(OpenVkGUIBuffer* Buffer, OpenVkBool VertexBuffer)
 
 		else
 		{
-			void* Data = realloc(Buffer->Data, Buffer->AllocatedSize * sizeof(uint32_t));
+			void* Data = OpenVkRealloc(Buffer->Data, Buffer->AllocatedSize * sizeof(uint32_t));
 			if (!Data)
 			{
 				OpenVkRuntimeError("Failed to Make GUI Index Buffer Bigger: %d", Buffer->AllocatedSize * (uint32_t)sizeof(uint32_t));
@@ -517,7 +517,16 @@ void OpenVkGUIInit(uint32_t Width, uint32_t Height, uint32_t RenderPass, uint32_
 	uint32_t DescriptorCounts[] = { 1 };
 	uint32_t Bindings[] = { 0 };
 
-	OpenVkGUI.DescriptorSetLayout = OpenVkCreateDescriptorSetLayout(1, Bindings, DescriptorCounts, DescriptorTypes, NULL, ShaderTypes);
+	OpenVkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo;
+	DescriptorSetLayoutCreateInfo.Flags = OPENVK_DESCRIPTOR_SET_LAYOUT_FLAG_NONE;
+	DescriptorSetLayoutCreateInfo.BindingCount = 1;
+	DescriptorSetLayoutCreateInfo.Bindings = Bindings;
+	DescriptorSetLayoutCreateInfo.DescriptorCounts = DescriptorCounts;
+	DescriptorSetLayoutCreateInfo.DescriptorTypes = DescriptorTypes;
+	DescriptorSetLayoutCreateInfo.DescriptorFlags = NULL;
+	DescriptorSetLayoutCreateInfo.ShaderTypes = ShaderTypes;
+	OpenVkGUI.DescriptorSetLayout = OpenVkCreateDescriptorSetLayout(&DescriptorSetLayoutCreateInfo);
+
 	OpenVkGUI.DescriptorPool = OpenVkCreateDescriptorPool(OPENVK_DESCRIPTOR_POOL_DEFAULT, 1, DescriptorTypes, DescriptorCounts);
 
 
@@ -699,7 +708,7 @@ void OpenVkGUIBeginRender(uint32_t Width, uint32_t Height)
 	if (OpenVkGUI.WindowCount >= OpenVkGUI.WindowSize)
 	{
 		OpenVkGUI.WindowSize += OPENVK_GUI_ALLOCATE_BLOCK;
-		OpenVkGUIWindow* Windows = (OpenVkGUIWindow*)realloc(OpenVkGUI.Windows, OpenVkGUI.WindowSize * sizeof(OpenVkGUIWindow));
+		OpenVkGUIWindow* Windows = (OpenVkGUIWindow*)OpenVkRealloc(OpenVkGUI.Windows, OpenVkGUI.WindowSize * sizeof(OpenVkGUIWindow));
 		if (!Windows)
 			OpenVkGUI.WindowSize -= OPENVK_GUI_ALLOCATE_BLOCK;
 		else

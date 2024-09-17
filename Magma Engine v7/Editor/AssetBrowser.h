@@ -129,7 +129,7 @@ void EditorAssetBrowser()
 				AddBean();
 				ImGui::SetWindowFocus("Mesh Inspector");
 			}
-
+			
 			if (ImGui::Selectable("Load Model"))
 				ifd::FileDialog::Instance().Open("LoadModel", "Load Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", true);
 

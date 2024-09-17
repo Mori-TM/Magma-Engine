@@ -1782,7 +1782,7 @@ namespace ifd {
       m_isOpen = false;
     }
 
-    int escapeKey = ImGui::GetIO().KeyMap[ImGuiKey_Escape];
+    ImGuiKey escapeKey = (ImGuiKey)ImGui::GetIO().KeyMap[ImGuiKey_Escape];
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) &&
       escapeKey >= 0 && ImGui::IsKeyPressed(escapeKey))
       m_isOpen = false;

@@ -50,7 +50,7 @@ EditorDraggingState EditorIsDragging(ImRect Rect, bool* IsDragging)
 void EditorWindowBar()
 {
 	ImGuiWindow* window = ImGui::GetCurrentWindow();
-//	ImRect Rect = window->MenuBarRect();
+	ImRect Rect = window->MenuBarRect();
 
 	int32_t MouseGX;
 	int32_t MouseGY;
@@ -60,7 +60,7 @@ void EditorWindowBar()
 	static int32_t MouseY = 0;
 	static bool IsDragging = false;
 	static bool IsDoubleClicked = false;
-
+	/*
 	if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 		IsDoubleClicked = true;
 
@@ -73,6 +73,9 @@ void EditorWindowBar()
 	{
 		ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
 		SDL_SetWindowPosition(Window, MouseGX - MouseX, MouseGY - MouseY);
+
+		if (FullScreen)
+			PushEventSDL(SDL_KEYDOWN, SDLK_F11);
 	}
 	else
 	{
@@ -96,23 +99,31 @@ void EditorWindowBar()
 	{
 	//	SDL_GetMouseState(&MouseX, &MouseY);
 	}
-
+	*/
 //	if (!ImGui::IsMouseDragging(ImGuiMouseButton_Left))
 //		IsDoubleClicked = false;
 	
-	/*
+	
 	if (ImGui::IsMouseHoveringRect(Rect.Min, Rect.Max) || IsDragging)
 	{
-		if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+		
 		{
-			IsDragging = true;
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
-			SDL_SetWindowPosition(Window, MouseGX - MouseX, MouseGY - MouseY);
+			if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+			{
+				IsDragging = true;
+				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+
+				if (FullScreen)
+					ForceFullScreenEvent = true;
+				else
+					SDL_SetWindowPosition(Window, MouseGX - MouseX, MouseGY - MouseY);
+			}
+			else
+			{
+				SDL_GetMouseState(&MouseX, &MouseY);
+			}
 		}
-		else
-		{
-			SDL_GetMouseState(&MouseX, &MouseY);
-		}
+		
 	}
 	
 	
@@ -122,7 +133,7 @@ void EditorWindowBar()
 		IsDragging = false;
 	//	ImGui::ReleaseMouseCapture();
 	}
-	*/
+	
 
 	/*
 	if (MouseState == 1 && WinBarMouseState == 0 &&
@@ -421,10 +432,12 @@ void EditorDrawMainMenuBar()
 			EditorBarButtonPressed = true;
 			if (ImGui::MenuItem("Open Scene", "STRG+O"))
 			{
+				ifd::FileDialog::Instance().Open("SceneLoad", "Load Scene", "Magma Scene (*.lva;*.magma;*.mgs;*.mag){.lva,.magma,.mgs,.mag},.*", false);
 			}
 
 			if (ImGui::MenuItem("Save Scene", "STRG+S"))
 			{
+				ifd::FileDialog::Instance().Save("SceneSave", "Save Scene", "Magma Scene (*.lva;*.magma;*.mgs){.lva,.magma,.mgs},.*");
 			}
 
 			if (ImGui::MenuItem("New Scene", "STRG+N"))
@@ -444,7 +457,8 @@ void EditorDrawMainMenuBar()
 		//	}
 		if (ImGui::MenuItem("Settings"))
 			EditorOpenedSettingsWindow = true;
-
+		//99, 201, 40
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.388f, 0.788f, 0.156f, 1.0f });
 		ImGui::PushFont(IconFontSmall);
 		ImGui::SetCursorPosX((WindowWidth * 0.5));
 		static char* ButtonType = (char*)"G";
@@ -461,6 +475,7 @@ void EditorDrawMainMenuBar()
 		}
 		ImGui::PopID();
 		ImGui::PopFont();
+		ImGui::PopStyleColor(1);
 
 		ImGui::PushFont(IconFontExt);
 		{
@@ -597,6 +612,19 @@ void EngineDrawEditor()
 		ifd::FileDialog::Instance().Close();
 	}
 
+	if (ifd::FileDialog::Instance().IsDone("SceneLoad"))
+	{
+		if (ifd::FileDialog::Instance().HasResult())
+			SceneLoad((const char*)ifd::FileDialog::Instance().GetResult().u8string().c_str());
+		ifd::FileDialog::Instance().Close();
+	}
+	if (ifd::FileDialog::Instance().IsDone("SceneSave"))
+	{
+		if (ifd::FileDialog::Instance().HasResult())
+			SceneSave((const char*)ifd::FileDialog::Instance().GetResult().u8string().c_str());
+		ifd::FileDialog::Instance().Close();
+	}
+
 	ImGui::Begin("Debug");
 	{
 		uint32_t VertexCount = 0;
@@ -672,7 +700,7 @@ void EngineDrawEditor()
 		ImGui::Text("Swapchain Image Count: %d", VkRenderer.SwapChainImageCount);
 		ImGui::Text("Image Count: %d", VkRenderer.ImageAttachments.Size);
 		ImGui::Text("Render Pass Count: %d", VkRenderer.RenderPassCount);
-		ImGui::Text("Pipeline Count: %d", VkRenderer.PipelineCount);
+		ImGui::Text("Pipeline Count: %d", VkRenderer.Pipelines.Size);
 		ImGui::Text("Pipeline Layout Count: %d", VkRenderer.PipelineLayoutCount);
 		ImGui::Text("Framebuffer Count: %d", VkRenderer.FramebufferCount);
 		ImGui::Text("Frames In Flight: %d", MAX_FRAMES_IN_FLIGHT);
@@ -715,6 +743,35 @@ void EngineDrawEditor()
 		ImGui::Text("Max Push Constants Size: %d", VkRenderer.PhysicalDeviceProperties.limits.maxPushConstantsSize);
 		ImGui::Text("Max Viewport Dimensions: %d %d", VkRenderer.PhysicalDeviceProperties.limits.maxViewportDimensions[0], VkRenderer.PhysicalDeviceProperties.limits.maxViewportDimensions[1]);
 		ImGui::Text("Max Viewports: %d", VkRenderer.PhysicalDeviceProperties.limits.maxViewports);
+
+#ifdef MAGMA_ENGINE_TRACK_MEMORY
+
+		ImGui::NewLine();
+		ImGui::Text("Current Memory Stats:");
+		ImGui::Text("Blocks In Use: %zu", s_MemBlocks.Size);
+
+		for (size_t i = 0; i < s_MemBlocks.Size; i++)
+		{
+			s_MemBlockInfo* Block = (s_MemBlockInfo*)DynamicArrayGetAt(&s_MemBlocks, i);
+
+			ImGui::NewLine();
+			ImGui::Text("Block %zu: Size: %zu/%zu, Elements: %zu/%zu", i, Block->Size, Block->AllocatedSize, Block->AllocatedElements.Size, Block->AllocatedElements.SizeAllocated);
+
+			for (size_t j = 0; j < Block->AllocatedElements.Size; j++)
+			{
+				s_AllocatedElementInfo* Element = (s_AllocatedElementInfo*)DynamicArrayGetAt(&Block->AllocatedElements, j);
+
+				if (Element->InUse == 1)
+				{
+					ImGui::Text("\tElement %zu: Address: %p, Size: %zu/%zu\n", j, Element->Data, Element->Size, Element->PotentialSize);
+				//	Element->
+				}
+			}
+
+			//	printf("[Malloc Sucks]: Failed to free: %p, Free2: %td\n", Block->Data, Block->DataAddress);
+		}
+		ImGui::NewLine();
+#endif
 	}
 	ImGui::End();
 
@@ -788,6 +845,13 @@ void EngineDrawEditor()
 		//	ImGui::Checkbox("Scene Backface Culling", &SceneBackfaceCulling);
 
 	//	ImGui::Checkbox("Render Shadows", &RenderShadows);
+		if (ImGui::Checkbox("Render Render Depth Pre Pass", &RenderDepthPrePass))
+		{
+			//FIX - create a function for this garbage
+			ForceResizeEvent = true;
+			PushEventSDL(0, 0);
+		}
+		ImGui::Checkbox("Render Raytraced", &RenderRaytraced);
 		ImGui::Checkbox("Render SSAO", &RenderSSAO);
 		if (ImGui::Checkbox("Render SSAO Blur", &RenderSSAOBlur))
 		{
@@ -852,7 +916,7 @@ void EngineDrawEditor()
 		}
 	}
 	ImGui::End();
-
+	
 	ImGui::Begin("Render Stages", NULL, ImGuiWindowFlags_NoScrollbar);
 	{
 		ImVec2 ImageSize = ImGui::GetWindowSize();
@@ -860,44 +924,32 @@ void EngineDrawEditor()
 		ImageSize.y = ImageSize.x / Aspect;
 		
 		ImGui::Checkbox("Render Debug View", &RenderDebugDescriptorSet);
-
-		for (uint32_t i = 0; i < ARRAY_SIZE(DebugDescriptorSets); i++)
+		if (!RenderRaytraced)
 		{
-			ImGui::Text(DebugAttachmentNames[i]);
-	//		ImGui::PushID(DebugDescriptorSets[i]);
-			if (ImGuiImageButtonID(DebugAttachmentNames[i], &GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
-				SceneRenderDescriptorSet = DebugDescriptorSets[i];
+			for (uint32_t i = 0; i < ARRAY_SIZE(DebugDescriptorSets); i++)
+			{
+				ImGui::Text(DebugAttachmentNames[i]);
+				//		ImGui::PushID(DebugDescriptorSets[i]);
+				if (ImGuiImageButtonID(DebugAttachmentNames[i], &GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+					SceneRenderDescriptorSet = DebugDescriptorSets[i];
 
+				ImGui::NewLine();
+				//	ImGui::Image(&GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize);
+		//			ImGui::PopID();
+			}
+		}
+		else
+		{
+			ImGui::Text("Raytracing Pass");
+			if (ImGuiImageButtonID("Raytraced Image ID", &GetDescriptorSet(SceneRenderDescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+				SceneRenderDescriptorSet = SceneOutputDescriptorSet;
 			ImGui::NewLine();
-		//	ImGui::Image(&GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize);
-//			ImGui::PopID();
+
+			ImGui::Text("FXAA Pass");
+			if (ImGuiImageButtonID("FXAA Image ID", &GetDescriptorSet(DebugDescriptorSets[ARRAY_SIZE(DebugDescriptorSets) - 1])[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+				SceneRenderDescriptorSet = DebugDescriptorSets[ARRAY_SIZE(DebugDescriptorSets) - 1];
 		}
 
-		/*
-		ImGui::Text("SSAO Pass");
-		ImGui::PushID("SSAO Pass Texture");
-		if (ImGui::ImageButton(&GetDescriptorSet(SSAOBlurDescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
-			SceneRenderDescriptorSet = SSAOBlurDescriptorSet;
-		ImGui::PopID();
-
-		ImGui::Text("Scene Pass");
-		ImGui::PushID("Scene Pass Texture");
-		if (ImGui::ImageButton(&GetDescriptorSet(SceneOutputDescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
-			SceneRenderDescriptorSet = SceneOutputDescriptorSet;
-		ImGui::PopID();
-
-		ImGui::Text("SSR Pass");
-		ImGui::PushID("SSR Pass Texture");
-		if (ImGui::ImageButton(&GetDescriptorSet(SSROutputDescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
-			SceneRenderDescriptorSet = SSROutputDescriptorSet;
-		ImGui::PopID();
-
-		ImGui::Text("FXAA Output");
-		ImGui::PushID("FXAA Output Texture");
-		if (ImGui::ImageButton(&GetDescriptorSet(FXAADescriptorSet)[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
-			SceneRenderDescriptorSet = FXAADescriptorSet;
-		ImGui::PopID();
-		*/
 	}
 	ImGui::End();
 

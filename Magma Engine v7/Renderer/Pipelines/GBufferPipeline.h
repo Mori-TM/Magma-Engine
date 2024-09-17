@@ -11,8 +11,9 @@ void CreateGBufferRenderPass()
 
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_DEPTH };
 	uint32_t AttachmentFormats[] = { Format, Format, OPENVK_FORMAT_RGBA, OPENVK_FORMAT_RGBA, Format, OPENVK_FORMAT_RG16F, OPENVK_FORMAT_DEFAULT };
+	uint32_t AttachmentDescriptions[] = { OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR };
 	uint32_t MsaaSamples[] = { 1, 1, 1, 1, 1, 1, 1 };
-	GBufferRenderPass = OpenVkCreateRenderPass(G_BUFFER_ATTACHMENT_COUNT, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
+	GBufferRenderPass = OpenVkCreateRenderPass(G_BUFFER_ATTACHMENT_COUNT, Attachments, AttachmentFormats, AttachmentDescriptions, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
 }
 
 void CreateGBufferLayout()
@@ -43,8 +44,8 @@ void CreateGBufferLayout()
 
 void CreateGBufferPipeline()
 {
-	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGB32F, OPENVK_FORMAT_RG32F, OPENVK_FORMAT_RGB32F };
-	uint32_t ShaderAttributeOffsets[] = { 0, 12, 20 };
+	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGBA32F, OPENVK_FORMAT_RGBA32F };
+	uint32_t ShaderAttributeOffsets[] = { 0, 16 };
 
 	OpenVkFile VertexShader = OpenVkReadFile("Data/Shader/GBufferVertex.spv");
 	OpenVkFile FragmentShader = OpenVkReadFile("Data/Shader/GBufferFragment.spv");
@@ -56,7 +57,7 @@ void CreateGBufferPipeline()
 	GraphicsPipelineCreateInfo.VertexShader = VertexShader;
 	GraphicsPipelineCreateInfo.FragmentShader = FragmentShader;
 	GraphicsPipelineCreateInfo.BindingStride = sizeof(SceneVertex);
-	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 3;
+	GraphicsPipelineCreateInfo.ShaderAttributeFormatCount = 2;
 	GraphicsPipelineCreateInfo.ShaderAttributeFormats = ShaderAttributeFormats;
 	GraphicsPipelineCreateInfo.ShaderAttributeOffsets = ShaderAttributeOffsets;
 	GraphicsPipelineCreateInfo.PrimitiveTopology = OPENVK_PRIMITIVE_TOPOLOGY_TRIANGLE;
@@ -226,8 +227,8 @@ void GBufferDraw()
 		OpenVkSetScissor(0, 0, SceneWidth, SceneHeight);
 		OpenVkSetViewport(0, 0, SceneWidth, SceneHeight);
 
-	//	if (!GameMode && !RenderGamePreview)
-	//		DebugDraw();
+		if (!GameMode && !RenderGamePreview)
+			DebugDraw();
 
 		uint32_t Pipeline = GBufferPipelineNoneCull;
 		switch (GBufferCullMode)
@@ -336,6 +337,7 @@ void GBufferDraw()
 						else
 							OpenVkBindVertexBuffer(Mesh->VertexBuffer);
 
+					//	RaytracingAddEntityMesh(Entities[i].Mesh.MeshIndex, Mesh);
 
 						for (uint32_t m = 0; m < Mesh->MeshCount; m++)
 						{
@@ -382,7 +384,7 @@ void GBufferDraw()
 								LastOcclusionDescriptorSet = OcclusionDescriptorSet;
 
 								if (Mesh->IndexBuffer != OPENVK_ERROR)
-									OpenVkDrawIndices(Mesh->MeshData[m].IndexOffset, Mesh->MeshData[m].IndexCount, Mesh->MeshData[m].VertexOffset);
+									OpenVkDrawIndices(Mesh->MeshData[m].IndexOffset, Mesh->MeshData[m].IndexCount, 0);//Mesh->MeshData[m].VertexOffset
 								else
 									OpenVkDrawVertices(Mesh->MeshData[m].VertexOffset, Mesh->MeshData[m].VertexCount);
 							}

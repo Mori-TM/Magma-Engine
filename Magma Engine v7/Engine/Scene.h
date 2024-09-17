@@ -93,7 +93,10 @@ void SceneInit()
 	Image.TextureDescriptorSet = SceneCreateDefaultTexture(&Image);
 	strcpy(Image.Name, "None");
 	strcpy(Image.Path, "None");
-	CMA_Push(&SceneTextures, &Image);
+	size_t DefaultTextureIndex = CMA_Push(&SceneTextures, &Image);
+	
+	//FIX - add a check if raytracing is even compatibale with hardware or enabled
+	RaytracingAddTexture(DefaultTextureIndex);
 
 	//	LoadTextureCompressed = true;
 	//	GenerateMipMaps = true;
@@ -173,9 +176,113 @@ void SceneInit()
 
 void SceneDestroy()
 {
+	for (size_t i = 0; i < SceneMeshes.Size; i++)
+	{
+		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, i);
+		if (Mesh)
+		{
+			free(Mesh->MeshData);
+		}
+	}
+
 	CMA_Destroy(&SceneTextures);
 	CMA_Destroy(&SceneMaterials);
 	CMA_Destroy(&SceneMeshes);
 	CMA_Destroy(&SceneAnimations);
 	free(SceneScripts);
+}
+
+void SceneSave(const char* FileName)
+{
+	
+
+	FILE* File = fopen(FileName, "wb");
+
+	fprintf(File, "{\n");
+
+	fprintf(File, "\t\"Textures\": [\n");
+	for (size_t i = 1; i < SceneTextures.Size; i++)
+	{
+		fprintf(File, "\t\t{\n");
+
+		SceneTextureImage* Texture = (SceneTextureImage*)CMA_GetAt(&SceneTextures, i);
+		if (Texture)
+		{
+			fprintf(File, "\t\t\t\"Name\": \"%s\",\n", Texture->Name);
+			fprintf(File, "\t\t\t\"Path\": \"%s\",\n", Texture->Path);
+			fprintf(File, "\t\t\t\"ShowInAssetBrowser\": %s,\n", Texture->ShowInAssetBrowser == true ? "true" : "false");
+			fprintf(File, "\t\t\t\"Width\": %d,\n", Texture->Width);
+			fprintf(File, "\t\t\t\"Height\": %d,\n", Texture->Height);
+			fprintf(File, "\t\t\t\"Format\": %d,\n", Texture->Format);
+			fprintf(File, "\t\t\t\"MipLevels\": %d,\n", Texture->MipLevels);
+			fprintf(File, "\t\t\t\"Data\": null%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
+		}		
+		
+		fprintf(File, "\t\t}%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
+	}
+	fprintf(File, "\t],\n\n");
+
+	fprintf(File, "\t\"Materials\": [\n");
+	for (size_t i = 1; i < SceneMaterials.Size; i++)
+	{
+		fprintf(File, "\t\t{\n");
+
+		SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, i);
+		if (Material)
+		{
+			fprintf(File, "\t\t\t\"Name\": \"%s\",\n", Material->Name);
+			fprintf(File, "\t\t\t\"AlbedoTexture\": %d,\n", Material->AlbedoIndex);
+			fprintf(File, "\t\t\t\"NormalTexture\": %d,\n", Material->NormalIndex);
+			fprintf(File, "\t\t\t\"MetallicTexture\": %d,\n", Material->MetallicIndex);
+			fprintf(File, "\t\t\t\"RoughnessTexture\": %d,\n", Material->RoughnessIndex);
+			fprintf(File, "\t\t\t\"OcclusionTexture\": %d,\n", Material->OcclusionIndex);
+
+			fprintf(File, "\t\t\t\"Color\": [%f, %f, %f, %f],\n", Material->Color.r, Material->Color.g, Material->Color.b, Material->Color.a);
+			fprintf(File, "\t\t\t\"MetallicTexture\": %f,\n", Material->Metallic);
+			fprintf(File, "\t\t\t\"RoughnessTexture\": %f,\n", Material->Roughness);
+			fprintf(File, "\t\t\t\"OcclusionTexture\": %f%s\n", Material->Occlusion, i == (SceneTextures.Size - 1) ? "" : ",");
+		}
+
+		fprintf(File, "\t\t}%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
+	}
+	fprintf(File, "\t],\n\n");
+
+
+	fprintf(File, "\t\"Meshes\": [\n");
+	for (size_t i = 1; i < SceneMeshes.Size; i++)
+	{
+		fprintf(File, "\t\t{\n");
+
+		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, i);
+		if (Mesh)
+		{
+			fprintf(File, "\t\t\t\"Name\": \"%s\",\n", Mesh->Name);
+			fprintf(File, "\t\t\t\"Path\": \"%s\",\n", Mesh->Path);
+			fprintf(File, "\t\t\t\"MeshCount\": %d,\n", Mesh->MeshCount);
+			fprintf(File, "\t\t\t\"Destroyable\": %s,\n", Mesh->Destroyable == true ? "true" : "false");
+			fprintf(File, "\t\t\t\"VertexBuffer\": %d,\n", Mesh->VertexBuffer);
+			fprintf(File, "\t\t\t\"IndexBuffer\": %d,\n", Mesh->IndexBuffer);			
+
+		//	fprintf(File, "\t\t\t\"OcclusionTexture\": \"%s\",\n", Mesh->OcclusionIndex);
+		//
+		//	fprintf(File, "\t\t\t\"Color\": [%f, %f, %f, %f],\n", Material->Color.r, Material->Color.g, Material->Color.b, Material->Color.a);
+		//	fprintf(File, "\t\t\t\"MetallicTexture\": %f,\n", Material->Metallic);
+		//	fprintf(File, "\t\t\t\"RoughnessTexture\": %f,\n", Material->Roughness);
+		//	fprintf(File, "\t\t\t\"OcclusionTexture\": %f%s\n", Material->Occlusion, i == (SceneTextures.Size - 1) ? "" : ",");
+		}
+
+		fprintf(File, "\t\t}%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
+	}
+	fprintf(File, "\t],\n\n");
+
+	fprintf(File, "}\n");
+
+	fclose(File);
+
+	printf("Saved Scene: %s\n", FileName);
+}
+
+ void SceneLoad(const char* FileName)
+{
+	printf("Loaded Scene: %s\n", FileName);
 }

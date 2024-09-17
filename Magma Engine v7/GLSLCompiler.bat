@@ -1,6 +1,9 @@
 @echo off
 glslc.exe Data/Shader/OffscreenVertex.vert -o Data/Shader/OffscreenVertex.spv
 
+glslc.exe Data/Shader/DepthPrePassVertex.vert -o Data/Shader/DepthPrePassVertex.spv
+glslc.exe Data/Shader/DepthPrePassFragment.frag -o Data/Shader/DepthPrePassFragment.spv
+
 glslc.exe Data/Shader/SceneVertex.vert -o Data/Shader/SceneVertex.spv
 glslc.exe Data/Shader/SceneFragment.frag -o Data/Shader/SceneFragment.spv
 
@@ -22,3 +25,12 @@ glslc.exe Data/Shader/SSRFragment.frag -o Data/Shader/SSRFragment.spv
 glslc.exe Data/Shader/SSAOFragment.frag -o Data/Shader/SSAOFragment.spv
 glslc.exe Data/Shader/SSAOBlurFragment.frag -o Data/Shader/SSAOBlurFragment.spv
 glslc.exe Data/Shader/FXAAFragment.frag -o Data/Shader/FXAAFragment.spv
+
+::Raytracin Shader
+glslc.exe Data/Shader/Raytracing/Vertex.vert -o Data/Shader/Raytracing/Vertex.spv
+glslc.exe Data/Shader/Raytracing/Fragment.frag -o Data/Shader/Raytracing/Fragment.spv
+
+glslc.exe Data/Shader/Raytracing/closesthit.rchit --target-env=vulkan1.2 -o Data/Shader/Raytracing/closesthit.spv
+glslc.exe Data/Shader/Raytracing/miss.rmiss --target-env=vulkan1.2 -o Data/Shader/Raytracing/miss.spv
+glslc.exe Data/Shader/Raytracing/shadow.rmiss --target-env=vulkan1.2 -o Data/Shader/Raytracing/shadow.spv
+glslc.exe Data/Shader/Raytracing/raygen.rgen --target-env=vulkan1.2 -o Data/Shader/Raytracing/raygen.spv

@@ -34,8 +34,9 @@ void EditorEntityInspector()
 								{
 									if (ImGui::Button(Mesh->Name))
 									{
-										Entities[SelectedEntity].Mesh.MeshIndex = i;
-										strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
+										AddMeshToEntity(SelectedEntity, i);
+									//	Entities[SelectedEntity].Mesh.MeshIndex = i;
+									//	strcpy(Entities[SelectedEntity].Mesh.Name, Mesh->Name);
 									}
 								}						
 							}
@@ -207,7 +208,7 @@ void EditorEntityInspector()
 			{				
 				ImGui::Text("Components");
 				
-				for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
+				for (uint32_t i = 1; i < COMPONENT_COUNT; i++)
 				{
 					if (ImGui::Button(ComponentNames[i]))
 						Entities[SelectedEntity].UsedComponents[i] = true;
@@ -431,7 +432,7 @@ void EditorMeshInspector()
 {
 	ImGui::Begin("Mesh Inspector");
 	{
-		if (SceneMeshes.Size > 1)
+		if (SceneMeshes.Size > 1 && SelectedMesh != 0)
 		{
 			SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, SelectedMesh);
 			if (Mesh != NULL)
@@ -716,8 +717,8 @@ void EditorVSInspector()
 void EditorInspector()
 {
 	EditorEntityInspector();
-	EditorTextureInspector();
 	EditorMeshInspector();
+	EditorTextureInspector();
 	EditorMaterialInspector();
 	EditorScriptInspector();
 //	EditorVSInspector();

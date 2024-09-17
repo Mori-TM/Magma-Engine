@@ -3,7 +3,8 @@
 typedef enum
 {
 	//Add Empty entity
-	COMPONENT_TYPE_MESH = 0,
+	COMPONENT_TYPE_EMPTY = 0,
+	COMPONENT_TYPE_MESH,
 	COMPONENT_TYPE_MATERIAL,
 	COMPONENT_TYPE_CAMERA,
 	COMPONENT_TYPE_AUDIO,
@@ -16,6 +17,7 @@ typedef enum
 
 const char* ComponentNames[] = 
 { 
+	"Empty",
 	"Mesh", 
 	"Material", 
 	"Camera", 
@@ -43,6 +45,7 @@ const char* LightNames[] =
 	"Spot"
 };
 
+//Maybe add _TYPE_
 typedef enum
 {
 	COLLIDER_BOX = 0,
@@ -167,6 +170,17 @@ void EntitiesInit()
 
 void EntitiesDestroy()
 {
+	EntityCount = 0;
+	EntityAllocatedCount = 0;
+
+	SelectedEntity = 0;
+	SelectedTexture = 0;
+	SelectedMaterial = 0;
+	SelectedMesh = 0;
+	SelectedAudio = 0;
+	SelectedAnimation = 0;
+	SelectedScript = 0;
+
 	free(Entities);
 }
 
@@ -264,7 +278,7 @@ void ResetEntityCollider(EntityInfo* Entity)
 	strcpy(Entity->Collider.Name, "None");
 	Entity->Collider.Collider = COLLIDER_BOX;
 }
-
+/*
 uint32_t AddEntity(uint32_t UsedComponent)
 {
 	if (!EntitiesCheckForResize())
@@ -313,13 +327,79 @@ uint32_t AddEntity(uint32_t UsedComponent)
 
 	return SelectedEntity;
 }
+*/
 
+
+uint32_t AddEntity(uint32_t UsedComponent)
+{
+	if (!EntitiesCheckForResize())
+		return SelectedEntity;
+
+	Mutex.lock();
+	EntityInfo* Entity = &Entities[EntityCount];
+	SelectedEntity = EntityCount++;
+
+	memset(Entity->UsedComponents, 0, COMPONENT_COUNT);
+	//	for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
+	//		Entity.UsedComponents[i] = false;
+
+	if (UsedComponent < COMPONENT_COUNT)
+		Entity->UsedComponents[UsedComponent] = true;
+
+	ResetEntityMesh(Entity);
+	ResetEntityMaterial(Entity);
+	ResetEntityCamera(Entity);
+	ResetEntityAnimation(Entity);
+	ResetEntityLight(Entity);
+
+	Entity->Translate = Vec3f(0.0);
+	Entity->Rotate = Vec3f(0.0);
+	Entity->Scale = Vec3f(1.0);
+	Entity->Selected = false;
+
+	uint32_t Count = 0;
+	for (uint32_t i = 0; i < EntityCount; i++)
+		if (strstr(Entities[i].Name, "Entity") != 0)
+			Count++;
+
+	if (Count > 0)
+		ssprintf(Entity->Name, "Entity (%d)", Count);
+	else
+		strcpycut(Entity->Name, "Entity");
+
+	//	Entities = (EntityInfo*)realloc(Entities, (EntityCount + 1) * sizeof(EntityInfo));
+	//	if (EntitiesCheckForResize())
+	//	{
+
+	//	}
+	//	else
+	//		SelectedEntity = EntityCount - 1;
+
+	Mutex.unlock();
+
+	return SelectedEntity;
+}
+
+//FIX - check for valid MeshIndex
 void AddMeshToEntity(uint32_t EntityIndex, uint32_t MeshIndex)
 {
+	/*
 	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshIndex);
 	
 	Entities[EntityIndex].Mesh.MeshIndex = MeshIndex;
 	strcpy(Entities[EntityIndex].Mesh.Name, Mesh->Name);
+	*/
+	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshIndex);
+	if (Mesh)
+	{
+		Entities[EntityIndex].Mesh.MeshIndex = MeshIndex;
+		strcpycut(Entities[EntityIndex].Mesh.Name, Mesh->Name);
+
+		RaytracingAddMesh(SelectedMesh);
+		return;
+	}
+	
+	printf("No Mesh to add to Entity\n");
 }
 
 uint32_t AddMesh(const char* Name, SceneMesh* MeshInfo)
@@ -545,6 +625,8 @@ uint32_t LoadTexture(char* Path, SceneTextureImage* Image)
 	DescriptorSetCreateInfo.DescriptorSet = NULL;
 	DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
+	OpenVkRuntimeWarning("Texture go Brr: %d, Sampler go: %d", Image->TextureImage, Image->TextureSampler);
+
 	return OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 }
 
@@ -560,6 +642,11 @@ uint32_t AddTexture(char* Path, bool ShowInAssetBrowser)
 	CheckForSameNames(&SceneTextures, ARRAY_SIZE(Image.Name), Name, Image.Name);
 
 	SelectedTexture = CMA_Push(&SceneTextures, &Image);
+
+	printf("Texture Added, Name: %s, Index: %d\n", Path, SelectedTexture);
+
+	//FIX - add a check if raytracing is even compatibale with hardware or enabled
+	RaytracingAddTexture(SelectedTexture);
 
 	return SelectedTexture;
 }
@@ -678,7 +765,7 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 		memset(&SceneMesh->Render, 1, ARRAY_SIZE(SceneMesh->Render) * sizeof(bool));
 
 		SetDefaultMaterial(&SceneMesh->Material, "MESH");
-		if (strcmp(ModelData->Materials[i].MaterialName, WaveEmptyMaterial.MaterialName) != 0)
+		if (strcmp(ModelData->Materials[i].MaterialName, WaveEmptyMaterial.MaterialName) != 0)//FIX - don't use strncpy
 			strncpy(SceneMesh->Material.Name, ModelData->Materials[i].MaterialName, sizeof(SceneMesh->Material.Name));
 
 		SceneMesh->VertexCount = WaveMesh->VertexCount;
@@ -718,21 +805,31 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 		SceneMesh->Material.Color.z = ModelData->Materials[i].DiffuseColor.z;
 		SceneMesh->Material.Color.w = ModelSetZeroAlphaOne ? (ModelData->Materials[i].Dissolve < 0.01 ? 1.0 : ModelData->Materials[i].Dissolve) : ModelData->Materials[i].Dissolve;
 
+		uint32_t LastVertexCount = VertexCount;
+
 		for (uint32_t j = 0; j < SceneMesh->VertexCount; j++)
 		{
-			Vertices[VertexCount].Pos.x = WaveMesh->Vertices[j].Vertices.x;
-			Vertices[VertexCount].Pos.y = WaveMesh->Vertices[j].Vertices.y;
-			Vertices[VertexCount].Pos.z = WaveMesh->Vertices[j].Vertices.z;
-			Vertices[VertexCount].Normal.x = WaveMesh->Vertices[j].Normals.x;
-			Vertices[VertexCount].Normal.y = WaveMesh->Vertices[j].Normals.y;
-			Vertices[VertexCount].Normal.z = WaveMesh->Vertices[j].Normals.z;
-			Vertices[VertexCount].TexCoord.x = WaveMesh->Vertices[j].TexCoords.x;
-			Vertices[VertexCount].TexCoord.y = WaveMesh->Vertices[j].TexCoords.y;
+			Vertices[VertexCount].PosTexX.x = WaveMesh->Vertices[j].Vertices.x;
+			Vertices[VertexCount].PosTexX.y = WaveMesh->Vertices[j].Vertices.y;
+			Vertices[VertexCount].PosTexX.z = WaveMesh->Vertices[j].Vertices.z;
+
+			Vertices[VertexCount].PosTexX.w = WaveMesh->Vertices[j].TexCoords.x;
+			Vertices[VertexCount].NormalTexY.w = WaveMesh->Vertices[j].TexCoords.y;
+
+			Vertices[VertexCount].NormalTexY.x = WaveMesh->Vertices[j].Normals.x;
+			Vertices[VertexCount].NormalTexY.y = WaveMesh->Vertices[j].Normals.y;
+			Vertices[VertexCount].NormalTexY.z = WaveMesh->Vertices[j].Normals.z;
+
+			Vertices[VertexCount].Data.VertexOffset = LastVertexCount;
+			Vertices[VertexCount].Data.TextureIndex = (float)SceneMesh->Material.AlbedoIndex;
+			Vertices[VertexCount].Data.Unused0 = 0.0;
+			Vertices[VertexCount].Data.Unused1 = 0.0;
+			
 			VertexCount++;
 		}
 
 		for (uint32_t j = 0; j < SceneMesh->IndexCount; j++)
-			Indices[IndexCount++] = WaveMesh->Indices[j];
+			Indices[IndexCount++] = WaveMesh->Indices[j] + LastVertexCount;
 
 		GenerateAABB(&MeshInfo->MeshData[i].AABB, SceneMesh->VertexCount, Vertices + SceneMesh->VertexOffset);
 
@@ -818,7 +915,10 @@ uint32_t AddModel(uint32_t Settings, const char* FileName)
 
 	WaveFreeModel(&Model);
 
-	SelectedTexture = LastTexture;
+	if (LastTexture != 0)
+		SelectedTexture = LastTexture;
+
+	RaytracingAddGeometry(MeshIndex);
 	return MeshIndex;
 }
 
@@ -842,7 +942,9 @@ uint32_t AddPlane()
 	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
 	MeshInfo.MeshData[0].AABB = PlaneAABB;
 
-	return AddMesh("Plane", &MeshInfo);
+	uint32_t MeshIndex = AddMesh("Plane", &MeshInfo);
+	RaytracingAddGeometry(MeshIndex);
+	return MeshIndex;
 }
 
 uint32_t AddCube()
@@ -865,7 +967,9 @@ uint32_t AddCube()
 	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
 	MeshInfo.MeshData[0].AABB = CubeAABB;
 
-	return AddMesh("Cube", &MeshInfo);
+	uint32_t MeshIndex = AddMesh("Cube", &MeshInfo);
+	RaytracingAddGeometry(MeshIndex);
+	return MeshIndex;
 }
 
 uint32_t AddSphere()
@@ -888,7 +992,9 @@ uint32_t AddSphere()
 	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
 	MeshInfo.MeshData[0].AABB = SphereAABB;
 
-	return AddMesh("Sphere", &MeshInfo);
+	uint32_t MeshIndex = AddMesh("Sphere", &MeshInfo);
+	RaytracingAddGeometry(MeshIndex);
+	return MeshIndex;
 }
 
 uint32_t AddBean()
@@ -912,5 +1018,7 @@ uint32_t AddBean()
 	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
 	MeshInfo.MeshData[0].AABB = BeanAABB;
 
-	return AddMesh("Bean", &MeshInfo);
+	uint32_t MeshIndex = AddMesh("Bean", &MeshInfo);
+	RaytracingAddGeometry(MeshIndex);
+	return MeshIndex;
 }

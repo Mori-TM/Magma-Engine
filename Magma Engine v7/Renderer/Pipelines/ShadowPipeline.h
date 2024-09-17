@@ -5,7 +5,8 @@ void CreateShadowRenderPass()
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_DEPTH };
 	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_DEFAULT };
 	uint32_t MsaaSamples[] = { 1 };
-	ShadowRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
+	uint32_t AttachmentDescriptions[] = { OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR };
+	ShadowRenderPass = OpenVkCreateRenderPass(1, Attachments, AttachmentFormats, AttachmentDescriptions, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
 }
 
 void CreateShadowLayout()
@@ -26,8 +27,8 @@ void CreateShadowLayout()
 
 void CreateShadowPipeline()
 {
-	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGB32F, OPENVK_FORMAT_RG32F };
-	uint32_t ShaderAttributeOffsets[] = { 0, 12 };
+	uint32_t ShaderAttributeFormats[] = { OPENVK_FORMAT_RGBA32F, OPENVK_FORMAT_RGBA32F };
+	uint32_t ShaderAttributeOffsets[] = { 0, 16 };
 
 	OpenVkFile VertexShader = OpenVkReadFile("Data/Shader/ShadowVertex.spv");
 	OpenVkFile FragmentShader = OpenVkReadFile("Data/Shader/ShadowFragment.spv");
@@ -141,6 +142,10 @@ void UpdateCascades()
 		}
 	}
 
+	ShadowDirection.x = -LightDirection.x;
+	ShadowDirection.y = -LightDirection.y;
+	ShadowDirection.z = -LightDirection.z;
+
 	if (!IsShadow)
 	{
 		RenderShadows = false;
@@ -158,7 +163,7 @@ void UpdateCascades()
 
 	for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
 	{
-		float p = (i + 1) / (float)SHADOW_MAP_CASCADE_COUNT;
+		float p = (float)(i + 1) / (float)SHADOW_MAP_CASCADE_COUNT;
 		float Log = MinZ * powf(Ratio, p);
 		float Uniform = MinZ + Range * p;
 		float d = CascadeSplitLambda * (Log - Uniform) + Uniform;
@@ -264,32 +269,38 @@ void UpdateAnimation(uint32_t AnimationIndex)
 		for (int i = 0; i < Model->NumTriangles; i++)
 		{
 			ProcModel.Update(i);
-			Vertices[j].Pos.x = ProcModel.Vertex[0].P[0];
-			Vertices[j].Pos.y = ProcModel.Vertex[0].P[1];
-			Vertices[j].Pos.z = ProcModel.Vertex[0].P[2];
-			Vertices[j].TexCoord.x = ProcModel.TexCoord[0].S;
-			Vertices[j].TexCoord.y = ProcModel.TexCoord[0].T;
-			Vertices[j].Normal.x = ProcModel.Normal[0].P[0];
-			Vertices[j].Normal.y = ProcModel.Normal[0].P[1];
-			Vertices[j].Normal.z = ProcModel.Normal[0].P[2];
+			Vertices[j].PosTexX.x = ProcModel.Vertex[0].P[0];
+			Vertices[j].PosTexX.y = ProcModel.Vertex[0].P[1];
+			Vertices[j].PosTexX.z = ProcModel.Vertex[0].P[2];
 
-			Vertices[j + 1].Pos.x = ProcModel.Vertex[2].P[0];
-			Vertices[j + 1].Pos.y = ProcModel.Vertex[2].P[1];
-			Vertices[j + 1].Pos.z = ProcModel.Vertex[2].P[2];
-			Vertices[j + 1].TexCoord.x = ProcModel.TexCoord[2].S;
-			Vertices[j + 1].TexCoord.y = ProcModel.TexCoord[2].T;
-			Vertices[j + 1].Normal.x = ProcModel.Normal[2].P[0];
-			Vertices[j + 1].Normal.y = ProcModel.Normal[2].P[1];
-			Vertices[j + 1].Normal.z = ProcModel.Normal[2].P[2];
+			Vertices[j].PosTexX.w = ProcModel.TexCoord[0].S;
+			Vertices[j].NormalTexY.w = ProcModel.TexCoord[0].T;
 
-			Vertices[j + 2].Pos.x = ProcModel.Vertex[1].P[0];
-			Vertices[j + 2].Pos.y = ProcModel.Vertex[1].P[1];
-			Vertices[j + 2].Pos.z = ProcModel.Vertex[1].P[2];
-			Vertices[j + 2].TexCoord.x = ProcModel.TexCoord[1].S;
-			Vertices[j + 2].TexCoord.y = ProcModel.TexCoord[1].T;
-			Vertices[j + 2].Normal.x = ProcModel.Normal[1].P[0];
-			Vertices[j + 2].Normal.y = ProcModel.Normal[1].P[1];
-			Vertices[j + 2].Normal.z = ProcModel.Normal[1].P[2];
+			Vertices[j].NormalTexY.x = ProcModel.Normal[0].P[0];
+			Vertices[j].NormalTexY.y = ProcModel.Normal[0].P[1];
+			Vertices[j].NormalTexY.z = ProcModel.Normal[0].P[2];
+
+			Vertices[j + 1].PosTexX.x = ProcModel.Vertex[2].P[0];
+			Vertices[j + 1].PosTexX.y = ProcModel.Vertex[2].P[1];
+			Vertices[j + 1].PosTexX.z = ProcModel.Vertex[2].P[2];
+
+			Vertices[j + 1].PosTexX.w = ProcModel.TexCoord[2].S;
+			Vertices[j + 1].NormalTexY.w = ProcModel.TexCoord[2].T;
+			
+			Vertices[j + 1].NormalTexY.x = ProcModel.Normal[2].P[0];
+			Vertices[j + 1].NormalTexY.y = ProcModel.Normal[2].P[1];
+			Vertices[j + 1].NormalTexY.z = ProcModel.Normal[2].P[2];
+
+			Vertices[j + 2].PosTexX.x = ProcModel.Vertex[1].P[0];
+			Vertices[j + 2].PosTexX.y = ProcModel.Vertex[1].P[1];
+			Vertices[j + 2].PosTexX.z = ProcModel.Vertex[1].P[2];
+
+			Vertices[j + 2].PosTexX.w = ProcModel.TexCoord[1].S;
+			Vertices[j + 2].NormalTexY.w = ProcModel.TexCoord[1].T;
+
+			Vertices[j + 2].NormalTexY.x = ProcModel.Normal[1].P[0];
+			Vertices[j + 2].NormalTexY.y = ProcModel.Normal[1].P[1];
+			Vertices[j + 2].NormalTexY.z = ProcModel.Normal[1].P[2];
 			j += 3;
 		}
 		ProcModel.End(GetDeltaTime() * Animation->Speed);
@@ -397,7 +408,7 @@ void ShadowDraw()
 								LastTextureDescriptorSet = TextureDescriptorSet;
 
 								if (Mesh->IndexBuffer != OPENVK_ERROR)
-									OpenVkDrawIndices(Mesh->MeshData[m].IndexOffset, Mesh->MeshData[m].IndexCount, Mesh->MeshData[m].VertexOffset);								
+									OpenVkDrawIndices(Mesh->MeshData[m].IndexOffset, Mesh->MeshData[m].IndexCount, 0);//Mesh->MeshData[m].VertexOffset
 								else
 									OpenVkDrawVertices(Mesh->MeshData[m].VertexOffset, Mesh->MeshData[m].VertexCount);
 							}							

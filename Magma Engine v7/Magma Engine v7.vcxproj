@@ -133,11 +133,11 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)includes;</AdditionalIncludeDirectories>
-      <Optimization>Full</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>
@@ -167,6 +167,7 @@
     <ClInclude Include="Engine\CameraPath.h" />
     <ClInclude Include="Engine\ECS.h" />
     <ClInclude Include="Engine\Engine.h" />
+    <ClInclude Include="Engine\FileDialog.h" />
     <ClInclude Include="Engine\FpsCamera.h" />
     <ClInclude Include="Engine\FrustumCulling.h" />
     <ClInclude Include="Engine\ImageCompression.h" />
@@ -201,10 +202,13 @@
     <ClInclude Include="Renderer\Pipelines\SSRPipeline.h" />
     <ClInclude Include="Renderer\Pipelines\SwapChainHelper.h" />
     <ClInclude Include="Renderer\Pipelines\SwapChainPipeline.h" />
+    <ClInclude Include="Renderer\Raytracing\Raytracing.h" />
     <ClInclude Include="Renderer\Renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Shader\BlurFragment.frag" />
+    <None Include="Data\Shader\DepthPrePassFragment.frag" />
+    <None Include="Data\Shader\DepthPrePassVertex.vert" />
     <None Include="Data\Shader\FXAAFragment.frag" />
     <None Include="Data\Shader\GBufferFragment.frag" />
     <None Include="Data\Shader\GBufferVertex.vert" />
@@ -213,6 +217,13 @@
     <None Include="Data\Shader\DebugVertex.vert" />
     <None Include="Data\Shader\GUIFragment.frag" />
     <None Include="Data\Shader\GUIVertex.vert" />
+    <None Include="Data\Shader\Raytracing\closesthit.rchit" />
+    <None Include="Data\Shader\Raytracing\Fragment.frag" />
+    <None Include="Data\Shader\Raytracing\hg_sdf.frag" />
+    <None Include="Data\Shader\Raytracing\miss.rmiss" />
+    <None Include="Data\Shader\Raytracing\raygen.rgen" />
+    <None Include="Data\Shader\Raytracing\shadow.rmiss" />
+    <None Include="Data\Shader\Raytracing\Vertex.vert" />
     <None Include="Data\Shader\SceneFragment.frag" />
     <None Include="Data\Shader\SceneVertex.vert" />
     <None Include="Data\Shader\ShadowFragment.frag" />

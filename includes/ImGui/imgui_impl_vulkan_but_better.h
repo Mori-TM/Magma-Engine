@@ -973,10 +973,16 @@ void ImGui_ImplVulkan_Shutdown()
 				vkFreeMemory(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.Buffers[i].IndexBufferMemory, NULL);
 			}
 		}
+
+		free(ImGui_ImplVulkan_Renderer_Info.Buffers);
 	}
 
 //	vkDestroyDescriptorSetLayout(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.DescriptorSetLayout, NULL);
 	vkDestroyPipelineLayout(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.PipelineLayout, NULL);
 	vkDestroyPipeline(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.Pipeline, NULL);
 	vkDestroyPipeline(ImGui_ImplVulkan_Renderer_Info.Device, ImGui_ImplVulkan_Renderer_Info.OpaquePipeline, NULL);
+
+	ImGuiIO* IO = &ImGui::GetIO();
+	IO->BackendRendererName = NULL;
+	IO->BackendRendererUserData = NULL;
 }

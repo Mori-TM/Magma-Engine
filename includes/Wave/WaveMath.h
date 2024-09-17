@@ -560,7 +560,7 @@ WAVE_INLINE vec4 Sub4P(vec4* a, vec4* b)
 
 WAVE_INLINE vec4 Mul4P(vec4* a, vec4* b)
 {
-	
+
 #if defined(WAVE_HAS_SSE)
 	vec4 r;
 	r.Fast = _mm_mul_ps(a->Fast, b->Fast);
@@ -962,10 +962,10 @@ vec4 MultiplyVec4Mat4P(vec4* v, mat4* m)
 	r = Add4(r, Mul4fP(&m->m4[2], v->z));
 	r = Add4(r, Mul4fP(&m->m4[3], v->w));
 
-//	r.x = v->x * m->m[0][0] + v->y * m->m[1][0] + v->z * m->m[2][0] + v->w * m->m[3][0];
-//	r.y = v->x * m->m[0][1] + v->y * m->m[1][1] + v->z * m->m[2][1] + v->w * m->m[3][1];
-//	r.z = v->x * m->m[0][2] + v->y * m->m[1][2] + v->z * m->m[2][2] + v->w * m->m[3][2];
-//	r.w = v->x * m->m[0][3] + v->y * m->m[1][3] + v->z * m->m[2][3] + v->w * m->m[3][3];
+	//	r.x = v->x * m->m[0][0] + v->y * m->m[1][0] + v->z * m->m[2][0] + v->w * m->m[3][0];
+	//	r.y = v->x * m->m[0][1] + v->y * m->m[1][1] + v->z * m->m[2][1] + v->w * m->m[3][1];
+	//	r.z = v->x * m->m[0][2] + v->y * m->m[1][2] + v->z * m->m[2][2] + v->w * m->m[3][2];
+	//	r.w = v->x * m->m[0][3] + v->y * m->m[1][3] + v->z * m->m[2][3] + v->w * m->m[3][3];
 	return r;
 }
 
@@ -1348,10 +1348,10 @@ WAVE_INLINE void SetMat4Vec4P(vec4* a, vec4* b, vec4* c, vec4* d, mat4* Res)
 	Res->Fast[2] = c->Fast;
 	Res->Fast[3] = d->Fast;
 
-//	_mm_storeu_ps(&Res->Fast[0], a->Fast);
-//	_mm_storeu_ps(&Res->Fast[1], b->Fast);
-//	_mm_storeu_ps(&Res->Fast[2], c->Fast);
-//	_mm_storeu_ps(&Res->Fast[3], d->Fast);
+	//	_mm_storeu_ps(&Res->Fast[0], a->Fast);
+	//	_mm_storeu_ps(&Res->Fast[1], b->Fast);
+	//	_mm_storeu_ps(&Res->Fast[2], c->Fast);
+	//	_mm_storeu_ps(&Res->Fast[3], d->Fast);
 #else
 	Res->Fast[0] = a->Fast;
 	Res->Fast[1] = b->Fast;
@@ -1423,7 +1423,7 @@ mat4 InverseMat4(mat4 m)
 	float Dot1 = (Dot0.x + Dot0.y) + (Dot0.z + Dot0.w);
 
 	float OneOverDeterminant = 1 / Dot1;
-	
+
 	//???
 	MulMat4FloatP(&Inverse, OneOverDeterminant);
 	return Inverse;
@@ -1431,13 +1431,13 @@ mat4 InverseMat4(mat4 m)
 
 mat4 TransposeMat4(mat4* Mat)
 {
-//	mat4 Matrix =
-//	{
-//		Mat->m[0][0], Mat->m[1][0], Mat->m[2][0], Mat->m[3][0],
-//		Mat->m[0][1], Mat->m[1][1], Mat->m[2][1], Mat->m[3][1],
-//		Mat->m[0][2], Mat->m[1][2], Mat->m[2][2], Mat->m[3][2],
-//		Mat->m[0][3], Mat->m[1][3], Mat->m[2][3], Mat->m[3][3]
-//	};
+	//	mat4 Matrix =
+	//	{
+	//		Mat->m[0][0], Mat->m[1][0], Mat->m[2][0], Mat->m[3][0],
+	//		Mat->m[0][1], Mat->m[1][1], Mat->m[2][1], Mat->m[3][1],
+	//		Mat->m[0][2], Mat->m[1][2], Mat->m[2][2], Mat->m[3][2],
+	//		Mat->m[0][3], Mat->m[1][3], Mat->m[2][3], Mat->m[3][3]
+	//	};
 
 	mat4 Matrix;
 
@@ -1473,4 +1473,9 @@ WAVE_INLINE int RandomInt(int Min, int Max)
 WAVE_INLINE float ToRadians(float Angle)
 {
 	return 0.01745329251 * Angle;
+}
+
+WAVE_INLINE int Compare3(vec3 a, vec3 b, float Accuracy)
+{
+	return fabsf(a.x - b.x) < Accuracy && fabsf(a.y - b.y) < Accuracy && fabsf(a.z - b.z) < Accuracy;
 }

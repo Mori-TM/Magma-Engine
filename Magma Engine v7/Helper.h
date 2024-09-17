@@ -135,6 +135,9 @@ double GetExecutionTimeOpenVkBool(OpenVkBool(*Func)(void))
 
 	return Time;
 }
+
+bool RestartEngine = false;
+
 /*
 const size_t MEMORY_POOL_SIZE = 1024 * 1024 * 100;
 size_t MemoryUsedSize = 0;

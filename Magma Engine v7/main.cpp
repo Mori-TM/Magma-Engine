@@ -63,6 +63,7 @@ static std::atomic<bool> Init = false;
 
 void RenderThread()
 {
+Restart:
 #ifdef _WIN32
 	system("GLSLCompiler.bat");
 #endif
@@ -87,6 +88,9 @@ void RenderThread()
 
 	while (Run)
 	{
+		if (RestartEngine)
+			Run = false;
+
 		while (SDL_PollEvent(&Event))
 		{
 			RendererEvent();
@@ -103,6 +107,13 @@ void RenderThread()
 	SDL_DestroyWindow(Window);
 	SDL_Quit();
 	printf("%f\n", WaveGetUsedMemory() * 0.000001);
+
+	if (RestartEngine)
+	{
+		RestartEngine = false;
+		Run = true;
+		goto Restart;
+	}
 }
 
 void CullingThread()

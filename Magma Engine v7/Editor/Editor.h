@@ -109,6 +109,23 @@ inline void ImGuiSetPosPaddingX(float Pos)
 	ImGui::SetCursorPosX(Pos - GImGui->Style.FramePadding.x);
 }
 
+bool ImGuiImageButtonID(const char* ID, ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1), int frame_padding = -1, const ImVec4& bg_col = ImVec4(0, 0, 0, 0), const ImVec4& tint_col = ImVec4(1, 1, 1, 1))
+{
+	ImGuiContext& g = *GImGui;
+	ImGuiWindow* window = g.CurrentWindow;
+	if (window->SkipItems)
+		return false;
+
+	// Default to using texture ID as ID. User can still push string/integer prefixes.
+	ImGui::PushID(ID);
+	const ImGuiID id = window->GetID("#image");
+	ImGui::PopID();
+
+	const ImVec2 padding = (frame_padding >= 0) ? ImVec2((float)frame_padding, (float)frame_padding) : g.Style.FramePadding;
+	return ImGui::ImageButtonEx(id, user_texture_id, size, uv0, uv1, padding, bg_col, tint_col);
+}
+
+
 void EngineInitEditor()
 {
 	

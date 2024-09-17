@@ -164,6 +164,7 @@
     <ClInclude Include="Editor\Inspector.h" />
     <ClInclude Include="Editor\SceneManager.h" />
     <ClInclude Include="Engine\AudioEngine.h" />
+    <ClInclude Include="Engine\CameraPath.h" />
     <ClInclude Include="Engine\ECS.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="Engine\FpsCamera.h" />

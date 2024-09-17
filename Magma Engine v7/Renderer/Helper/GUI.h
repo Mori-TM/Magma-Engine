@@ -311,7 +311,7 @@ void EndSingleTimeCommandBuffer(VkCommandBuffer CommandBuffer)
 	vkFreeCommandBuffers(VkRenderer.Device, VkRenderer.CommandPool, 1, &CommandBuffer);
 }
 
-const float FontMultiplyer = 1.25;
+float FontMultiplyer = 1.75;
 
 uint32_t ImGuiUsedDescriptorPool = 0;
 

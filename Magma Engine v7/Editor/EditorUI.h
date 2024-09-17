@@ -8,19 +8,123 @@ bool WinResizeMouseState = false;
 
 bool EditorBarButtonPressed = false;
 
+//bool AABBCollision2D(int32_t x, int32_t y, int32_t MinX, int32_t Min)
+
+typedef enum
+{
+	EDITOR_DRAGGING_STATE_FALSE = 0,
+	EDITOR_DRAGGING_STATE_TRUE,
+	EDITOR_DRAGGING_STATE_RELEASED,
+	EDITOR_DRAGGING_STATE_COUNT,
+} EditorDraggingState;
+
+EditorDraggingState EditorIsDragging(ImRect Rect, bool* IsDragging)
+{
+	if (ImGui::IsMouseHoveringRect(Rect.Min, Rect.Max) || *IsDragging)
+	{
+		if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+		{
+			*IsDragging = true;
+		//	ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+		//	SDL_SetWindowPosition(Window, MouseGX - MouseX, MouseGY - MouseY);
+			return EDITOR_DRAGGING_STATE_TRUE;
+		}
+		else
+		{
+		//	SDL_GetMouseState(&MouseX, &MouseY);
+			return EDITOR_DRAGGING_STATE_RELEASED;
+		}
+	}
+
+
+
+	if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+	{
+		*IsDragging = false;
+		//	ImGui::ReleaseMouseCapture();
+	}
+
+	return EDITOR_DRAGGING_STATE_FALSE;
+}
+
 void EditorWindowBar()
 {
 	ImGuiWindow* window = ImGui::GetCurrentWindow();
-	ImRect Rect = window->MenuBarRect();
+//	ImRect Rect = window->MenuBarRect();
 
 	int32_t MouseGX;
 	int32_t MouseGY;
 	uint32_t MouseState = SDL_GetGlobalMouseState(&MouseGX, &MouseGY);
 
-	int32_t MouseX;
-	int32_t MouseY;
-	SDL_GetMouseState(&MouseX, &MouseY);
+	static int32_t MouseX = 0;
+	static int32_t MouseY = 0;
+	static bool IsDragging = false;
+	static bool IsDoubleClicked = false;
 
+	if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+		IsDoubleClicked = true;
+
+	const Uint8* State = SDL_GetKeyboardState(NULL);
+	
+//	EditorDraggingState State = EditorIsDragging(Rect, &IsDragging);
+	if (IsDoubleClicked == true &&
+		ImGui::IsMouseDragging(ImGuiMouseButton_Left) &&
+		State[SDL_SCANCODE_LCTRL])
+	{
+		ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+		SDL_SetWindowPosition(Window, MouseGX - MouseX, MouseGY - MouseY);
+	}
+	else
+	{
+		SDL_GetMouseState(&MouseX, &MouseY);
+		
+	}
+	if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+		IsDoubleClicked = false;
+
+
+	ImRect Rect;
+	Rect = { (float)WindowWidth - 25, (float)WindowHeight - 25, (float)WindowWidth + 25, (float)WindowHeight + 25 };
+
+	EditorDraggingState DraggingState = EditorIsDragging(Rect, &IsDragging);
+	if (DraggingState == EDITOR_DRAGGING_STATE_TRUE)
+	{
+		ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNESW);
+	}
+
+	if (DraggingState == EDITOR_DRAGGING_STATE_RELEASED)
+	{
+	//	SDL_GetMouseState(&MouseX, &MouseY);
+	}
+
+//	if (!ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+//		IsDoubleClicked = false;
+	
+	/*
+	if (ImGui::IsMouseHoveringRect(Rect.Min, Rect.Max) || IsDragging)
+	{
+		if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+		{
+			IsDragging = true;
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+			SDL_SetWindowPosition(Window, MouseGX - MouseX, MouseGY - MouseY);
+		}
+		else
+		{
+			SDL_GetMouseState(&MouseX, &MouseY);
+		}
+	}
+	
+	
+
+	if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+	{
+		IsDragging = false;
+	//	ImGui::ReleaseMouseCapture();
+	}
+	*/
+
+	/*
 	if (MouseState == 1 && WinBarMouseState == 0 &&
 		MouseX > Rect.Min.x && MouseX < Rect.Max.x &&
 		MouseY > Rect.Min.y && MouseY < Rect.Max.y)
@@ -65,6 +169,9 @@ void EditorWindowBar()
 	{
 
 	}
+	*/
+//	int32_t HitboxSize = 5;
+//	if (MouseX - HitboxSize )
 }
 
 bool EditorOpenedSettingsWindow = false;
@@ -72,15 +179,16 @@ bool EditorOpenedSettingsWindow = false;
 typedef enum
 {
 	EDITOR_SETTING_TEXTURE = 0,
-	EDITOR_SETTING_MODEL_IMPORTER = 1,
-	EDITOR_SETTING_MATERIAL = 2,
-	EDITOR_SETTING_THEME = 3,
-	EDITOR_SETTING_CAMERA = 4,
-	EDITOR_SETTING_EDITOR = 5,
-	EDITOR_SETTING_OTHER = 6,
+	EDITOR_SETTING_MODEL_IMPORTER,
+	EDITOR_SETTING_MATERIAL,
+	EDITOR_SETTING_THEME,
+	EDITOR_SETTING_CAMERA,
+	EDITOR_SETTING_EDITOR,
+	EDITOR_SETTING_OTHER,
+	EDITOR_SETTING_COUNT
 } EditorSelectableSettings;
 
-uint32_t EditorSelectedSetting = EDITOR_SETTING_TEXTURE;
+EditorSelectableSettings EditorSelectedSetting = EDITOR_SETTING_TEXTURE;
 
 void EditorSettingsWindow()
 {
@@ -211,9 +319,13 @@ void EditorSettingsWindow()
 				ImGui::SliderFloat("Default Occlusion Strength", &ModelOcclusion, 0.0, 1.0);
 				ImGui::Separator();
 				ImGui::Checkbox("Import Materials", &ModelLoadMaterials);
+				ImGui::Checkbox("Remove Redundant Materials", &ModelRedundantMaterials);
 				ImGui::Checkbox("Generate Flat Normals", &ModelGenFlatNormals);
 				ImGui::Checkbox("Generate Smooth Normals", &ModelGenSmoothNormals);
 				ImGui::Checkbox("Flip UVs", &ModelFlipUVs);
+				ImGui::Checkbox("Set Zero Alpha To One", &ModelSetZeroAlphaOne);
+				//Add option to set 0.0 transparancie to 1.0
+
 				break;
 			case EDITOR_SETTING_MATERIAL:
 				ImGui::InputText("Default Name", MaterialName, MAX_CHAR_NAME_LENGTH);
@@ -248,6 +360,12 @@ void EditorSettingsWindow()
 				//vec3-Icon Color
 				
 				ImGui::DragFloat("Font Size", &GImGui->IO.FontGlobalScale, 0.005, 0.1, 5.0, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+//				ImGui::DragFloat("Font Multiplyer", &FontMultiplyer, 0.01, 0.1, 10.0);
+				if (ImGui::Button("Apply"))
+				{
+					RestartEngine = true;
+					FontMultiplyer *= GImGui->IO.FontGlobalScale;
+				}					
 				break;
 			case EDITOR_SETTING_OTHER:
 				//bool-Frustum culling
@@ -506,6 +624,32 @@ void EngineDrawEditor()
 		}
 		Mutex.unlock();
 
+		ImGui::Text("Record Camera Path");
+		ImGui::SameLine();
+		ImGui::PushFont(IconFontSmall);
+		static char* ButtonType = (char*)"G";
+		ImGui::PushID("Play Button");
+		if (ImGui::Button(ButtonType))
+		{
+			CameraPath.Record = !CameraPath.Record;
+			if (CameraPath.Record)
+				ButtonType = (char*)"L";
+			else
+				ButtonType = (char*)"G";
+		}
+		ImGui::PopID();
+		ImGui::PopFont();
+		ImGui::Text("Recorded Frame: %d", CameraPath.FrameCountPath);
+
+		if (ImGui::Button("Camera Path Reset"))
+		{
+			CameraPath.FrameCount = 0;
+			CameraPath.FrameCountPath = 0;
+		}
+
+		if (ImGui::Button("Play Camera Path"))
+			CameraPath.Play = !CameraPath.Play;
+
 		ImGui::Text("Scene Vertices: %d", VertexCount);
 		ImGui::Text("Scene Indices: %d", IndexCount);
 		ImGui::Text("Scene Triangles: %d", IndexCount / 3);
@@ -721,7 +865,7 @@ void EngineDrawEditor()
 		{
 			ImGui::Text(DebugAttachmentNames[i]);
 	//		ImGui::PushID(DebugDescriptorSets[i]);
-			if (ImGui::ImageButton(&GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+			if (ImGuiImageButtonID(DebugAttachmentNames[i], &GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
 				SceneRenderDescriptorSet = DebugDescriptorSets[i];
 
 			ImGui::NewLine();

@@ -226,8 +226,8 @@ void GBufferDraw()
 		OpenVkSetScissor(0, 0, SceneWidth, SceneHeight);
 		OpenVkSetViewport(0, 0, SceneWidth, SceneHeight);
 
-		if (!GameMode && !RenderGamePreview)
-			DebugDraw();
+	//	if (!GameMode && !RenderGamePreview)
+	//		DebugDraw();
 
 		uint32_t Pipeline = GBufferPipelineNoneCull;
 		switch (GBufferCullMode)

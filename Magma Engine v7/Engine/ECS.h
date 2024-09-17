@@ -26,6 +26,8 @@ const char* ComponentNames[] =
 	"Rigidbody"
 };
 
+
+//Maybe add _TYPE_
 typedef enum
 {
 	LIGHT_POINT = 0,
@@ -624,9 +626,11 @@ float ModelMetallic = 0.0;
 float ModelRoughness = 1.0;
 float ModelOcclusion = 1.0;
 bool ModelLoadMaterials = true;
+bool ModelRedundantMaterials = true;
 bool ModelGenFlatNormals = false;
 bool ModelGenSmoothNormals = false;
 bool ModelFlipUVs = true;
+bool ModelSetZeroAlphaOne = true;
 //uint32_t ModelSettings = WAVE_LOAD_MATERIAL | WAVE_GEN_NORMALS | WAVE_FLIP_UVS | WAVE_GEN_UVS | WAVE_GEN_INDICES | WAVE_MATERIAL_USE_MODEL_PATH | WAVE_REMOVE_REDUNDANT_MATERIALS | WAVE_PRINT_DEBUG_INOFS;
 
 bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshInfo)
@@ -712,7 +716,7 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 		SceneMesh->Material.Color.x = ModelData->Materials[i].DiffuseColor.x;
 		SceneMesh->Material.Color.y = ModelData->Materials[i].DiffuseColor.y;
 		SceneMesh->Material.Color.z = ModelData->Materials[i].DiffuseColor.z;
-		SceneMesh->Material.Color.w = ModelData->Materials[i].Dissolve;
+		SceneMesh->Material.Color.w = ModelSetZeroAlphaOne ? (ModelData->Materials[i].Dissolve < 0.01 ? 1.0 : ModelData->Materials[i].Dissolve) : ModelData->Materials[i].Dissolve;
 
 		for (uint32_t j = 0; j < SceneMesh->VertexCount; j++)
 		{
@@ -787,9 +791,10 @@ uint32_t AddModel(uint32_t Settings, const char* FileName)
 
 //	Settings |= WAVE_LOAD_MATERIAL | WAVE_GEN_NORMALS | WAVE_FLIP_UVS | WAVE_GEN_UVS | WAVE_GEN_INDICES | WAVE_MATERIAL_USE_MODEL_PATH | WAVE_REMOVE_REDUNDANT_MATERIALS | WAVE_PRINT_DEBUG_INOFS;
 
-	Settings = WAVE_GEN_UVS | WAVE_GEN_NORMALS | WAVE_GEN_INDICES | WAVE_MATERIAL_USE_MODEL_PATH | WAVE_REMOVE_REDUNDANT_MATERIALS | WAVE_PRINT_DEBUG_INOFS;
+	Settings = WAVE_GEN_UVS | WAVE_GEN_NORMALS | WAVE_GEN_INDICES | WAVE_MATERIAL_USE_MODEL_PATH | WAVE_PRINT_DEBUG_INOFS;
 
 	if (ModelLoadMaterials)		Settings |= WAVE_LOAD_MATERIAL;
+	if (ModelRedundantMaterials)Settings |= WAVE_REMOVE_REDUNDANT_MATERIALS;
 	if (ModelGenFlatNormals)	Settings |= WAVE_FORCE_GEN_NORMALS;
 	if (ModelGenSmoothNormals)	Settings |= WAVE_GEN_SMOOTH_NORMALS;
 	if (ModelFlipUVs)			Settings |= WAVE_FLIP_UVS;

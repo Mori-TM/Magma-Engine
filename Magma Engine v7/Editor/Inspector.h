@@ -13,6 +13,20 @@ void EditorEntityInspector()
 				ImGuiVec3Control("Rotation", &Entities[SelectedEntity].Rotate, 0.0, 120.0);
 				ImGuiVec3Control("Scale", &Entities[SelectedEntity].Scale, 1.0, 120.0);
 				
+				mat4 TransformMatrix;
+				LoadMat4IdentityP(&TransformMatrix);
+				TransformMatrix = ScaleMat4P	(&TransformMatrix, &Entities[SelectedEntity].Scale);
+				TransformMatrix = RotateXMat4P	(&TransformMatrix, ToRadians(Entities[SelectedEntity].Rotate.x));
+				TransformMatrix = RotateYMat4P	(&TransformMatrix, ToRadians(Entities[SelectedEntity].Rotate.y));
+				TransformMatrix = RotateZMat4P	(&TransformMatrix, ToRadians(Entities[SelectedEntity].Rotate.z));
+				TransformMatrix = TranslateMat4P(&TransformMatrix, &Entities[SelectedEntity].Translate);
+
+				ImGui::Text("Matrix =\n\t[ %.2f, %.2f, %.2f, %.2f ]\n\t[ %.2f, %.2f, %.2f, %.2f ]\n\t[ %.2f, %.2f, %.2f, %.2f ]\n\t[ %.2f, %.2f, %.2f, %.2f ]", TransformMatrix.m[0][0], TransformMatrix.m[0][1], TransformMatrix.m[0][2], TransformMatrix.m[0][3], 
+					TransformMatrix.m[1][0], TransformMatrix.m[1][1], TransformMatrix.m[1][2], TransformMatrix.m[1][3], 
+					TransformMatrix.m[2][0], TransformMatrix.m[2][1], TransformMatrix.m[2][2], TransformMatrix.m[2][3], 
+					TransformMatrix.m[3][0], TransformMatrix.m[3][1], TransformMatrix.m[3][2], TransformMatrix.m[3][3]);
+
+
 			//	ImGui::DragFloat3("Translation", (float*)&Entities[SelectedEntity].Translate, 0.1, -10000.0, 10000.0);
 			//	ImGui::DragFloat3("Rotation", (float*)&Entities[SelectedEntity].Rotate, 0.1, -10000.0, 10000.0);
 			//	ImGui::DragFloat3("Scale", (float*)&Entities[SelectedEntity].Scale, 0.1, -10000.0, 10000.0);

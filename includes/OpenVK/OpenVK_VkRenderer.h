@@ -287,7 +287,10 @@ uint32_t VkCreateRenderer(const char**(*GetExtensions)(uint32_t* ExtensionCount)
 	CreateInfo.ppEnabledExtensionNames = VkRenderer.DeviceExtensions;
 
 	if (OpenVkRendererFlags & OPENVK_RAYTRACING)
-		VkGetRaytracingFeatures(&CreateInfo);
+	{
+		if (VkGetRaytracingFeatures(&CreateInfo) == OpenVkFalse)
+			OpenVkRendererFlags &= ~OPENVK_RAYTRACING;
+	}
 
 	if (vkCreateDevice(VkRenderer.PhysicalDevice, &CreateInfo, NULL, &VkRenderer.Device) != VK_SUCCESS)
 		return OpenVkRuntimeError("Failed to Create Device");

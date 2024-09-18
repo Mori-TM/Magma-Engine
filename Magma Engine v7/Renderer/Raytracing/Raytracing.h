@@ -734,13 +734,18 @@ void RaytracingUpdate()
 
 	RTR.CurrentTransformHash = HashUint64(RTR.CurrentTransformHash);
 
-	if (RTR.Render && RTR.LastTransformHash != RTR.CurrentTransformHash)
+	
+	if (RTR.Render)
 	{
-		RtUpdateInstances();
-		RTR.LastTransformHash = RTR.CurrentTransformHash;
-	}
+		if (RTR.LastTransformHash != RTR.CurrentTransformHash)
+		{
+			RtUpdateInstances();
+			RTR.LastTransformHash = RTR.CurrentTransformHash;
+		}
 
-	OpenVkUpdateBuffer(RTR.DescriptionBuffers.Size * sizeof(RaytracingBufferDescription), RTR.DescriptionBuffers.Data, RTR.DescriptionBuffer);
+		OpenVkUpdateBuffer(RTR.DescriptionBuffers.Size * sizeof(RaytracingBufferDescription), RTR.DescriptionBuffers.Data, RTR.DescriptionBuffer);
+	}
+	
 
 	
 	RTR.CurrentTransformHash = 0;

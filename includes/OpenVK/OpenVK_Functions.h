@@ -117,6 +117,9 @@ uint32_t OpenVkCreateRenderer(uint32_t RendererFlags, const char** (*GetExtensio
 		OpenVkDrawIndices = VkDrawIndices;
 		OpenVkBindDescriptorSet = VkBindDescriptorSet;
 		OpenVkPushConstant = VkPushConstant;
+
+		uint32_t Renderer = VkCreateRenderer(GetExtensions, GetSurface, GetWindowSize);
+
 		if (RendererFlags & OPENVK_RAYTRACING)
 		{
 			OpenVkCreateTranformBuffer = VkCreateTranformBuffer;
@@ -132,8 +135,10 @@ uint32_t OpenVkCreateRenderer(uint32_t RendererFlags, const char** (*GetExtensio
 			OpenVkCreateShaderBindingTable = VkCreateShaderBindingTable;
 			OpenVkTraceRays = VkTraceRays;
 		}
+		
 
-		return VkCreateRenderer(GetExtensions, GetSurface, GetWindowSize);
+
+		return Renderer;
 	}
 	else if (RendererFlags & OPENVK_OPENGL)
 	{

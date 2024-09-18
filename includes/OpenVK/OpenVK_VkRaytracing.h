@@ -73,7 +73,7 @@ VkRaytracerInfo VkRaytracer;
 if (vkCreateDevice(VkRenderer.PhysicalDevice, &CreateInfo, NULL, &VkRenderer.Device) != VK_SUCCESS)
 	return OpenVkRuntimeError("Failed to Create Device");
 */
-void VkGetRaytracingFeatures(VkDeviceCreateInfo* DeviceCreateInfo)
+OpenVkBool VkGetRaytracingFeatures(VkDeviceCreateInfo* DeviceCreateInfo)
 {
 	memset(&VkRaytracer, 0, sizeof(VkRaytracerInfo));
 	VkRaytracer.Geometry = CMA_Create(sizeof(VkRaytracingGeometryInfo), "OpenVk Raytracer, Geometry");
@@ -103,6 +103,8 @@ void VkGetRaytracingFeatures(VkDeviceCreateInfo* DeviceCreateInfo)
 	VkRaytracer.EnabledAccelerationStructureFeatures.accelerationStructure = VK_TRUE;
 	VkRaytracer.EnabledAccelerationStructureFeatures.pNext = &VkRaytracer.EnabledRayTracingPipelineFeatures;
 
+	uint32_t StartingDeviceExtensionCount = VkRenderer.DeviceExtensionCount;
+
 	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME;
 	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME;
 	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME;
@@ -112,9 +114,10 @@ void VkGetRaytracingFeatures(VkDeviceCreateInfo* DeviceCreateInfo)
 	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME;
 	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_KHR_MAINTENANCE3_EXTENSION_NAME;
 
-	if (!VkCheckDeviceExtensionSupport(VkRenderer.DeviceExtensionCount, VkRenderer.DeviceExtensions))
+	if (VkCheckDeviceExtensionSupport(VkRenderer.DeviceExtensionCount, VkRenderer.DeviceExtensions) == OPENVK_ERROR)
 	{
-
+		VkRenderer.DeviceExtensionCount = StartingDeviceExtensionCount;
+		return OpenVkFalse;
 	}
 
 	DeviceCreateInfo->enabledExtensionCount = VkRenderer.DeviceExtensionCount;
@@ -126,6 +129,8 @@ void VkGetRaytracingFeatures(VkDeviceCreateInfo* DeviceCreateInfo)
 
 	DeviceCreateInfo->pEnabledFeatures = NULL;
 	DeviceCreateInfo->pNext = &VkRaytracer.PhysicalDeviceFeatures2;
+
+	return OpenVkTrue;
 }
 
 /*

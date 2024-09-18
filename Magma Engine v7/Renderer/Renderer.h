@@ -122,9 +122,13 @@ void RendererCreate()
 	OpenVkInitThreads();
 	SwapChain = OpenVkCreateRenderer(OPENVK_VULKAN | OPENVK_VALIDATION_LAYER | OPENVK_RAYTRACING, GetExtensions, GetSurface, GetWindowSize);
 	
-	RaytracingInit();
-	OpenVkRuntimeInfo("Raytracing was initilaized", "");
-
+	if (OpenVkHasRaytracingSupport())
+	{
+		RaytracingInit();
+		OpenVkRuntimeInfo("Raytracing was initilaized", "");
+	}
+//	exit(3666);
+		
 	CreateRenderPasses();
 	/*
 	* 80, "C:/Windows/Fonts/RAGE.TTF"
@@ -136,7 +140,6 @@ void RendererCreate()
 	CreateSSAONoiseImage();
 	CreatePipelineLayouts();
 	CreateGraphicsPipelines();
-	
 	CreateFramebuffers();
 
 	CreateImageSampler();
@@ -161,6 +164,8 @@ void RendererCreate()
 	LuaInit();
 	ImGuiInit();
 	FpsCameraInit();
+
+
 
 	OpenVkRuntimeInfo("Engine was initilaized", "");
 
@@ -210,9 +215,9 @@ void RendererCreate()
 //	}
 
 //	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
-//	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/Sponza-master/sponza2.obj");
+	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/Sponza-master/sponza2.obj");
 //	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/TestMesh.obj");
-	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
+//	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Sponza-master/Sponza2.obj");
 		AddEntity(COMPONENT_TYPE_MESH);
 		AddMeshToEntity(SelectedEntity, ModelIndex);
 		
@@ -231,7 +236,7 @@ void RendererCreate()
 		strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
 	OpenVkRuntimeInfo("Scene was initilaized", "");
 
-//	exit(3666);
+	
 }
 
 void RendererDestroy()
@@ -244,7 +249,8 @@ void RendererDestroy()
 	EngineDestroy();
 	EngineDestroyEditor();
 	CameraDestroyPath();
-	RaytracingDestroy();
+	if (OpenVkHasRaytracingSupport())
+		RaytracingDestroy();
 	
 	OpenVkGUIDestroy();
 	OpenVkDestroyRenderer();
@@ -271,7 +277,8 @@ void RendererUpdate()
 	SceneUpdateStorageBuffer();
 	SSRUpdateUniformBuffer();
 	
-	RaytracingUpdate();
+	if (OpenVkHasRaytracingSupport())
+		RaytracingUpdate();
 }
 
 void RendererDraw()
@@ -304,7 +311,8 @@ void RendererDraw()
 			else
 				SceneRenderDescriptorSet = SceneOutputDescriptorSet;
 
-			RaytracingDraw();
+			if (OpenVkHasRaytracingSupport())
+				RaytracingDraw();
 		}
 		
 
@@ -329,7 +337,8 @@ void RendererResize(OpenVkBool RecreateSwapChain)
 	CreateFramebuffers();
 	OpenVkDestroyDescriptorPool(DescriptorPool);
 	CreateDescriptors();
-	RaytracingResize();
+	if (OpenVkHasRaytracingSupport())
+		RaytracingResize();
 	ForceRenderOnce = true;
 }
 
@@ -513,7 +522,9 @@ void RendererRun()
 		// Use OpenVk function!!!
 		for (uint32_t i = 0; i < VkRenderer.Pipelines.Size; i++)
 		{
-			if (i != RTR.RaytracingPipeline)
+
+			//FIX - check if works the if statement
+			if (!(OpenVkHasRaytracingSupport() && i == RTR.RaytracingPipeline))
 			{
 				VkPipeline* Pipeline = (VkPipeline*)CMA_GetAt(&VkRenderer.Pipelines, i);
 				if (Pipeline != NULL)
@@ -535,6 +546,7 @@ void RendererRun()
 	GetDeltaTime();
 //	OpenVkDrawFrame(RendererDraw, RendererResize, RendererUpdate);
 
+	if (OpenVkHasRaytracingSupport())
 	{
 		RaytracingRestBuild();
 

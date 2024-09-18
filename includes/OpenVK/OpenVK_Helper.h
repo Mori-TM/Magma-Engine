@@ -386,6 +386,12 @@ typedef struct
 	uint32_t HitHandleCount;
 } OpenVkTraceRaysInfo;
 
+//Only call after OpenVkCreateRenderer
+OpenVkBool OpenVkHasRaytracingSupport()
+{	
+	return (OpenVkRendererFlags & OPENVK_RAYTRACING ? OpenVkTrue : OpenVkFalse);
+}
+
 void OpenVkRuntimeInfo(const char* Msg, const char* Val)
 {
 	printf("\x1B[36m[Renderer Info]\033[0m\t%s%s\n", Msg, Val);

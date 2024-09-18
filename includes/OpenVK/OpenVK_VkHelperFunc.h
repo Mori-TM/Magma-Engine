@@ -195,7 +195,7 @@ uint32_t VkGetBestSuitablePhysicalDevice(uint32_t DeviceCount, VkPhysicalDevice*
 			BestDevice = i;
 		}
 	}
-
+//	BestDevice = 1;
 	vkGetPhysicalDeviceProperties(Devices[BestDevice], &VkRenderer.PhysicalDeviceProperties);
 	vkGetPhysicalDeviceFeatures(Devices[BestDevice], &VkRenderer.PhysicalDeviceFeatures);
 
@@ -391,7 +391,7 @@ OpenVkBool VkCheckDeviceExtensionSupport(uint32_t RequiredExtensionCount, const 
 		if (Found == OpenVkFalse)
 		{
 			free(AvailableExtensions);
-			return OpenVkRuntimeError("Required Extension %s, is not supported by device!", RequiredExtensions[i]);
+			return OpenVkRuntimeWarning("Required Extension %s, is not supported by device! This can be fatal!", RequiredExtensions[i]);
 		}
 	}
 

@@ -1450,6 +1450,30 @@ mat4 TransposeMat4(mat4* Mat)
 	return Matrix;
 }
 
+
+void ColumnToRowMajorMat4P(const mat4 ColumnMajor, mat4* RowMajor)
+{
+	RowMajor->m[0][0] = ColumnMajor.m[0][0];
+	RowMajor->m[0][1] = ColumnMajor.m[1][0];
+	RowMajor->m[0][2] = ColumnMajor.m[2][0];
+	RowMajor->m[0][3] = ColumnMajor.m[3][0];
+
+	RowMajor->m[1][0] = ColumnMajor.m[0][1];
+	RowMajor->m[1][1] = ColumnMajor.m[1][1];
+	RowMajor->m[1][2] = ColumnMajor.m[2][1];
+	RowMajor->m[1][3] = ColumnMajor.m[3][1];
+
+	RowMajor->m[2][0] = ColumnMajor.m[0][2];
+	RowMajor->m[2][1] = ColumnMajor.m[1][2];
+	RowMajor->m[2][2] = ColumnMajor.m[2][2];
+	RowMajor->m[2][3] = ColumnMajor.m[3][2];
+
+	RowMajor->m[3][0] = ColumnMajor.m[0][3];
+	RowMajor->m[3][1] = ColumnMajor.m[1][3];
+	RowMajor->m[3][2] = ColumnMajor.m[2][3];
+	RowMajor->m[3][3] = ColumnMajor.m[3][3];
+}
+
 //helper
 WAVE_INLINE void PrintVec2(vec2* a)
 {

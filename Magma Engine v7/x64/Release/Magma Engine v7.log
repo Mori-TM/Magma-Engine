@@ -429,6 +429,24 @@ C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WavePhysics.h
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WavePhysics.h(157,61): warning C4100: 'Sphere': unreferenced formal parameter
   (compiling source file 'main.cpp')
   
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Json\Json.h(176,14): warning C4456: declaration of 'Obj' hides previous local declaration
+  (compiling source file 'main.cpp')
+  C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Json\Json.h(146,13):
+  see declaration of 'Obj'
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Json\Json.h(182,17): warning C4456: declaration of 'Var' hides previous local declaration
+  (compiling source file 'main.cpp')
+  C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Json\Json.h(155,16):
+  see declaration of 'Var'
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Json\Json.h(188,19): warning C4456: declaration of 'Var' hides previous local declaration
+  (compiling source file 'main.cpp')
+  C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Json\Json.h(182,17):
+  see declaration of 'Var'
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Json\Json.h(161,14): warning C4189: 'PrevObj': local variable is initialized but not referenced
+  (compiling source file 'main.cpp')
+  
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\OpenVK\CMA.h(298,20): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
@@ -1114,6 +1132,11 @@ C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(99,23): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(317,17): warning C4456: declaration of 'i' hides previous local declaration
+  (compiling source file 'main.cpp')
+  C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(308,15):
+  see declaration of 'i'
+  
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(34,28): warning C4459: declaration of 'CameraPos' hides global declaration
   (compiling source file 'main.cpp')
   C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(6,6):
@@ -1448,23 +1471,23 @@ C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pi
   C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Pipelines\SwapChainPipeline.h(179,5):
   consider using '%I64d' in the format string
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(381,29): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(382,29): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(382,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(383,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(386,33): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(387,33): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(387,35): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(388,35): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(405,33): warning C4100: 'TextureImage': unreferenced formal parameter
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(406,33): warning C4100: 'TextureImage': unreferenced formal parameter
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\main.cpp(73,35): warning C4100: 'argv': unreferenced formal parameter
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\main.cpp(73,22): warning C4100: 'argc': unreferenced formal parameter
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\main.cpp(74,35): warning C4100: 'argv': unreferenced formal parameter
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\main.cpp(74,22): warning C4100: 'argc': unreferenced formal parameter
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\algorithm(3456,24): warning C4244: '=': conversion from 'int' to 'char', possible loss of data
   (compiling source file 'main.cpp')
   C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\algorithm(3456,24):
@@ -1482,8 +1505,8 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.3313
      Creating library C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.lib and object C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exp
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  4 of 4954 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+  3 of 4961 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    112 functions had inline decision re-evaluated but remain unchanged
+    110 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Magma Engine v7.vcxproj -> C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exe

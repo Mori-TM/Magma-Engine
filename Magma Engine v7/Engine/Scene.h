@@ -282,7 +282,54 @@ void SceneSave(const char* FileName)
 	printf("Saved Scene: %s\n", FileName);
 }
 
- void SceneLoad(const char* FileName)
+void SceneLoadTexture(JsonObject* Object)
 {
-	printf("Loaded Scene: %s\n", FileName);
+	char* Path = NULL;
+	bool ShowInAssetBrowser = false;
+
+	for (size_t i = 0; i < Object->Refrences.Size; i++)
+	{
+		JsonVariables* Variable = (JsonVariables*)DynamicArrayGetAt(&Object->Refrences, i);
+		if (strcmp(Variable->Name, "Path") == 0)
+			Path = Variable->Data.Str;
+		else if (strcmp(Variable->Name, "ShowInAssetBrowser") == 0)
+				ShowInAssetBrowser = Variable->Data.Bool;
+	}
+	AddTexture(Path, ShowInAssetBrowser);
+}
+
+void SceneLoad(const char* FileName)
+{
+	Json Jsn;
+	if (JsonParseFile(FileName, &Jsn) != JSON_ERROR)
+	{
+		JsonObject* Base = (JsonObject*)DynamicArrayGetAt(&Jsn.Objects, 0);
+
+		for (size_t i = 0; i < Base->Refrences.Size; i++)
+		{
+			JsonObject* Objects = (JsonObject*)DynamicArrayGetAt(&Base->Refrences, i);
+			printf("Object: %s\n", Objects->Name);
+
+		//	
+			
+			if (strcmp(Objects->Name, "Textures") == 0)
+			{
+				for (size_t i = 0; i < Objects->Refrences.Size; i++)
+				{
+					JsonObject* Object = (JsonObject*)DynamicArrayGetAt(&Objects->Refrences, i);
+					SceneLoadTexture(Object);
+				}
+				
+			}
+				
+
+			//FIX - Give better names
+		}
+
+
+		printf("Loaded Scene: %s\n", FileName);
+		JsonDestroy(&Jsn);
+	}
+
+
 }

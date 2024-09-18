@@ -61,6 +61,7 @@ extern "C"
 #include <Wave/WaveLayer.h>
 #include <Wave/WavePhysics.h>
 
+#include <Json/Json.h>
 #include <Md2Loader/Md2Loader.h>
 #include <OpenVK/OpenVK.h>
 
@@ -197,6 +198,8 @@ Restart:
 	RendererCreate();
 	bool Run = true;
 
+	SceneLoad("ExampleScene.lva");
+
 //	Run = false;
 //	exit(3666);
 
@@ -218,7 +221,7 @@ Restart:
 		FrameCount++;
 	}
 	
-	SceneSave("ExampleScene.lva");
+//	SceneSave("ExampleScene.lva");
 
 	RendererDestroy();
 	SDL_DestroyWindow(Window);

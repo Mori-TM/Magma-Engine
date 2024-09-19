@@ -21,7 +21,8 @@ void EditorEntityInspector()
 				TransformMatrix = RotateZMat4P	(&TransformMatrix, ToRadians(Entities[SelectedEntity].Rotate.z));
 				TransformMatrix = TranslateMat4P(&TransformMatrix, &Entities[SelectedEntity].Translate);
 
-				ImGui::Text("Matrix =\n\t[ %.2f, %.2f, %.2f, %.2f ]\n\t[ %.2f, %.2f, %.2f, %.2f ]\n\t[ %.2f, %.2f, %.2f, %.2f ]\n\t[ %.2f, %.2f, %.2f, %.2f ]", TransformMatrix.m[0][0], TransformMatrix.m[0][1], TransformMatrix.m[0][2], TransformMatrix.m[0][3], 
+				ImGui::Text("Matrix =\n\t[ %.2f, %.2f, %.2f, %.2f ]\n\t[ %.2f, %.2f, %.2f, %.2f ]\n\t[ %.2f, %.2f, %.2f, %.2f ]\n\t[ %.2f, %.2f, %.2f, %.2f ]", 
+					TransformMatrix.m[0][0], TransformMatrix.m[0][1], TransformMatrix.m[0][2], TransformMatrix.m[0][3], 
 					TransformMatrix.m[1][0], TransformMatrix.m[1][1], TransformMatrix.m[1][2], TransformMatrix.m[1][3], 
 					TransformMatrix.m[2][0], TransformMatrix.m[2][1], TransformMatrix.m[2][2], TransformMatrix.m[2][3], 
 					TransformMatrix.m[3][0], TransformMatrix.m[3][1], TransformMatrix.m[3][2], TransformMatrix.m[3][3]);

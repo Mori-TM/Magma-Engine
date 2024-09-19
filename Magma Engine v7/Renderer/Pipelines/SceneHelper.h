@@ -120,6 +120,7 @@ typedef enum
 typedef struct
 {
 	SceneMaterial Material;
+	uint32_t MaterialIndex;
 
 	uint32_t VertexOffset;
 	uint32_t VertexCount;

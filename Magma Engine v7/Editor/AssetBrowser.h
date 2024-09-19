@@ -102,31 +102,31 @@ void EditorAssetBrowser()
 
 			if (ImGui::Selectable("Add Material"))
 			{
-				AddMaterial();
+				AddMaterial(NULL);
 				ImGui::SetWindowFocus("Material Inspector");
 			}
 
 			if (ImGui::Selectable("Add Plane"))
 			{
-				AddPlane();
+				AddDefaultModel(DEFAULT_MODEL_PLANE);
 				ImGui::SetWindowFocus("Mesh Inspector");
 			}
 
 			if (ImGui::Selectable("Add Cube"))
 			{
-				AddCube();
+				AddDefaultModel(DEFAULT_MODEL_CUBE);
 				ImGui::SetWindowFocus("Mesh Inspector");
 			}
 
 			if (ImGui::Selectable("Add Sphere"))
 			{
-				AddSphere();
+				AddDefaultModel(DEFAULT_MODEL_SPHERE);
 				ImGui::SetWindowFocus("Mesh Inspector");
 			}
 
 			if (ImGui::Selectable("Add Bean"))
 			{
-				AddBean();
+				AddDefaultModel(DEFAULT_MODEL_BEAN);
 				ImGui::SetWindowFocus("Mesh Inspector");
 			}
 			

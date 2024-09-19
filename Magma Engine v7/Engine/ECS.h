@@ -413,14 +413,23 @@ uint32_t AddMesh(const char* Name, SceneMesh* MeshInfo)
 	return SelectedMesh;
 }
 
-uint32_t AddMaterial()
+//if NULL set to default
+uint32_t AddMaterial(SceneMaterial* Material)
 {
-	SceneMaterial Material;
-	SetDefaultMaterial(&Material, MaterialName);
+	SceneMaterial DefMaterial;
+	char Name[MAX_CHAR_NAME_LENGTH];
+	if (Material == NULL)
+	{
+		SetDefaultMaterial(&DefMaterial, MaterialName);
+		Material = &DefMaterial;
+		strcpycut(Name, MaterialName);
+	}
+	else
+		strcpycut(Name, Material->Name);
 
-	CheckForSameNames(&SceneMaterials, ARRAY_SIZE(Material.Name), MaterialName, Material.Name);
+	CheckForSameNames(&SceneMaterials, ARRAY_SIZE(Material->Name), Name, Material->Name);
 
-	SelectedMaterial = CMA_Push(&SceneMaterials, &Material);
+	SelectedMaterial = CMA_Push(&SceneMaterials, Material);
 
 	return SelectedMesh;
 }
@@ -805,6 +814,11 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 		SceneMesh->Material.Color.z = ModelData->Materials[i].DiffuseColor.z;
 		SceneMesh->Material.Color.w = ModelSetZeroAlphaOne ? (ModelData->Materials[i].Dissolve < 0.01 ? 1.0 : ModelData->Materials[i].Dissolve) : ModelData->Materials[i].Dissolve;
 
+		
+		strcpycut(SceneMesh->Material.Name, ModelData->Materials[i].MaterialName);
+	//	OpenVkRuntimeError("%s", SceneMesh->Material.Name);
+		AddMaterial(&SceneMesh->Material);
+
 		uint32_t LastVertexCount = VertexCount;
 
 		for (uint32_t j = 0; j < SceneMesh->VertexCount; j++)
@@ -922,8 +936,85 @@ uint32_t AddModel(uint32_t Settings, const char* FileName)
 	return MeshIndex;
 }
 
+typedef enum : uint32_t
+{
+	DEFAULT_MODEL_PLANE = 0,
+	DEFAULT_MODEL_CUBE,
+	DEFAULT_MODEL_SPHERE,
+	DEFAULT_MODEL_BEAN,
+	DEFAULT_MODEL_COUNT
+} DefaultModels;
+
+uint32_t AddDefaultModel(DefaultModels Model)
+{
+	SceneMesh MeshInfo;
+	memset(&MeshInfo, 0, sizeof(SceneMesh));
+
+	SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
+	MeshInfo.Destroyable = false;
+	MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
+	MeshInfo.MeshCount = 1;
+	MeshInfo.MeshData[0].VertexOffset = 0;
+	MeshInfo.MeshData[0].IndexOffset = 0;
+	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
+
+	uint32_t MeshIndex = OPENVK_ERROR;
+
+	switch (Model)
+	{
+	case DEFAULT_MODEL_PLANE:
+		strcpy(MeshInfo.Path, "Plane");
+		MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(PlaneVertices);
+		MeshInfo.MeshData[0].IndexCount = ARRAY_SIZE(PlaneIndices);
+		MeshInfo.VertexBuffer = PlaneVertexBuffer;
+		MeshInfo.IndexBuffer = PlaneIndexBuffer;
+		MeshInfo.MeshData[0].AABB = PlaneAABB;
+		MeshIndex = AddMesh("Plane", &MeshInfo);
+		break;
+
+	case DEFAULT_MODEL_CUBE:
+		strcpy(MeshInfo.Path, "Cube");
+		MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(CubeVertices);
+		MeshInfo.MeshData[0].IndexCount = 0;
+		MeshInfo.VertexBuffer = CubeVertexBuffer;
+		MeshInfo.IndexBuffer = OPENVK_ERROR;
+		MeshInfo.MeshData[0].AABB = CubeAABB;
+		MeshIndex = AddMesh("Cube", &MeshInfo);
+		break;
+
+	case DEFAULT_MODEL_SPHERE:
+		strcpy(MeshInfo.Path, "Sphere");
+		MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(SphereVertices);
+		MeshInfo.MeshData[0].IndexCount = ARRAY_SIZE(SphereIndices);
+		MeshInfo.VertexBuffer = SphereVertexBuffer;
+		MeshInfo.IndexBuffer = SphereIndexBuffer;
+		MeshInfo.MeshData[0].AABB = SphereAABB;
+		MeshIndex = AddMesh("Sphere", &MeshInfo);
+		break;
+
+	case DEFAULT_MODEL_BEAN:
+		strcpy(MeshInfo.Path, "Bean");
+		MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(BeanVertices);
+		MeshInfo.MeshData[0].IndexCount = ARRAY_SIZE(BeanIndices);
+		MeshInfo.VertexBuffer = BeanVertexBuffer;
+		MeshInfo.IndexBuffer = BeanIndexBuffer;
+		MeshInfo.MeshData[0].AABB = BeanAABB;
+		MeshIndex = AddMesh("Bean", &MeshInfo);
+		break;
+
+	default:
+		printf("Invalid default model\n");
+	}	
+	
+	RaytracingAddGeometry(MeshIndex);
+	return MeshIndex;
+}
+/*
+
 uint32_t AddPlane()
 {
+	
+
 	SceneMesh MeshInfo;
 
 	MeshInfo.Destroyable = false;
@@ -1022,3 +1113,4 @@ uint32_t AddBean()
 	RaytracingAddGeometry(MeshIndex);
 	return MeshIndex;
 }
+*/

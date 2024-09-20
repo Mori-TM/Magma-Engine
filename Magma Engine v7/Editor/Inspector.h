@@ -309,6 +309,28 @@ void EditorTextureCombo(const char* Name, const char* ID, uint32_t* TextureIndex
 	ImGui::PopID();
 }
 
+void EditorMaterialCombo(const char* Name, const char* ID, uint32_t* MaterialIndex)
+{
+	SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, *MaterialIndex);
+
+	ImGui::PushID(ID);
+	if (ImGui::BeginCombo(Name, Material->Name))
+	{
+		for (uint32_t i = 0; i < SceneTextures.Size; i++)
+		{
+			Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, i);
+			
+			if (Material != NULL)
+			{
+				if (ImGui::Button(Material->Name))
+					*MaterialIndex = i;
+			}
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::PopID();
+}
+
 void MaterialEditor(SceneMaterial* Material, float Offset)
 {
 	ImGui::SetCursorPosX(Offset); ImGui::ColorPicker4("Color", (float*)&Material->Color, ImGuiColorEditFlags_AlphaBar);
@@ -432,13 +454,22 @@ void EditorMeshInspector()
 						SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[i].MaterialIndex);
 						if (Material)
 						{
-							ssprintf(MeshName, "%d\t%s", i, Material->Name);
+							ssprintf(MeshName, "%d\t%s", i, Mesh->MeshData[i].Name);
 
 							ImGui::SetCursorPosX(33);
 							if (ImGui::CollapsingHeader(MeshName))
 							{
-								ImGui::PushID(Material);
-								MaterialEditor(Material, 66);
+								ImGui::SetCursorPosX(66);
+								EditorMaterialCombo("Material", "Material-Selecter", &Mesh->MeshData[i].MaterialIndex);
+
+								ImGui::SetCursorPosX(66);
+								ImGui::PushID(Mesh->MeshData[i].Name);
+								if (ImGui::CollapsingHeader("Material Options"))
+								{
+									ImGui::PushID(Material);
+									MaterialEditor(Material, 99);
+									ImGui::PopID();
+								}	
 								ImGui::PopID();
 							}
 						}																	

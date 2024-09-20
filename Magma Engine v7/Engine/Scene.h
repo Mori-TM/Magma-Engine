@@ -155,6 +155,7 @@ void SceneInit()
 	Mesh.Destroyable = false;
 
 //	SetDefaultMaterial(&Mesh.MeshData[0].Material, "MESH");
+	strcpy(Mesh.MeshData[0].Name, "None");
 	Mesh.MeshData[0].VertexOffset = 0;
 	Mesh.MeshData[0].IndexOffset = 0;
 	Mesh.MeshData[0].VertexCount = 0;
@@ -182,7 +183,13 @@ void SceneDestroy()
 		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, i);
 		if (Mesh)
 		{
-			free(Mesh->MeshData);
+			if (Mesh->Destroyable)
+			{
+				if (Mesh->Vertices) free(Mesh->Vertices);
+				if (Mesh->Indices) free(Mesh->Indices);
+			}			
+
+			free(Mesh->MeshData);			
 		}
 	}
 
@@ -204,81 +211,159 @@ void SceneSave(const char* FileName)
 	fprintf(File, "\t\"Textures\": [\n");
 	for (size_t i = 1; i < SceneTextures.Size; i++)
 	{
-		fprintf(File, "\t\t{\n");
-
 		SceneTextureImage* Texture = (SceneTextureImage*)CMA_GetAt(&SceneTextures, i);
 		if (Texture)
 		{
-			fprintf(File, "\t\t\t\"Name\": \"%s\",\n", Texture->Name);
-			fprintf(File, "\t\t\t\"Path\": \"%s\",\n", Texture->Path);
-			fprintf(File, "\t\t\t\"ShowInAssetBrowser\": %s,\n", Texture->ShowInAssetBrowser == true ? "true" : "false");
-			fprintf(File, "\t\t\t\"Width\": %d,\n", Texture->Width);
-			fprintf(File, "\t\t\t\"Height\": %d,\n", Texture->Height);
-			fprintf(File, "\t\t\t\"Format\": %d,\n", Texture->Format);
-			fprintf(File, "\t\t\t\"MipLevels\": %d,\n", Texture->MipLevels);
-			fprintf(File, "\t\t\t\"Data\": null%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
+			fprintf(File, "\t\t{\n");
+			{
+				fprintf(File, "\t\t\t\"Name\": \"%s\",\n", Texture->Name);
+				fprintf(File, "\t\t\t\"Path\": \"%s\",\n", Texture->Path);
+				fprintf(File, "\t\t\t\"ShowInAssetBrowser\": %s,\n", Texture->ShowInAssetBrowser == true ? "true" : "false");
+				fprintf(File, "\t\t\t\"Width\": %d,\n", Texture->Width);
+				fprintf(File, "\t\t\t\"Height\": %d,\n", Texture->Height);
+				fprintf(File, "\t\t\t\"Format\": %d,\n", Texture->Format);
+				fprintf(File, "\t\t\t\"MipLevels\": %d,\n", Texture->MipLevels);
+				fprintf(File, "\t\t\t\"Data\": null%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
+			}			
+			fprintf(File, "\t\t}%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
 		}		
 		
-		fprintf(File, "\t\t}%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
 	}
 	fprintf(File, "\t],\n\n");
 
 	fprintf(File, "\t\"Materials\": [\n");
 	for (size_t i = 1; i < SceneMaterials.Size; i++)
 	{
-		fprintf(File, "\t\t{\n");
-
 		SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, i);
 		if (Material)
 		{
-			fprintf(File, "\t\t\t\"Name\": \"%s\",\n", Material->Name);
-			fprintf(File, "\t\t\t\"AlbedoTexture\": %d,\n", Material->AlbedoIndex);
-			fprintf(File, "\t\t\t\"NormalTexture\": %d,\n", Material->NormalIndex);
-			fprintf(File, "\t\t\t\"MetallicTexture\": %d,\n", Material->MetallicIndex);
-			fprintf(File, "\t\t\t\"RoughnessTexture\": %d,\n", Material->RoughnessIndex);
-			fprintf(File, "\t\t\t\"OcclusionTexture\": %d,\n", Material->OcclusionIndex);
+			fprintf(File, "\t\t{\n");
+			{
+				fprintf(File, "\t\t\t\"Name\": \"%s\",\n", Material->Name);
+				fprintf(File, "\t\t\t\"AlbedoTexture\": %d,\n", Material->AlbedoIndex);
+				fprintf(File, "\t\t\t\"NormalTexture\": %d,\n", Material->NormalIndex);
+				fprintf(File, "\t\t\t\"MetallicTexture\": %d,\n", Material->MetallicIndex);
+				fprintf(File, "\t\t\t\"RoughnessTexture\": %d,\n", Material->RoughnessIndex);
+				fprintf(File, "\t\t\t\"OcclusionTexture\": %d,\n", Material->OcclusionIndex);
 
-			fprintf(File, "\t\t\t\"Color\": [%f, %f, %f, %f],\n", Material->Color.r, Material->Color.g, Material->Color.b, Material->Color.a);
-			fprintf(File, "\t\t\t\"MetallicTexture\": %f,\n", Material->Metallic);
-			fprintf(File, "\t\t\t\"RoughnessTexture\": %f,\n", Material->Roughness);
-			fprintf(File, "\t\t\t\"OcclusionTexture\": %f%s\n", Material->Occlusion, i == (SceneTextures.Size - 1) ? "" : ",");
+				fprintf(File, "\t\t\t\"Color\": [%f, %f, %f, %f],\n", Material->Color.r, Material->Color.g, Material->Color.b, Material->Color.a);
+				fprintf(File, "\t\t\t\"MetallicTexture\": %f,\n", Material->Metallic);
+				fprintf(File, "\t\t\t\"RoughnessTexture\": %f,\n", Material->Roughness);
+				fprintf(File, "\t\t\t\"OcclusionTexture\": %f%s\n", Material->Occlusion, i == (SceneTextures.Size - 1) ? "" : ",");
+
+			}			
+			fprintf(File, "\t\t}%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
 		}
 
-		fprintf(File, "\t\t}%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
 	}
 	fprintf(File, "\t],\n\n");
 
+	size_t Base64EncodeBufferSize = Bas64CalcRequiredSize(512 * sizeof(SceneVertex));
+	BYTE* Base64EncodeBuffer = (BYTE*)malloc(Base64EncodeBufferSize);
+	if (!Base64EncodeBuffer)
+	{
+		printf("Failed to fully save scene, allocation of base64 encode buffer failed!\n");
+		fclose(File);
+
+		return;
+	}
 
 	fprintf(File, "\t\"Meshes\": [\n");
 	for (size_t i = 1; i < SceneMeshes.Size; i++)
 	{
-		fprintf(File, "\t\t{\n");
+		
 
 		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, i);
 		if (Mesh)
 		{
-			fprintf(File, "\t\t\t\"Name\": \"%s\",\n", Mesh->Name);
-			fprintf(File, "\t\t\t\"Path\": \"%s\",\n", Mesh->Path);
-			fprintf(File, "\t\t\t\"MeshCount\": %d,\n", Mesh->MeshCount);
-			fprintf(File, "\t\t\t\"Destroyable\": %s,\n", Mesh->Destroyable == true ? "true" : "false");
-			fprintf(File, "\t\t\t\"VertexBuffer\": %d,\n", Mesh->VertexBuffer);
-			fprintf(File, "\t\t\t\"IndexBuffer\": %d,\n", Mesh->IndexBuffer);			
+			fprintf(File, "\t\t{\n");
+			{
+				fprintf(File, "\t\t\t\"Name\": \"%s\",\n", Mesh->Name);
+				fprintf(File, "\t\t\t\"Path\": \"%s\",\n", Mesh->Path);
+				fprintf(File, "\t\t\t\"MeshCount\": %d,\n", Mesh->MeshCount);
+				fprintf(File, "\t\t\t\"Destroyable\": %s,\n", Mesh->Destroyable == true ? "true" : "false");
+				fprintf(File, "\t\t\t\"TotalVertexCount\": %d,\n", Mesh->TotalVertexCount);
+				fprintf(File, "\t\t\t\"TotalIndexCount\": %d,\n", Mesh->TotalIndexCount);
 
-		//	fprintf(File, "\t\t\t\"OcclusionTexture\": \"%s\",\n", Mesh->OcclusionIndex);
-		//
-		//	fprintf(File, "\t\t\t\"Color\": [%f, %f, %f, %f],\n", Material->Color.r, Material->Color.g, Material->Color.b, Material->Color.a);
-		//	fprintf(File, "\t\t\t\"MetallicTexture\": %f,\n", Material->Metallic);
-		//	fprintf(File, "\t\t\t\"RoughnessTexture\": %f,\n", Material->Roughness);
-		//	fprintf(File, "\t\t\t\"OcclusionTexture\": %f%s\n", Material->Occlusion, i == (SceneTextures.Size - 1) ? "" : ",");
+				bool ResizeBas64 = false;
+				if (Bas64CalcRequiredSize((size_t)Mesh->TotalVertexCount * sizeof(SceneVertex)) > Base64EncodeBufferSize)
+				{
+					Base64EncodeBufferSize = Bas64CalcRequiredSize((size_t)Mesh->TotalVertexCount * sizeof(SceneVertex));
+					ResizeBas64 = true;				
+				}
+				else if (Bas64CalcRequiredSize((size_t)Mesh->TotalIndexCount * sizeof(uint32_t)) > Base64EncodeBufferSize)
+				{
+					Base64EncodeBufferSize = Bas64CalcRequiredSize((size_t)Mesh->TotalIndexCount * sizeof(uint32_t));
+					ResizeBas64 = true;
+				}
+
+				if (ResizeBas64)
+				{
+					Base64EncodeBuffer = (BYTE*)realloc(Base64EncodeBuffer, Base64EncodeBufferSize);
+					if (!Base64EncodeBuffer)
+					{
+						printf("Failed to fully save scene, reallocation of base64 encode buffer failed!\n");
+						fclose(File);
+						return;
+					}
+				}
+
+				if (Mesh->Vertices)
+				{
+					DWORD Length = 0;
+					Base64Encode((BYTE*)Mesh->Vertices, (size_t)Mesh->TotalVertexCount * sizeof(SceneVertex), Base64EncodeBuffer, &Length);
+					fprintf(File, "\t\t\t\"Vertices\": %s\n", Base64EncodeBuffer);
+				}
+				if (Mesh->Indices)
+				{
+					DWORD Length = 0;
+					Base64Encode((BYTE*)Mesh->Indices, (size_t)Mesh->TotalIndexCount * sizeof(uint32_t), Base64EncodeBuffer, &Length);
+					fprintf(File, "\t\t\t\"Indices\": %s\n", Base64EncodeBuffer);
+				}
+					
+
+				fprintf(File, "\t\t\t\"MeshData\": [\n", Mesh->IndexBuffer);
+				for (uint32_t j = 0; j < Mesh->MeshCount; j++)
+				{
+					fprintf(File, "\t\t\t\t{\n");
+					{
+						fprintf(File, "\t\t\t\t\t\"Name\": \"%s\",\n", Mesh->MeshData[j].Name);
+						fprintf(File, "\t\t\t\t\t\"MaterialIndex\": %d,\n", Mesh->MeshData[j].MaterialIndex);
+						fprintf(File, "\t\t\t\t\t\"VertexOffset\": %d,\n", Mesh->MeshData[j].VertexOffset);
+						fprintf(File, "\t\t\t\t\t\"VertexCount\": %d,\n", Mesh->MeshData[j].VertexCount);
+						fprintf(File, "\t\t\t\t\t\"IndexOffset\": %d,\n", Mesh->MeshData[j].IndexOffset);
+						fprintf(File, "\t\t\t\t\t\"IndexCount\": %d,\n", Mesh->MeshData[j].IndexCount);
+
+						fprintf(File, "\t\t\t\t\t\"Min\": [%f, %f, %f],\n", Mesh->MeshData[j].AABB.Min.x, Mesh->MeshData[j].AABB.Min.y, Mesh->MeshData[j].AABB.Min.z);
+						fprintf(File, "\t\t\t\t\t\"Max\": [%f, %f, %f],\n", Mesh->MeshData[j].AABB.Max.x, Mesh->MeshData[j].AABB.Max.y, Mesh->MeshData[j].AABB.Max.z);
+						fprintf(File, "\t\t\t\t\t\"Render\": [%s, %s, %s, %s, %s],\n", 
+							Mesh->MeshData[j].Render[0] ? "true" : "false",
+							Mesh->MeshData[j].Render[1] ? "true" : "false",
+							Mesh->MeshData[j].Render[2] ? "true" : "false",
+							Mesh->MeshData[j].Render[3] ? "true" : "false",
+							Mesh->MeshData[j].Render[4] ? "true" : "false");
+					}
+					fprintf(File, "\t\t\t\t}%s\n", j == (Mesh->MeshCount - 1) ? "" : ",");
+				}
+				fprintf(File, "\t\t\t]\n", Mesh->IndexBuffer);
+				//	fprintf(File, "\t\t\t\"OcclusionTexture\": \"%s\",\n", Mesh->OcclusionIndex);
+				//
+				//	fprintf(File, "\t\t\t\"Color\": [%f, %f, %f, %f],\n", Material->Color.r, Material->Color.g, Material->Color.b, Material->Color.a);
+				//	fprintf(File, "\t\t\t\"MetallicTexture\": %f,\n", Material->Metallic);
+				//	fprintf(File, "\t\t\t\"RoughnessTexture\": %f,\n", Material->Roughness);
+				//	fprintf(File, "\t\t\t\"OcclusionTexture\": %f%s\n", Material->Occlusion, i == (SceneTextures.Size - 1) ? "" : ",");
+			}			
+			fprintf(File, "\t\t}%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
 		}
 
-		fprintf(File, "\t\t}%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
 	}
 	fprintf(File, "\t],\n\n");
 
 	fprintf(File, "}\n");
 
 	fclose(File);
+
+	free(Base64EncodeBuffer);
 
 	printf("Saved Scene: %s\n", FileName);
 }

@@ -120,6 +120,7 @@ typedef enum
 typedef struct
 {
 //	SceneMaterial Material;
+	char Name[MAX_CHAR_NAME_LENGTH_SHORT];
 	uint32_t MaterialIndex;
 
 	uint32_t VertexOffset;
@@ -138,6 +139,11 @@ typedef struct
 	char Path[MAX_CHAR_PATH_LENGTH];
 	uint32_t MeshCount;
 	bool Destroyable;
+
+	uint32_t TotalVertexCount;
+	uint32_t TotalIndexCount;
+	SceneVertex* Vertices;
+	uint32_t* Indices;
 
 	uint32_t VertexBuffer;
 	uint32_t IndexBuffer; //if OPENVK_ERROR then not used

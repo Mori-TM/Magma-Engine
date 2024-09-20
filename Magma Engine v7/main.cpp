@@ -62,6 +62,7 @@ extern "C"
 #include <Wave/WavePhysics.h>
 
 #include <Json/Json.h>
+#include <Base64/Base64.h>
 #include <Md2Loader/Md2Loader.h>
 #include <OpenVK/OpenVK.h>
 

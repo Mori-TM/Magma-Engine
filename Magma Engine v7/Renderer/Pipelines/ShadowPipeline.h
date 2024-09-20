@@ -397,9 +397,13 @@ void ShadowDraw()
 							{
 								if (!Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
 								{
-									SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.AlbedoIndex);
-									if (Image != NULL)
-										TextureDescriptorSet = Image->TextureDescriptorSet;
+									Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[m].MaterialIndex);
+									if (Material)
+									{
+										SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->AlbedoIndex);
+										if (Image != NULL)
+											TextureDescriptorSet = Image->TextureDescriptorSet;
+									}									
 								}
 
 								if (LastTextureDescriptorSet != TextureDescriptorSet)

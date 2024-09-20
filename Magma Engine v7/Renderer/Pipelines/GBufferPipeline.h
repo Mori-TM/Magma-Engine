@@ -316,10 +316,10 @@ void GBufferDraw()
 				}
 				else
 				{
-					GBufferFragmentPc.Color = Vec4f(1.0);
-					GBufferFragmentPc.Metallic = 0.0;
-					GBufferFragmentPc.Roughness = 1.0;
-					GBufferFragmentPc.Occlusion = 1.0;
+					GBufferFragmentPc.Color = MaterialColor;
+					GBufferFragmentPc.Metallic = MaterialMetallic;
+					GBufferFragmentPc.Roughness = MaterialRoughness;
+					GBufferFragmentPc.Occlusion = MaterialOcclusion;
 					GBufferFragmentPc.NearPlane = NearPlane;
 					GBufferFragmentPc.FarPlane = FarPlane;
 				}
@@ -345,25 +345,41 @@ void GBufferDraw()
 							{
 								if (!Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
 								{
-									GBufferFragmentPc.Color = Mesh->MeshData[m].Material.Color;
-									GBufferFragmentPc.Metallic = Mesh->MeshData[m].Material.Metallic;
-									GBufferFragmentPc.Roughness = Mesh->MeshData[m].Material.Roughness;
-									GBufferFragmentPc.Occlusion = Mesh->MeshData[m].Material.Occlusion;
+									Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[m].MaterialIndex);
+									if (Material)
+									{
+										GBufferFragmentPc.Color =		Material->Color;
+										GBufferFragmentPc.Metallic =	Material->Metallic;
+										GBufferFragmentPc.Roughness =	Material->Roughness;
+										GBufferFragmentPc.Occlusion =	Material->Occlusion;
+
+
+										Albedo = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->AlbedoIndex);
+										Normal = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->NormalIndex);
+										Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->MetallicIndex);
+										Roughness = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->RoughnessIndex);
+										Occlusion = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->OcclusionIndex);
+
+										if (Albedo != NULL) AlbedoDescriptorSet = Albedo->TextureDescriptorSet;
+										if (Normal != NULL) NormalDescriptorSet = Normal->TextureDescriptorSet;
+										if (Metallic != NULL) MetallicDescriptorSet = Metallic->TextureDescriptorSet;
+										if (Roughness != NULL) RoughnessDescriptorSet = Roughness->TextureDescriptorSet;
+										if (Occlusion != NULL) OcclusionDescriptorSet = Occlusion->TextureDescriptorSet;
+									}
+									else
+									{
+										GBufferFragmentPc.Color = MaterialColor;
+										GBufferFragmentPc.Metallic = MaterialMetallic;
+										GBufferFragmentPc.Roughness = MaterialRoughness;
+										GBufferFragmentPc.Occlusion = MaterialOcclusion;
+									}
+								//	GBufferFragmentPc.Color = Mesh->MeshData[m].Material.Color;
+								//	GBufferFragmentPc.Metallic = Mesh->MeshData[m].Material.Metallic;
+								//	GBufferFragmentPc.Roughness = Mesh->MeshData[m].Material.Roughness;
+								//	GBufferFragmentPc.Occlusion = Mesh->MeshData[m].Material.Occlusion;
 									GBufferFragmentPc.NearPlane = NearPlane;
 									GBufferFragmentPc.FarPlane = FarPlane;
 									OpenVkPushConstant(GBufferLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(GBufferFragmentPushConstant), &GBufferFragmentPc);
-
-									Albedo = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.AlbedoIndex);
-									Normal = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.NormalIndex);
-									Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.MetallicIndex);
-									Roughness = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.RoughnessIndex);
-									Occlusion = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[m].Material.OcclusionIndex);
-
-									if (Albedo != NULL) AlbedoDescriptorSet = Albedo->TextureDescriptorSet;
-									if (Normal != NULL) NormalDescriptorSet = Normal->TextureDescriptorSet;
-									if (Metallic != NULL) MetallicDescriptorSet = Metallic->TextureDescriptorSet;
-									if (Roughness != NULL) RoughnessDescriptorSet = Roughness->TextureDescriptorSet;
-									if (Occlusion != NULL) OcclusionDescriptorSet = Occlusion->TextureDescriptorSet;
 								}
 
 								if (LastAlbedoDescriptorSet != AlbedoDescriptorSet)

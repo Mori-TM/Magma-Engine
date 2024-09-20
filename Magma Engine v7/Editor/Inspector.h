@@ -338,16 +338,11 @@ void EditorMaterialInspector()
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 				if (ImGui::Button("Delete Material"))
 				{
-					Mutex.lock();
-					for (uint32_t i = 0; i < EntityCount; i++)
-						if (Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL] && Entities[i].Material.MaterialIndex == SelectedMaterial)
-							ResetEntityMaterial(&Entities[i]);
-					Mutex.unlock();
-					CMA_Pop(&SceneMaterials, SelectedMaterial);
-
-					for (uint32_t i = 1; i < SceneMaterials.Size; i++)
-						if (CMA_GetAt(&SceneMaterials, i) != NULL)
-							SelectedMaterial = i;
+					DeleteMaterial(SelectedMaterial);
+				}
+				if (ImGui::Button("[FIX - Implement] Delete Material with Textures"))
+				{
+					//FIX - currently no way to remove multiple texture at the same time
 				}
 
 				ImGui::PopStyleColor();
@@ -401,40 +396,14 @@ void EditorTextureInspector()
 					break;
 
 				default:
+					ImGui::Text("Format: unknown");
 					break;
 				}
 
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 				if (ImGui::Button("Delete Texture"))
 				{
-					for (uint32_t i = 0; i < SceneMaterials.Size; i++)
-					{
-						SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, i);
-						if (Material != NULL)
-						{
-							if (Material->AlbedoIndex == SelectedTexture)
-								Material->AlbedoIndex = 0;
-							else if (Material->NormalIndex == SelectedTexture)
-								Material->NormalIndex = 0;
-							else if (Material->MetallicIndex == SelectedTexture)
-								Material->MetallicIndex = 0;
-							else if (Material->RoughnessIndex == SelectedTexture)
-								Material->RoughnessIndex = 0;
-							else if (Material->OcclusionIndex == SelectedTexture)
-								Material->OcclusionIndex = 0;
-						}
-					}						
-
-					TextureToDelete = Image->TextureImage;
-					SamplerToDelete = Image->TextureSampler;
-
-					CMA_Pop(&SceneTextures, SelectedTexture);
-					
-					for (uint32_t i = 1; i < SceneTextures.Size; i++)
-						if (CMA_GetAt(&SceneTextures, i) != NULL)
-							SelectedTexture = i;
-
-					DeleteTexture = true;
+					RequestTextureDeletion(SelectedTexture);
 				}
 				ImGui::PopStyleColor();
 			}
@@ -460,43 +429,32 @@ void EditorMeshInspector()
 				{
 					for (uint32_t i = 0; i < Mesh->MeshCount; i++)
 					{
-						ssprintf(MeshName, "%d\t%s", i, Mesh->MeshData[i].Material.Name);
-
-						ImGui::SetCursorPosX(33);
-						if (ImGui::CollapsingHeader(MeshName))
+						SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[i].MaterialIndex);
+						if (Material)
 						{
-							ImGui::PushID(&Mesh->MeshData[i].Material);
-							MaterialEditor(&Mesh->MeshData[i].Material, 66);
-							ImGui::PopID();
-						}											
+							ssprintf(MeshName, "%d\t%s", i, Material->Name);
+
+							ImGui::SetCursorPosX(33);
+							if (ImGui::CollapsingHeader(MeshName))
+							{
+								ImGui::PushID(Material);
+								MaterialEditor(Material, 66);
+								ImGui::PopID();
+							}
+						}																	
 					}
 				}				
 			}			
 
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 			if (ImGui::Button("Delete Mesh"))
-			{
-				Mutex.lock();
-				for (uint32_t i = 0; i < EntityCount; i++)
-					if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] && Entities[i].Mesh.MeshIndex == SelectedMesh)
-						ResetEntityMesh(&Entities[i]);
-				Mutex.unlock();
-
-				MeshToDelete = SelectedMesh;
-				DeleteMesh = true;
-			}
+				RequestMeshDeletion(SelectedMesh, MODEL_DELETE_MESH);
 
 			if (ImGui::Button("Delete Mesh with Textures"))
-			{
-				Mutex.lock();
-				for (uint32_t i = 0; i < EntityCount; i++)
-					if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] && Entities[i].Mesh.MeshIndex == SelectedMesh)
-						ResetEntityMesh(&Entities[i]);
-				Mutex.unlock();
-
-				MeshToDelete = SelectedMesh;
-				DeleteMeshWithTextures = true;
-			}
+				RequestMeshDeletion(SelectedMesh, MODEL_DELETE_MESH | MODEL_DELETE_TEXURES);
+			
+			if (ImGui::Button("Delete Mesh with Textures and Materials"))
+				RequestMeshDeletion(SelectedMesh, MODEL_DELETE_MESH | MODEL_DELETE_TEXURES | MODEL_DELETE_MATERIALS);
 
 			ImGui::PopStyleColor();
 		}

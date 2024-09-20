@@ -431,7 +431,24 @@ uint32_t AddMaterial(SceneMaterial* Material)
 
 	SelectedMaterial = CMA_Push(&SceneMaterials, Material);
 
-	return SelectedMesh;
+	return SelectedMaterial;//Why previously SelectedMesh?
+}
+
+//doesn't check if Material is valid
+void DeleteMaterial(uint32_t Material)
+{
+	if (Material == 0)
+		return;
+
+	for (uint32_t i = 0; i < EntityCount; i++)
+		if (Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL] && Entities[i].Material.MaterialIndex == Material)
+			ResetEntityMaterial(&Entities[i]);
+	
+	CMA_Pop(&SceneMaterials, Material);
+
+	for (uint32_t i = 1; i < SceneMaterials.Size; i++)
+		if (CMA_GetAt(&SceneMaterials, i) != NULL)
+			SelectedMaterial = i;
 }
 
 bool LoadTextureCompressed = false;
@@ -660,6 +677,46 @@ uint32_t AddTexture(char* Path, bool ShowInAssetBrowser)
 	return SelectedTexture;
 }
 
+void RequestTextureDeletion(uint32_t Texture)
+{
+	SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Texture);
+	if (Image == NULL)
+	{
+		printf("Failed to find texture that was requested to be deleted: %d\n", Texture);
+		return;
+	}
+
+	for (uint32_t i = 0; i < SceneMaterials.Size; i++)
+	{
+		SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, i);
+		if (Material != NULL)
+		{
+			if (Material->AlbedoIndex == Texture)
+				Material->AlbedoIndex = 0;
+			else if (Material->NormalIndex == Texture)
+				Material->NormalIndex = 0;
+			else if (Material->MetallicIndex == Texture)
+				Material->MetallicIndex = 0;
+			else if (Material->RoughnessIndex == Texture)
+				Material->RoughnessIndex = 0;
+			else if (Material->OcclusionIndex == Texture)
+				Material->OcclusionIndex = 0;
+		}
+	}
+
+	
+	TextureToDelete = Image->TextureImage;
+	SamplerToDelete = Image->TextureSampler;	
+
+	CMA_Pop(&SceneTextures, Texture);
+
+	for (uint32_t i = 1; i < SceneTextures.Size; i++)
+		if (CMA_GetAt(&SceneTextures, i) != NULL)
+			SelectedTexture = i;
+
+	DeleteTexture = true;
+}
+
 //Fix memory
 uint32_t AddAnimation(char* Path, int32_t TexWidth, int32_t TexHeight)
 {
@@ -773,9 +830,11 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 		SceneMeshData* SceneMesh = &MeshInfo->MeshData[i];
 		memset(&SceneMesh->Render, 1, ARRAY_SIZE(SceneMesh->Render) * sizeof(bool));
 
-		SetDefaultMaterial(&SceneMesh->Material, "MESH");
+		SceneMaterial Material;
+
+		SetDefaultMaterial(&Material, "MESH");
 		if (strcmp(ModelData->Materials[i].MaterialName, WaveEmptyMaterial.MaterialName) != 0)//FIX - don't use strncpy
-			strncpy(SceneMesh->Material.Name, ModelData->Materials[i].MaterialName, sizeof(SceneMesh->Material.Name));
+			strncpy(Material.Name, ModelData->Materials[i].MaterialName, sizeof(Material.Name));
 
 		SceneMesh->VertexCount = WaveMesh->VertexCount;
 		SceneMesh->IndexCount = WaveMesh->IndexCount;
@@ -783,41 +842,41 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 		SceneMesh->VertexOffset = VertexCount;
 		SceneMesh->IndexOffset = IndexCount;
 
-		SceneMesh->Material.Metallic = ModelData->Materials[i].Metallic;
-		SceneMesh->Material.Roughness = ModelData->Materials[i].Roughness;
+		Material.Metallic = ModelData->Materials[i].Metallic;
+		Material.Roughness = ModelData->Materials[i].Roughness;
 
 		if (ModelLoadAlbedo && strcmp(ModelData->Materials[i].DiffuseTexture, "NoTexture") != 0)
-			SceneMesh->Material.AlbedoIndex = AddTexture(ModelData->Materials[i].DiffuseTexture, false);
+			Material.AlbedoIndex = AddTexture(ModelData->Materials[i].DiffuseTexture, false);
 
 		if (ModelLoadNormal)
 		{
 			if (strcmp(ModelData->Materials[i].NormalTexture, "NoTexture") != 0)
-				SceneMesh->Material.NormalIndex = AddTexture(ModelData->Materials[i].NormalTexture, false);
+				Material.NormalIndex = AddTexture(ModelData->Materials[i].NormalTexture, false);
 			else if (strcmp(ModelData->Materials[i].DisplacmentTexture, "NoTexture") != 0)
-				SceneMesh->Material.NormalIndex = AddTexture(ModelData->Materials[i].DisplacmentTexture, false);
+				Material.NormalIndex = AddTexture(ModelData->Materials[i].DisplacmentTexture, false);
 			else if (strcmp(ModelData->Materials[i].BumpTexture, "NoTexture") != 0)
-				SceneMesh->Material.NormalIndex = AddTexture(ModelData->Materials[i].BumpTexture, false);
+				Material.NormalIndex = AddTexture(ModelData->Materials[i].BumpTexture, false);
 		}
 		if (ModelLoadRoughness)
 		{
 			if (strcmp(ModelData->Materials[i].RoughnessTexture, "NoTexture") != 0)
-				SceneMesh->Material.RoughnessIndex = AddTexture(ModelData->Materials[i].RoughnessTexture, false);
+				Material.RoughnessIndex = AddTexture(ModelData->Materials[i].RoughnessTexture, false);
 			else if (strcmp(ModelData->Materials[i].SpecularTexture, "NoTexture") != 0)
-				SceneMesh->Material.RoughnessIndex = AddTexture(ModelData->Materials[i].SpecularTexture, false);
+				Material.RoughnessIndex = AddTexture(ModelData->Materials[i].SpecularTexture, false);
 		}
 		
 		if (ModelLoadMetallic && strcmp(ModelData->Materials[i].MetallicTexture, "NoTexture") != 0)
-			SceneMesh->Material.MetallicIndex = AddTexture(ModelData->Materials[i].MetallicTexture, false);
+			Material.MetallicIndex = AddTexture(ModelData->Materials[i].MetallicTexture, false);
 
-		SceneMesh->Material.Color.x = ModelData->Materials[i].DiffuseColor.x;
-		SceneMesh->Material.Color.y = ModelData->Materials[i].DiffuseColor.y;
-		SceneMesh->Material.Color.z = ModelData->Materials[i].DiffuseColor.z;
-		SceneMesh->Material.Color.w = ModelSetZeroAlphaOne ? (ModelData->Materials[i].Dissolve < 0.01 ? 1.0 : ModelData->Materials[i].Dissolve) : ModelData->Materials[i].Dissolve;
+		Material.Color.x = ModelData->Materials[i].DiffuseColor.x;
+		Material.Color.y = ModelData->Materials[i].DiffuseColor.y;
+		Material.Color.z = ModelData->Materials[i].DiffuseColor.z;
+		Material.Color.w = ModelSetZeroAlphaOne ? (ModelData->Materials[i].Dissolve < 0.01 ? 1.0 : ModelData->Materials[i].Dissolve) : ModelData->Materials[i].Dissolve;
 
 		
-		strcpycut(SceneMesh->Material.Name, ModelData->Materials[i].MaterialName);
-	//	OpenVkRuntimeError("%s", SceneMesh->Material.Name);
-		AddMaterial(&SceneMesh->Material);
+		strcpycut(Material.Name, ModelData->Materials[i].MaterialName);
+	//	OpenVkRuntimeError("%s", Material.Name);
+		SceneMesh->MaterialIndex = AddMaterial(&Material);
 
 		uint32_t LastVertexCount = VertexCount;
 
@@ -835,7 +894,7 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 			Vertices[VertexCount].NormalTexY.z = WaveMesh->Vertices[j].Normals.z;
 
 			Vertices[VertexCount].Data.VertexOffset = LastVertexCount;
-			Vertices[VertexCount].Data.TextureIndex = (float)SceneMesh->Material.AlbedoIndex;
+			Vertices[VertexCount].Data.TextureIndex = (float)Material.AlbedoIndex;
 			Vertices[VertexCount].Data.Unused0 = 0.0;
 			Vertices[VertexCount].Data.Unused1 = 0.0;
 			
@@ -950,7 +1009,6 @@ uint32_t AddDefaultModel(DefaultModels Model)
 	SceneMesh MeshInfo;
 	memset(&MeshInfo, 0, sizeof(SceneMesh));
 
-	SetDefaultMaterial(&MeshInfo.MeshData[0].Material, "MESH");
 	MeshInfo.Destroyable = false;
 	MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
 	MeshInfo.MeshCount = 1;
@@ -1005,10 +1063,27 @@ uint32_t AddDefaultModel(DefaultModels Model)
 	default:
 		printf("Invalid default model\n");
 	}	
+
+	SceneMaterial Material;
+	SetDefaultMaterial(&Material, MeshInfo.Name);
+	MeshInfo.MeshData[0].MaterialIndex = AddMaterial(&Material);
 	
 	RaytracingAddGeometry(MeshIndex);
 	return MeshIndex;
 }
+
+void RequestMeshDeletion(uint32_t Mesh, uint32_t Options)
+{
+	Mutex.lock();
+	for (uint32_t i = 0; i < EntityCount; i++)
+		if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] && Entities[i].Mesh.MeshIndex == Mesh)
+			ResetEntityMesh(&Entities[i]);
+	Mutex.unlock();
+
+	ModelToDelete = Mesh;
+	ModelToDeleteOptions = Options;
+}
+
 /*
 
 uint32_t AddPlane()

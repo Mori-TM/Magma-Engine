@@ -3,9 +3,17 @@ bool GameMode = false;
 bool LuaOnStart = true;
 bool ReloadShaders = false;
 
-uint32_t MeshToDelete = 0;
-bool DeleteMesh = false;
-bool DeleteMeshWithTextures = false;
+typedef enum : uint32_t
+{
+	MODEL_DELETE_NOTHING = 1,
+	MODEL_DELETE_MESH = 2,
+	MODEL_DELETE_TEXURES = 4,
+	MODEL_DELETE_MATERIALS = 8,
+	MODEL_DELETE_MESH_COUNT
+} ModelDeleteOptions;
+
+uint32_t ModelToDelete = 0;
+uint32_t ModelToDeleteOptions = MODEL_DELETE_NOTHING;
 
 uint32_t TextureToDelete = 0;
 uint32_t SamplerToDelete = 0;

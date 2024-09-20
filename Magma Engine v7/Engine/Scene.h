@@ -154,11 +154,12 @@ void SceneInit()
 	Mesh.MeshCount = 0;
 	Mesh.Destroyable = false;
 
-	SetDefaultMaterial(&Mesh.MeshData[0].Material, "MESH");
+//	SetDefaultMaterial(&Mesh.MeshData[0].Material, "MESH");
 	Mesh.MeshData[0].VertexOffset = 0;
 	Mesh.MeshData[0].IndexOffset = 0;
 	Mesh.MeshData[0].VertexCount = 0;
 	Mesh.MeshData[0].IndexCount = 0;
+	Mesh.MeshData[0].MaterialIndex = 0;
 	Mesh.VertexBuffer = OPENVK_ERROR;
 	Mesh.IndexBuffer = OPENVK_ERROR;
 	CMA_Push(&SceneMeshes, &Mesh);

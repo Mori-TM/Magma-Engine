@@ -461,43 +461,66 @@ void RendererRun()
 
 		RendererResize(false);
 	}
-	if (DeleteMesh || DeleteMeshWithTextures)
+	if (ModelToDeleteOptions != MODEL_DELETE_NOTHING)
 	{
 		Mutex.lock();
-		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshToDelete);
+		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelToDelete);
 		if (Mesh != NULL)
 		{
-			if (DeleteMeshWithTextures)
+			if (ModelToDeleteOptions & MODEL_DELETE_TEXURES)
 			{
 				for (uint32_t i = 0; i < Mesh->MeshCount; i++)
 				{
-					SceneTextureImage* Albedo = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].Material.AlbedoIndex);
-					SceneTextureImage* Normal = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].Material.NormalIndex);
-					SceneTextureImage* Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].Material.MetallicIndex);
-					SceneTextureImage* Roughness = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].Material.RoughnessIndex);
-					SceneTextureImage* Occlusion = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Mesh->MeshData[i].Material.OcclusionIndex);
+					SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[i].MaterialIndex);
+					if (Material)
+					{
+						//FIX ? - Maybe add a check if texture* is valid
+						SceneTextureImage* Albedo	= (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->AlbedoIndex);
+						SceneTextureImage* Normal	= (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->NormalIndex);
+						SceneTextureImage* Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->MetallicIndex);
+						SceneTextureImage* Roughness= (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->RoughnessIndex);
+						SceneTextureImage* Occlusion= (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->OcclusionIndex);
 
-					DeleteMeshTexture(Albedo->TextureImage, Mesh->MeshData[i].Material.AlbedoIndex);
-					DeleteMeshTexture(Normal->TextureImage, Mesh->MeshData[i].Material.NormalIndex);
-					DeleteMeshTexture(Metallic->TextureImage, Mesh->MeshData[i].Material.MetallicIndex);
-					DeleteMeshTexture(Roughness->TextureImage, Mesh->MeshData[i].Material.RoughnessIndex);
-					DeleteMeshTexture(Occlusion->TextureImage, Mesh->MeshData[i].Material.OcclusionIndex);
+						DeleteMeshTexture(Albedo->TextureImage,		Material->AlbedoIndex);
+						DeleteMeshTexture(Normal->TextureImage,		Material->NormalIndex);
+						DeleteMeshTexture(Metallic->TextureImage,	Material->MetallicIndex);
+						DeleteMeshTexture(Roughness->TextureImage,	Material->RoughnessIndex);
+						DeleteMeshTexture(Occlusion->TextureImage,	Material->OcclusionIndex);
+
+						Material->AlbedoIndex = 0;
+						Material->NormalIndex = 0;
+						Material->MetallicIndex = 0;
+						Material->RoughnessIndex = 0;
+						Material->OcclusionIndex = 0;
+					}					
 				}
 
-				if (Mesh->Destroyable)
+				
+			}
+
+			if (ModelToDeleteOptions & MODEL_DELETE_MATERIALS)
+			{
+				for (uint32_t i = 0; i < Mesh->MeshCount; i++)
 				{
-					if (Mesh->VertexBuffer != OPENVK_ERROR)
-						OpenVkDestroyBuffer(Mesh->VertexBuffer);
-					if (Mesh->IndexBuffer != OPENVK_ERROR)
-						OpenVkDestroyBuffer(Mesh->IndexBuffer);
+					SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[i].MaterialIndex);
+					if (Material)
+						DeleteMaterial(Mesh->MeshData[i].MaterialIndex);
 				}
+			}
+
+			if (ModelToDeleteOptions & MODEL_DELETE_MESH && Mesh->Destroyable)
+			{
+				if (Mesh->VertexBuffer != OPENVK_ERROR)
+					OpenVkDestroyBuffer(Mesh->VertexBuffer);
+				if (Mesh->IndexBuffer != OPENVK_ERROR)
+					OpenVkDestroyBuffer(Mesh->IndexBuffer);
 			}
 
 			free(Mesh->MeshData);
 		}
 
 		printf("Oi: %zu\n", SceneMeshes.Size);
-		CMA_Pop(&SceneMeshes, MeshToDelete);
+		CMA_Pop(&SceneMeshes, ModelToDelete);
 		SelectedMesh = 0;
 		printf("steve: %zu\n", SceneMeshes.Size);
 
@@ -507,8 +530,7 @@ void RendererRun()
 
 		Mutex.unlock();
 		
-		DeleteMesh = false;
-		DeleteMeshWithTextures = false;
+		ModelToDeleteOptions = MODEL_DELETE_NOTHING;
 
 		RendererResize(false);
 	}
@@ -517,7 +539,7 @@ void RendererRun()
 		ReloadShaders = false;
 
 		system("GLSLCompiler.bat");
-
+		
 		OpenVkDeviceWaitIdle();
 
 		// Use OpenVk function!!!

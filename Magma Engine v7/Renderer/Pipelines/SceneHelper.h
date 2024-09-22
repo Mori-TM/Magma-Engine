@@ -82,6 +82,12 @@ typedef struct
 
 typedef struct
 {
+	uint32_t MeshIndex;
+	uint32_t MeshDataIndex;
+} SceneMeshReference;
+
+typedef struct
+{
 	char Name[MAX_CHAR_NAME_LENGTH];
 	uint32_t AlbedoIndex;
 	uint32_t NormalIndex;
@@ -93,6 +99,9 @@ typedef struct
 	float Metallic;
 	float Roughness;
 	float Occlusion;
+
+	//uses SceneMeshReference, usage: every mesh that uses this material gets stored here
+	DynamicArray MeshDataReferences;
 } SceneMaterial;
 
 typedef struct

@@ -462,15 +462,18 @@ void EditorMeshInspector()
 								ImGui::SetCursorPosX(66);
 								EditorMaterialCombo("Material", "Material-Selecter", &Mesh->MeshData[i].MaterialIndex);
 
-								ImGui::SetCursorPosX(66);
-								ImGui::PushID(Mesh->MeshData[i].Name);
-								if (ImGui::CollapsingHeader("Material Options"))
+								if (Mesh->MeshData[i].MaterialIndex != 0)
 								{
-									ImGui::PushID(Material);
-									MaterialEditor(Material, 99);
+									ImGui::SetCursorPosX(66);
+									ImGui::PushID(Mesh->MeshData[i].Name);
+									if (ImGui::CollapsingHeader("Material Options"))
+									{
+										ImGui::PushID(Material);
+										MaterialEditor(Material, 99);
+										ImGui::PopID();
+									}
 									ImGui::PopID();
-								}	
-								ImGui::PopID();
+								}								
 							}
 						}																	
 					}

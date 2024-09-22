@@ -429,9 +429,63 @@ uint32_t AddMaterial(SceneMaterial* Material)
 
 	CheckForSameNames(&SceneMaterials, ARRAY_SIZE(Material->Name), Name, Material->Name);
 
+	Material->MeshDataReferences = DynamicArrayCreate(sizeof(SceneMeshReference), "Material Mesh References");
+
 	SelectedMaterial = CMA_Push(&SceneMaterials, Material);
 
 	return SelectedMaterial;//Why previously SelectedMesh?
+}
+
+void SetMaterial(uint32_t MeshIndex, uint32_t MeshDataIndex, uint32_t MaterialIndex)
+{
+	SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, MaterialIndex);
+	if (Material == NULL)
+	{
+		printf("Failed to find Material: %d, for setting: %d->%d\n", MaterialIndex, MeshIndex, MeshDataIndex);
+		return;
+	}
+
+	//Remove old mesh reference from the material that was previously used by the mesh
+	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshIndex);
+	if (Mesh)
+	{
+		if (Mesh->MeshData[MeshDataIndex].MaterialIndex != 0)
+		{
+			SceneMaterial* MeshMaterial = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[MeshDataIndex].MaterialIndex);
+			if (MeshMaterial != NULL)
+			{
+				for (size_t i = 0; i < MeshMaterial->MeshDataReferences.Size; i++)
+				{
+					SceneMeshReference* MeshReference = (SceneMeshReference*)DynamicArrayGetAt(&MeshMaterial->MeshDataReferences, i);
+					if (MeshReference != NULL)
+					{
+						if (MeshReference->MeshIndex == MeshIndex &&
+							MeshReference->MeshDataIndex == MeshDataIndex)							
+						{
+							DynamicArrayPop(&MeshMaterial->MeshDataReferences, i);
+							break;
+						}
+
+					//	SceneMesh* MaterialMeshRefernce = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshReference->MeshIndex);
+					//	if (MaterialMeshRefernce != NULL)
+					//	{
+					//
+					//	}
+					}
+					
+
+				}
+
+			}
+		}
+
+		Mesh->MeshData[MeshDataIndex].MaterialIndex = MaterialIndex;
+	}
+
+	SceneMeshReference MeshReference;
+	MeshReference.MeshIndex = MeshIndex;
+	MeshReference.MeshDataIndex = MeshDataIndex;
+	DynamicArrayPush(&Material->MeshDataReferences, &MeshReference);
 }
 
 //doesn't check if Material is valid
@@ -444,6 +498,26 @@ void DeleteMaterial(uint32_t Material)
 		if (Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL] && Entities[i].Material.MaterialIndex == Material)
 			ResetEntityMaterial(&Entities[i]);
 	
+	//Reset the material for every mesh that used to use this material
+	{
+		SceneMaterial* MaterialPTR = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Material);
+
+		for (size_t i = 0; i < MaterialPTR->MeshDataReferences.Size; i++)
+		{
+			SceneMeshReference* MeshReference = (SceneMeshReference*)DynamicArrayGetAt(&MaterialPTR->MeshDataReferences, i);
+			if (MeshReference != NULL)
+			{
+				SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshReference->MeshIndex);
+				if (Mesh != NULL)
+				{
+					Mesh->MeshData[MeshReference->MeshDataIndex].MaterialIndex = 0;
+				}
+			}
+		}
+
+		DynamicArrayDestroy(&MaterialPTR->MeshDataReferences);
+	}	
+
 	CMA_Pop(&SceneMaterials, Material);
 
 	for (uint32_t i = 1; i < SceneMaterials.Size; i++)
@@ -986,7 +1060,23 @@ uint32_t AddModel(uint32_t Settings, const char* FileName)
 
 	uint32_t MeshIndex = ERROR32;
 	if (LoadModelWave(FileName, &Model, &MeshInfo))
+	{
 		MeshIndex = AddMesh(GetFileNameFromPath((char*)FileName), &MeshInfo);
+
+		{
+			SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshIndex);
+
+			for (uint32_t i = 0; i < Mesh->MeshCount; i++)
+			{
+				SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[i].MaterialIndex);
+
+				SceneMeshReference MeshReference;
+				MeshReference.MeshIndex = MeshIndex;
+				MeshReference.MeshDataIndex = i;
+				DynamicArrayPush(&Material->MeshDataReferences, &MeshReference);
+			}
+		}	
+	}
 	else
 	{
 		printf("Failed to parse Model\n");
@@ -1111,7 +1201,8 @@ uint32_t AddDefaultModel(DefaultModels Model)
 //	SceneMaterial Material;
 //	SetDefaultMaterial(&Material, MeshInfo.Name);
 //	MeshInfo.MeshData[0].MaterialIndex = AddMaterial(&Material);
-	MeshInfo.MeshData[0].MaterialIndex = 0;
+//	MeshInfo.MeshData[0].MaterialIndex = 0;
+	SetMaterial(MeshIndex, 0, 0);
 
 	RaytracingAddGeometry(MeshIndex);
 	return MeshIndex;

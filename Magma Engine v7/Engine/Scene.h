@@ -132,6 +132,7 @@ void SceneInit()
 
 		//Material
 	SceneMaterials = CMA_Create(sizeof(SceneMaterial), "Magma Engine, Scene Materials");
+	/*
 	SceneMaterial Material;
 	strcpy(Material.Name, "None");
 	Material.Color = Vec4f(1.0);
@@ -145,6 +146,11 @@ void SceneInit()
 	Material.RoughnessIndex = 0;
 	Material.OcclusionIndex = 0;
 	CMA_Push(&SceneMaterials, &Material);
+	*/
+	SceneMaterial Material;
+	SetDefaultMaterial(&Material, "None");
+	AddMaterial(&Material);
+
 	//Mesh
 	SceneMeshes = CMA_Create(sizeof(SceneMesh), "Magma Engine, Scene Meshes");
 	SceneMesh Mesh;

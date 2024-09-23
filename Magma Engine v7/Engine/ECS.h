@@ -737,6 +737,7 @@ uint32_t AddTexture(char* Path, bool ShowInAssetBrowser)
 	Image.ShowInAssetBrowser = ShowInAssetBrowser;
 	Image.TextureDescriptorSet = LoadTexture(Path, &Image);
 	strcpycut(Image.Path, Path);
+	ConvertFilePath(Image.Path);
 
 	char* Name = GetFileNameFromPath(Path);
 	CheckForSameNames(&SceneTextures, ARRAY_SIZE(Image.Name), Name, Image.Name);
@@ -864,6 +865,7 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 {
 	MeshInfo->Destroyable = true;
 	strcpycut(MeshInfo->Path, Path);
+	ConvertFilePath(MeshInfo->Path);
 	MeshInfo->MeshData = (SceneMeshData*)malloc(ModelData->MeshCount * sizeof(SceneMeshData));
 	if (!MeshInfo->MeshData)
 	{

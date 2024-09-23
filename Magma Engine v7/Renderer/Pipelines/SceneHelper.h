@@ -100,6 +100,7 @@ typedef struct
 	float Roughness;
 	float Occlusion;
 
+	//Gets created by AddMaterial
 	//uses SceneMeshReference, usage: every mesh that uses this material gets stored here
 	DynamicArray MeshDataReferences;
 } SceneMaterial;

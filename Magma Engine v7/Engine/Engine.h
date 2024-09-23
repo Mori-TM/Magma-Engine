@@ -25,6 +25,27 @@ int32_t InitTime = 0;
 float FPS = 0.0;
 float MS = 0.0;
 
+// From \\ to /
+void ConvertFilePath(char* Path)
+{
+	if (Path == NULL)
+		return;
+
+	char* FileName = Path;
+	for (char* Cur = Path; *Cur != '\0'; Cur++)
+	{
+		if (*Cur == '\\')
+			*FileName = '/';
+		else
+			*FileName = *Cur;
+
+		FileName++;
+	}
+	*FileName = '\0';
+
+//	Path = FileName;
+}
+
 char* GetFileNameFromPath(char* Path)
 {
 	if (Path == NULL)

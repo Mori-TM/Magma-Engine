@@ -246,16 +246,16 @@ void SceneSave(const char* FileName)
 			fprintf(File, "\t\t{\n");
 			{
 				fprintf(File, "\t\t\t\"Name\": \"%s\",\n", Material->Name);
-				fprintf(File, "\t\t\t\"AlbedoTexture\": %d,\n", Material->AlbedoIndex);
-				fprintf(File, "\t\t\t\"NormalTexture\": %d,\n", Material->NormalIndex);
-				fprintf(File, "\t\t\t\"MetallicTexture\": %d,\n", Material->MetallicIndex);
-				fprintf(File, "\t\t\t\"RoughnessTexture\": %d,\n", Material->RoughnessIndex);
-				fprintf(File, "\t\t\t\"OcclusionTexture\": %d,\n", Material->OcclusionIndex);
+				fprintf(File, "\t\t\t\"AlbedoIndex\": %d,\n", Material->AlbedoIndex);
+				fprintf(File, "\t\t\t\"NormalIndex\": %d,\n", Material->NormalIndex);
+				fprintf(File, "\t\t\t\"MetallicIndex\": %d,\n", Material->MetallicIndex);
+				fprintf(File, "\t\t\t\"RoughnessIndex\": %d,\n", Material->RoughnessIndex);
+				fprintf(File, "\t\t\t\"OcclusionIndex\": %d,\n", Material->OcclusionIndex);
 
 				fprintf(File, "\t\t\t\"Color\": [%f, %f, %f, %f],\n", Material->Color.r, Material->Color.g, Material->Color.b, Material->Color.a);
-				fprintf(File, "\t\t\t\"MetallicTexture\": %f,\n", Material->Metallic);
-				fprintf(File, "\t\t\t\"RoughnessTexture\": %f,\n", Material->Roughness);
-				fprintf(File, "\t\t\t\"OcclusionTexture\": %f%s\n", Material->Occlusion, i == (SceneTextures.Size - 1) ? "" : ",");
+				fprintf(File, "\t\t\t\"Metallic\": %f,\n", Material->Metallic);
+				fprintf(File, "\t\t\t\"Roughness\": %f,\n", Material->Roughness);
+				fprintf(File, "\t\t\t\"Occlusion\": %f%s\n", Material->Occlusion, i == (SceneTextures.Size - 1) ? "" : ",");
 
 			}			
 			fprintf(File, "\t\t}%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
@@ -318,17 +318,17 @@ void SceneSave(const char* FileName)
 				{
 					DWORD Length = 0;
 					Base64Encode((BYTE*)Mesh->Vertices, (size_t)Mesh->TotalVertexCount * sizeof(SceneVertex), Base64EncodeBuffer, &Length);
-					fprintf(File, "\t\t\t\"Vertices\": %s\n", Base64EncodeBuffer);
+					fprintf(File, "\t\t\t\"Vertices\": %s,\n", Base64EncodeBuffer);
 				}
 				if (Mesh->Indices)
 				{
 					DWORD Length = 0;
 					Base64Encode((BYTE*)Mesh->Indices, (size_t)Mesh->TotalIndexCount * sizeof(uint32_t), Base64EncodeBuffer, &Length);
-					fprintf(File, "\t\t\t\"Indices\": %s\n", Base64EncodeBuffer);
+					fprintf(File, "\t\t\t\"Indices\": %s,\n", Base64EncodeBuffer);
 				}
 					
 
-				fprintf(File, "\t\t\t\"MeshData\": [\n", Mesh->IndexBuffer);
+				fprintf(File, "\t\t\t\"MeshData\": [\n");
 				for (uint32_t j = 0; j < Mesh->MeshCount; j++)
 				{
 					fprintf(File, "\t\t\t\t{\n");
@@ -351,7 +351,7 @@ void SceneSave(const char* FileName)
 					}
 					fprintf(File, "\t\t\t\t}%s\n", j == (Mesh->MeshCount - 1) ? "" : ",");
 				}
-				fprintf(File, "\t\t\t]\n", Mesh->IndexBuffer);
+				fprintf(File, "\t\t\t]\n");
 				//	fprintf(File, "\t\t\t\"OcclusionTexture\": \"%s\",\n", Mesh->OcclusionIndex);
 				//
 				//	fprintf(File, "\t\t\t\"Color\": [%f, %f, %f, %f],\n", Material->Color.r, Material->Color.g, Material->Color.b, Material->Color.a);
@@ -385,9 +385,41 @@ void SceneLoadTexture(JsonObject* Object)
 		if (strcmp(Variable->Name, "Path") == 0)
 			Path = Variable->Data.Str;
 		else if (strcmp(Variable->Name, "ShowInAssetBrowser") == 0)
-				ShowInAssetBrowser = Variable->Data.Bool;
+			ShowInAssetBrowser = Variable->Data.Bool;
 	}
 	AddTexture(Path, ShowInAssetBrowser);
+}
+
+void SceneLoadMaterial(JsonObject* Object)
+{
+	SceneMaterial Material;
+
+	for (size_t i = 0; i < Object->Refrences.Size; i++)
+	{
+		JsonVariables* Variable = (JsonVariables*)DynamicArrayGetAt(&Object->Refrences, i);
+		if (strcmp(Variable->Name, "Name") == 0)
+			strcpycut(Material.Name, Variable->Data.Str);
+		else if (strcmp(Variable->Name, "AlbedoIndex") == 0) Material.AlbedoIndex = Variable->Data.Int;
+		else if (strcmp(Variable->Name, "NormalIndex") == 0) Material.NormalIndex = Variable->Data.Int;
+		else if (strcmp(Variable->Name, "MetallicIndex") == 0) Material.MetallicIndex = Variable->Data.Int;
+		else if (strcmp(Variable->Name, "RoughnessIndex") == 0) Material.RoughnessIndex = Variable->Data.Int;
+		else if (strcmp(Variable->Name, "OcclusionIndex") == 0)	Material.OcclusionIndex = Variable->Data.Int;
+		else if (strcmp(Variable->Name, "Color") == 0)
+		{
+			JsonObject* ColorObj = (JsonObject*)Variable;
+			for (size_t j = 0; j < ColorObj->Refrences.Size; j++)
+			{
+				JsonVariables* Color = (JsonVariables*)DynamicArrayGetAt(&ColorObj->Refrences, j);
+				Material.Color.Arr[j] = Color->Data.Double;
+			}
+			
+		}
+		else if (strcmp(Variable->Name, "Metallic") == 0)	Material.Metallic = Variable->Data.Double;
+		else if (strcmp(Variable->Name, "Roughness") == 0)	Material.Roughness = Variable->Data.Double;
+		else if (strcmp(Variable->Name, "Occlusion") == 0)	Material.Occlusion = Variable->Data.Double;
+
+	}
+	AddMaterial(&Material);
 }
 
 void SceneLoad(const char* FileName)
@@ -413,9 +445,21 @@ void SceneLoad(const char* FileName)
 				}
 				
 			}
+			else
+			{
+				if (strcmp(Objects->Name, "Materials") == 0)
+				{
+					for (size_t i = 0; i < Objects->Refrences.Size; i++)
+					{
+						JsonObject* Object = (JsonObject*)DynamicArrayGetAt(&Objects->Refrences, i);
+						SceneLoadMaterial(Object);
+					}
+
+				}
+			}
 				
 
-			//FIX - Give better names
+			//FIX - Give Objets better names
 		}
 
 

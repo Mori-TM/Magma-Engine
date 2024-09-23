@@ -74,6 +74,13 @@ extern "C"
 
 int32_t main(int32_t argc, char** argv)
 {
+//	char Path[256];
+//	strcpy(Path, "C:\\Oi\\fi\\file.txt\0");
+//	ConvertFilePath(Path);
+//	printf("%s\n", Path);
+//	exit(4567890);
+
+
 Restart:
 #ifdef MAGMA_ENGINE_TRACK_MEMORY
 	s_init();
@@ -199,7 +206,7 @@ Restart:
 	RendererCreate();
 	bool Run = true;
 
-//	SceneLoad("ExampleScene.lva");
+	SceneLoad("ExampleScene.lva");
 
 //	Run = false;
 //	exit(3666);
@@ -222,7 +229,7 @@ Restart:
 		FrameCount++;
 	}
 	
-	SceneSave("ExampleScene.lva");
+//	SceneSave("ExampleScene.lva");
 
 	RendererDestroy();
 	SDL_DestroyWindow(Window);

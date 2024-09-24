@@ -161,7 +161,7 @@ JsonRet JsonParseBuffer(const size_t Length, const char* Buffer, Json* Jsn)
 	JsonObject* PrevObj = NULL;
 
 	size_t StrLen = 0;
-	size_t StrAllocSize = 32;
+	size_t StrAllocSize = 128;
 	char* String = (char*)malloc(StrAllocSize);
 
 	DynamicArray Names = DynamicArrayCreate(sizeof(char**), "Json Names");
@@ -256,7 +256,7 @@ JsonRet JsonParseBuffer(const size_t Length, const char* Buffer, Json* Jsn)
 
 						if (StrLen >= StrAllocSize)
 						{
-							StrAllocSize += 32;
+							StrAllocSize += 8192;
 							char* TmpChr = (char*)realloc(String, StrAllocSize);
 							if (TmpChr)
 								String = TmpChr;

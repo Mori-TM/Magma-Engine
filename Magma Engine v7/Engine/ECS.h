@@ -402,8 +402,11 @@ void AddMeshToEntity(uint32_t EntityIndex, uint32_t MeshIndex)
 	printf("No Mesh to add to Entity\n");
 }
 
-uint32_t AddMesh(const char* Name, SceneMesh* MeshInfo)
+uint32_t AddMesh(SceneMesh* MeshInfo)
 {
+	char Name[MAX_CHAR_NAME_LENGTH];
+	strcpycut(Name, MeshInfo->Name);
+
 	Mutex.lock();
 	CheckForSameNames(&SceneMeshes, ARRAY_SIZE(MeshInfo->Name), Name, MeshInfo->Name);
 
@@ -1063,7 +1066,8 @@ uint32_t AddModel(uint32_t Settings, const char* FileName)
 	uint32_t MeshIndex = ERROR32;
 	if (LoadModelWave(FileName, &Model, &MeshInfo))
 	{
-		MeshIndex = AddMesh(GetFileNameFromPath((char*)FileName), &MeshInfo);
+		strcpycut(MeshInfo.Name, GetFileNameFromPath((char*)FileName));
+		MeshIndex = AddMesh(&MeshInfo);
 
 		{
 			SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, MeshIndex);
@@ -1123,6 +1127,7 @@ uint32_t AddDefaultModel(DefaultModels Model)
 	case DEFAULT_MODEL_PLANE:
 		strcpycut(ModelName, "Plane");
 		
+		strcpycut(MeshInfo.Name, ModelName);
 		strcpycut(MeshInfo.Path, ModelName);
 		strcpycut(MeshInfo.MeshData[0].Name, ModelName);
 		MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(PlaneVertices);
@@ -1136,12 +1141,13 @@ uint32_t AddDefaultModel(DefaultModels Model)
 		MeshInfo.VertexBuffer = PlaneVertexBuffer;
 		MeshInfo.IndexBuffer = PlaneIndexBuffer;
 		MeshInfo.MeshData[0].AABB = PlaneAABB;
-		MeshIndex = AddMesh(ModelName, &MeshInfo);
+		MeshIndex = AddMesh(&MeshInfo);
 		break;
 
 	case DEFAULT_MODEL_CUBE:
 		strcpycut(ModelName, "Cube");
 		
+		strcpycut(MeshInfo.Name, ModelName);
 		strcpycut(MeshInfo.Path, ModelName);
 		strcpycut(MeshInfo.MeshData[0].Name, ModelName);
 		MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(CubeVertices);
@@ -1155,12 +1161,13 @@ uint32_t AddDefaultModel(DefaultModels Model)
 		MeshInfo.VertexBuffer = CubeVertexBuffer;
 		MeshInfo.IndexBuffer = OPENVK_ERROR;
 		MeshInfo.MeshData[0].AABB = CubeAABB;
-		MeshIndex = AddMesh(ModelName, &MeshInfo);
+		MeshIndex = AddMesh(&MeshInfo);
 		break;
 
 	case DEFAULT_MODEL_SPHERE:
 		strcpycut(ModelName, "Sphere");
 		
+		strcpycut(MeshInfo.Name, ModelName);
 		strcpycut(MeshInfo.Path, ModelName);
 		strcpycut(MeshInfo.MeshData[0].Name, ModelName);
 		MeshInfo.MeshData[0].VertexCount = SphereVertexCount;
@@ -1174,12 +1181,13 @@ uint32_t AddDefaultModel(DefaultModels Model)
 		MeshInfo.VertexBuffer = SphereVertexBuffer;
 		MeshInfo.IndexBuffer = SphereIndexBuffer;
 		MeshInfo.MeshData[0].AABB = SphereAABB;
-		MeshIndex = AddMesh(ModelName, &MeshInfo);
+		MeshIndex = AddMesh(&MeshInfo);
 		break;
 
 	case DEFAULT_MODEL_BEAN:
 		strcpycut(ModelName, "Bean");
 
+		strcpycut(MeshInfo.Name, ModelName);
 		strcpycut(MeshInfo.Path, ModelName);
 		strcpycut(MeshInfo.MeshData[0].Name, ModelName);
 		MeshInfo.MeshData[0].VertexCount = BeanVertexCount;
@@ -1193,7 +1201,7 @@ uint32_t AddDefaultModel(DefaultModels Model)
 		MeshInfo.VertexBuffer = BeanVertexBuffer;
 		MeshInfo.IndexBuffer = BeanIndexBuffer;
 		MeshInfo.MeshData[0].AABB = BeanAABB;
-		MeshIndex = AddMesh(ModelName, &MeshInfo);
+		MeshIndex = AddMesh(&MeshInfo);
 		break;
 
 	default:

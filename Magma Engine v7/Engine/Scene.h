@@ -318,13 +318,13 @@ void SceneSave(const char* FileName)
 				{
 					DWORD Length = 0;
 					Base64Encode((BYTE*)Mesh->Vertices, (size_t)Mesh->TotalVertexCount * sizeof(SceneVertex), Base64EncodeBuffer, &Length);
-					fprintf(File, "\t\t\t\"Vertices\": %s,\n", Base64EncodeBuffer);
+					fprintf(File, "\t\t\t\"Vertices\": \"%s\",\n", Base64EncodeBuffer);
 				}
 				if (Mesh->Indices)
 				{
 					DWORD Length = 0;
 					Base64Encode((BYTE*)Mesh->Indices, (size_t)Mesh->TotalIndexCount * sizeof(uint32_t), Base64EncodeBuffer, &Length);
-					fprintf(File, "\t\t\t\"Indices\": %s,\n", Base64EncodeBuffer);
+					fprintf(File, "\t\t\t\"Indices\": \"%s\",\n", Base64EncodeBuffer);
 				}
 					
 
@@ -422,6 +422,75 @@ void SceneLoadMaterial(JsonObject* Object)
 	AddMaterial(&Material);
 }
 
+void SceneLoadMesh(JsonObject* Object)
+{
+	SceneMesh MeshInfo;
+	memset(&MeshInfo, 0, sizeof(SceneMesh));
+
+	for (size_t i = 0; i < Object->Refrences.Size; i++)
+	{
+		JsonVariables* Variable = (JsonVariables*)DynamicArrayGetAt(&Object->Refrences, i);
+		if (strcmp(Variable->Name, "Name") == 0)		strcpycut(MeshInfo.Name, Variable->Data.Str);
+		else if (strcmp(Variable->Name, "Path") == 0)	strcpycut(MeshInfo.Path, Variable->Data.Str);
+		else if (strcmp(Variable->Name, "MeshCount") == 0) MeshInfo.MeshCount = Variable->Data.Int;
+		else if (strcmp(Variable->Name, "Destroyable") == 0) MeshInfo.Destroyable = Variable->Data.Bool;
+		else if (strcmp(Variable->Name, "TotalVertexCount") == 0) MeshInfo.TotalVertexCount = Variable->Data.Int;
+		else if (strcmp(Variable->Name, "TotalIndexCount") == 0) MeshInfo.TotalIndexCount = Variable->Data.Int;
+		else if (strcmp(Variable->Name, "Vertices") == 0)
+		{
+			MeshInfo.Vertices = (SceneVertex*)malloc(MeshInfo.TotalVertexCount * sizeof(SceneVertex));
+			if (MeshInfo.Vertices == NULL)
+			{
+				printf("Failed to allocate vertices for: %s while scene loading\n", MeshInfo.Name);
+				return;
+			}
+			printf("Jason derulo\n");
+			
+			DWORD Length = 0;
+			Base64Decode((BYTE*)Variable->Data.Str, (BYTE*)MeshInfo.Vertices, &Length);
+			if (Length != (DWORD)(MeshInfo.TotalVertexCount * sizeof(SceneVertex)))
+				printf("Base64 parse length not the same as vertex size would guess\n");
+		}
+		else if (strcmp(Variable->Name, "Indices") == 0)
+		{
+			MeshInfo.Indices = (uint32_t*)malloc(MeshInfo.TotalIndexCount * sizeof(uint32_t));
+			if (MeshInfo.Indices == NULL)
+			{
+				printf("Failed to allocate indices for: %s while scene loading\n", MeshInfo.Name);
+				return;
+			}
+
+		
+			DWORD Length = 0;
+			Base64Decode((BYTE*)Variable->Data.Str, (BYTE*)MeshInfo.Indices, &Length);
+			if (Length != (DWORD)(MeshInfo.TotalIndexCount * sizeof(uint32_t)))
+				printf("Base64 parse length not the same as index size would guess\n");
+		}
+		else if (strcmp(Variable->Name, "MeshData") == 0)
+		{
+			JsonObject* MeshData = (JsonObject*)Variable;
+			for (size_t j = 0; j < MeshData->Refrences.Size; j++)
+			{
+				JsonVariables* MeshDataVars = (JsonVariables*)DynamicArrayGetAt(&MeshData->Refrences, j);
+				
+			}
+		}
+	}
+
+	printf("Yeaj\n");
+
+//	AddMesh(&MeshInfo);
+}
+
+void SceneParseObjectRefernces(JsonObject* Objects, void(*LoadFunc)(JsonObject* Object))
+{
+	for (size_t i = 0; i < Objects->Refrences.Size; i++)
+	{
+		JsonObject* Object = (JsonObject*)DynamicArrayGetAt(&Objects->Refrences, i);
+		LoadFunc(Object);
+	}
+}
+
 void SceneLoad(const char* FileName)
 {
 	Json Jsn;
@@ -438,24 +507,16 @@ void SceneLoad(const char* FileName)
 			
 			if (strcmp(Objects->Name, "Textures") == 0)
 			{
-				for (size_t i = 0; i < Objects->Refrences.Size; i++)
-				{
-					JsonObject* Object = (JsonObject*)DynamicArrayGetAt(&Objects->Refrences, i);
-					SceneLoadTexture(Object);
-				}
-				
+				SceneParseObjectRefernces(Objects, SceneLoadTexture);				
 			}
-			else
+			else if(strcmp(Objects->Name, "Materials") == 0)
 			{
-				if (strcmp(Objects->Name, "Materials") == 0)
-				{
-					for (size_t i = 0; i < Objects->Refrences.Size; i++)
-					{
-						JsonObject* Object = (JsonObject*)DynamicArrayGetAt(&Objects->Refrences, i);
-						SceneLoadMaterial(Object);
-					}
-
-				}
+				SceneParseObjectRefernces(Objects, SceneLoadMaterial);
+			}
+			else if (strcmp(Objects->Name, "Meshes") == 0)
+			{
+				printf("my n\n");
+				SceneParseObjectRefernces(Objects, SceneLoadMesh);
 			}
 				
 

@@ -152,6 +152,7 @@ typedef struct
 	};
 } vec2;
 
+/*
 typedef struct
 {
 	union
@@ -176,6 +177,39 @@ typedef struct
 		float p;
 		float b;
 	};
+} vec3;
+*/
+
+typedef union
+{
+	float Arr[3];
+
+	struct
+	{
+		float x;
+		float y;
+		float z;
+	};
+
+	struct
+	{
+		float r;
+		float g;
+		float b;
+	};
+
+	struct
+	{
+		float u;
+		float v;
+	};
+
+	struct
+	{
+		float s;
+		float t;
+	};
+
 } vec3;
 /*
 typedef struct

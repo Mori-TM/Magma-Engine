@@ -450,7 +450,7 @@ void EditorMeshInspector()
 				if (ImGui::CollapsingHeader("SUB MESHES"))
 				{
 					for (uint32_t i = 0; i < Mesh->MeshCount; i++)
-					{
+					{						
 						SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[i].MaterialIndex);
 						if (Material)
 						{

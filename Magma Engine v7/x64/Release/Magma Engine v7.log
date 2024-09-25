@@ -282,94 +282,106 @@ C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(48
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\MojoAL\mojoal.c(4849,41): warning C4100: 'name': unreferenced formal parameter
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(234,3): warning C4201: nonstandard extension used: nameless struct/union
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(192,3): warning C4201: nonstandard extension used: nameless struct/union
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(242,3): warning C4201: nonstandard extension used: nameless struct/union
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(199,3): warning C4201: nonstandard extension used: nameless struct/union
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(248,3): warning C4201: nonstandard extension used: nameless struct/union
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(205,3): warning C4201: nonstandard extension used: nameless struct/union
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(254,3): warning C4201: nonstandard extension used: nameless struct/union
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(211,3): warning C4201: nonstandard extension used: nameless struct/union
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(270,3): warning C4201: nonstandard extension used: nameless struct/union
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(268,3): warning C4201: nonstandard extension used: nameless struct/union
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(278,3): warning C4201: nonstandard extension used: nameless struct/union
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(276,3): warning C4201: nonstandard extension used: nameless struct/union
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(284,3): warning C4201: nonstandard extension used: nameless struct/union
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(282,3): warning C4201: nonstandard extension used: nameless struct/union
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(290,3): warning C4201: nonstandard extension used: nameless struct/union
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(288,3): warning C4201: nonstandard extension used: nameless struct/union
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(313,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(304,3): warning C4201: nonstandard extension used: nameless struct/union
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(321,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(312,3): warning C4201: nonstandard extension used: nameless struct/union
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(421,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(318,3): warning C4201: nonstandard extension used: nameless struct/union
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(428,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(324,3): warning C4201: nonstandard extension used: nameless struct/union
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(750,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(347,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(751,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(355,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(766,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(455,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(767,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(462,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(768,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(784,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1142,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(785,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1143,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(800,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1157,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(801,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1158,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(802,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1172,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1176,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1173,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1177,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1261,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1191,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1261,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1192,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1261,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1206,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1294,2): warning C5033: 'register' is no longer a supported storage class
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1207,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1294,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1295,2): warning C5033: 'register' is no longer a supported storage class
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1294,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1295,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1500,23): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1295,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1328,2): warning C5033: 'register' is no longer a supported storage class
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1328,36): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1328,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveMath.h(1534,23): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(690,11): warning C4189: 'j': local variable is initialized but not referenced
@@ -1135,43 +1147,52 @@ C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(99,23): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(402,93): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(490,93): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(403,93): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(491,93): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(404,97): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(492,97): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(405,99): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(493,99): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(406,99): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(494,99): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(413,40): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(506,87): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(417,87): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(507,89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(418,89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(508,89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(419,89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(523,106): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(435,89): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(524,104): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(437,103): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(525,102): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(438,101): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(526,102): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(474,20): warning C4189: 'MeshDataVars': local variable is initialized but not referenced
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(527,101): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(546,39): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(558,103): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(559,101): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(34,28): warning C4459: declaration of 'CameraPos' hides global declaration
@@ -1542,8 +1563,8 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.3313
      Creating library C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.lib and object C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exp
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  2 of 4970 functions (<0.1%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    113 functions had inline decision re-evaluated but remain unchanged
+  6 of 4973 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+    2 functions were new in current compilation
+    112 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Magma Engine v7.vcxproj -> C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exe

@@ -390,6 +390,95 @@ void SceneLoadTexture(JsonObject* Object)
 	AddTexture(Path, ShowInAssetBrowser);
 }
 
+typedef struct
+{
+	union
+	{
+			char* Str;
+			int32_t Int32;
+			float Float32;
+			bool Bool;
+
+
+		/*
+		union
+		{
+			char* Str;
+		} StringArray;
+
+		union
+		{
+			int32_t Int32;
+		} Int32Array;
+
+		union
+		{
+			float Float32;
+		} Float32Array;
+
+		union
+		{
+			bool Bool;
+		} BoolArray;
+		*/
+	};
+	
+} SceneArrayTypes;
+
+//This criminal macro could also be a function using a template
+#define SCENE_DECLARE_TYPE(type) \
+void SceneLoadArray##type(type *DstArray, JsonObject* ArrayObj) { \
+    for (size_t j = 0; j < ArrayObj->Refrences.Size; j++) \
+	{ \
+		JsonVariables* Var = (JsonVariables*)DynamicArrayGetAt(&ArrayObj->Refrences, j); \
+		switch (Var->Type) \
+		{ \
+		case JSON_INT: \
+			DstArray[j] = (type)Var->Data.Int; \
+			break; \
+		case JSON_DUB: \
+			DstArray[j] = (type)Var->Data.Double; \
+			break; \
+		case JSON_BOOL: \
+			DstArray[j] = (type)Var->Data.Bool; \
+			break; \
+		default:\
+			break;\
+		} \
+	} \
+}
+
+SCENE_DECLARE_TYPE(int32_t)
+SCENE_DECLARE_TYPE(float)
+SCENE_DECLARE_TYPE(bool)
+/*
+//doesn't allocate string - yet?
+void SceneLoadArray(SceneArrayTypes* DstArray, JsonObject* ArrayObj)
+{	
+
+	for (size_t j = 0; j < ArrayObj->Refrences.Size; j++)
+	{
+		JsonVariables* Var = (JsonVariables*)DynamicArrayGetAt(&ArrayObj->Refrences, j);
+		switch (Var->Type)
+		{
+		case JSON_STR:
+			DstArray[j].Str = Var->Data.Str;
+			break;
+		case JSON_INT:
+			DstArray[j].Int32 = Var->Data.Int;
+			break;
+		case JSON_DUB:
+			DstArray[j].Float32 = Var->Data.Double;
+			break;
+		case JSON_BOOL:
+			DstArray[j].Bool = Var->Data.Bool;
+			break;
+		
+		}
+	}
+}
+*/
+
 void SceneLoadMaterial(JsonObject* Object)
 {
 	SceneMaterial Material;
@@ -406,13 +495,14 @@ void SceneLoadMaterial(JsonObject* Object)
 		else if (strcmp(Variable->Name, "OcclusionIndex") == 0)	Material.OcclusionIndex = Variable->Data.Int;
 		else if (strcmp(Variable->Name, "Color") == 0)
 		{
-			JsonObject* ColorObj = (JsonObject*)Variable;
-			for (size_t j = 0; j < ColorObj->Refrences.Size; j++)
-			{
-				JsonVariables* Color = (JsonVariables*)DynamicArrayGetAt(&ColorObj->Refrences, j);
-				Material.Color.Arr[j] = Color->Data.Double;
-			}
-			
+		//	JsonObject* ColorObj = (JsonObject*)Variable;
+		//	for (size_t j = 0; j < ColorObj->Refrences.Size; j++)
+		//	{
+		//		JsonVariables* Color = (JsonVariables*)DynamicArrayGetAt(&ColorObj->Refrences, j);
+		//		Material.Color.Arr[j] = Color->Data.Double;
+		//	}
+
+			SceneLoadArrayfloat(Material.Color.Arr, (JsonObject*)Variable);
 		}
 		else if (strcmp(Variable->Name, "Metallic") == 0)	Material.Metallic = Variable->Data.Double;
 		else if (strcmp(Variable->Name, "Roughness") == 0)	Material.Roughness = Variable->Data.Double;
@@ -420,6 +510,26 @@ void SceneLoadMaterial(JsonObject* Object)
 
 	}
 	AddMaterial(&Material);
+}
+
+void SceneLoadMeshData(SceneMeshData* MeshData, JsonObject* MeshDataElements)
+{
+	memset(MeshData, 0, sizeof(SceneMeshData));
+
+	for (size_t j = 0; j < MeshDataElements->Refrences.Size; j++)
+	{
+		JsonVariables* MeshDataVars = (JsonVariables*)DynamicArrayGetAt(&MeshDataElements->Refrences, j);
+
+		if (strcmp(MeshDataVars->Name, "Name") == 0)		strcpycut(MeshData->Name, MeshDataVars->Data.Str);
+		else if (strcmp(MeshDataVars->Name, "MaterialIndex") == 0)	MeshData->MaterialIndex = MeshDataVars->Data.Int;
+		else if (strcmp(MeshDataVars->Name, "VertexOffset") == 0)	MeshData->VertexOffset = MeshDataVars->Data.Int;
+		else if (strcmp(MeshDataVars->Name, "VertexCount") == 0)	MeshData->VertexCount = MeshDataVars->Data.Int;
+		else if (strcmp(MeshDataVars->Name, "IndexOffset") == 0)	MeshData->IndexOffset = MeshDataVars->Data.Int;
+		else if (strcmp(MeshDataVars->Name, "IndexCount") == 0)		MeshData->IndexCount = MeshDataVars->Data.Int;
+		else if (strcmp(MeshDataVars->Name, "Min") == 0)	SceneLoadArrayfloat(MeshData->AABB.Min.Arr, (JsonObject*)MeshDataVars);
+		else if (strcmp(MeshDataVars->Name, "Max") == 0)	SceneLoadArrayfloat(MeshData->AABB.Max.Arr, (JsonObject*)MeshDataVars);
+		else if (strcmp(MeshDataVars->Name, "Render") == 0)	SceneLoadArraybool(MeshData->Render, (JsonObject*)MeshDataVars);
+	}
 }
 
 void SceneLoadMesh(JsonObject* Object)
@@ -432,7 +542,19 @@ void SceneLoadMesh(JsonObject* Object)
 		JsonVariables* Variable = (JsonVariables*)DynamicArrayGetAt(&Object->Refrences, i);
 		if (strcmp(Variable->Name, "Name") == 0)		strcpycut(MeshInfo.Name, Variable->Data.Str);
 		else if (strcmp(Variable->Name, "Path") == 0)	strcpycut(MeshInfo.Path, Variable->Data.Str);
-		else if (strcmp(Variable->Name, "MeshCount") == 0) MeshInfo.MeshCount = Variable->Data.Int;
+		else if (strcmp(Variable->Name, "MeshCount") == 0)
+		{
+			MeshInfo.MeshCount = Variable->Data.Int;
+			MeshInfo.MeshData = (SceneMeshData*)malloc(MeshInfo.MeshCount * sizeof(SceneMeshData));
+			if (MeshInfo.MeshData == NULL)
+			{
+				printf("Failed to allocate MeshData from scene load\n");
+				return;
+			}
+
+			//For later array looping is set to zero here
+			MeshInfo.MeshCount = 0;
+		}
 		else if (strcmp(Variable->Name, "Destroyable") == 0) MeshInfo.Destroyable = Variable->Data.Bool;
 		else if (strcmp(Variable->Name, "TotalVertexCount") == 0) MeshInfo.TotalVertexCount = Variable->Data.Int;
 		else if (strcmp(Variable->Name, "TotalIndexCount") == 0) MeshInfo.TotalIndexCount = Variable->Data.Int;
@@ -450,6 +572,14 @@ void SceneLoadMesh(JsonObject* Object)
 			Base64Decode((BYTE*)Variable->Data.Str, (BYTE*)MeshInfo.Vertices, &Length);
 			if (Length != (DWORD)(MeshInfo.TotalVertexCount * sizeof(SceneVertex)))
 				printf("Base64 parse length not the same as vertex size would guess\n");
+
+			MeshInfo.VertexBuffer = OpenVkCreateVertexBuffer(MeshInfo.TotalVertexCount * sizeof(SceneVertex), MeshInfo.Vertices);
+			if (MeshInfo.VertexBuffer == OPENVK_ERROR)
+			{
+				printf("Failed to allocate scene Vertex buffer for: %s, count: %d\n", MeshInfo.Path, MeshInfo.TotalVertexCount);
+				free(MeshInfo.Vertices);
+				return;
+			}
 		}
 		else if (strcmp(Variable->Name, "Indices") == 0)
 		{
@@ -465,21 +595,35 @@ void SceneLoadMesh(JsonObject* Object)
 			Base64Decode((BYTE*)Variable->Data.Str, (BYTE*)MeshInfo.Indices, &Length);
 			if (Length != (DWORD)(MeshInfo.TotalIndexCount * sizeof(uint32_t)))
 				printf("Base64 parse length not the same as index size would guess\n");
+
+			MeshInfo.IndexBuffer = OpenVkCreateIndexBuffer(MeshInfo.TotalIndexCount * sizeof(uint32_t), MeshInfo.Indices);
+			if (MeshInfo.IndexBuffer == OPENVK_ERROR)
+			{
+				printf("Failed to allocate scene Index buffer for: %s, count: %d\n", MeshInfo.Path, MeshInfo.TotalIndexCount);
+				free(MeshInfo.Vertices);
+				free(MeshInfo.Indices);
+				return;
+			}
+
 		}
 		else if (strcmp(Variable->Name, "MeshData") == 0)
 		{
 			JsonObject* MeshData = (JsonObject*)Variable;
+			
+
 			for (size_t j = 0; j < MeshData->Refrences.Size; j++)
 			{
-				JsonVariables* MeshDataVars = (JsonVariables*)DynamicArrayGetAt(&MeshData->Refrences, j);
-				
+				JsonObject* MeshDataElements = (JsonObject*)DynamicArrayGetAt(&MeshData->Refrences, j);
+	
+				SceneLoadMeshData(&MeshInfo.MeshData[MeshInfo.MeshCount++], MeshDataElements);
 			}
 		}
 	}
 
 	printf("Yeaj\n");
 
-//	AddMesh(&MeshInfo);
+	uint32_t MeshIndex = AddMesh(&MeshInfo);
+	RaytracingAddGeometry(MeshIndex);
 }
 
 void SceneParseObjectRefernces(JsonObject* Objects, void(*LoadFunc)(JsonObject* Object))

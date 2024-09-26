@@ -214,7 +214,7 @@ void RendererCreate()
 //	//	OpenVkRuntimeInfo("Scene was initilaized", "");
 //	}
 	
-	/*
+	
 //	uint32_t ModelIndex = AddModel(0, "D:/3D Models/Buildings/ccity-building-set-1/source/City.obj");
 	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/Sponza-master/sponza2.obj");
 //	uint32_t ModelIndex = AddModel(0, "C:/Users/Moritz Laptop/Downloads/TestMesh.obj");
@@ -235,7 +235,7 @@ void RendererCreate()
 		Entities[EntityIndex].Light.Strength = 5.8;
 		Entities[EntityIndex].Translate = Vec3(-3.6, 13.5, 2.75);
 		strcpy(Entities[EntityIndex].Light.Name, "Dir Light");
-		*/
+		
 	OpenVkRuntimeInfo("Scene was initilaized", "");
 
 	

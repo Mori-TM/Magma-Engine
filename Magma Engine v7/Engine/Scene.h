@@ -365,6 +365,36 @@ void SceneSave(const char* FileName)
 	}
 	fprintf(File, "\t],\n\n");
 
+	fprintf(File, "\t\"Entities\": [\n");
+	for (uint32_t i = 0; i < EntityCount; i++)
+	{
+		EntityInfo* Entity = &Entities[i];
+
+		fprintf(File, "\t\t{\n");
+		{
+			fprintf(File, "\t\t\t\"Name\": \"%s\",\n", Entity->Name);
+			fprintf(File, "\t\t\t\"Translate\": [%f, %f, %f],\n", Entity->Translate.x, Entity->Translate.y, Entity->Translate.z);
+			fprintf(File, "\t\t\t\"Rotate\": [%f, %f, %f],\n", Entity->Rotate.x, Entity->Rotate.y, Entity->Rotate.z);
+			fprintf(File, "\t\t\t\"Scale\": [%f, %f, %f],\n", Entity->Scale.x, Entity->Scale.y, Entity->Scale.z);
+			fprintf(File, "\t\t\t\"Selected\": %s,\n", Entity->Selected == true ? "true" : "false");
+			fprintf(File, "\t\t\t\"UsedComponents\": [", Entity->Selected == true ? "true" : "false");
+			for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
+			{
+				
+			}
+			fprintf(File, "],\n");
+
+		//	fprintf(File, "\t\t\t\"Path\": \"%s\",\n", Texture->Path);
+		//	fprintf(File, "\t\t\t\"Width\": %d,\n", Texture->Width);
+		//	fprintf(File, "\t\t\t\"Height\": %d,\n", Texture->Height);
+		//	fprintf(File, "\t\t\t\"Format\": %d,\n", Texture->Format);
+		//	fprintf(File, "\t\t\t\"MipLevels\": %d,\n", Texture->MipLevels);
+		//	fprintf(File, "\t\t\t\"Data\": null%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
+		}
+		fprintf(File, "\t\t}%s\n", i == (EntityCount - 1) ? "" : ",");
+	}
+	fprintf(File, "\t],\n\n");
+
 	fprintf(File, "}\n");
 
 	fclose(File);

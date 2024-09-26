@@ -8,7 +8,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "lion.tga",
@@ -18,7 +18,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "spnza_bricks_a_diff.tga",
@@ -28,7 +28,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_arch_diff.tga",
@@ -38,7 +38,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_ceiling_a_diff.tga",
@@ -48,7 +48,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_column_a_diff.tga",
@@ -58,7 +58,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_column_b_diff.tga",
@@ -68,7 +68,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_column_c_diff.tga",
@@ -78,7 +78,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_curtain_blue_diff.tga",
@@ -88,7 +88,7 @@
 			"Height": 2048,
 			"Format": 4,
 			"MipLevels": 12,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_curtain_diff.tga",
@@ -98,7 +98,7 @@
 			"Height": 2048,
 			"Format": 4,
 			"MipLevels": 12,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_curtain_green_diff.tga",
@@ -108,7 +108,7 @@
 			"Height": 2048,
 			"Format": 4,
 			"MipLevels": 12,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_details_diff.tga",
@@ -118,7 +118,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_fabric_blue_diff.tga",
@@ -128,7 +128,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_fabric_diff.tga",
@@ -138,7 +138,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_fabric_green_diff.tga",
@@ -148,7 +148,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_flagpole_diff.tga",
@@ -158,7 +158,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_floor_a_diff.tga",
@@ -168,7 +168,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_roof_diff.tga",
@@ -178,7 +178,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "vase_dif.tga",
@@ -188,7 +188,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "vase_hanging.tga",
@@ -198,7 +198,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "vase_round.tga",
@@ -208,7 +208,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "chain_texture.tga",
@@ -218,7 +218,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "sponza_thorn_diff.tga",
@@ -228,7 +228,7 @@
 			"Height": 512,
 			"Format": 4,
 			"MipLevels": 10,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "vase_plant.tga",
@@ -238,7 +238,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "generated_photos_6576d3b20724cc0013794683.jpg",
@@ -248,7 +248,7 @@
 			"Height": 1024,
 			"Format": 4,
 			"MipLevels": 11,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "img1.jpg",
@@ -258,7 +258,7 @@
 			"Height": 1675,
 			"Format": 4,
 			"MipLevels": 12,
-			"Data": null
+			"Data": null,
 		},
 		{
 			"Name": "IMG-3547.jpg",
@@ -283,7 +283,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "Material__25",
@@ -295,7 +295,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "bricks",
@@ -307,7 +307,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "arch",
@@ -319,7 +319,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "ceiling",
@@ -331,7 +331,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "column_a",
@@ -343,7 +343,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "column_b",
@@ -355,7 +355,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "column_c",
@@ -367,7 +367,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "fabric_g",
@@ -379,7 +379,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "fabric_c",
@@ -391,7 +391,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "fabric_f",
@@ -403,7 +403,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "details",
@@ -415,7 +415,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "fabric_d",
@@ -427,7 +427,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "fabric_a",
@@ -439,7 +439,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "fabric_e",
@@ -451,7 +451,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "flagpole",
@@ -463,7 +463,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "floor",
@@ -475,7 +475,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "roof",
@@ -487,7 +487,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "vase",
@@ -499,7 +499,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "vase_hanging",
@@ -511,7 +511,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "vase_round",
@@ -523,7 +523,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "Material__47",
@@ -535,7 +535,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "chain",
@@ -547,7 +547,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "leaf",
@@ -559,7 +559,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "Material__57",
@@ -571,7 +571,7 @@
 			"Color": [0.470400, 0.470400, 0.470400, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "Material.002",
@@ -583,7 +583,7 @@
 			"Color": [0.800000, 0.800000, 0.800000, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "Material.003",
@@ -596,7 +596,7 @@
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
 			"Occlusion": 1.000000
-		},
+		}
 		{
 			"Name": "Material (6)",
 			"AlbedoIndex": 27,
@@ -607,7 +607,7 @@
 			"Color": [0.800000, 0.800000, 0.800000, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
+			"Occlusion": 1.000000,
 		},
 		{
 			"Name": "Material.001",
@@ -619,8 +619,8 @@
 			"Color": [0.800000, 0.800000, 0.800000, 1.000000],
 			"Metallic": 0.000000,
 			"Roughness": 1.000000,
-			"Occlusion": 1.000000
-		}
+			"Occlusion": 1.000000,
+		},
 	],
 
 	"Meshes": [
@@ -643,7 +643,7 @@
 					"IndexCount": 12258,
 					"Min": [-13.893785, 0.397070, -1.589368],
 					"Max": [12.644673, 7.378953, 0.862134],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "Material__25",
@@ -654,7 +654,7 @@
 					"IndexCount": 9126,
 					"Min": [-13.885607, 0.777287, -1.115680],
 					"Max": [12.636497, 2.575509, 0.416864],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "bricks",
@@ -665,7 +665,7 @@
 					"IndexCount": 2388,
 					"Min": [-18.161390, -1.229994, -11.080107],
 					"Max": [16.991249, 13.105078, 10.113970],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "arch",
@@ -676,7 +676,7 @@
 					"IndexCount": 30504,
 					"Min": [-10.242025, 2.056385, -3.094428],
 					"Max": [8.968283, 12.402886, 2.391200],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "ceiling",
@@ -687,7 +687,7 @@
 					"IndexCount": 17628,
 					"Min": [-13.905238, 2.099265, -6.275787],
 					"Max": [12.667385, 12.295072, 5.592465],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "column_a",
@@ -698,7 +698,7 @@
 					"IndexCount": 8448,
 					"Min": [-10.284287, -0.023938, -3.082398],
 					"Max": [9.003966, 2.149787, 2.398988],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "column_b",
@@ -709,7 +709,7 @@
 					"IndexCount": 69624,
 					"Min": [-10.093930, 4.928359, -3.012710],
 					"Max": [8.826953, 6.805592, 2.283800],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "column_c",
@@ -720,7 +720,7 @@
 					"IndexCount": 21264,
 					"Min": [-13.913534, 1.776779, -6.293489],
 					"Max": [12.677797, 6.763871, 5.600469],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "fabric_g",
@@ -731,7 +731,7 @@
 					"IndexCount": 42981,
 					"Min": [-5.618897, -0.003004, -2.872137],
 					"Max": [7.978381, 2.759555, 2.076687],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "fabric_c",
@@ -742,7 +742,7 @@
 					"IndexCount": 56796,
 					"Min": [-9.204688, -0.003006, -2.872137],
 					"Max": [7.978381, 2.759555, 2.076687],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "fabric_f",
@@ -753,7 +753,7 @@
 					"IndexCount": 42981,
 					"Min": [-9.204688, -0.003006, -2.813795],
 					"Max": [4.358324, 2.759554, 2.076687],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "details",
@@ -764,7 +764,7 @@
 					"IndexCount": 2640,
 					"Min": [-4.958030, -0.021550, -6.337950],
 					"Max": [12.796985, 6.973285, 5.885373],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "fabric_d",
@@ -775,7 +775,7 @@
 					"IndexCount": 49500,
 					"Min": [-7.654689, 3.301988, -3.156882],
 					"Max": [6.311814, 5.064166, 2.454153],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "fabric_a",
@@ -786,7 +786,7 @@
 					"IndexCount": 33000,
 					"Min": [-4.069012, 3.301988, -3.156882],
 					"Max": [2.756337, 5.064166, 2.454152],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "fabric_e",
@@ -797,7 +797,7 @@
 					"IndexCount": 49500,
 					"Min": [-7.624490, 3.301988, -3.156882],
 					"Max": [6.342013, 5.064166, 2.454154],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "flagpole",
@@ -808,7 +808,7 @@
 					"IndexCount": 49488,
 					"Min": [-9.325894, 2.674715, -2.818140],
 					"Max": [8.076823, 8.620066, 2.034202],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "floor",
@@ -819,7 +819,7 @@
 					"IndexCount": 63,
 					"Min": [-13.932203, -0.024381, -6.278538],
 					"Max": [12.667573, 4.042143, 5.585484],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "roof",
@@ -830,7 +830,7 @@
 					"IndexCount": 43452,
 					"Min": [-18.686325, 12.456409, -11.505951],
 					"Max": [17.508909, 13.905054, 10.753222],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "vase",
@@ -841,7 +841,7 @@
 					"IndexCount": 27552,
 					"Min": [-12.419054, -0.006747, -5.092430],
 					"Max": [11.616494, 1.293945, 4.652372],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "vase_hanging",
@@ -852,7 +852,7 @@
 					"IndexCount": 59484,
 					"Min": [-6.363683, 0.959857, -2.401124],
 					"Max": [5.083792, 2.110431, 1.658333],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "vase_round",
@@ -863,7 +863,7 @@
 					"IndexCount": 53064,
 					"Min": [-9.637579, -0.039210, -2.447900],
 					"Max": [8.358941, 0.546691, 1.744276],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "Material__47",
@@ -874,7 +874,7 @@
 					"IndexCount": 54,
 					"Min": [-1.161555, 2.497392, 5.531721],
 					"Max": [-0.080379, 3.387147, 5.598324],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "chain",
@@ -885,7 +885,7 @@
 					"IndexCount": 96,
 					"Min": [-6.273695, 1.300796, -2.154554],
 					"Max": [4.993803, 2.085174, 1.411762],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "leaf",
@@ -896,7 +896,7 @@
 					"IndexCount": 94308,
 					"Min": [-6.617384, -0.272858, -3.318460],
 					"Max": [5.362147, 2.189719, 2.591862],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "Material__57",
@@ -907,7 +907,7 @@
 					"IndexCount": 10416,
 					"Min": [-9.659189, 0.411666, -2.547058],
 					"Max": [8.384139, 0.711323, 1.827358],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				}
 			]
 		},
@@ -930,7 +930,7 @@
 					"IndexCount": 2904,
 					"Min": [-0.357531, -0.797213, -5.166106],
 					"Max": [3.721282, 1.958394, -1.481900],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "Material.003",
@@ -941,7 +941,7 @@
 					"IndexCount": 186,
 					"Min": [1.680666, -0.873881, -1.498733],
 					"Max": [3.680666, 1.126119, 0.501267],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "Material",
@@ -952,7 +952,7 @@
 					"IndexCount": 36,
 					"Min": [-1.000000, -1.000000, -1.000000],
 					"Max": [1.000000, 1.000000, 1.000000],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				},
 				{
 					"Name": "Material.001",
@@ -963,10 +963,37 @@
 					"IndexCount": 47232,
 					"Min": [-4.147779, -0.675219, 1.407378],
 					"Max": [-0.214909, 2.551322, 4.821409],
-					"Render": [true, true, true, true, true]
+					"Render": [true, true, true, true, true],
 				}
 			]
+		},
+	],
+
+	"Entities": [
+		{
+			"Name": "Entity",
+			"Translate": [0.000000, 0.000000, 0.000000],
+			"Rotate": [0.000000, 0.000000, 0.000000],
+			"Scale": [1.000000, 1.000000, 1.000000],
+			"Selected": false,
+			"UsedComponents": [],
+		},
+		{
+			"Name": "Entity (1)",
+			"Translate": [0.000000, 0.000000, 25.000000],
+			"Rotate": [0.000000, 0.000000, 0.000000],
+			"Scale": [1.000000, 1.000000, 1.000000],
+			"Selected": false,
+			"UsedComponents": [],
+		},
+		{
+			"Name": "Entity (2)",
+			"Translate": [-3.600000, 13.500000, 2.750000],
+			"Rotate": [0.000000, 0.000000, 0.000000],
+			"Scale": [1.000000, 1.000000, 1.000000],
+			"Selected": true,
+			"UsedComponents": [],
 		}
-	]
+	],
 
 }

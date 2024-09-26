@@ -377,12 +377,12 @@ void SceneSave(const char* FileName)
 			fprintf(File, "\t\t\t\"Rotate\": [%f, %f, %f],\n", Entity->Rotate.x, Entity->Rotate.y, Entity->Rotate.z);
 			fprintf(File, "\t\t\t\"Scale\": [%f, %f, %f],\n", Entity->Scale.x, Entity->Scale.y, Entity->Scale.z);
 			fprintf(File, "\t\t\t\"Selected\": %s,\n", Entity->Selected == true ? "true" : "false");
-			fprintf(File, "\t\t\t\"UsedComponents\": [", Entity->Selected == true ? "true" : "false");
-			for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
+			fprintf(File, "\t\t\t\"UsedComponents\": [\n");
+			for (uint32_t j = 0; j < COMPONENT_COUNT; j++)
 			{
-				
+				fprintf(File, "\t\t\t\t\"%s\": %s%s\n", ComponentNames[j], Entity->UsedComponents[j] == true ? "true" : "false", j == (COMPONENT_COUNT - 1) ? "" : ",");
 			}
-			fprintf(File, "],\n");
+			fprintf(File, "\t\t\t],\n");
 
 		//	fprintf(File, "\t\t\t\"Path\": \"%s\",\n", Texture->Path);
 		//	fprintf(File, "\t\t\t\"Width\": %d,\n", Texture->Width);

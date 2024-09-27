@@ -384,6 +384,10 @@ void SceneSave(const char* FileName)
 			}
 			fprintf(File, "\t\t\t],\n");
 
+			fprintf(File, "\t\t\t\"MeshComponent\": [\n");
+			fprintf(File, "\t\t\t\t\"%s\": %s%s\n", ComponentNames[j], Entity->UsedComponents[j] == true ? "true" : "false", j == (COMPONENT_COUNT - 1) ? "" : ",");
+			fprintf(File, "\t\t\t],\n");
+
 		//	fprintf(File, "\t\t\t\"Path\": \"%s\",\n", Texture->Path);
 		//	fprintf(File, "\t\t\t\"Width\": %d,\n", Texture->Width);
 		//	fprintf(File, "\t\t\t\"Height\": %d,\n", Texture->Height);

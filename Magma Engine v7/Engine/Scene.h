@@ -384,9 +384,51 @@ void SceneSave(const char* FileName)
 			}
 			fprintf(File, "\t\t\t],\n");
 
-			fprintf(File, "\t\t\t\"MeshComponent\": [\n");
-			fprintf(File, "\t\t\t\t\"%s\": %s%s\n", ComponentNames[j], Entity->UsedComponents[j] == true ? "true" : "false", j == (COMPONENT_COUNT - 1) ? "" : ",");
-			fprintf(File, "\t\t\t],\n");
+			fprintf(File, "\t\t\t\"MeshComponent\": {\n");
+			fprintf(File, "\t\t\t\t\"Name\": %s,\n", Entity->Mesh.Name);
+			fprintf(File, "\t\t\t\t\"MeshIndex\": %d\n", Entity->Mesh.MeshIndex);
+			fprintf(File, "\t\t\t},\n");
+
+			fprintf(File, "\t\t\t\"MaterialComponent\": {\n");
+			fprintf(File, "\t\t\t\t\"Name\": %s,\n", Entity->Material.Name);
+			fprintf(File, "\t\t\t\t\"MaterialIndex\": %d\n", Entity->Material.MaterialIndex);
+			fprintf(File, "\t\t\t},\n");
+
+			fprintf(File, "\t\t\t\"CameraComponent\": {\n");
+			fprintf(File, "\t\t\t\t\"Name\": %s,\n", Entity->Camera.Name);
+			fprintf(File, "\t\t\t\t\"FOV\": %f,\n", Entity->Camera.FOV);
+			fprintf(File, "\t\t\t\t\"NearPlane\": %f,\n", Entity->Camera.NearPlane);
+			fprintf(File, "\t\t\t\t\"FarPlane\": %f,\n", Entity->Camera.FarPlane);
+			fprintf(File, "\t\t\t},\n");
+
+			//FIX - Audio Component
+
+			fprintf(File, "\t\t\t\"AnimationComponent\": {\n");
+			fprintf(File, "\t\t\t\t\"Name\": %s,\n", Entity->Animation.Name);
+			fprintf(File, "\t\t\t\t\"AnimationIndex\": %d\n", Entity->Animation.AnimationIndex);
+			fprintf(File, "\t\t\t},\n");
+
+			fprintf(File, "\t\t\t\"LightComponent\": {\n");
+			fprintf(File, "\t\t\t\t\"Name\": %s,\n", Entity->Light.Name);
+			fprintf(File, "\t\t\t\t\"Color\": [%f, %f, %f]\n", Entity->Light.Color.r, Entity->Light.Color.g, Entity->Light.Color.b);
+			fprintf(File, "\t\t\t\t\"Strength\": %f\n", Entity->Light.Strength);
+			fprintf(File, "\t\t\t\t\"Type\": \"%s\"\n", LightNames[Entity->Light.Type]);
+			fprintf(File, "\t\t\t\t\"CastShadow\": %s\n", Entity->Light.CastShadow == true ? "true" : "false");
+			fprintf(File, "\t\t\t},\n");
+
+			fprintf(File, "\t\t\t\"ColliderComponent\": {\n");
+			fprintf(File, "\t\t\t\t\"Name\": %s,\n", Entity->Collider.Name);
+			fprintf(File, "\t\t\t\t\"Type\": \"%s\"\n", ColliderNames[Entity->Collider.Collider]);
+			
+			fprintf(File, "\t\t\t\t\"Friction\": %f\n", Entity->Collider.Friction);
+			fprintf(File, "\t\t\t\t\"Bounciness\": %f\n", Entity->Collider.Bounciness);
+			
+			fprintf(File, "\t\t\t},\n");
+
+			fprintf(File, "\t\t\t\"RigidbodyComponent\": {\n");
+			fprintf(File, "\t\t\t\t\"Name\": %s,\n", Entity->Rigidbody.Name);
+			fprintf(File, "\t\t\t\t\"Mass\": %f\n", Entity->Rigidbody.Mass);
+			fprintf(File, "\t\t\t}\n");
 
 		//	fprintf(File, "\t\t\t\"Path\": \"%s\",\n", Texture->Path);
 		//	fprintf(File, "\t\t\t\"Width\": %d,\n", Texture->Width);

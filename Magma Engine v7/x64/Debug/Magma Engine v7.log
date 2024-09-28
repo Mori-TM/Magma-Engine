@@ -661,35 +661,35 @@ D:\GitHub\Magma-Engine\Magma Engine v7\Engine\CameraPath.h(82,22): message : see
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\CameraPath.h(110,36): warning C4305: 'argument': truncation from 'double' to 'float'
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\CameraPath.h(111,33): warning C4305: 'argument': truncation from 'double' to 'float'
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(256,29): warning C4305: '=': truncation from 'double' to 'float'
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(413,25): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(437,29): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(561,39): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(561,24): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(748,28): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(816,30): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(953,22): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(976,46): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(1025,7): warning C4459: declaration of 'LastPath' hides global declaration
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(424,25): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(448,29): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(572,39): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(572,24): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(759,28): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(827,30): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(964,22): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(987,46): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(1036,7): warning C4459: declaration of 'LastPath' hides global declaration
 D:\GitHub\Magma-Engine\includes\Wave\WaveLayer.h(22,6): message : see declaration of 'LastPath'
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(1028,18): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(1025,7): warning C4101: 'LastPath': unreferenced local variable
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(1039,18): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(1036,7): warning C4101: 'LastPath': unreferenced local variable
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(99,23): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(521,93): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(522,93): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(523,97): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(524,99): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(525,99): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(537,87): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(538,89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(539,89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(554,106): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(555,104): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(556,102): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(557,102): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(558,101): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(577,39): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(589,103): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
-D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(590,101): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(567,93): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(568,93): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(569,97): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(570,99): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(571,99): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(583,87): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(584,89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(585,89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(600,106): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(601,104): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(602,102): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(603,102): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(604,101): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(623,39): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(635,103): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+D:\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(636,101): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(34,28): warning C4459: declaration of 'CameraPos' hides global declaration
 D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Helper\RendererHelper.h(6,6): message : see declaration of 'CameraPos'
 D:\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(34,64): warning C4459: declaration of 'CameraUp' hides global declaration
@@ -870,8 +870,8 @@ D:\GitHub\Magma-Engine\includes\ImGui\FileDialog\ImFileDialog.cpp(1309,18): mess
           ]
 D:\GitHub\Magma-Engine\includes\stb\dxt\stb_dxt.c(641): warning C4702: unreachable code
 D:\GitHub\Magma-Engine\includes\Wave\WaveLoader.h(951): warning C4172: returning address of local variable or temporary: Line
-D:\GitHub\Magma-Engine\includes\Wave\WaveLayer.h(48): warning C4172: returning address of local variable or temporary: Out
 D:\GitHub\Magma-Engine\includes\Wave\WaveLayer.h(36): warning C4172: returning address of local variable or temporary: Out
+D:\GitHub\Magma-Engine\includes\Wave\WaveLayer.h(48): warning C4172: returning address of local variable or temporary: Out
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(441): warning C4701: potentially uninitialized local variable 'BottomLevelAS' used
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_VkRaytracing.h(605): warning C4701: potentially uninitialized local variable 'TopLevelAS' used
 D:\GitHub\Magma-Engine\includes\OpenVK\OpenVK_GUI.h(883): warning C4701: potentially uninitialized local variable 'MinX' used
@@ -882,6 +882,4 @@ D:\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(361): warning C4706: 
 D:\GitHub\Magma-Engine\includes\ImGui\FileDialog\filesystem.cpp(163): warning C4702: unreachable code
 D:\GitHub\Magma-Engine\includes\ImGui\FileDialog\filesystem.cpp(204): warning C4702: unreachable code
 D:\GitHub\Magma-Engine\includes\Wave\WaveMath.h(882): warning C4702: unreachable code
-     Creating library D:\GitHub\Magma-Engine\x64\Debug\Magma Engine v7.lib and object D:\GitHub\Magma-Engine\x64\Debug\Magma Engine v7.exp
-LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Magma Engine v7.vcxproj -> D:\GitHub\Magma-Engine\x64\Debug\Magma Engine v7.exe

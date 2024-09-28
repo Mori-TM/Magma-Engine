@@ -108,14 +108,14 @@ typedef struct
 	char Name[MAX_CHAR_NAME_LENGTH];
 	vec3 Color;
 	float Strength;
-	LightTypes Type;
+	LightTypes Type; //FIX - move under name
 	bool CastShadow;
 } LightComponent;
 
 typedef struct
 {
 	char Name[MAX_CHAR_NAME_LENGTH];
-	ColliderTypes Collider;
+	ColliderTypes Collider;//FIX - rename to Type
 	float Friction;
 	float Bounciness;
 } ColliderComponent;
@@ -277,7 +277,16 @@ void ResetEntityCollider(EntityInfo* Entity)
 {
 	strcpycut(Entity->Collider.Name, "None");
 	Entity->Collider.Collider = COLLIDER_BOX;
+	Entity->Collider.Friction = 0.0;
+	Entity->Collider.Bounciness = 0.0;
 }
+
+void ResetEntityRigidbody(EntityInfo* Entity)
+{
+	strcpycut(Entity->Rigidbody.Name, "None");
+	Entity->Rigidbody.Mass = 0.0;
+}
+
 /*
 uint32_t AddEntity(uint32_t UsedComponent)
 {
@@ -351,6 +360,8 @@ uint32_t AddEntity(uint32_t UsedComponent)
 	ResetEntityCamera(Entity);
 	ResetEntityAnimation(Entity);
 	ResetEntityLight(Entity);
+	ResetEntityCollider(Entity);
+	ResetEntityRigidbody(Entity);
 
 	Entity->Translate = Vec3f(0.0);
 	Entity->Rotate = Vec3f(0.0);

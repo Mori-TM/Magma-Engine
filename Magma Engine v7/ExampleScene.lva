@@ -1097,50 +1097,40 @@
 			"Rotate": [0.000000, 0.000000, 0.000000],
 			"Scale": [1.000000, 1.000000, 1.000000],
 			"Selected": false,
-			"UsedComponents": [
-				"Empty": false,
-				"Mesh": true,
-				"Material": false,
-				"Camera": false,
-				"Audio": false,
-				"Animation": false,
-				"Light": false,
-				"Collider": false,
-				"Rigidbody": false
-			],
+			"UsedComponents": ["Mesh"],
 			"MeshComponent": {
-				"Name": Sponza2.obj,
+				"Name": "Sponza2.obj",
 				"MeshIndex": 1
 			},
 			"MaterialComponent": {
-				"Name": None,
+				"Name": "None",
 				"MaterialIndex": 0
 			},
 			"CameraComponent": {
-				"Name": None,
+				"Name": "None",
 				"FOV": 75.000000,
 				"NearPlane": 0.010000,
-				"FarPlane": 1000.000000,
+				"FarPlane": 1000.000000
 			},
 			"AnimationComponent": {
-				"Name": None,
+				"Name": "None",
 				"AnimationIndex": 0
 			},
 			"LightComponent": {
-				"Name": None,
-				"Color": [1.000000, 1.000000, 1.000000]
-				"Strength": 1.000000
-				"Type": "Point"
-				"CastShadow": false
+				"Name": "None",
+				"Color": [1.000000, 1.000000, 1.000000],
+				"Strength": 1.000000,
+				"Type": "Point",
+				"CastShadow": false,
 			},
 			"ColliderComponent": {
-				"Name": None,
-				"Type": "Box"
-				"Friction": 0.000000
+				"Name": "None",
+				"Type": "Box",
+				"Friction": 0.000000,
 				"Bounciness": 0.000000
 			},
 			"RigidbodyComponent": {
-				"Name": None,
+				"Name": "None",
 				"Mass": 0.000000
 			}
 		},
@@ -1150,50 +1140,40 @@
 			"Rotate": [0.000000, 0.000000, 0.000000],
 			"Scale": [1.000000, 1.000000, 1.000000],
 			"Selected": false,
-			"UsedComponents": [
-				"Empty": false,
-				"Mesh": true,
-				"Material": false,
-				"Camera": false,
-				"Audio": false,
-				"Animation": false,
-				"Light": false,
-				"Collider": false,
-				"Rigidbody": false
-			],
+			"UsedComponents": ["Mesh"],
 			"MeshComponent": {
-				"Name": Teapot.obj,
+				"Name": "Teapot.obj",
 				"MeshIndex": 2
 			},
 			"MaterialComponent": {
-				"Name": None,
+				"Name": "None",
 				"MaterialIndex": 0
 			},
 			"CameraComponent": {
-				"Name": None,
+				"Name": "None",
 				"FOV": 75.000000,
 				"NearPlane": 0.010000,
-				"FarPlane": 1000.000000,
+				"FarPlane": 1000.000000
 			},
 			"AnimationComponent": {
-				"Name": None,
+				"Name": "None",
 				"AnimationIndex": 0
 			},
 			"LightComponent": {
-				"Name": None,
-				"Color": [1.000000, 1.000000, 1.000000]
-				"Strength": 1.000000
-				"Type": "Point"
-				"CastShadow": false
+				"Name": "None",
+				"Color": [1.000000, 1.000000, 1.000000],
+				"Strength": 1.000000,
+				"Type": "Point",
+				"CastShadow": false,
 			},
 			"ColliderComponent": {
-				"Name": None,
-				"Type": "Box"
-				"Friction": 0.000000
+				"Name": "None",
+				"Type": "Box",
+				"Friction": 0.000000,
 				"Bounciness": 0.000000
 			},
 			"RigidbodyComponent": {
-				"Name": None,
+				"Name": "None",
 				"Mass": 0.000000
 			}
 		},
@@ -1203,53 +1183,42 @@
 			"Rotate": [0.000000, 0.000000, 0.000000],
 			"Scale": [1.000000, 1.000000, 1.000000],
 			"Selected": true,
-			"UsedComponents": [
-				"Empty": false,
-				"Mesh": false,
-				"Material": false,
-				"Camera": false,
-				"Audio": false,
-				"Animation": false,
-				"Light": true,
-				"Collider": false,
-				"Rigidbody": false
-			],
+			"UsedComponents": ["Light"],
 			"MeshComponent": {
-				"Name": None,
+				"Name": "None",
 				"MeshIndex": 0
 			},
 			"MaterialComponent": {
-				"Name": None,
+				"Name": "None",
 				"MaterialIndex": 0
 			},
 			"CameraComponent": {
-				"Name": None,
+				"Name": "None",
 				"FOV": 75.000000,
 				"NearPlane": 0.010000,
-				"FarPlane": 1000.000000,
+				"FarPlane": 1000.000000
 			},
 			"AnimationComponent": {
-				"Name": None,
+				"Name": "None",
 				"AnimationIndex": 0
 			},
 			"LightComponent": {
-				"Name": Dir Light,
-				"Color": [1.000000, 1.000000, 1.000000]
-				"Strength": 5.800000
-				"Type": "Directional"
-				"CastShadow": true
+				"Name": "Dir Light",
+				"Color": [1.000000, 1.000000, 1.000000],
+				"Strength": 5.800000,
+				"Type": "Directional",
+				"CastShadow": true,
 			},
 			"ColliderComponent": {
-				"Name": None,
-				"Type": "Box"
-				"Friction": 0.000000
+				"Name": "None",
+				"Type": "Box",
+				"Friction": 0.000000,
 				"Bounciness": 0.000000
 			},
 			"RigidbodyComponent": {
-				"Name": None,
+				"Name": "None",
 				"Mass": 0.000000
 			}
 		}
-	],
-
+	]
 }

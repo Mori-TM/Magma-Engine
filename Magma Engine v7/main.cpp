@@ -72,6 +72,14 @@ extern "C"
 
 #include "Renderer/Renderer.h"
 
+/*
+* General improvements:
+* - Conventional arrays are now that scene loading is implemented too unreliable one light type not in range and all crahses
+* - Naming consistency
+* - print spelling - either "Every Thing Like This" or "Every thing like this"
+* - Add option for mesh saving in scene file or just file path and the same for textures
+*/
+
 int32_t main(int32_t argc, char** argv)
 {
 //	char Path[256];
@@ -206,7 +214,7 @@ Restart:
 	RendererCreate();
 	bool Run = true;
 
-//	SceneLoad("ExampleScene.lva");
+	SceneLoad("ExampleScene.lva");
 
 //	Run = false;
 //	exit(3666);
@@ -229,7 +237,7 @@ Restart:
 		FrameCount++;
 	}
 	
-	SceneSave("ExampleScene.lva");
+//	SceneSave("ExampleScene.lva");
 
 	RendererDestroy();
 	SDL_DestroyWindow(Window);

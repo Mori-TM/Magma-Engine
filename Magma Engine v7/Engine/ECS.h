@@ -134,6 +134,7 @@ typedef struct
 	vec3 Scale;
 	bool Selected;
 
+	//FIX ? - why bool array?
 	bool UsedComponents[COMPONENT_COUNT];
 	MeshComponent Mesh;
 	MaterialComponent Material;
@@ -184,6 +185,7 @@ void EntitiesDestroy()
 	free(Entities);
 }
 
+//Checks if there is enough room for one more entity
 bool EntitiesCheckForResize()
 {
 	if (EntityCount + 1 >= EntityAllocatedCount)
@@ -339,7 +341,7 @@ uint32_t AddEntity(uint32_t UsedComponent)
 */
 
 
-uint32_t AddEntity(uint32_t UsedComponent)
+uint32_t AddDefaultEntity(uint32_t UsedComponent)
 {
 	if (!EntitiesCheckForResize())
 		return SelectedEntity;
@@ -388,6 +390,16 @@ uint32_t AddEntity(uint32_t UsedComponent)
 
 	Mutex.unlock();
 
+	return SelectedEntity;
+}
+
+uint32_t AddEntity(EntityInfo* Entity)
+{
+	if (!EntitiesCheckForResize())
+		return SelectedEntity;
+
+	memcpy(&Entities[EntityCount], Entity, sizeof(EntityInfo));
+	SelectedEntity = EntityCount++;
 	return SelectedEntity;
 }
 

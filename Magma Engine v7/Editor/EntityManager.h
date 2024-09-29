@@ -31,7 +31,7 @@ void EditorEntities()
 				char Name[64];
 				ssprintf(Name, "Add %s Entity", ComponentNames[i]);
 				if (ImGui::Selectable(Name))
-					AddEntity(i);
+					AddDefaultEntity(i);
 			}
 
 			/*

@@ -1109,100 +1109,135 @@ C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Came
   C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\CameraPath.h(82,22):
   see declaration of 'Frames'
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(413,25): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(436,25): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(437,29): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(460,29): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(561,39): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(584,39): warning C4244: 'argument': conversion from 'int32_t' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(561,24): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(584,24): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(748,28): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(771,28): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(816,30): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(839,30): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(953,22): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(976,22): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(976,46): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(999,46): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(1025,7): warning C4459: declaration of 'LastPath' hides global declaration
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(1048,7): warning C4459: declaration of 'LastPath' hides global declaration
   (compiling source file 'main.cpp')
   C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\includes\Wave\WaveLayer.h(22,6):
   see declaration of 'LastPath'
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(1028,18): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(1051,18): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(1025,7): warning C4101: 'LastPath': unreferenced local variable
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\ECS.h(1048,7): warning C4101: 'LastPath': unreferenced local variable
   (compiling source file 'main.cpp')
   
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(99,23): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(380,66): warning C4474: 'fprintf' : too many arguments passed for format string
-  (compiling source file 'main.cpp')
-  C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(380,66):
-  placeholders and their parameters expect 0 variadic arguments, but 1 were provided
-  
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(381,18): warning C4456: declaration of 'i' hides previous local declaration
-  (compiling source file 'main.cpp')
-  C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(369,16):
-  see declaration of 'i'
-  
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(521,93): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(514,75): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(522,93): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(515,88): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(523,97): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(516,92): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(524,99): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(517,84): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(525,99): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(518,82): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(537,87): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(615,93): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(538,89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(616,93): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(539,89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(617,97): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(554,106): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(618,99): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(555,104): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(619,99): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(556,102): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(631,87): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(557,102): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(632,89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(558,101): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(633,89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(577,39): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(648,106): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(589,103): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(649,104): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(590,101): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(650,102): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(651,102): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(652,101): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(671,39): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(683,103): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(684,101): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(812,86): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(824,98): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(834,76): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(835,88): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(836,86): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(846,101): warning C4244: '=': conversion from 'int64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(857,85): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(895,88): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(896,92): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\Scene.h(906,87): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Engine\FpsCamera.h(34,28): warning C4459: declaration of 'CameraPos' hides global declaration
@@ -1554,8 +1589,8 @@ C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Re
 C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\Renderer\Renderer.h(407,33): warning C4100: 'TextureImage': unreferenced formal parameter
   (compiling source file 'main.cpp')
   
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\main.cpp(75,35): warning C4100: 'argv': unreferenced formal parameter
-C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\main.cpp(75,22): warning C4100: 'argc': unreferenced formal parameter
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\main.cpp(83,35): warning C4100: 'argv': unreferenced formal parameter
+C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\Magma Engine v7\main.cpp(83,22): warning C4100: 'argc': unreferenced formal parameter
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\algorithm(3456,24): warning C4244: '=': conversion from 'int' to 'char', possible loss of data
   (compiling source file 'main.cpp')
   C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\algorithm(3456,24):
@@ -1573,8 +1608,8 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.3313
      Creating library C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.lib and object C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exp
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  2 of 4973 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+  1 of 4982 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    111 functions had inline decision re-evaluated but remain unchanged
+    113 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Magma Engine v7.vcxproj -> C:\Users\Moritz Laptop\Documents\GitHub\Magma-Engine\x64\Release\Magma Engine v7.exe

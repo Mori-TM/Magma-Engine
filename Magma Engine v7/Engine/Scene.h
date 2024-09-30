@@ -214,6 +214,24 @@ void SceneSave(const char* FileName)
 
 	fprintf(File, "{\n");
 
+	fprintf(File, "\t\"Scene\": {\n");
+	{
+		fprintf(File, "\t\t\"CameraFOV\": %f,\n", CameraFOV);
+		fprintf(File, "\t\t\"CameraZoomFOV\": %f,\n", CameraZoomFOV);
+		fprintf(File, "\t\t\"CameraNormalFOV\": %f,\n", CameraNormalFOV);
+		fprintf(File, "\t\t\"CameraNearZ\": %f,\n", CameraNearZ);
+		fprintf(File, "\t\t\"CameraFarZ\": %f,\n", CameraFarZ);
+		fprintf(File, "\t\t\"CameraYaw\": %f,\n", CameraInfo.Yaw);
+		fprintf(File, "\t\t\"CameraPitch\": %f,\n", CameraInfo.Pitch);
+		fprintf(File, "\t\t\"CameraPos\": [%f, %f, %f],\n", CameraPos.x, CameraPos.y, CameraPos.z);
+		fprintf(File, "\t\t\"CameraDir\": [%f, %f, %f],\n", CameraDir.x, CameraDir.y, CameraDir.z);
+		fprintf(File, "\t\t\"CameraUp\": [%f, %f, %f],\n", CameraUp.x, CameraUp.y, CameraUp.z);
+		fprintf(File, "\t\t\"CameraRight\": [%f, %f, %f],\n", CameraRight.x, CameraRight.y, CameraRight.z);
+		fprintf(File, "\t\t\"ClearColor\": [%f, %f, %f]\n", ClearColor.x, ClearColor.y, ClearColor.z);
+
+	}
+	fprintf(File, "\t},\n\n");
+
 	fprintf(File, "\t\"Textures\": [\n");
 	for (size_t i = 1; i < SceneTextures.Size; i++)
 	{
@@ -462,6 +480,51 @@ void SceneSave(const char* FileName)
 	printf("Saved Scene: %s\n", FileName);
 }
 
+
+//This criminal macro could also be a function using a template
+#define SCENE_DECLARE_TYPE(type) \
+void SceneLoadArray##type(type *DstArray, JsonObject* ArrayObj) { \
+    for (size_t j = 0; j < ArrayObj->Refrences.Size; j++) \
+	{ \
+		JsonVariables* Var = (JsonVariables*)DynamicArrayGetAt(&ArrayObj->Refrences, j); \
+		switch (Var->Type) \
+		{ \
+		case JSON_INT: \
+			DstArray[j] = (type)Var->Data.Int; \
+			break; \
+		case JSON_DUB: \
+			DstArray[j] = (type)Var->Data.Double; \
+			break; \
+		case JSON_BOOL: \
+			DstArray[j] = (type)Var->Data.Bool; \
+			break; \
+		default:\
+			break;\
+		} \
+	} \
+}
+
+SCENE_DECLARE_TYPE(int32_t)
+SCENE_DECLARE_TYPE(float)
+SCENE_DECLARE_TYPE(bool)
+
+void SceneLoadScene(JsonObject* Object)
+{
+	JsonVariables* Variable = (JsonVariables*)Object;
+	if (strcmp(Variable->Name, "CameraFOV") == 0) CameraFOV = Variable->Data.Double;
+	else if (strcmp(Variable->Name, "CameraZoomFOV") == 0) CameraZoomFOV = Variable->Data.Double;
+	else if (strcmp(Variable->Name, "CameraNormalFOV") == 0) CameraNormalFOV = Variable->Data.Double;
+	else if (strcmp(Variable->Name, "CameraNearZ") == 0) CameraNearZ = Variable->Data.Double;
+	else if (strcmp(Variable->Name, "CameraFarZ") == 0) CameraFarZ = Variable->Data.Double;
+	else if (strcmp(Variable->Name, "CameraYaw") == 0) CameraInfo.Yaw = Variable->Data.Double;
+	else if (strcmp(Variable->Name, "CameraPitch") == 0) CameraInfo.Pitch = Variable->Data.Double;
+	else if (strcmp(Variable->Name, "CameraPos") == 0) SceneLoadArrayfloat(CameraPos.Arr, (JsonObject*)Variable);
+	else if (strcmp(Variable->Name, "CameraDir") == 0) SceneLoadArrayfloat(CameraDir.Arr, (JsonObject*)Variable);
+	else if (strcmp(Variable->Name, "CameraUp") == 0) SceneLoadArrayfloat(CameraUp.Arr, (JsonObject*)Variable);
+	else if (strcmp(Variable->Name, "CameraRight") == 0) SceneLoadArrayfloat(CameraRight.Arr, (JsonObject*)Variable);
+	else if (strcmp(Variable->Name, "ClearColor") == 0) SceneLoadArrayfloat(ClearColor.Arr, (JsonObject*)Variable);
+}
+
 void SceneLoadTexture(JsonObject* Object)
 {
 	char* Path = NULL;
@@ -513,32 +576,6 @@ typedef struct
 	
 } SceneArrayTypes;
 
-//This criminal macro could also be a function using a template
-#define SCENE_DECLARE_TYPE(type) \
-void SceneLoadArray##type(type *DstArray, JsonObject* ArrayObj) { \
-    for (size_t j = 0; j < ArrayObj->Refrences.Size; j++) \
-	{ \
-		JsonVariables* Var = (JsonVariables*)DynamicArrayGetAt(&ArrayObj->Refrences, j); \
-		switch (Var->Type) \
-		{ \
-		case JSON_INT: \
-			DstArray[j] = (type)Var->Data.Int; \
-			break; \
-		case JSON_DUB: \
-			DstArray[j] = (type)Var->Data.Double; \
-			break; \
-		case JSON_BOOL: \
-			DstArray[j] = (type)Var->Data.Bool; \
-			break; \
-		default:\
-			break;\
-		} \
-	} \
-}
-
-SCENE_DECLARE_TYPE(int32_t)
-SCENE_DECLARE_TYPE(float)
-SCENE_DECLARE_TYPE(bool)
 /*
 //doesn't allocate string - yet?
 void SceneLoadArray(SceneArrayTypes* DstArray, JsonObject* ArrayObj)
@@ -897,8 +934,11 @@ void SceneLoad(const char* FileName)
 			printf("Object: %s\n", Objects->Name);
 
 		//	
-			
-			if (strcmp(Objects->Name, "Textures") == 0)
+			if (strcmp(Objects->Name, "Scene") == 0)
+			{
+				SceneParseObjectRefernces(Objects, SceneLoadScene);
+			}
+			else if (strcmp(Objects->Name, "Textures") == 0)
 			{
 				SceneParseObjectRefernces(Objects, SceneLoadTexture);				
 			}

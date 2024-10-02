@@ -5,10 +5,10 @@
 		"CameraNormalFOV": 75.000000,
 		"CameraNearZ": 0.010000,
 		"CameraFarZ": 1000.000000,
-		"CameraYaw": -45.800011,
-		"CameraPitch": 36.599995,
-		"CameraPos": [-19.489967, 12.034719, 21.166653],
-		"CameraDir": [0.559694, -0.596222, -0.575546],
+		"CameraYaw": -67.100021,
+		"CameraPitch": 24.499979,
+		"CameraPos": [-2.722933, 4.007173, 11.933238],
+		"CameraDir": [0.354086, -0.414691, -0.838240],
 		"CameraUp": [0.000000, 1.000000, 0.000000],
 		"CameraRight": [1.000000, 0.000000, 0.000000],
 		"ClearColor": [0.763848, 0.410716, 0.296186]
@@ -1111,32 +1111,11 @@
 			"Translate": [0.000000, -16.299999, 0.000000],
 			"Rotate": [0.000000, 0.000000, 0.000000],
 			"Scale": [1.000000, 1.000000, 1.000000],
-			"Selected": false,
-			"UsedComponents": ["Mesh"],
+			"Selected": true,
+			"UsedComponents": ["Mesh", "Collider"],
 			"MeshComponent": {
 				"Name": "Sponza2.obj",
 				"MeshIndex": 1
-			},
-			"MaterialComponent": {
-				"Name": "None",
-				"MaterialIndex": 0
-			},
-			"CameraComponent": {
-				"Name": "None",
-				"FOV": 75.000000,
-				"NearPlane": 0.010000,
-				"FarPlane": 1000.000000
-			},
-			"AnimationComponent": {
-				"Name": "None",
-				"AnimationIndex": 0
-			},
-			"LightComponent": {
-				"Name": "None",
-				"Color": [1.000000, 1.000000, 1.000000],
-				"Strength": 1.000000,
-				"Type": "Point",
-				"CastShadow": false,
 			},
 			"ColliderComponent": {
 				"Name": "None",
@@ -1144,10 +1123,6 @@
 				"Friction": 0.000000,
 				"Bounciness": 0.000000
 			},
-			"RigidbodyComponent": {
-				"Name": "None",
-				"Mass": 0.000000
-			}
 		},
 		{
 			"Name": "Entity (1)",
@@ -1155,37 +1130,10 @@
 			"Rotate": [0.000000, 0.000000, 0.000000],
 			"Scale": [1.000000, 1.000000, 1.000000],
 			"Selected": false,
-			"UsedComponents": ["Mesh"],
+			"UsedComponents": ["Mesh", "Rigidbody"],
 			"MeshComponent": {
 				"Name": "Teapot.obj",
 				"MeshIndex": 2
-			},
-			"MaterialComponent": {
-				"Name": "None",
-				"MaterialIndex": 0
-			},
-			"CameraComponent": {
-				"Name": "None",
-				"FOV": 75.000000,
-				"NearPlane": 0.010000,
-				"FarPlane": 1000.000000
-			},
-			"AnimationComponent": {
-				"Name": "None",
-				"AnimationIndex": 0
-			},
-			"LightComponent": {
-				"Name": "None",
-				"Color": [1.000000, 1.000000, 1.000000],
-				"Strength": 1.000000,
-				"Type": "Point",
-				"CastShadow": false,
-			},
-			"ColliderComponent": {
-				"Name": "None",
-				"Type": "Box",
-				"Friction": 0.000000,
-				"Bounciness": 0.000000
 			},
 			"RigidbodyComponent": {
 				"Name": "None",
@@ -1197,26 +1145,8 @@
 			"Translate": [-3.600000, 13.500000, 2.750000],
 			"Rotate": [0.000000, 0.000000, 0.000000],
 			"Scale": [1.000000, 1.000000, 1.000000],
-			"Selected": true,
+			"Selected": false,
 			"UsedComponents": ["Light"],
-			"MeshComponent": {
-				"Name": "None",
-				"MeshIndex": 0
-			},
-			"MaterialComponent": {
-				"Name": "None",
-				"MaterialIndex": 0
-			},
-			"CameraComponent": {
-				"Name": "None",
-				"FOV": 75.000000,
-				"NearPlane": 0.010000,
-				"FarPlane": 1000.000000
-			},
-			"AnimationComponent": {
-				"Name": "None",
-				"AnimationIndex": 0
-			},
 			"LightComponent": {
 				"Name": "Dir Light",
 				"Color": [1.000000, 1.000000, 1.000000],
@@ -1224,16 +1154,6 @@
 				"Type": "Directional",
 				"CastShadow": true,
 			},
-			"ColliderComponent": {
-				"Name": "None",
-				"Type": "Box",
-				"Friction": 0.000000,
-				"Bounciness": 0.000000
-			},
-			"RigidbodyComponent": {
-				"Name": "None",
-				"Mass": 0.000000
-			}
 		}
 	]
 }

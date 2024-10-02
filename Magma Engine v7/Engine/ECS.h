@@ -340,22 +340,10 @@ uint32_t AddEntity(uint32_t UsedComponent)
 }
 */
 
-
-uint32_t AddDefaultEntity(uint32_t UsedComponent)
+void ResetEntity(EntityInfo* Entity)
 {
-	if (!EntitiesCheckForResize())
-		return SelectedEntity;
-
-	Mutex.lock();
-	EntityInfo* Entity = &Entities[EntityCount];
-	SelectedEntity = EntityCount++;
-
-	memset(Entity->UsedComponents, 0, COMPONENT_COUNT);
-	//	for (uint32_t i = 0; i < COMPONENT_COUNT; i++)
-	//		Entity.UsedComponents[i] = false;
-
-	if (UsedComponent < COMPONENT_COUNT)
-		Entity->UsedComponents[UsedComponent] = true;
+//	memset(Entity->UsedComponents, 0, COMPONENT_COUNT);
+	memset(Entity, 0, sizeof(EntityInfo));
 
 	ResetEntityMesh(Entity);
 	ResetEntityMaterial(Entity);
@@ -379,16 +367,20 @@ uint32_t AddDefaultEntity(uint32_t UsedComponent)
 		ssprintf(Entity->Name, "Entity (%d)", Count);
 	else
 		strcpycut(Entity->Name, "Entity");
+}
 
-	//	Entities = (EntityInfo*)realloc(Entities, (EntityCount + 1) * sizeof(EntityInfo));
-	//	if (EntitiesCheckForResize())
-	//	{
+uint32_t AddDefaultEntity(uint32_t UsedComponent)
+{
+	if (!EntitiesCheckForResize())
+		return SelectedEntity;
 
-	//	}
-	//	else
-	//		SelectedEntity = EntityCount - 1;
+	EntityInfo* Entity = &Entities[EntityCount];
+	SelectedEntity = EntityCount++;
 
-	Mutex.unlock();
+	ResetEntity(Entity);
+
+	if (UsedComponent < COMPONENT_COUNT)
+		Entity->UsedComponents[UsedComponent] = true;
 
 	return SelectedEntity;
 }

@@ -237,7 +237,7 @@ Restart:
 		FrameCount++;
 	}
 	
-	SceneSave("ExampleScene.lva");
+//	SceneSave("ExampleScene.lva");
 
 	RendererDestroy();
 	SDL_DestroyWindow(Window);

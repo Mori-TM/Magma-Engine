@@ -929,7 +929,7 @@ void SceneLoadEntity(JsonObject* Object)
 			{
 				JsonVariables* Comp = (JsonVariables*)DynamicArrayGetAt(&Components->Refrences, j);
 				if (strcmp(Comp->Name, "Name") == 0) strcpycut(Entity.Rigidbody.Name, Comp->Data.Str);
-				else if (strcmp(Comp->Name, "Bounciness") == 0) Entity.Rigidbody.Mass = Comp->Data.Double;
+				else if (strcmp(Comp->Name, "Mass") == 0) Entity.Rigidbody.Mass = Comp->Data.Double;
 			}
 		}
 	}

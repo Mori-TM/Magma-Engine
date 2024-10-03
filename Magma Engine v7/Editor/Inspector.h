@@ -194,6 +194,17 @@ void EditorEntityInspector()
 			{
 				if (ImGui::CollapsingHeader("COLLIDER"))
 				{
+					if (ImGui::BeginCombo("Collider Type", ColliderNames[Entities[SelectedEntity].Collider.Collider]))
+					{
+						for (uint32_t i = 0; i < COLLIDER_COUNT; i++)
+						{
+							if (ImGui::Button(ColliderNames[i]))
+							{
+								Entities[SelectedEntity].Collider.Collider = (ColliderTypes)i;
+							}
+						}
+						ImGui::EndCombo();
+					}
 					ImGui::DragFloat("Friction", &Entities[SelectedEntity].Collider.Friction, 0.001, 0.0, 1.0);
 					ImGui::DragFloat("Bounciness", &Entities[SelectedEntity].Collider.Bounciness, 0.001, 0.0, 1.0);
 
@@ -210,6 +221,8 @@ void EditorEntityInspector()
 			{
 				if (ImGui::CollapsingHeader("RIGIDBODY"))
 				{
+					ImGui::DragFloat("Mass", &Entities[SelectedEntity].Rigidbody.Mass, 0.001, 0.0, 100000.0);
+
 					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 					if (ImGui::Button("Remove Rigidbody Component"))
 					{

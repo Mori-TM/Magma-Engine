@@ -34,22 +34,6 @@ void EditorEntities()
 					AddDefaultEntity(i);
 			}
 
-			/*
-			if (ImGui::Selectable("Add Mesh Entity"))
-				AddEntity(COMPONENT_TYPE_MESH);
-
-			if (ImGui::Selectable("Add Camera Entity"))
-				AddEntity(COMPONENT_TYPE_CAMERA);
-
-			if (ImGui::Selectable("Add Audio Entity"))
-				AddEntity(COMPONENT_TYPE_AUDIO);
-
-			if (ImGui::Selectable("Add Animation Entity"))
-				AddEntity(COMPONENT_TYPE_ANIMATION);
-
-			if (ImGui::Selectable("Add Light Entity"))
-				AddEntity(COMPONENT_TYPE_LIGHT);
-				*/
 			ImGui::EndPopup();
 		}
 	//	ImGui::EndChild();

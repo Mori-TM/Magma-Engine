@@ -5,10 +5,10 @@
 		"CameraNormalFOV": 75.000000,
 		"CameraNearZ": 0.010000,
 		"CameraFarZ": 1000.000000,
-		"CameraYaw": -67.100021,
-		"CameraPitch": 24.499979,
-		"CameraPos": [-2.722933, 4.007173, 11.933238],
-		"CameraDir": [0.354086, -0.414691, -0.838240],
+		"CameraYaw": 157.300034,
+		"CameraPitch": 32.299988,
+		"CameraPos": [17.651737, 2.926015, -1.179448],
+		"CameraDir": [-0.779783, -0.534350, 0.326190],
 		"CameraUp": [0.000000, 1.000000, 0.000000],
 		"CameraRight": [1.000000, 0.000000, 0.000000],
 		"ClearColor": [0.763848, 0.410716, 0.296186]
@@ -1107,11 +1107,11 @@
 
 	"Entities": [
 		{
-			"Name": "Entity",
+			"Name": "Sponza",
 			"Translate": [0.000000, -16.299999, 0.000000],
 			"Rotate": [0.000000, 0.000000, 0.000000],
 			"Scale": [1.000000, 1.000000, 1.000000],
-			"Selected": true,
+			"Selected": false,
 			"UsedComponents": ["Mesh", "Collider"],
 			"MeshComponent": {
 				"Name": "Sponza2.obj",
@@ -1119,29 +1119,35 @@
 			},
 			"ColliderComponent": {
 				"Name": "None",
-				"Type": "Box",
-				"Friction": 0.000000,
-				"Bounciness": 0.000000
+				"Type": "Mesh",
+				"Friction": 0.153000,
+				"Bounciness": 0.163000
 			},
 		},
 		{
-			"Name": "Entity (1)",
+			"Name": "Teapot",
 			"Translate": [5.700000, 0.000000, 4.400000],
 			"Rotate": [0.000000, 0.000000, 0.000000],
 			"Scale": [1.000000, 1.000000, 1.000000],
-			"Selected": false,
-			"UsedComponents": ["Mesh", "Rigidbody"],
+			"Selected": true,
+			"UsedComponents": ["Mesh", "Collider", "Rigidbody"],
 			"MeshComponent": {
 				"Name": "Teapot.obj",
 				"MeshIndex": 2
 			},
+			"ColliderComponent": {
+				"Name": "None",
+				"Type": "Convex",
+				"Friction": 1.000000,
+				"Bounciness": 10.000000
+			},
 			"RigidbodyComponent": {
 				"Name": "None",
-				"Mass": 0.000000
+				"Mass": 5.800000
 			}
 		},
 		{
-			"Name": "Entity (2)",
+			"Name": "Sun",
 			"Translate": [-3.600000, 13.500000, 2.750000],
 			"Rotate": [0.000000, 0.000000, 0.000000],
 			"Scale": [1.000000, 1.000000, 1.000000],

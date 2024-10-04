@@ -28,6 +28,7 @@ uint32_t GBufferRenderPass;
 #define G_BUFFER_ATTACHMENT_COUNT 7
 uint32_t GBufferAttachments[G_BUFFER_ATTACHMENT_COUNT];
 uint32_t GBufferFramebuffer;
+uint32_t GBufferDescriptorSetLayoutCount;
 //uint32_t GBufferDescriptorSet;
 uint32_t GBufferVertexUniformDescriptorSet;
 uint32_t GBufferVertexUniformBuffer;

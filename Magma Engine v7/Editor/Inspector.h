@@ -87,7 +87,7 @@ void EditorEntityInspector()
 									if (ImGui::Button(Material->Name))
 									{
 										Entities[SelectedEntity].Material.MaterialIndex = i;
-										strcpy(Entities[SelectedEntity].Material.Name, Material->Name);
+									//	strcpy(Entities[SelectedEntity].Material.Name, Material->Name);
 									}
 								}
 							}
@@ -138,7 +138,7 @@ void EditorEntityInspector()
 									if (ImGui::Button(Animation->Name))
 									{
 										Entities[SelectedEntity].Animation.AnimationIndex = i;
-										strcpy(Entities[SelectedEntity].Animation.Name, Animation->Name);
+									//	strcpy(Entities[SelectedEntity].Animation.Name, Animation->Name);
 										Animation->End = Animation->MeshData.NumFrames - 1;//maybe -1?
 									}
 								}
@@ -194,13 +194,13 @@ void EditorEntityInspector()
 			{
 				if (ImGui::CollapsingHeader("COLLIDER"))
 				{
-					if (ImGui::BeginCombo("Collider Type", ColliderNames[Entities[SelectedEntity].Collider.Collider]))
+					if (ImGui::BeginCombo("Collider Type", ColliderNames[Entities[SelectedEntity].Collider.Type]))
 					{
 						for (uint32_t i = 0; i < COLLIDER_COUNT; i++)
 						{
 							if (ImGui::Button(ColliderNames[i]))
 							{
-								Entities[SelectedEntity].Collider.Collider = (ColliderTypes)i;
+								Entities[SelectedEntity].Collider.Type = (ColliderTypes)i;
 							}
 						}
 						ImGui::EndCombo();

@@ -76,13 +76,7 @@ if (vkCreateDevice(VkRenderer.PhysicalDevice, &CreateInfo, NULL, &VkRenderer.Dev
 OpenVkBool VkGetRaytracingFeatures(VkDeviceCreateInfo* DeviceCreateInfo)
 {
 	memset(&VkRaytracer, 0, sizeof(VkRaytracerInfo));
-	VkRaytracer.Geometry = CMA_Create(sizeof(VkRaytracingGeometryInfo), "OpenVk Raytracer, Geometry");
-	VkRaytracer.Instances = CMA_Create(sizeof(VkAccelerationStructureInstanceKHR), "OpenVk Raytracer, Instances");
-	VkRaytracer.AccelerationStructures = CMA_Create(sizeof(VkAccelerationStructure), "OpenVk Raytracer, AS");
 	
-	VkRaytracer.GeometryStorage = DynamicArrayCreate(sizeof(VkAccelerationStructureGeometryKHR), "OpenVk Raytracer, Geometry Tmp");
-	VkRaytracer.InstanceStorage = DynamicArrayCreate(sizeof(VkAccelerationStructureInstanceKHR), "OpenVk Raytracer, Instance Tmp");
-
 	VkRaytracer.EnabledDescriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
 	VkRaytracer.EnabledDescriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
 	VkRaytracer.EnabledDescriptorIndexingFeatures.runtimeDescriptorArray = VK_TRUE;
@@ -119,6 +113,13 @@ OpenVkBool VkGetRaytracingFeatures(VkDeviceCreateInfo* DeviceCreateInfo)
 		VkRenderer.DeviceExtensionCount = StartingDeviceExtensionCount;
 		return OpenVkFalse;
 	}
+
+	VkRaytracer.Geometry = CMA_Create(sizeof(VkRaytracingGeometryInfo), "OpenVk Raytracer, Geometry");
+	VkRaytracer.Instances = CMA_Create(sizeof(VkAccelerationStructureInstanceKHR), "OpenVk Raytracer, Instances");
+	VkRaytracer.AccelerationStructures = CMA_Create(sizeof(VkAccelerationStructure), "OpenVk Raytracer, AS");
+
+	VkRaytracer.GeometryStorage = DynamicArrayCreate(sizeof(VkAccelerationStructureGeometryKHR), "OpenVk Raytracer, Geometry Tmp");
+	VkRaytracer.InstanceStorage = DynamicArrayCreate(sizeof(VkAccelerationStructureInstanceKHR), "OpenVk Raytracer, Instance Tmp");
 
 	DeviceCreateInfo->enabledExtensionCount = VkRenderer.DeviceExtensionCount;
 	DeviceCreateInfo->ppEnabledExtensionNames = VkRenderer.DeviceExtensions;

@@ -196,6 +196,9 @@ void RtCreateDescriptorSetBufferDescriptions(uint32_t DescriptionBuffer)
 
 void RaytracingInit()
 {
+	if (!OpenVkHasRaytracingSupport())
+		return;
+
 	memset(&RTR, 0, sizeof(RaytracingRenderer));
 
 	RTR.DescriptorPool = OPENVK_ERROR;
@@ -378,6 +381,9 @@ void RaytracingInit()
 
 bool RaytracingAddTexture(uint32_t SceneTexture)
 {
+	if (!OpenVkHasRaytracingSupport())
+		return false;
+
 	SceneTextureImage* Texture = (SceneTextureImage*)CMA_GetAt(&SceneTextures, SceneTexture);
 	if (Texture)
 	{
@@ -417,6 +423,9 @@ bool RaytracingAddTexture(uint32_t SceneTexture)
 
 void RaytracingAddGeometry(uint32_t SceneMeshIndex)
 {
+	if (!OpenVkHasRaytracingSupport())
+		return;
+
 	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, SceneMeshIndex);
 	if (Mesh == NULL || Mesh->MeshCount == 0)
 	{
@@ -467,6 +476,9 @@ void RaytracingAddGeometry(uint32_t SceneMeshIndex)
 
 uint32_t RaytracingAddMesh(uint32_t SceneMeshIndex)
 {
+	if (!OpenVkHasRaytracingSupport())
+		return OPENVK_ERROR;
+
 	SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, SceneMeshIndex);
 	if (Mesh == NULL || Mesh->MeshCount == 0)
 	{
@@ -515,6 +527,9 @@ typedef struct
 
 void RaytracingRestBuild()
 {
+	if (!OpenVkHasRaytracingSupport())
+		return;
+
 	RTR.CurrentBuildHash = 0;
 	DynamicArrayClear(&RTR.Meshes);
 	DynamicArrayClear(&RTR.DescriptionBuffers);
@@ -522,6 +537,9 @@ void RaytracingRestBuild()
 
 void RaytracingAddEntityMesh(uint32_t MeshIndex, mat4* Transform, SceneMesh* Mesh)
 {
+	if (!OpenVkHasRaytracingSupport())
+		return;
+
 	RTR.CurrentBuildHash += Mesh->IndexBuffer == OPENVK_ERROR ? 0 : Mesh->IndexBuffer;
 	RTR.CurrentBuildHash += Mesh->VertexBuffer;
 	RTR.CurrentBuildHash += Mesh->MeshCount;
@@ -569,7 +587,9 @@ void RaytracingAddEntityMesh(uint32_t MeshIndex, mat4* Transform, SceneMesh* Mes
 
 void RaytracingBuild()
 {
-	
+	if (!OpenVkHasRaytracingSupport())
+		return;
+
 //	uint64_t CurrentBuildHash = -1;//HashUint64
 
 
@@ -651,6 +671,9 @@ void RaytracingBuild()
 
 void RaytracingResize()
 {
+	if (!OpenVkHasRaytracingSupport())
+		return;
+
 	if (RTR.StorageImageWidth >= WindowWidth &&
 		RTR.StorageImageHeight >= WindowHeight)
 		return;
@@ -719,6 +742,9 @@ void RtUpdateInstances()
 
 void RaytracingUpdate()
 {
+	if (!OpenVkHasRaytracingSupport())
+		return;
+
 	RaytracingUniformBufferObject UBO;
 	UBO.viewInverse = GBufferVertexUBO.View;
 	UBO.projInverse = GBufferVertexUBO.Projection;
@@ -753,6 +779,9 @@ void RaytracingUpdate()
 
 void RaytracingDraw()
 {
+	if (!OpenVkHasRaytracingSupport())
+		return;
+
 	if (RTR.Render && RTR.DescriptionBuffers.Size > 0)
 	{
 		OpenVkBindPipeline(RTR.RaytracingPipeline, OPENVK_PIPELINE_TYPE_RAYTRACING);
@@ -781,6 +810,9 @@ void RaytracingDraw()
 
 void RaytracingDestroy()
 {
+	if (!OpenVkHasRaytracingSupport())
+		return;
+
 	CMA_Destroy(&RTR.Geometry);
 	CMA_Destroy(&RTR.BottomLevelAS);
 	DynamicArrayDestroy(&RTR.DescriptionBuffers);

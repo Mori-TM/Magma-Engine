@@ -251,8 +251,7 @@ void RendererDestroy()
 	EngineDestroy();
 	EngineDestroyEditor();
 	CameraDestroyPath();
-	if (OpenVkHasRaytracingSupport())
-		RaytracingDestroy();
+	RaytracingDestroy();
 	
 	OpenVkGUIDestroy();
 	OpenVkDestroyRenderer();
@@ -261,7 +260,6 @@ void RendererDestroy()
 
 void RendererUpdate()
 {
-	//	if (!IsEditorActive)
 	UpdateFpsCamera(&CameraPos, &CameraDir, &CameraUp);
 	CameraUpdateRecordingPath();
 
@@ -269,8 +267,6 @@ void RendererUpdate()
 		CameraFOV = CameraZoomFOV;
 	else
 		CameraFOV = CameraNormalFOV;
-	
-//	if (RenderShadows || EffectFrame == 2)
 
 	GBufferUpdateUniformBuffer();
 	UpdateCascades();
@@ -278,9 +274,7 @@ void RendererUpdate()
 	SceneUpdateUniformBuffer();
 	SceneUpdateStorageBuffer();
 	SSRUpdateUniformBuffer();
-	
-	if (OpenVkHasRaytracingSupport())
-		RaytracingUpdate();
+	RaytracingUpdate();
 }
 
 void RendererDraw()
@@ -313,8 +307,7 @@ void RendererDraw()
 			else
 				SceneRenderDescriptorSet = SceneOutputDescriptorSet;
 
-			if (OpenVkHasRaytracingSupport())
-				RaytracingDraw();
+			RaytracingDraw();
 		}
 		
 
@@ -339,8 +332,7 @@ void RendererResize(OpenVkBool RecreateSwapChain)
 	CreateFramebuffers();
 	OpenVkDestroyDescriptorPool(DescriptorPool);
 	CreateDescriptors();
-	if (OpenVkHasRaytracingSupport())
-		RaytracingResize();
+	RaytracingResize();
 	ForceRenderOnce = true;
 }
 
@@ -543,7 +535,7 @@ void RendererRun()
 		
 		OpenVkDeviceWaitIdle();
 
-		// Use OpenVk function!!!
+		//FIX - Use OpenVk function!!!
 		for (uint32_t i = 0; i < VkRenderer.Pipelines.Size; i++)
 		{
 

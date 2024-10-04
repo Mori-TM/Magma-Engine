@@ -537,6 +537,26 @@ void main()
 
 		vec3 Light;
 		vec3 L;
+
+		switch (SBO.LightType[i])
+		{
+		case 0:
+			Light = SBO.LightPos[i].xyz - WorldPos.xyz;
+			L = normalize(Light);
+			break;
+
+		case 1:
+			Light = normalize(SBO.LightPos[i].xyz);
+			L = Light;
+			break;
+
+		default:
+			Light = normalize(SBO.LightPos[i].xyz);
+			L = Light;
+			break;
+		}
+
+		/*
 		if (SBO.LightType[i] == 0)
 		{
 			Light = SBO.LightPos[i].xyz - WorldPos.xyz;
@@ -547,6 +567,7 @@ void main()
 			Light = normalize(SBO.LightPos[i].xyz);
 			L = Light;
 		}
+		*/
 		 
 		vec3 H = normalize(V + L);
 

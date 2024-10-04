@@ -14,11 +14,13 @@ layout(location = 2) in vec2 FragTexCoord;
 layout(location = 3) in vec4 FragPosRelToCam;
 layout(location = 4) in vec4 FragWorldPos;
 
-layout(set = 0, binding = 0) uniform sampler2D AlbedoMap;
-layout(set = 1, binding = 0) uniform sampler2D NormalMap;
-layout(set = 2, binding = 0) uniform sampler2D MetallicMap;
-layout(set = 3, binding = 0) uniform sampler2D RoughnessMap;
-layout(set = 4, binding = 0) uniform sampler2D OcclusionMap;
+layout(set = 1, binding = 0) uniform sampler2D AlbedoMap;
+layout(set = 2, binding = 0) uniform sampler2D NormalMap;
+layout(set = 3, binding = 0) uniform sampler2D MetallicMap;
+
+layout(set = 4, binding = 0) uniform sampler2D RoughnessMap;
+layout(set = 5, binding = 0) uniform sampler2D OcclusionMap;
+
 
 layout(push_constant) uniform PushConstants
 {
@@ -75,6 +77,9 @@ void main()
 	OutPBR.r = texture(MetallicMap, FragTexCoord).r * PushConst.Metallic;
 	OutPBR.g = texture(RoughnessMap, FragTexCoord).r * PushConst.Roughness;
 	OutPBR.b = texture(OcclusionMap, FragTexCoord).r * PushConst.Occlusion;
+	OutPBR.g = PushConst.Roughness;
+	OutPBR.b = PushConst.Occlusion;
+
 	OutPBR.a = Normal.y;
 	OutWorldPos.x = FragWorldPos.x;
 	OutWorldPos.y = FragWorldPos.y;

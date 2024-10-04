@@ -19,7 +19,7 @@ layout(push_constant) uniform PushConstants
 	layout(offset = 0) mat4 Model;
 } PushConst;
 
-layout(set = 5, binding = 0) uniform UniformBufferObject
+layout(set = 0, binding = 0) uniform UniformBufferObject
 {
 	mat4 View;
 	mat4 Projection;

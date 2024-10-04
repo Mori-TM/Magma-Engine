@@ -208,8 +208,6 @@ void SceneDestroy()
 
 void SceneSave(const char* FileName)
 {
-	
-
 	FILE* File = fopen(FileName, "wb");
 
 	fprintf(File, "{\n");
@@ -370,12 +368,6 @@ void SceneSave(const char* FileName)
 					fprintf(File, "\t\t\t\t}%s\n", j == (Mesh->MeshCount - 1) ? "" : ",");
 				}
 				fprintf(File, "\t\t\t]\n");
-				//	fprintf(File, "\t\t\t\"OcclusionTexture\": \"%s\",\n", Mesh->OcclusionIndex);
-				//
-				//	fprintf(File, "\t\t\t\"Color\": [%f, %f, %f, %f],\n", Material->Color.r, Material->Color.g, Material->Color.b, Material->Color.a);
-				//	fprintf(File, "\t\t\t\"MetallicTexture\": %f,\n", Material->Metallic);
-				//	fprintf(File, "\t\t\t\"RoughnessTexture\": %f,\n", Material->Roughness);
-				//	fprintf(File, "\t\t\t\"OcclusionTexture\": %f%s\n", Material->Occlusion, i == (SceneTextures.Size - 1) ? "" : ",");
 			}			
 			fprintf(File, "\t\t}%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
 		}
@@ -417,21 +409,18 @@ void SceneSave(const char* FileName)
 			if (Entity->UsedComponents[COMPONENT_TYPE_MESH] == true)
 			{
 				fprintf(File, "\t\t\t\"MeshComponent\": {\n");
-				fprintf(File, "\t\t\t\t\"Name\": \"%s\",\n", Entity->Mesh.Name);
 				fprintf(File, "\t\t\t\t\"MeshIndex\": %d\n", Entity->Mesh.MeshIndex);
 				fprintf(File, "\t\t\t},\n");
 			}
 			if (Entity->UsedComponents[COMPONENT_TYPE_MATERIAL] == true)
 			{
 				fprintf(File, "\t\t\t\"MaterialComponent\": {\n");
-				fprintf(File, "\t\t\t\t\"Name\": \"%s\",\n", Entity->Material.Name);
 				fprintf(File, "\t\t\t\t\"MaterialIndex\": %d\n", Entity->Material.MaterialIndex);
 				fprintf(File, "\t\t\t},\n");
 			}
 			if (Entity->UsedComponents[COMPONENT_TYPE_CAMERA] == true)
 			{
 				fprintf(File, "\t\t\t\"CameraComponent\": {\n");
-				fprintf(File, "\t\t\t\t\"Name\": \"%s\",\n", Entity->Camera.Name);
 				fprintf(File, "\t\t\t\t\"FOV\": %f,\n", Entity->Camera.FOV);
 				fprintf(File, "\t\t\t\t\"NearPlane\": %f,\n", Entity->Camera.NearPlane);
 				fprintf(File, "\t\t\t\t\"FarPlane\": %f\n", Entity->Camera.FarPlane);
@@ -440,14 +429,12 @@ void SceneSave(const char* FileName)
 			if (Entity->UsedComponents[COMPONENT_TYPE_ANIMATION] == true)
 			{
 				fprintf(File, "\t\t\t\"AnimationComponent\": {\n");
-				fprintf(File, "\t\t\t\t\"Name\": \"%s\",\n", Entity->Animation.Name);
 				fprintf(File, "\t\t\t\t\"AnimationIndex\": %d\n", Entity->Animation.AnimationIndex);
 				fprintf(File, "\t\t\t},\n");
 			}
 			if (Entity->UsedComponents[COMPONENT_TYPE_LIGHT] == true)
 			{
 				fprintf(File, "\t\t\t\"LightComponent\": {\n");
-				fprintf(File, "\t\t\t\t\"Name\": \"%s\",\n", Entity->Light.Name);
 				fprintf(File, "\t\t\t\t\"Color\": [%f, %f, %f],\n", Entity->Light.Color.r, Entity->Light.Color.g, Entity->Light.Color.b);
 				fprintf(File, "\t\t\t\t\"Strength\": %f,\n", Entity->Light.Strength);
 				fprintf(File, "\t\t\t\t\"Type\": \"%s\",\n", LightNames[Entity->Light.Type]);
@@ -457,8 +444,7 @@ void SceneSave(const char* FileName)
 			if (Entity->UsedComponents[COMPONENT_TYPE_COLLIDER] == true)
 			{
 				fprintf(File, "\t\t\t\"ColliderComponent\": {\n");
-				fprintf(File, "\t\t\t\t\"Name\": \"%s\",\n", Entity->Collider.Name);
-				fprintf(File, "\t\t\t\t\"Type\": \"%s\",\n", ColliderNames[Entity->Collider.Collider]);
+				fprintf(File, "\t\t\t\t\"Type\": \"%s\",\n", ColliderNames[Entity->Collider.Type]);
 
 				fprintf(File, "\t\t\t\t\"Friction\": %f,\n", Entity->Collider.Friction);
 				fprintf(File, "\t\t\t\t\"Bounciness\": %f\n", Entity->Collider.Bounciness);
@@ -468,28 +454,12 @@ void SceneSave(const char* FileName)
 			if (Entity->UsedComponents[COMPONENT_TYPE_RIGIDBODY] == true)
 			{
 				fprintf(File, "\t\t\t\"RigidbodyComponent\": {\n");
-				fprintf(File, "\t\t\t\t\"Name\": \"%s\",\n", Entity->Rigidbody.Name);
 				fprintf(File, "\t\t\t\t\"Mass\": %f\n", Entity->Rigidbody.Mass);
 				fprintf(File, "\t\t\t}\n");
 			}
 			
 
 			//FIX - Audio Component
-
-			
-
-			
-
-			
-
-			
-
-		//	fprintf(File, "\t\t\t\"Path\": \"%s\",\n", Texture->Path);
-		//	fprintf(File, "\t\t\t\"Width\": %d,\n", Texture->Width);
-		//	fprintf(File, "\t\t\t\"Height\": %d,\n", Texture->Height);
-		//	fprintf(File, "\t\t\t\"Format\": %d,\n", Texture->Format);
-		//	fprintf(File, "\t\t\t\"MipLevels\": %d,\n", Texture->MipLevels);
-		//	fprintf(File, "\t\t\t\"Data\": null%s\n", i == (SceneTextures.Size - 1) ? "" : ",");
 		}
 		fprintf(File, "\t\t}%s\n", i == (EntityCount - 1) ? "" : ",");
 	}
@@ -565,69 +535,6 @@ void SceneLoadTexture(JsonObject* Object)
 	AddTexture(Path, ShowInAssetBrowser);
 }
 
-typedef struct
-{
-	union
-	{
-			char* Str;
-			int32_t Int32;
-			float Float32;
-			bool Bool;
-
-
-		/*
-		union
-		{
-			char* Str;
-		} StringArray;
-
-		union
-		{
-			int32_t Int32;
-		} Int32Array;
-
-		union
-		{
-			float Float32;
-		} Float32Array;
-
-		union
-		{
-			bool Bool;
-		} BoolArray;
-		*/
-	};
-	
-} SceneArrayTypes;
-
-/*
-//doesn't allocate string - yet?
-void SceneLoadArray(SceneArrayTypes* DstArray, JsonObject* ArrayObj)
-{	
-
-	for (size_t j = 0; j < ArrayObj->Refrences.Size; j++)
-	{
-		JsonVariables* Var = (JsonVariables*)DynamicArrayGetAt(&ArrayObj->Refrences, j);
-		switch (Var->Type)
-		{
-		case JSON_STR:
-			DstArray[j].Str = Var->Data.Str;
-			break;
-		case JSON_INT:
-			DstArray[j].Int32 = Var->Data.Int;
-			break;
-		case JSON_DUB:
-			DstArray[j].Float32 = Var->Data.Double;
-			break;
-		case JSON_BOOL:
-			DstArray[j].Bool = Var->Data.Bool;
-			break;
-		
-		}
-	}
-}
-*/
-
 void SceneLoadMaterial(JsonObject* Object)
 {
 	SceneMaterial Material;
@@ -642,17 +549,7 @@ void SceneLoadMaterial(JsonObject* Object)
 		else if (strcmp(Variable->Name, "MetallicIndex") == 0) Material.MetallicIndex = Variable->Data.Int;
 		else if (strcmp(Variable->Name, "RoughnessIndex") == 0) Material.RoughnessIndex = Variable->Data.Int;
 		else if (strcmp(Variable->Name, "OcclusionIndex") == 0)	Material.OcclusionIndex = Variable->Data.Int;
-		else if (strcmp(Variable->Name, "Color") == 0)
-		{
-		//	JsonObject* ColorObj = (JsonObject*)Variable;
-		//	for (size_t j = 0; j < ColorObj->Refrences.Size; j++)
-		//	{
-		//		JsonVariables* Color = (JsonVariables*)DynamicArrayGetAt(&ColorObj->Refrences, j);
-		//		Material.Color.Arr[j] = Color->Data.Double;
-		//	}
-
-			SceneLoadArrayfloat(Material.Color.Arr, (JsonObject*)Variable);
-		}
+		else if (strcmp(Variable->Name, "Color") == 0) SceneLoadArrayfloat(Material.Color.Arr, (JsonObject*)Variable);
 		else if (strcmp(Variable->Name, "Metallic") == 0)	Material.Metallic = Variable->Data.Double;
 		else if (strcmp(Variable->Name, "Roughness") == 0)	Material.Roughness = Variable->Data.Double;
 		else if (strcmp(Variable->Name, "Occlusion") == 0)	Material.Occlusion = Variable->Data.Double;
@@ -792,8 +689,6 @@ void SceneLoadEntity(JsonObject* Object)
 	EntityInfo Entity;
 	ResetEntity(&Entity);
 
-//	memset(&Entity, 0, sizeof(EntityInfo));
-
 	for (size_t i = 0; i < Object->Refrences.Size; i++)
 	{
 		JsonVariables* Variable = (JsonVariables*)DynamicArrayGetAt(&Object->Refrences, i);
@@ -813,18 +708,6 @@ void SceneLoadEntity(JsonObject* Object)
 					if (strcmp(Comp->Data.Str, ComponentNames[k]) == 0)
 						Entity.UsedComponents[k] = true;					
 				}
-				
-				/*
-				if (strcmp(Variable->Name, "Empty") == 0) Entity.UsedComponents[COMPONENT_TYPE_EMPTY] = Variable->Data.Bool;
-				else if (strcmp(Variable->Name, "Mesh") == 0) Entity.UsedComponents[COMPONENT_TYPE_MESH] = Variable->Data.Bool;
-				else if (strcmp(Variable->Name, "Material") == 0) Entity.UsedComponents[COMPONENT_TYPE_MATERIAL] = Variable->Data.Bool;
-				else if (strcmp(Variable->Name, "Camera") == 0) Entity.UsedComponents[COMPONENT_TYPE_CAMERA] = Variable->Data.Bool;
-				else if (strcmp(Variable->Name, "Audio") == 0) Entity.UsedComponents[COMPONENT_TYPE_AUDIO] = Variable->Data.Bool;
-				else if (strcmp(Variable->Name, "Animation") == 0) Entity.UsedComponents[COMPONENT_TYPE_ANIMATION] = Variable->Data.Bool;
-				else if (strcmp(Variable->Name, "Light") == 0) Entity.UsedComponents[COMPONENT_TYPE_LIGHT] = Variable->Data.Bool;
-				else if (strcmp(Variable->Name, "Collider") == 0) Entity.UsedComponents[COMPONENT_TYPE_COLLIDER] = Variable->Data.Bool;
-				else if (strcmp(Variable->Name, "Rigidbody") == 0) Entity.UsedComponents[COMPONENT_TYPE_RIGIDBODY] = Variable->Data.Bool;
-				*/
 			}
 		}
 		//FIX - most of this could be shortended via a general function 
@@ -834,8 +717,7 @@ void SceneLoadEntity(JsonObject* Object)
 			for (size_t j = 0; j < Components->Refrences.Size; j++)
 			{
 				JsonVariables* Comp = (JsonVariables*)DynamicArrayGetAt(&Components->Refrences, j);
-				if (strcmp(Comp->Name, "Name") == 0) strcpycut(Entity.Mesh.Name, Comp->Data.Str);
-				else if (strcmp(Comp->Name, "MeshIndex") == 0) Entity.Mesh.MeshIndex = Comp->Data.Int;
+				if (strcmp(Comp->Name, "MeshIndex") == 0) Entity.Mesh.MeshIndex = Comp->Data.Int;
 			}
 
 			RaytracingAddMesh(Entity.Mesh.MeshIndex);
@@ -846,8 +728,7 @@ void SceneLoadEntity(JsonObject* Object)
 			for (size_t j = 0; j < Components->Refrences.Size; j++)
 			{
 				JsonVariables* Comp = (JsonVariables*)DynamicArrayGetAt(&Components->Refrences, j);
-				if (strcmp(Comp->Name, "Name") == 0) strcpycut(Entity.Material.Name, Comp->Data.Str);
-				else if (strcmp(Comp->Name, "MaterialIndex") == 0) Entity.Material.MaterialIndex = Comp->Data.Int;
+				if (strcmp(Comp->Name, "MaterialIndex") == 0) Entity.Material.MaterialIndex = Comp->Data.Int;
 			}
 		}
 		else if (strcmp(Variable->Name, "CameraComponent") == 0)
@@ -856,8 +737,7 @@ void SceneLoadEntity(JsonObject* Object)
 			for (size_t j = 0; j < Components->Refrences.Size; j++)
 			{
 				JsonVariables* Comp = (JsonVariables*)DynamicArrayGetAt(&Components->Refrences, j);
-				if (strcmp(Comp->Name, "Name") == 0) strcpycut(Entity.Camera.Name, Comp->Data.Str);
-				else if (strcmp(Comp->Name, "FOV") == 0) Entity.Camera.FOV = Comp->Data.Double;
+				if (strcmp(Comp->Name, "FOV") == 0) Entity.Camera.FOV = Comp->Data.Double;
 				else if (strcmp(Comp->Name, "NearPlane") == 0) Entity.Camera.NearPlane = Comp->Data.Double;
 				else if (strcmp(Comp->Name, "FarPlane") == 0) Entity.Camera.FarPlane = Comp->Data.Double;
 			}
@@ -868,8 +748,7 @@ void SceneLoadEntity(JsonObject* Object)
 			for (size_t j = 0; j < Components->Refrences.Size; j++)
 			{
 				JsonVariables* Comp = (JsonVariables*)DynamicArrayGetAt(&Components->Refrences, j);
-				if (strcmp(Comp->Name, "Name") == 0) strcpycut(Entity.Animation.Name, Comp->Data.Str);
-				else if (strcmp(Comp->Name, "AnimationIndex") == 0) Entity.Animation.AnimationIndex = Comp->Data.Int;
+				if (strcmp(Comp->Name, "AnimationIndex") == 0) Entity.Animation.AnimationIndex = Comp->Data.Int;
 			}
 		}
 		else if (strcmp(Variable->Name, "LightComponent") == 0)
@@ -878,8 +757,7 @@ void SceneLoadEntity(JsonObject* Object)
 			for (size_t j = 0; j < Components->Refrences.Size; j++)
 			{
 				JsonVariables* Comp = (JsonVariables*)DynamicArrayGetAt(&Components->Refrences, j);
-				if (strcmp(Comp->Name, "Name") == 0) strcpycut(Entity.Light.Name, Comp->Data.Str);
-				else if (strcmp(Comp->Name, "Color") == 0) SceneLoadArrayfloat(Entity.Light.Color.Arr, (JsonObject*)Comp);
+				if (strcmp(Comp->Name, "Color") == 0) SceneLoadArrayfloat(Entity.Light.Color.Arr, (JsonObject*)Comp);
 				else if (strcmp(Comp->Name, "Strength") == 0) Entity.Light.Strength = Comp->Data.Double;
 				else if (strcmp(Comp->Name, "Type") == 0)
 				{
@@ -891,11 +769,6 @@ void SceneLoadEntity(JsonObject* Object)
 							break;
 						}
 					}
-					/*
-						 if (strcmp(Comp->Name, "Point") == 0)			Entity.Light.Type = LIGHT_POINT;
-					else if (strcmp(Comp->Name, "Directional") == 0)	Entity.Light.Type = LIGHT_DIRECTIONAL;
-					else if (strcmp(Comp->Name, "Spot") == 0)			Entity.Light.Type = LIGHT_SPOT;
-					*/
 				}
 				else if (strcmp(Comp->Name, "CastShadow") == 0) Entity.Light.CastShadow = Comp->Data.Bool;
 			}
@@ -906,14 +779,13 @@ void SceneLoadEntity(JsonObject* Object)
 			for (size_t j = 0; j < Components->Refrences.Size; j++)
 			{
 				JsonVariables* Comp = (JsonVariables*)DynamicArrayGetAt(&Components->Refrences, j);
-				if (strcmp(Comp->Name, "Name") == 0) strcpycut(Entity.Collider.Name, Comp->Data.Str);
-				else if (strcmp(Comp->Name, "Type") == 0)
+				if (strcmp(Comp->Name, "Type") == 0)
 				{
 					for (uint32_t k = 0; k < COLLIDER_COUNT; k++)
 					{
 						if (strcmp(Comp->Data.Str, ColliderNames[k]) == 0)
 						{
-							Entity.Collider.Collider = (ColliderTypes)k;
+							Entity.Collider.Type = (ColliderTypes)k;
 							break;
 						}
 					}
@@ -928,8 +800,7 @@ void SceneLoadEntity(JsonObject* Object)
 			for (size_t j = 0; j < Components->Refrences.Size; j++)
 			{
 				JsonVariables* Comp = (JsonVariables*)DynamicArrayGetAt(&Components->Refrences, j);
-				if (strcmp(Comp->Name, "Name") == 0) strcpycut(Entity.Rigidbody.Name, Comp->Data.Str);
-				else if (strcmp(Comp->Name, "Mass") == 0) Entity.Rigidbody.Mass = Comp->Data.Double;
+				if (strcmp(Comp->Name, "Mass") == 0) Entity.Rigidbody.Mass = Comp->Data.Double;
 			}
 		}
 	}

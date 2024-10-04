@@ -28,13 +28,11 @@ const char* ComponentNames[] =
 	"Rigidbody"
 };
 
-
-//Maybe add _TYPE_
 typedef enum
 {
-	LIGHT_POINT = 0,
-	LIGHT_DIRECTIONAL,
-	LIGHT_SPOT,
+	LIGHT_TYPE_POINT = 0,
+	LIGHT_TYPE_DIRECTIONAL,
+	LIGHT_TYPE_SPOT,
 	LIGHT_COUNT
 } LightTypes;
 
@@ -45,16 +43,15 @@ const char* LightNames[] =
 	"Spot"
 };
 
-//Maybe add _TYPE_
 typedef enum
 {
-	COLLIDER_BOX = 0,
-	COLLIDER_SPHERE,
-	COLLIDER_CYLINDER,
-	COLLIDER_Bean,
-	COLLIDER_CONE,
-	COLLIDER_CONVEX,
-	COLLIDER_MESH,
+	COLLIDER_TYPE_BOX = 0,
+	COLLIDER_TYPE_SPHERE,
+	COLLIDER_TYPE_CYLINDER,
+	COLLIDER_TYPE_Bean,
+	COLLIDER_TYPE_CONE,
+	COLLIDER_TYPE_CONVEX,
+	COLLIDER_TYPE_MESH,
 	COLLIDER_COUNT
 } ColliderTypes;
 
@@ -72,19 +69,19 @@ const char* ColliderNames[] =
 //Use MAX_CHAR_NAME_LENGTH_SHORT
 typedef struct
 {
-	char Name[MAX_CHAR_NAME_LENGTH];
+//	char Name[MAX_CHAR_NAME_LENGTH];
 	uint32_t MeshIndex;
 } MeshComponent;
 
 typedef struct
 {
-	char Name[MAX_CHAR_NAME_LENGTH];
+//	char Name[MAX_CHAR_NAME_LENGTH];
 	uint32_t MaterialIndex;
 } MaterialComponent;
 
 typedef struct
 {
-	char Name[MAX_CHAR_NAME_LENGTH];
+//	char Name[MAX_CHAR_NAME_LENGTH];
 	float FOV;
 	float NearPlane;
 	float FarPlane;
@@ -92,37 +89,37 @@ typedef struct
 
 typedef struct
 {
-	char Name[MAX_CHAR_NAME_LENGTH];
+//	char Name[MAX_CHAR_NAME_LENGTH];
 	SoLoud::Wav Audio;
 	SoLoud::handle Handle;
 } AudioComponent;
 
 typedef struct
 {
-	char Name[MAX_CHAR_NAME_LENGTH];
+//	char Name[MAX_CHAR_NAME_LENGTH];
 	uint32_t AnimationIndex;
 } AnimationComponent;
 
 typedef struct
 {
-	char Name[MAX_CHAR_NAME_LENGTH];
+//	char Name[MAX_CHAR_NAME_LENGTH];
+	LightTypes Type; //FIX - move under name
 	vec3 Color;
 	float Strength;
-	LightTypes Type; //FIX - move under name
 	bool CastShadow;
 } LightComponent;
 
 typedef struct
 {
-	char Name[MAX_CHAR_NAME_LENGTH];
-	ColliderTypes Collider;//FIX - rename to Type
+//	char Name[MAX_CHAR_NAME_LENGTH];
+	ColliderTypes Type;//FIX - rename to Type
 	float Friction;
 	float Bounciness;
 } ColliderComponent;
 
 typedef struct
 {
-	char Name[MAX_CHAR_NAME_LENGTH];
+//	char Name[MAX_CHAR_NAME_LENGTH];
 	float Mass;
 } RigidbodyComponent;
 
@@ -242,18 +239,18 @@ void SetDefaultMaterial(SceneMaterial* Material, const char* Name)
 void ResetEntityMesh(EntityInfo* Entity)
 {
 	Entity->Mesh.MeshIndex = 0;
-	strcpycut(Entity->Mesh.Name, "None");
+//	strcpycut(Entity->Mesh.Name, "None");
 }
 
 void ResetEntityMaterial(EntityInfo* Entity)
 {
 	Entity->Material.MaterialIndex = 0;
-	strcpycut(Entity->Material.Name, "None");
+//	strcpycut(Entity->Material.Name, "None");
 }
 
 void ResetEntityCamera(EntityInfo* Entity)
 {
-	strcpycut(Entity->Camera.Name, "None");
+//	strcpycut(Entity->Camera.Name, "None");
 	Entity->Camera.FOV = 75.0;
 	Entity->Camera.NearPlane = 0.01;
 	Entity->Camera.FarPlane = 1000.0;
@@ -261,31 +258,31 @@ void ResetEntityCamera(EntityInfo* Entity)
 
 void ResetEntityAnimation(EntityInfo* Entity)
 {
-	strcpycut(Entity->Animation.Name, "None");
+//	strcpycut(Entity->Animation.Name, "None");
 	Entity->Animation.AnimationIndex = 0;
 }
 
 
 void ResetEntityLight(EntityInfo* Entity)
 {
-	strcpycut(Entity->Light.Name, "None");
+//	strcpycut(Entity->Light.Name, "None");
 	Entity->Light.Color = Vec3f(1.0);
 	Entity->Light.Strength = 1.0;
-	Entity->Light.Type = LIGHT_POINT;
+	Entity->Light.Type = LIGHT_TYPE_POINT;
 	Entity->Light.CastShadow = false;
 }
 
 void ResetEntityCollider(EntityInfo* Entity)
 {
-	strcpycut(Entity->Collider.Name, "None");
-	Entity->Collider.Collider = COLLIDER_BOX;
+//	strcpycut(Entity->Collider.Name, "None");
+	Entity->Collider.Type = COLLIDER_TYPE_BOX;
 	Entity->Collider.Friction = 0.0;
 	Entity->Collider.Bounciness = 0.0;
 }
 
 void ResetEntityRigidbody(EntityInfo* Entity)
 {
-	strcpycut(Entity->Rigidbody.Name, "None");
+//	strcpycut(Entity->Rigidbody.Name, "None");
 	Entity->Rigidbody.Mass = 0.0;
 }
 
@@ -408,7 +405,7 @@ void AddMeshToEntity(uint32_t EntityIndex, uint32_t MeshIndex)
 	if (Mesh)
 	{
 		Entities[EntityIndex].Mesh.MeshIndex = MeshIndex;
-		strcpycut(Entities[EntityIndex].Mesh.Name, Mesh->Name);
+	//	strcpycut(Entities[EntityIndex].Mesh.Name, Mesh->Name);
 
 		RaytracingAddMesh(SelectedMesh);
 		return;

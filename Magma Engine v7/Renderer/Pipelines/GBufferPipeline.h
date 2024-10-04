@@ -20,24 +20,26 @@ void CreateGBufferLayout()
 {
 	uint32_t DescriptorSetLayouts[] =
 	{
+		VertexUniformDescriptorSetLayout,
 		TextureDescriptorSetLayout,
 		TextureDescriptorSetLayout,
 		TextureDescriptorSetLayout,
 		TextureDescriptorSetLayout,
 		TextureDescriptorSetLayout,
-		VertexUniformDescriptorSetLayout
 	};
 	
 	uint32_t PushTypes[] = { OPENVK_SHADER_TYPE_VERTEX, OPENVK_SHADER_TYPE_FRAGMENT };
 	uint32_t PushOffsets[] = { 0, 64 };
 	uint32_t PushSizes[] = { sizeof(GBufferVertexPushConstant), sizeof(GBufferFragmentPushConstant) };
 
+	GBufferDescriptorSetLayoutCount = ARRAY_SIZE(DescriptorSetLayouts) < VkRenderer.PhysicalDeviceProperties.limits.maxBoundDescriptorSets ? ARRAY_SIZE(DescriptorSetLayouts) : VkRenderer.PhysicalDeviceProperties.limits.maxBoundDescriptorSets;
+	
 	OpenVkPipelineLayoutCreateInfo Layout;
 	Layout.PushConstantCount = 2;
 	Layout.PushConstantShaderTypes = PushTypes;
 	Layout.PushConstantOffsets = PushOffsets;
 	Layout.PushConstantSizes = PushSizes;
-	Layout.DescriptorSetLayoutCount = ARRAY_SIZE(DescriptorSetLayouts);
+	Layout.DescriptorSetLayoutCount = GBufferDescriptorSetLayoutCount;
 	Layout.DescriptorSetLayouts = DescriptorSetLayouts;
 	GBufferLayout = OpenVkCreatePipelineLayout(&Layout);
 }
@@ -51,7 +53,7 @@ void CreateGBufferPipeline()
 	OpenVkFile FragmentShader = OpenVkReadFile("Data/Shader/GBufferFragment.spv");
 	VertexShader.Freeable = OpenVkFalse;
 	FragmentShader.Freeable = OpenVkFalse;
-
+	
 	OpenVkBool AlphaBlendings[] = { OpenVkFalse, OpenVkFalse, OpenVkFalse, OpenVkFalse, OpenVkFalse, OpenVkFalse };
 	OpenVkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
 	GraphicsPipelineCreateInfo.VertexShader = VertexShader;
@@ -131,31 +133,6 @@ void CreateGBufferDescriptorSet()
 
 		GBufferVertexUniformDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
 	}
-
-//	{
-//		uint32_t DescriptorCounts[] = { 1, 1, 1, 1 };
-//		uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
-//		uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT };
-//		uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT };
-//		uint32_t Bindings[] = { 0, 1, 2, 3 };
-//		uint32_t Sampler[] = { ImageSampler, ImageSampler, ImageSampler, ImageSampler };
-//
-//		OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
-//		DescriptorSetCreateInfo.DescriptorSetLayout = GBufferDescriptorSetLayout;
-//		DescriptorSetCreateInfo.DescriptorPool = DescriptorPool;
-//		DescriptorSetCreateInfo.DescriptorWriteCount = ARRAY_SIZE(GBufferAttachments);
-//		DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
-//		DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
-//		DescriptorSetCreateInfo.Sampler = Sampler;
-//		DescriptorSetCreateInfo.ImageTypes = ImageTypes;
-//		DescriptorSetCreateInfo.Images = GBufferAttachments;
-//		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
-//		DescriptorSetCreateInfo.Bindings = Bindings;
-//		DescriptorSetCreateInfo.DescriptorSet = NULL;
-//		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
-//
-//		GBufferDescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
-//	}
 }
 
 float NearPlane;
@@ -245,7 +222,7 @@ void GBufferDraw()
 
 		OpenVkBindPipeline(Pipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
 		
-		OpenVkBindDescriptorSet(GBufferLayout, 5, GBufferVertexUniformDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+		OpenVkBindDescriptorSet(GBufferLayout, 0, GBufferVertexUniformDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
 		uint32_t AlbedoDescriptorSet = 0;
 		uint32_t NormalDescriptorSet = 0;
@@ -373,25 +350,23 @@ void GBufferDraw()
 										GBufferFragmentPc.Roughness = MaterialRoughness;
 										GBufferFragmentPc.Occlusion = MaterialOcclusion;
 									}
-								//	GBufferFragmentPc.Color = Mesh->MeshData[m].Material.Color;
-								//	GBufferFragmentPc.Metallic = Mesh->MeshData[m].Material.Metallic;
-								//	GBufferFragmentPc.Roughness = Mesh->MeshData[m].Material.Roughness;
-								//	GBufferFragmentPc.Occlusion = Mesh->MeshData[m].Material.Occlusion;
 									GBufferFragmentPc.NearPlane = NearPlane;
 									GBufferFragmentPc.FarPlane = FarPlane;
 									OpenVkPushConstant(GBufferLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(GBufferFragmentPushConstant), &GBufferFragmentPc);
 								}
 
-								if (LastAlbedoDescriptorSet != AlbedoDescriptorSet)
-									OpenVkBindDescriptorSet(GBufferLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-								if (LastNormalDescriptorSet != NormalDescriptorSet)
-									OpenVkBindDescriptorSet(GBufferLayout, 1, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-								if (LastMetallicDescriptorSet != MetallicDescriptorSet)
-									OpenVkBindDescriptorSet(GBufferLayout, 2, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-								if (LastRoughnessDescriptorSet != RoughnessDescriptorSet)
-									OpenVkBindDescriptorSet(GBufferLayout, 3, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-								if (LastOcclusionDescriptorSet != OcclusionDescriptorSet)
-									OpenVkBindDescriptorSet(GBufferLayout, 4, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+
+
+								if (LastAlbedoDescriptorSet != AlbedoDescriptorSet && GBufferDescriptorSetLayoutCount > 1)
+									OpenVkBindDescriptorSet(GBufferLayout, 1, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								if (LastNormalDescriptorSet != NormalDescriptorSet && GBufferDescriptorSetLayoutCount > 2)
+									OpenVkBindDescriptorSet(GBufferLayout, 2, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								if (LastMetallicDescriptorSet != MetallicDescriptorSet && GBufferDescriptorSetLayoutCount > 3)
+									OpenVkBindDescriptorSet(GBufferLayout, 3, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								if (LastRoughnessDescriptorSet != RoughnessDescriptorSet && GBufferDescriptorSetLayoutCount > 4)
+									OpenVkBindDescriptorSet(GBufferLayout, 4, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								if (LastOcclusionDescriptorSet != OcclusionDescriptorSet && GBufferDescriptorSetLayoutCount > 5)
+									OpenVkBindDescriptorSet(GBufferLayout, 5, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
 								LastAlbedoDescriptorSet = AlbedoDescriptorSet;
 								LastNormalDescriptorSet = NormalDescriptorSet;
@@ -417,16 +392,16 @@ void GBufferDraw()
 							OpenVkPushConstant(GBufferLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(GBufferVertexPushConstant), &GBufferVertexPc);
 							OpenVkPushConstant(GBufferLayout, OPENVK_SHADER_TYPE_FRAGMENT, 64, sizeof(GBufferFragmentPushConstant), &GBufferFragmentPc);
 
-							if (LastAlbedoDescriptorSet != AlbedoDescriptorSet)
-								OpenVkBindDescriptorSet(GBufferLayout, 0, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-							if (LastNormalDescriptorSet != NormalDescriptorSet)
-								OpenVkBindDescriptorSet(GBufferLayout, 1, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-							if (LastMetallicDescriptorSet != MetallicDescriptorSet)
-								OpenVkBindDescriptorSet(GBufferLayout, 2, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-							if (LastRoughnessDescriptorSet != RoughnessDescriptorSet)
-								OpenVkBindDescriptorSet(GBufferLayout, 3, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-							if (LastOcclusionDescriptorSet != OcclusionDescriptorSet)
-								OpenVkBindDescriptorSet(GBufferLayout, 4, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							if (LastAlbedoDescriptorSet != AlbedoDescriptorSet && GBufferDescriptorSetLayoutCount > 1)
+								OpenVkBindDescriptorSet(GBufferLayout, 1, AlbedoDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							if (LastNormalDescriptorSet != NormalDescriptorSet && GBufferDescriptorSetLayoutCount > 2)
+								OpenVkBindDescriptorSet(GBufferLayout, 2, NormalDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							if (LastMetallicDescriptorSet != MetallicDescriptorSet && GBufferDescriptorSetLayoutCount > 3)
+								OpenVkBindDescriptorSet(GBufferLayout, 3, MetallicDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							if (LastRoughnessDescriptorSet != RoughnessDescriptorSet && GBufferDescriptorSetLayoutCount > 4)
+								OpenVkBindDescriptorSet(GBufferLayout, 4, RoughnessDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+							if (LastOcclusionDescriptorSet != OcclusionDescriptorSet && GBufferDescriptorSetLayoutCount > 5)
+								OpenVkBindDescriptorSet(GBufferLayout, 5, OcclusionDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
 
 							LastAlbedoDescriptorSet = AlbedoDescriptorSet;
 							LastNormalDescriptorSet = NormalDescriptorSet;

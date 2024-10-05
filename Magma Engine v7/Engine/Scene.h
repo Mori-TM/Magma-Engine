@@ -225,8 +225,28 @@ void SceneSave(const char* FileName)
 		fprintf(File, "\t\t\"CameraDir\": [%f, %f, %f],\n", CameraDir.x, CameraDir.y, CameraDir.z);
 		fprintf(File, "\t\t\"CameraUp\": [%f, %f, %f],\n", CameraUp.x, CameraUp.y, CameraUp.z);
 		fprintf(File, "\t\t\"CameraRight\": [%f, %f, %f],\n", CameraRight.x, CameraRight.y, CameraRight.z);
-		fprintf(File, "\t\t\"ClearColor\": [%f, %f, %f]\n", ClearColor.x, ClearColor.y, ClearColor.z);
+		fprintf(File, "\t\t\"ClearColor\": [%f, %f, %f],\n", ClearColor.x, ClearColor.y, ClearColor.z);
 
+		fprintf(File, "\t\t\"RenderDepthPrePass\": %s,\n", RenderDepthPrePass == true ? "true" : "false");
+		fprintf(File, "\t\t\"RenderRaytraced\": %s,\n", RenderRaytraced == true ? "true" : "false");
+		fprintf(File, "\t\t\"RenderShadows\": %s,\n", RenderShadows == true ? "true" : "false");
+		fprintf(File, "\t\t\"RenderSSAO\": %s,\n", RenderSSAO == true ? "true" : "false");
+		fprintf(File, "\t\t\"RenderSSR\": %s,\n", RenderSSR == true ? "true" : "false");
+		fprintf(File, "\t\t\"RenderFXAA\": %s,\n", RenderFXAA == true ? "true" : "false");
+		fprintf(File, "\t\t\"ForceRenderOnce\": %s,\n", ForceRenderOnce == true ? "true" : "false");
+
+		fprintf(File, "\t\t\"CascadeSplitLambda\": %f,\n", CascadeSplitLambda);
+		fprintf(File, "\t\t\"CascadeNearClip\": %f,\n", CascadeNearClip);
+		fprintf(File, "\t\t\"CascadeFarClip\": %f,\n", CascadeFarClip);
+		fprintf(File, "\t\t\"CascadeRange\": [%f, %f, %f, %f],\n", SceneFragmentUBO.CascadeRange[0], SceneFragmentUBO.CascadeRange[1], SceneFragmentUBO.CascadeRange[2], SceneFragmentUBO.CascadeRange[3]);
+		fprintf(File, "\t\t\"CascadeScale\": [%f, %f, %f, %f],\n", SceneFragmentUBO.CascadeScale[0], SceneFragmentUBO.CascadeScale[1], SceneFragmentUBO.CascadeScale[2], SceneFragmentUBO.CascadeScale[3]);
+		fprintf(File, "\t\t\"CascadeBias\": [%f, %f, %f, %f],\n", SceneFragmentUBO.CascadeBias[0], SceneFragmentUBO.CascadeBias[1], SceneFragmentUBO.CascadeBias[2], SceneFragmentUBO.CascadeBias[3]);
+		
+		fprintf(File, "\t\t\"Gamma\": %f,\n", SceneFragmentUBO.Gamma);
+		fprintf(File, "\t\t\"Exposure\": %f,\n", SceneFragmentUBO.Exposure);
+		fprintf(File, "\t\t\"AmbientMultiplier\": %f,\n", SceneFragmentUBO.AmbientMultiplier);
+
+		fprintf(File, "\t\t\"ShadowMapHeight\": %d\n", ShadowMapHeight);
 	}
 	fprintf(File, "\t},\n\n");
 
@@ -517,6 +537,31 @@ void SceneLoadScene(JsonObject* Object)
 	else if (strcmp(Variable->Name, "CameraUp") == 0) SceneLoadArrayfloat(CameraUp.Arr, (JsonObject*)Variable);
 	else if (strcmp(Variable->Name, "CameraRight") == 0) SceneLoadArrayfloat(CameraRight.Arr, (JsonObject*)Variable);
 	else if (strcmp(Variable->Name, "ClearColor") == 0) SceneLoadArrayfloat(ClearColor.Arr, (JsonObject*)Variable);
+
+	else if (strcmp(Variable->Name, "RenderDepthPrePass") == 0) RenderDepthPrePass = Variable->Data.Bool;
+	else if (strcmp(Variable->Name, "RenderRaytraced") == 0) RenderRaytraced = Variable->Data.Bool;
+	else if (strcmp(Variable->Name, "RenderShadows") == 0) RenderShadows = Variable->Data.Bool;
+	else if (strcmp(Variable->Name, "RenderSSAO") == 0) RenderSSAO = Variable->Data.Bool;
+	else if (strcmp(Variable->Name, "RenderSSR") == 0) RenderSSR = Variable->Data.Bool;
+	else if (strcmp(Variable->Name, "RenderFXAA") == 0) RenderFXAA = Variable->Data.Bool;
+	else if (strcmp(Variable->Name, "ForceRenderOnce") == 0) ForceRenderOnce = Variable->Data.Bool;
+
+	else if (strcmp(Variable->Name, "CascadeSplitLambda") == 0) CascadeSplitLambda = Variable->Data.Double;
+	else if (strcmp(Variable->Name, "CascadeNearClip") == 0) CascadeNearClip = Variable->Data.Double;
+	else if (strcmp(Variable->Name, "CascadeFarClip") == 0) CascadeFarClip = Variable->Data.Double;
+	else if (strcmp(Variable->Name, "CascadeRange") == 0) SceneLoadArrayfloat(SceneFragmentUBO.CascadeRange, (JsonObject*)Variable);
+	else if (strcmp(Variable->Name, "CascadeScale") == 0) SceneLoadArrayfloat(SceneFragmentUBO.CascadeScale, (JsonObject*)Variable);
+	else if (strcmp(Variable->Name, "CascadeBias") == 0) SceneLoadArrayfloat(SceneFragmentUBO.CascadeBias, (JsonObject*)Variable);
+	else if (strcmp(Variable->Name, "Gamma") == 0) SceneFragmentUBO.Gamma = Variable->Data.Double;
+	else if (strcmp(Variable->Name, "Exposure") == 0) SceneFragmentUBO.Exposure = Variable->Data.Double;
+	else if (strcmp(Variable->Name, "AmbientMultiplier") == 0) SceneFragmentUBO.AmbientMultiplier = Variable->Data.Double;
+
+	else if (strcmp(Variable->Name, "ShadowMapHeight") == 0)
+	{
+		ShadowMapHeight = Variable->Data.Int;
+		ShadowMapSizeTmp = ShadowMapHeight;
+		ShadowMapWidth = ShadowMapHeight * SHADOW_MAP_CASCADE_COUNT;
+	}
 }
 
 void SceneLoadTexture(JsonObject* Object)
@@ -860,5 +905,5 @@ void SceneLoad(const char* FileName)
 		JsonDestroy(&Jsn);
 	}
 
-
+	ForceResizeEvent = true;
 }

@@ -461,18 +461,17 @@ void EditorDrawMainMenuBar()
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.388f, 0.788f, 0.156f, 1.0f });
 		ImGui::PushFont(IconFontSmall);
 		ImGui::SetCursorPosX((WindowWidth * 0.5));
-		static char* ButtonType = (char*)"G";
+		
+		char* ButtonType;
+		if (GameMode)	ButtonType = (char*)"L";
+		else			ButtonType = (char*)"G";
+		
 		ImGui::PushID("Play Button");
 		if (ImGui::Button(ButtonType))
 		{
+			StartStopGameMode();
 			EditorBarButtonPressed = true;
-			GameMode = !GameMode;
-			if (GameMode)
-				ButtonType = (char*)"L";
-			else
-				ButtonType = (char*)"G";
-			LuaOnStart = true;
-		}
+		}			
 		ImGui::PopID();
 		ImGui::PopFont();
 		ImGui::PopStyleColor(1);
@@ -851,7 +850,9 @@ void EngineDrawEditor()
 			ForceResizeEvent = true;
 			PushEventSDL(0, 0);
 		}
-		ImGui::Checkbox("Render Raytraced", &RenderRaytraced);
+		if (OpenVkHasRaytracingSupport())
+			ImGui::Checkbox("Render Raytraced", &RenderRaytraced);
+		
 		ImGui::Checkbox("Render SSAO", &RenderSSAO);
 		if (ImGui::Checkbox("Render SSAO Blur", &RenderSSAOBlur))
 		{

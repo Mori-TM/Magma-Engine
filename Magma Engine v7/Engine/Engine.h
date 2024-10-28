@@ -165,6 +165,12 @@ void MeasureFPS()
 	}
 }
 
+void StartStopGameMode()
+{
+	GameMode = !GameMode;
+	LuaOnStart = true;
+}
+
 void EngineInit()
 {
 	

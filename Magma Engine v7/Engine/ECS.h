@@ -1118,6 +1118,101 @@ typedef enum : uint32_t
 	DEFAULT_MODEL_COUNT
 } DefaultModels;
 
+uint32_t SetMeshInfoForDefaultModel(DefaultModels Model, SceneMesh* MeshInfo)
+{
+	uint32_t MeshIndex = OPENVK_ERROR;
+
+	char ModelName[MAX_CHAR_NAME_LENGTH_SHORT];
+
+	switch (Model)
+	{
+	case DEFAULT_MODEL_PLANE:
+		strcpycut(ModelName, "Plane");
+
+		strcpycut(MeshInfo->Name, ModelName);
+		strcpycut(MeshInfo->Path, ModelName);
+		strcpycut(MeshInfo->MeshData[0].Name, ModelName);
+		MeshInfo->MeshData[0].VertexCount = ARRAY_SIZE(PlaneVertices);
+		MeshInfo->MeshData[0].IndexCount = ARRAY_SIZE(PlaneIndices);
+
+		MeshInfo->TotalVertexCount = ARRAY_SIZE(PlaneVertices);
+		MeshInfo->TotalIndexCount = ARRAY_SIZE(PlaneIndices);
+		MeshInfo->Vertices = NULL;
+		MeshInfo->Indices = NULL;
+
+		MeshInfo->VertexBuffer = PlaneVertexBuffer;
+		MeshInfo->IndexBuffer = PlaneIndexBuffer;
+		MeshInfo->MeshData[0].AABB = PlaneAABB;
+		MeshIndex = AddMesh(MeshInfo);
+		break;
+
+	case DEFAULT_MODEL_CUBE:
+		strcpycut(ModelName, "Cube");
+
+		strcpycut(MeshInfo->Name, ModelName);
+		strcpycut(MeshInfo->Path, ModelName);
+		strcpycut(MeshInfo->MeshData[0].Name, ModelName);
+		MeshInfo->MeshData[0].VertexCount = ARRAY_SIZE(CubeVertices);
+		MeshInfo->MeshData[0].IndexCount = 0;
+
+		MeshInfo->TotalVertexCount = ARRAY_SIZE(CubeVertices);
+		MeshInfo->TotalIndexCount = 0;
+		MeshInfo->Vertices = NULL;
+		MeshInfo->Indices = NULL;
+
+		MeshInfo->VertexBuffer = CubeVertexBuffer;
+		MeshInfo->IndexBuffer = OPENVK_ERROR;
+		MeshInfo->MeshData[0].AABB = CubeAABB;
+		MeshIndex = AddMesh(MeshInfo);
+		break;
+
+	case DEFAULT_MODEL_SPHERE:
+		strcpycut(ModelName, "Sphere");
+
+		strcpycut(MeshInfo->Name, ModelName);
+		strcpycut(MeshInfo->Path, ModelName);
+		strcpycut(MeshInfo->MeshData[0].Name, ModelName);
+		MeshInfo->MeshData[0].VertexCount = SphereVertexCount;
+		MeshInfo->MeshData[0].IndexCount = SphereIndexCount;
+
+		MeshInfo->TotalVertexCount = SphereVertexCount;
+		MeshInfo->TotalIndexCount = SphereIndexCount;
+		MeshInfo->Vertices = NULL;
+		MeshInfo->Indices = NULL;
+
+		MeshInfo->VertexBuffer = SphereVertexBuffer;
+		MeshInfo->IndexBuffer = SphereIndexBuffer;
+		MeshInfo->MeshData[0].AABB = SphereAABB;
+		MeshIndex = AddMesh(MeshInfo);
+		break;
+
+	case DEFAULT_MODEL_BEAN:
+		strcpycut(ModelName, "Bean");
+
+		strcpycut(MeshInfo->Name, ModelName);
+		strcpycut(MeshInfo->Path, ModelName);
+		strcpycut(MeshInfo->MeshData[0].Name, ModelName);
+		MeshInfo->MeshData[0].VertexCount = BeanVertexCount;
+		MeshInfo->MeshData[0].IndexCount = BeanIndexCount;
+
+		MeshInfo->TotalVertexCount = BeanVertexCount;
+		MeshInfo->TotalIndexCount = BeanIndexCount;
+		MeshInfo->Vertices = NULL;
+		MeshInfo->Indices = NULL;
+
+		MeshInfo->VertexBuffer = BeanVertexBuffer;
+		MeshInfo->IndexBuffer = BeanIndexBuffer;
+		MeshInfo->MeshData[0].AABB = BeanAABB;
+		MeshIndex = AddMesh(MeshInfo);
+		break;
+
+	default:
+		printf("Invalid default model\n");
+	}
+
+	return MeshIndex;
+}
+
 uint32_t AddDefaultModel(DefaultModels Model)
 {
 	SceneMesh MeshInfo;
@@ -1130,100 +1225,8 @@ uint32_t AddDefaultModel(DefaultModels Model)
 	MeshInfo.MeshData[0].IndexOffset = 0;
 	memset(&MeshInfo.MeshData[0].Render, 1, ARRAY_SIZE(MeshInfo.MeshData[0].Render) * sizeof(bool));
 
-	uint32_t MeshIndex = OPENVK_ERROR;
+	uint32_t MeshIndex = SetMeshInfoForDefaultModel(Model, &MeshInfo);
 
-	char ModelName[MAX_CHAR_NAME_LENGTH_SHORT];
-
-	switch (Model)
-	{
-	case DEFAULT_MODEL_PLANE:
-		strcpycut(ModelName, "Plane");
-		
-		strcpycut(MeshInfo.Name, ModelName);
-		strcpycut(MeshInfo.Path, ModelName);
-		strcpycut(MeshInfo.MeshData[0].Name, ModelName);
-		MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(PlaneVertices);
-		MeshInfo.MeshData[0].IndexCount = ARRAY_SIZE(PlaneIndices);
-
-		MeshInfo.TotalVertexCount = ARRAY_SIZE(PlaneVertices);
-		MeshInfo.TotalIndexCount = ARRAY_SIZE(PlaneIndices);
-		MeshInfo.Vertices = NULL;
-		MeshInfo.Indices = NULL;
-
-		MeshInfo.VertexBuffer = PlaneVertexBuffer;
-		MeshInfo.IndexBuffer = PlaneIndexBuffer;
-		MeshInfo.MeshData[0].AABB = PlaneAABB;
-		MeshIndex = AddMesh(&MeshInfo);
-		break;
-
-	case DEFAULT_MODEL_CUBE:
-		strcpycut(ModelName, "Cube");
-		
-		strcpycut(MeshInfo.Name, ModelName);
-		strcpycut(MeshInfo.Path, ModelName);
-		strcpycut(MeshInfo.MeshData[0].Name, ModelName);
-		MeshInfo.MeshData[0].VertexCount = ARRAY_SIZE(CubeVertices);
-		MeshInfo.MeshData[0].IndexCount = 0;
-
-		MeshInfo.TotalVertexCount = ARRAY_SIZE(CubeVertices);
-		MeshInfo.TotalIndexCount = 0;
-		MeshInfo.Vertices = NULL;
-		MeshInfo.Indices = NULL;
-
-		MeshInfo.VertexBuffer = CubeVertexBuffer;
-		MeshInfo.IndexBuffer = OPENVK_ERROR;
-		MeshInfo.MeshData[0].AABB = CubeAABB;
-		MeshIndex = AddMesh(&MeshInfo);
-		break;
-
-	case DEFAULT_MODEL_SPHERE:
-		strcpycut(ModelName, "Sphere");
-		
-		strcpycut(MeshInfo.Name, ModelName);
-		strcpycut(MeshInfo.Path, ModelName);
-		strcpycut(MeshInfo.MeshData[0].Name, ModelName);
-		MeshInfo.MeshData[0].VertexCount = SphereVertexCount;
-		MeshInfo.MeshData[0].IndexCount = SphereIndexCount;
-
-		MeshInfo.TotalVertexCount = SphereVertexCount;
-		MeshInfo.TotalIndexCount = SphereIndexCount;
-		MeshInfo.Vertices = NULL;
-		MeshInfo.Indices = NULL;
-
-		MeshInfo.VertexBuffer = SphereVertexBuffer;
-		MeshInfo.IndexBuffer = SphereIndexBuffer;
-		MeshInfo.MeshData[0].AABB = SphereAABB;
-		MeshIndex = AddMesh(&MeshInfo);
-		break;
-
-	case DEFAULT_MODEL_BEAN:
-		strcpycut(ModelName, "Bean");
-
-		strcpycut(MeshInfo.Name, ModelName);
-		strcpycut(MeshInfo.Path, ModelName);
-		strcpycut(MeshInfo.MeshData[0].Name, ModelName);
-		MeshInfo.MeshData[0].VertexCount = BeanVertexCount;
-		MeshInfo.MeshData[0].IndexCount = BeanIndexCount;
-
-		MeshInfo.TotalVertexCount = BeanVertexCount;
-		MeshInfo.TotalIndexCount = BeanIndexCount;
-		MeshInfo.Vertices = NULL;
-		MeshInfo.Indices = NULL;
-
-		MeshInfo.VertexBuffer = BeanVertexBuffer;
-		MeshInfo.IndexBuffer = BeanIndexBuffer;
-		MeshInfo.MeshData[0].AABB = BeanAABB;
-		MeshIndex = AddMesh(&MeshInfo);
-		break;
-
-	default:
-		printf("Invalid default model\n");
-	}	
-
-//	SceneMaterial Material;
-//	SetDefaultMaterial(&Material, MeshInfo.Name);
-//	MeshInfo.MeshData[0].MaterialIndex = AddMaterial(&Material);
-//	MeshInfo.MeshData[0].MaterialIndex = 0;
 	SetMaterial(MeshIndex, 0, 0);
 
 	RaytracingAddGeometry(MeshIndex);

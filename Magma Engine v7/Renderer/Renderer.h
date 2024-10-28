@@ -120,7 +120,7 @@ void CreateDescriptors()
 void RendererCreate()
 {
 	OpenVkInitThreads();
-	SwapChain = OpenVkCreateRenderer(OPENVK_VULKAN | OPENVK_VALIDATION_LAYER | OPENVK_RAYTRACING, GetExtensions, GetSurface, GetWindowSize);
+	SwapChain = OpenVkCreateRenderer(OPENVK_VULKAN | OPENVK_RAYTRACING | OPENVK_VALIDATION_LAYER, GetExtensions, GetSurface, GetWindowSize);
 	
 	if (OpenVkHasRaytracingSupport())
 	{
@@ -340,12 +340,14 @@ void RendererEvent()
 {
 	ImGuiEvent();
 
-	if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_F1)
+	if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_F1 && OpenVkHasRaytracingSupport())
 	{
 		OpenVkDeviceWaitIdle();
 		RenderRaytraced = !RenderRaytraced;
 	}
 		
+	if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_KP_0)
+		StartStopGameMode();
 
 	if (ForceFullScreenEvent || (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_F11))
 	{

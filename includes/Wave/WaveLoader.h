@@ -1143,7 +1143,16 @@ WaveModelData WaveLoadOBJ(const char* FilePath, size_t Length, char* Buffer, uin
 		WaveLoaderError("Failed to allocate vertices for: %s", FilePath);
 	}
 	WaveVec3* VertexTextures = (WaveVec3*)calloc(VertexTextureCount, sizeof(WaveVec3));
+	if (!VertexTextures)
+	{
+		WaveLoaderError("Failed to allocate vertex textures for: %s", FilePath);
+	}
+
 	WaveVec3* VertexNormals = (WaveVec3*)calloc(VertexNormalCount, sizeof(WaveVec3));
+	if (!VertexNormals)
+	{
+		WaveLoaderError("Failed to allocate vertex normals for: %s", FilePath);
+	}
 
 	Data.Materials = &WaveEmptyMaterial;
 	Data.MaterialCount = 0;
@@ -1294,8 +1303,18 @@ WaveModelData WaveLoadOBJ(const char* FilePath, size_t Length, char* Buffer, uin
 
 					Vertex.VertexIndex = Mesh->VertexCount;
 					Vertex.Vertices = Vertices[p[j]->V - 1];
-					Vertex.TexCoords = p[j]->VT != 0 ? VertexTextures[p[j]->VT - 1] : NullVec;
-					Vertex.Normals = p[j]->VN != 0 ? VertexNormals[p[j]->VN - 1] : NullVec;
+				//	Vertex.TexCoords = p[j]->VT != 0 ? VertexTextures[p[j]->VT - 1] : NullVec;
+
+					if (p[j]->VN != 0 && VertexTextures != NULL)
+						Vertex.TexCoords = VertexTextures[p[j]->VT - 1];
+					else
+						Vertex.TexCoords = NullVec;
+
+					if (p[j]->VN != 0 && VertexNormals != NULL)
+						Vertex.Normals = VertexNormals[p[j]->VN - 1];
+					else
+						Vertex.Normals = NullVec;
+
 					Vertex.VertexColor.x = 1.0;
 					Vertex.VertexColor.y = 1.0;
 					Vertex.VertexColor.z = 1.0;
@@ -1324,8 +1343,8 @@ WaveModelData WaveLoadOBJ(const char* FilePath, size_t Length, char* Buffer, uin
 	WaveLoadingStatus = WAVE_STATUS_REDUCE_SIZE;
 
 	free(VertexReferences);
-	free(VertexNormals);
-	free(VertexTextures);
+	if (VertexNormals)  free(VertexNormals);
+	if (VertexTextures) free(VertexTextures);
 	free(Vertices);
 
 	for (uint32_t i = 0; i < Data.MeshCount; i++)

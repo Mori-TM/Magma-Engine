@@ -627,6 +627,8 @@ void SceneLoadMesh(JsonObject* Object)
 {
 	SceneMesh MeshInfo;
 	memset(&MeshInfo, 0, sizeof(SceneMesh));
+	MeshInfo.VertexBuffer = OPENVK_ERROR;
+	MeshInfo.IndexBuffer = OPENVK_ERROR;
 
 	for (size_t i = 0; i < Object->Refrences.Size; i++)
 	{
@@ -657,7 +659,6 @@ void SceneLoadMesh(JsonObject* Object)
 				printf("Failed to allocate vertices for: %s while scene loading\n", MeshInfo.Name);
 				return;
 			}
-			printf("Jason derulo\n");
 			
 			DWORD Length = 0;
 			Base64Decode((BYTE*)Variable->Data.Str, (BYTE*)MeshInfo.Vertices, &Length);
@@ -713,7 +714,26 @@ void SceneLoadMesh(JsonObject* Object)
 
 	printf("Yeaj\n");
 
-	uint32_t MeshIndex = AddMesh(&MeshInfo);
+	//We do this because the default models like plane, sphere, cube so on have no vertex/index buffer saved in the json
+	//Only default models are not "Destroyable"
+	uint32_t MeshIndex = OPENVK_ERROR;
+
+	if (MeshInfo.Destroyable == false)
+	{
+		if (strcmp(MeshInfo.Path, "Plane") == 0)
+			MeshIndex = SetMeshInfoForDefaultModel(DEFAULT_MODEL_PLANE, &MeshInfo);
+		else if (strcmp(MeshInfo.Path, "Cube") == 0)
+			MeshIndex = SetMeshInfoForDefaultModel(DEFAULT_MODEL_CUBE, &MeshInfo);
+		else if (strcmp(MeshInfo.Path, "Sphere") == 0)
+			MeshIndex = SetMeshInfoForDefaultModel(DEFAULT_MODEL_SPHERE, &MeshInfo);
+		else if (strcmp(MeshInfo.Path, "Bean") == 0)
+			MeshIndex = SetMeshInfoForDefaultModel(DEFAULT_MODEL_BEAN, &MeshInfo);
+	}
+	else
+	{
+		MeshIndex = AddMesh(&MeshInfo);
+	}	
+
 	RaytracingAddGeometry(MeshIndex);
 }
 /*

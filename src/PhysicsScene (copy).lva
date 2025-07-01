@@ -1,0 +1,244 @@
+{
+	"Scene": {
+		"CameraFOV": 75.000000,
+		"CameraZoomFOV": 10.000000,
+		"CameraNormalFOV": 75.000000,
+		"CameraNearZ": 0.010000,
+		"CameraFarZ": 1000.000000,
+		"CameraYaw": 576.003662,
+		"CameraPitch": 21.800024,
+		"CameraPos": [5.778370, 5.438320, 4.887801],
+		"CameraDir": [-0.751122, -0.371367, -0.545796],
+		"CameraUp": [0.000000, 1.000000, 0.000000],
+		"CameraRight": [1.000000, 0.000000, 0.000000],
+		"ClearColor": [0.150000, 0.300000, 0.700000],
+		"RenderDepthPrePass": false,
+		"RenderRaytraced": false,
+		"RenderShadows": true,
+		"RenderSSAO": true,
+		"RenderSSR": true,
+		"RenderFXAA": true,
+		"ForceRenderOnce": false,
+		"CascadeSplitLambda": 0.950000,
+		"CascadeNearClip": 0.500000,
+		"CascadeFarClip": 48.000000,
+		"CascadeRange": [2.000000, 2.000000, 8.000000, 2.000000],
+		"CascadeScale": [1.044000, 0.600000, 0.681000, 0.600000],
+		"CascadeBias": [0.002000, 0.000900, 0.000900, 0.000900],
+		"Gamma": 0.900000,
+		"Exposure": 4.000000,
+		"AmbientMultiplier": 0.600000,
+		"ShadowMapHeight": 2048
+	},
+
+	"Textures": [
+		{
+			"Name": "WoodFloor.jpg",
+			"Path": "Data/Textures/WoodFloor.jpg",
+			"ShowInAssetBrowser": false,
+			"Width": 2048,
+			"Height": 2048,
+			"Format": 4,
+			"MipLevels": 12,
+			"Data": null
+		}
+	],
+
+	"Materials": [
+		{
+			"Name": "Reflectiv Red",
+			"AlbedoIndex": 0,
+			"NormalIndex": 0,
+			"MetallicIndex": 0,
+			"RoughnessIndex": 0,
+			"OcclusionIndex": 0,
+			"Color": [0.959538, 0.266230, 0.266230, 1.000000],
+			"Metallic": 0.790000,
+			"Roughness": 0.141000,
+			"Occlusion": 1.000000
+		}
+		{
+			"Name": "Lime Green",
+			"AlbedoIndex": 0,
+			"NormalIndex": 0,
+			"MetallicIndex": 0,
+			"RoughnessIndex": 0,
+			"OcclusionIndex": 0,
+			"Color": [0.338033, 1.000000, 0.098266, 1.000000],
+			"Metallic": 0.000000,
+			"Roughness": 0.210000,
+			"Occlusion": 1.000000,
+		},
+		{
+			"Name": "Floor",
+			"AlbedoIndex": 1,
+			"NormalIndex": 0,
+			"MetallicIndex": 0,
+			"RoughnessIndex": 0,
+			"OcclusionIndex": 0,
+			"Color": [0.705202, 0.638473, 0.509539, 1.000000],
+			"Metallic": 0.137000,
+			"Roughness": 0.614000,
+			"Occlusion": 1.000000,
+		},
+	],
+
+	"Meshes": [
+		{
+			"Name": "Cube",
+			"Path": "Cube",
+			"MeshCount": 1,
+			"Destroyable": false,
+			"TotalVertexCount": 36,
+			"TotalIndexCount": 0,
+			"MeshData": [
+				{
+					"Name": "Cube",
+					"MaterialIndex": 0,
+					"VertexOffset": 0,
+					"VertexCount": 36,
+					"IndexOffset": 0,
+					"IndexCount": 0,
+					"Min": [-0.500000, -0.500000, -0.500000],
+					"Max": [0.500000, 0.500000, 0.500000],
+					"Render": [true, true, true, true, true],
+				}
+			]
+		}
+		{
+			"Name": "Plane",
+			"Path": "Plane",
+			"MeshCount": 1,
+			"Destroyable": false,
+			"TotalVertexCount": 4,
+			"TotalIndexCount": 6,
+			"MeshData": [
+				{
+					"Name": "Plane",
+					"MaterialIndex": 0,
+					"VertexOffset": 0,
+					"VertexCount": 4,
+					"IndexOffset": 0,
+					"IndexCount": 6,
+					"Min": [-0.500000, 0.000000, -0.500000],
+					"Max": [0.500000, 0.000000, 0.500000],
+					"Render": [true, true, true, true, true],
+				}
+			]
+		},
+		{
+			"Name": "Sphere",
+			"Path": "Sphere",
+			"MeshCount": 1,
+			"Destroyable": false,
+			"TotalVertexCount": 625,
+			"TotalIndexCount": 3456,
+			"MeshData": [
+				{
+					"Name": "Sphere",
+					"MaterialIndex": 0,
+					"VertexOffset": 0,
+					"VertexCount": 625,
+					"IndexOffset": 0,
+					"IndexCount": 3456,
+					"Min": [-0.500000, -0.500000, -0.500000],
+					"Max": [0.500000, 0.500000, 0.500000],
+					"Render": [true, true, true, true, true],
+				}
+			]
+		},
+	],
+
+	"Entities": [
+		{
+			"Name": "Ground",
+			"Translate": [0.000000, 0.000000, 0.000000],
+			"Rotate": [4.200000, 0.000000, 4.700000],
+			"Scale": [18.900000, 1.000000, 17.900000],
+			"Selected": false,
+			"UsedComponents": ["Mesh", "Material", "Collider"],
+			"MeshComponent": {
+				"MeshIndex": 2
+			},
+			"MaterialComponent": {
+				"MaterialIndex": 3
+			},
+			"ColliderComponent": {
+				"Type": "Box",
+				"Friction": 0.579000,
+				"Bounciness": 0.110000
+			},
+		},
+		{
+			"Name": "Cube",
+			"Translate": [0.000000, 3.800000, 0.000000],
+			"Rotate": [24.600000, 0.000000, 26.700001],
+			"Scale": [2.000000, 2.000000, 2.000000],
+			"Selected": false,
+			"UsedComponents": ["Mesh", "Material", "Collider", "Rigidbody"],
+			"MeshComponent": {
+				"MeshIndex": 1
+			},
+			"MaterialComponent": {
+				"MaterialIndex": 1
+			},
+			"ColliderComponent": {
+				"Type": "Box",
+				"Friction": 0.000000,
+				"Bounciness": 0.000000
+			},
+			"RigidbodyComponent": {
+				"Mass": 10.000000
+			}
+		},
+		{
+			"Name": "Sun",
+			"Translate": [5.200000, 10.600000, 4.700000],
+			"Rotate": [0.000000, 0.000000, 0.000000],
+			"Scale": [1.000000, 1.000000, 1.000000],
+			"Selected": false,
+			"UsedComponents": ["Light"],
+			"LightComponent": {
+				"Color": [1.000000, 1.000000, 1.000000],
+				"Strength": 10.500000,
+				"Type": "Directional",
+				"CastShadow": true,
+			},
+		},
+		{
+			"Name": "Camera",
+			"Translate": [-11.200000, 6.400000, 4.500000],
+			"Rotate": [-21.299999, -65.500000, 0.000000],
+			"Scale": [1.000000, 1.000000, 1.000000],
+			"Selected": false,
+			"UsedComponents": ["Camera"],
+			"CameraComponent": {
+				"FOV": 75.000000,
+				"NearPlane": 0.010000,
+				"FarPlane": 1000.000000
+			},
+		},
+		{
+			"Name": "Ball",
+			"Translate": [5.800000, 6.800000, 0.000000],
+			"Rotate": [0.000000, 0.000000, 0.000000],
+			"Scale": [2.000000, 2.000000, 2.000000],
+			"Selected": true,
+			"UsedComponents": ["Mesh", "Material", "Collider", "Rigidbody"],
+			"MeshComponent": {
+				"MeshIndex": 3
+			},
+			"MaterialComponent": {
+				"MaterialIndex": 2
+			},
+			"ColliderComponent": {
+				"Type": "Sphere",
+				"Friction": 0.000000,
+				"Bounciness": 0.000000
+			},
+			"RigidbodyComponent": {
+				"Mass": 20.000000
+			}
+		}
+	]
+}

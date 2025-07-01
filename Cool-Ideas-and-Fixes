@@ -1,0 +1,7 @@
+Node(File) base pipeline system: Adding pipeline in the engine via button, setting shaders for it. defining input and outputs and so on
+
+fixes:
+Forward pipeline doesnt handle texture updates
+
+File dialog looks like ass on windows
+WaveLoader: Bumpmaps dont load if it has parameters

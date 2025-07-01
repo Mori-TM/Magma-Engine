@@ -72,7 +72,7 @@ else()
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
-    target_link_libraries(MyProject kvm pthread)
+    target_link_libraries(MyProject elf kvm pthread)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "DragonFly")
     target_link_libraries(MyProject kvm pthread)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "NetBSD")

@@ -1,3 +1,7 @@
+#include "FileDialogs/dialogs.hpp"
+
+using namespace ngs::imgui;
+
 void EditorAssetBrowserShowAsset(CMA_MemoryZone* Zone, const float ThumbnailSize, const char* Icon, const char* WindowToFocus, uint32_t* Selection)
 {
 	for (uint32_t i = 1; i < Zone->Size; i++)
@@ -151,29 +155,17 @@ void EditorAssetBrowser()
 			
 			if (ImGui::Selectable("Load Model"))
 			{
-				#ifdef LINUX_PORT
-				ifd::FileDialog::Instance().Open("LoadModel", "Load Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", true);
-				#endif
-
-				FileDialogAddInstance("Load Model", "All Models (*.obj, *.stl, *.gltf, *.glb)\0*.obj;*.stl;*.gltf;*.glb\0", true, true);
+				get_open_filename("LoadModel", "Load Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", "", "", true);
 			}
 
 			if (ImGui::Selectable("Load Texture"))
 			{
-				#ifdef LINUX_PORT
-				ifd::FileDialog::Instance().Open("LoadTexture", "Load Texture", "Image files (*.png;*.jpg;*.tga;*.jpeg;*.hdr;*.psd;*.bmp){.png,.jpg,.tga,.jpeg,.hdr,.psd,.bmp},.*", true);
-				#endif
-
-				FileDialogAddInstance("Load Texture", "All Textures (*.png, *.jpg, *.tga, *.jpeg, *.hdr, *.psd, *.bmp)\0*.png;*.jpg;*.tga;*.jpeg;*.hdr;*.psd;*.bmp\0", true, true);
+				get_open_filename("LoadTexture", "Load Texture", "Image files (*.png;*.jpg;*.tga;*.jpeg;*.hdr;*.psd;*.bmp){.png,.jpg,.tga,.jpeg,.hdr,.psd,.bmp},.*", "", "", true);
 			}
 
 			if (ImGui::Selectable("Load Animation"))
 			{
-				#ifdef LINUX_PORT
-				ifd::FileDialog::Instance().Open("LoadAnimation", "Load Animation", "Quake Models (*.md2;*.bin){.md2,.bin},.*", true);
-				#endif
-
-				FileDialogAddInstance("Load Animation", "All Animations (*.md2, *.bin)\0*.md2;*.bin\0", true, true);
+				get_open_filename("LoadAnimation", "Load Animation", "Quake Models (*.md2;*.bin){.md2,.bin},.*", "", "", true);
 			}
 
 			ImGui::EndPopup();

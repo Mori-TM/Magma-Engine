@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/moritz/C-Projects/Magma-Engine/build",
+  "command": "/usr/bin/clang++  -I/home/moritz/C-Projects/Magma-Engine/include  -ftime-trace -g -std=gnu++17 -w -o CMakeFiles/MyProject.dir/src/main.cpp.o -c /home/moritz/C-Projects/Magma-Engine/src/main.cpp",
+  "file": "/home/moritz/C-Projects/Magma-Engine/src/main.cpp",
+  "output": "CMakeFiles/MyProject.dir/src/main.cpp.o"
+}
+]

@@ -71,6 +71,7 @@ else()
     message(FATAL_ERROR "SDL3 library not found.")
 endif()
 
+# 5. Process
 if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
     target_link_libraries(MyProject elf kvm pthread)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "DragonFly")

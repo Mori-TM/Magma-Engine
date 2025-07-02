@@ -903,7 +903,7 @@ bool ImGui_CreateGraphicsPipeline()
 	PipelineCreateInfo.pDynamicState = &DynamicStateCreateInfo;
 	PipelineCreateInfo.layout = ImGui_ImplVulkan_Renderer_Info.PipelineLayout;
 	PipelineCreateInfo.renderPass = ImGui_ImplVulkan_Renderer_Info.RenderPass;
-	PipelineCreateInfo.subpass = NULL;
+	PipelineCreateInfo.subpass = 0;
 	PipelineCreateInfo.basePipelineHandle = NULL;
 	PipelineCreateInfo.basePipelineIndex = 0;
 

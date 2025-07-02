@@ -1,3 +1,7 @@
+#include "FileDialogs/dialogs.hpp"
+
+using namespace ngs::imgui;
+
 int32_t LastMouseX = 0;
 int32_t LastMouseY = 0;
 int32_t LastWindowX = 0;
@@ -432,16 +436,12 @@ void EditorDrawMainMenuBar()
 			EditorBarButtonPressed = true;
 			if (ImGui::MenuItem("Open Scene", "STRG+O"))
 			{
-				#ifdef LINU_PORT
-				ifd::FileDialog::Instance().Open("SceneLoad", "Load Scene", "Magma Scene (*.lva;*.magma;*.mgs;*.mag){.lva,.magma,.mgs,.mag},.*", false);
-				#endif
+				get_open_filename("SceneLoad", "Load Scene", "Magma Scene (*.lva;*.magma;*.mgs;*.mag){.lva,.magma,.mgs,.mag},.*", "", "", false);
 			}
 
 			if (ImGui::MenuItem("Save Scene", "STRG+S"))
 			{
-				#ifdef LINU_PORT
-				ifd::FileDialog::Instance().Save("SceneSave", "Save Scene", "Magma Scene (*.lva;*.magma;*.mgs){.lva,.magma,.mgs},.*");
-				#endif
+				get_save_filename("SceneSave", "Save Scene", "Magma Scene (*.lva;*.magma;*.mgs){.lva,.magma,.mgs},.*", "", "");
 			}
 
 			if (ImGui::MenuItem("New Scene", "STRG+N"))

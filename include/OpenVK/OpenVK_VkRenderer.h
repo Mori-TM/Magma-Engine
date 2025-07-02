@@ -531,7 +531,7 @@ uint32_t VkCreateRenderPass(uint32_t AttachmentCount, uint32_t* Attachments, uin
 	Subpass.pColorAttachments = ColorAttachmentReferences;
 	Subpass.pResolveAttachments = ColorAttachmentResolveReferences;
 	Subpass.pDepthStencilAttachment = (HasDepthAttachment ? &DepthAttachmentReference : NULL);
-	Subpass.preserveAttachmentCount = NULL;
+	Subpass.preserveAttachmentCount = 0;
 	Subpass.pPreserveAttachments = NULL;
 
 	VkSubpassDependency Dependencies[2];

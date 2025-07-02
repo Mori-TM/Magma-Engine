@@ -174,7 +174,7 @@ void WavePlayAudio()
 	
 }
 
-#elif __linux__
+#elif (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
 #include <sys/resource.h>
 
 /*
@@ -187,7 +187,7 @@ char LastPath[WAVE_MAX_LENGTH];
 bool WaveOpenFileDialog(const char* Title, bool IsMultiSelect, const char* FileExtensions, char* Path)
 {
 	char Call[WAVE_MAX_LENGTH];
-	const char ZenityPath[] = "/usr/bin/zenity";
+	const char ZenityPath[] = "zenity";
   
 	/*
 	"Image Files (*.jpg, *.png)\0*.jpg;*.png\0" 

@@ -161,7 +161,7 @@ typedef struct
 	uint32_t PresentFamily;
 } VkQueueFamilyIndices;
 
-VkRendererInfo VkRenderer = { NULL };
+VkRendererInfo VkRenderer = { 0 };
 
 uint32_t VkGetBestSuitablePhysicalDevice(uint32_t DeviceCount, VkPhysicalDevice* Devices)
 {
@@ -250,7 +250,7 @@ VkQueueFamilyIndices VkFindQueueFamilies(VkPhysicalDevice PhysicalDevice)
 		if (Supported)
 			Indices.PresentFamily = i;
 
-		if (Indices.GraphicsFamily != NULL && Indices.PresentFamily != NULL)
+		if (Indices.GraphicsFamily != 0 && Indices.PresentFamily != 0)
 			break;
 	}
 

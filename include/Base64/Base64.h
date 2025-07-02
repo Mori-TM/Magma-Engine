@@ -7,7 +7,7 @@
 
 // #define EXPORT extern "C" __declspec(dllexport)
 
-#ifdef __linux__
+#ifndef _WIN32
 typedef int BOOL;
 typedef unsigned char BYTE;
 typedef unsigned int DWORD;

@@ -37,8 +37,8 @@ namespace ngs::imgui {
   void show_message(std::string message);
   void show_question(std::string message);
   void show_question_ext(std::string message);
-  void get_string(std::string message, std::string value);
-  void get_number(std::string message, double value);
+  void get_string(std::string message, std::string defstr);
+  void get_number(std::string message, double defnum);
   void get_open_filename(std::string key, std::string title, std::string filter, std::string fname, std::string dir, bool multi);
   void get_save_filename(std::string key, std::string title, std::string filter, std::string fname, std::string dir);
   void get_directory(std::string key, std::string title, std::string dname);

@@ -1,14 +1,20 @@
 # Minimum CMake version
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.80)
 
 # Project Name and C++ Standard
 project(MyProject LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Explicitly specify Clang as the compiler
-set(CMAKE_C_COMPILER "clang")
-set(CMAKE_CXX_COMPILER "clang++")
+if(WIN32)
+    message(STATUS "Configuring for Windows: Using MSVC")
+    set(CMAKE_C_COMPILER "cl.exe")
+    set(CMAKE_CXX_COMPILER "cl.exe")
+else()
+    # Explicitly specify Clang as the compiler
+    set(CMAKE_C_COMPILER "/usr/bin/clang")
+    set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
+endif()
 
 # Use ccache if available
 set(CMAKE_C_COMPILER_LAUNCHER ccache)
@@ -27,9 +33,6 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 # Output Directories
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/src)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
@@ -48,10 +51,36 @@ list(FILTER SOURCES EXCLUDE REGEX "${CMAKE_BINARY_DIR}/.*")  # Exclude build dir
 #add_executable(MyProject ${SOURCES})
 add_executable(MyProject src/main.cpp include/FileDialogs/dialogs.cpp include/Process/process.cpp)  # Explicitly list files or use proper globs
 
+# Copy data folder to build directory
+#add_custom_command(
+#  TARGET MyProject POST_BUILD
+#  COMMAND ${CMAKE_COMMAND} -E copy_directory
+#          ${CMAKE_SOURCE_DIR}/src/data
+#          $<TARGET_FILE_DIR:MyProject>/data
+#  COMMENT "Copying data directory to output dir"
+#)
+
+# Remove Unicode definitions (if already defined)
+# and add MBCS definition
+if(WIN32)
+target_compile_definitions(MyProject PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:_MBCS>
+)
+endif()
+
+#Set VS Working Directory to src/
+set_property(TARGET MyProject PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/src")
+
+#target
+target_compile_definitions(MyProject PRIVATE SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+
 # Build FileDialogs CLI
 execute_process(COMMAND make -C ${CMAKE_CURRENT_SOURCE_DIR}/include/FileDialogs)
 
 ### Libraries ###
+
+# Use FetchContent to automatically download dependencies
+include(FetchContent)
 
 # 3. Vulkan
 find_package(Vulkan REQUIRED)
@@ -63,12 +92,20 @@ else()
 endif()
 
 # 4. SDL3
-find_package(SDL3 REQUIRED)
-if(SDL3_FOUND)
-    include_directories(${SDL3_INCLUDE_DIRS})
-    target_link_libraries(MyProject ${SDL3_LIBRARIES})
+find_package(SDL3 QUIET)  # Try to find it first
+if(NOT SDL3_FOUND)
+    message(STATUS "SDL3 not found. Fetching from source...")
+    FetchContent_Declare(
+        SDL3
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+        GIT_TAG release-3.2.4
+    )
+    FetchContent_MakeAvailable(SDL3)
+endif()
+if(SDL3_FOUND OR TARGET SDL3::SDL3)
+    target_link_libraries(MyProject SDL3::SDL3)
 else()
-    message(FATAL_ERROR "SDL3 library not found.")
+    message(FATAL_ERROR "SDL3 library could not be found or built.")
 endif()
 
 # 5. Process

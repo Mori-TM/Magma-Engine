@@ -111,8 +111,11 @@ void BenchmarkAndTest() {
     size_t indices[TEST_SIZE];
 
     // Push TEST_SIZE elements
-    for (int i = 0; i < TEST_SIZE; i++) {
-        TestStruct data = { .value = i, .name = "Test" };
+	for (int i = 0; i < TEST_SIZE; i++) {
+		TestStruct data;
+		data.value = i;
+		strcpy(data.name, "Test");
+	
         snprintf(data.name, sizeof(data.name), "Item %d", i);
         indices[i] = CMA_Push(&zone, &data);
     }
@@ -237,10 +240,14 @@ Restart:
 	SDL_GetWindowSize(MainHWnd.Wnd, (int*)&MainHWnd.Width, (int*)&MainHWnd.Height);
 	SDL_SetWindowPosition(MainHWnd.Wnd, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 #ifdef _WIN32
+	/*
 	SDL_SysWMinfo WmInfo;
 	SDL_VERSION(&WmInfo.version);
 	SDL_GetWindowWMInfo(MainHWnd.Wnd, &WmInfo);
 	WaveHwnd = WmInfo.info.win.window;
+	*/
+
+	WaveHwnd = NULL;
 #endif	
 
 /*

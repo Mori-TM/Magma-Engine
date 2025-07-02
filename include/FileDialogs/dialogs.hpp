@@ -44,21 +44,3 @@ namespace ngs::imgui {
   void get_directory(std::string key, std::string title, std::string dname);
 
 } // namespace ngs::imgui
-
-#if defined(IFD_SHARED_LIBRARY)
-#ifdef _WIN32
-#define EXPORTED_FUNCTION extern "C" __declspec(dllexport)
-#else
-#define EXPORTED_FUNCTION extern "C" __attribute__((visibility("default")))
-#endif
-EXPORTED_FUNCTION const char *result_string();
-EXPORTED_FUNCTION double result_number();
-EXPORTED_FUNCTION void show_message(const char *message);
-EXPORTED_FUNCTION void show_question(const char *message);
-EXPORTED_FUNCTION void show_question_ext(const char *message);
-EXPORTED_FUNCTION void get_string(const char *message, const char *value);
-EXPORTED_FUNCTION void get_number(const char *message, double value);
-EXPORTED_FUNCTION void get_open_filename(const char *key, const char *title, const char *filter, const char *fname, const char *dir, int multi);
-EXPORTED_FUNCTION void get_save_filename(const char *key, const char *title, const char *filter, const char *fname, const char *dir);
-EXPORTED_FUNCTION void get_directory(const char *key, const char *title, const char *dname);
-#endif

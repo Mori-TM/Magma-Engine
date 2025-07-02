@@ -12,8 +12,11 @@ MyProject.exe
 *.dylib
 *.cmake
 *.pc
-/MakeFile
+/Makefile
 /include/FileDialogs/lunasvg/Makefile
 /include/FileDialogs/lunasvg/plutovg/Makefile
 /include/FileDialogs/lunasvg/examples/svg2png
+/include/FileDialogs/lunasvg/examples/Makefile
+include/FileDialogs/lunasvg/plutovg/examples/Makefile
+/include/FileDialogs/lunasvg/plutovg/examples/smiley
 /src/Data/filedialogs

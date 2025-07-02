@@ -245,10 +245,10 @@ namespace ifd {
   };
 
   static const char *GetDefaultFolderIcon() {
-    return (const char*)&folder_icon[0];
+    return (const char *)&folder_icon[0];
   }
 
   static const char *GetDefaultFileIcon() {
-    return (const char*)&file_icon[0];
+    return (const char *)&file_icon[0];
   }
 }

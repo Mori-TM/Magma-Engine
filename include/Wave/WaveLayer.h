@@ -322,14 +322,14 @@ void WaveSetPath(char* Path)
 {
 
 }
-#elif __APPLE__
+#elif defined(__APPLE__)
 #include <unistd.h>
 #include <sys/resource.h>
 #include <mach/mach.h>
 
 char LastPath[WAVE_MAX_LENGTH];
 
-int32_t WaveOpenFileDialog(char* Path, int MultiSelect, unsigned short* Offset, const char* FileExtensions)
+bool WaveOpenFileDialog(const char* Title, bool IsMultiSelect, const char* FileExtensions, char* Path)
 {
 
 }

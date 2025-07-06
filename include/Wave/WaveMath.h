@@ -411,7 +411,7 @@ void Cross4Perf(vec4* a, vec4* b, vec4* r)
 	Wave128 t2 = vextq_f32(a->Fast, a->Fast, 1); // Assure Z and W are the same
 	t2 = vmulq_f32(t2, b->Fast);
 	Wave128 t3 = vsubq_f32(t1, t2);
-	return vextq_f32(t3, t3, 1); // Assure Z and W are the same
+	vextq_f32(t3, t3, 1); // Assure Z and W are the same
 #else
 	r->x = a->y * b->z - a->z * b->y;
 	r->y = a->z * b->x - a->x * b->z;
@@ -837,8 +837,8 @@ WAVE_INLINE void Vec4P(float x, float y, float z, float w, Wave128* r)
 #if defined(WAVE_HAS_SSE)
 	*r = _mm_set_ps(w, z, y, x);
 #elif defined(WAVE_HAS_NEON)
-	__n64 xy = vcreate_f32((uint64_t)(*(uint32_t*)(&x)) | ((uint64_t)(*(uint32_t*)(&y)) << 32));
-	__n64 zw = vcreate_f32((uint64_t)(*(uint32_t*)(&z)) | ((uint64_t)(*(uint32_t*)(&w)) << 32));
+	float32x2_t xy = vcreate_f32((uint64_t)(*(uint32_t*)(&x)) | ((uint64_t)(*(uint32_t*)(&y)) << 32));
+	float32x2_t zw = vcreate_f32((uint64_t)(*(uint32_t*)(&z)) | ((uint64_t)(*(uint32_t*)(&w)) << 32));
 	*r = vcombine_f32(xy, zw);
 #else
 	vec4 a;

@@ -13,6 +13,7 @@ MyProject.exe
 *.dylib
 *.cmake
 *.pc
+*.spv
 /Makefile
 /include/FileDialogs/lunasvg/Makefile
 /include/FileDialogs/lunasvg/plutovg/Makefile

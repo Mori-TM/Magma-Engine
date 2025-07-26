@@ -1,6 +1,6 @@
-#include "FileDialogs/dialogs.hpp"
+//#include "FileDialogs/dialogs.hpp"
 
-using namespace ngs::imgui;
+//using namespace ngs::imgui;
 
 int32_t LastMouseX = 0;
 int32_t LastMouseY = 0;
@@ -436,12 +436,14 @@ void EditorDrawMainMenuBar()
 			EditorBarButtonPressed = true;
 			if (ImGui::MenuItem("Open Scene", "STRG+O"))
 			{
-				get_open_filename("SceneLoad", "Load Scene", "Magma Scene (*.lva;*.magma;*.mgs;*.mag){.lva,.magma,.mgs,.mag},.*", "", "", false);
+			//	get_open_filename("SceneLoad", "Load Scene", "Magma Scene (*.lva;*.magma;*.mgs;*.mag){.lva,.magma,.mgs,.mag},.*", "", "", false);
+				FileDialogAddInstance("Load Scene", "Magma Scene (*.lva, *.magma)\0*.lva;*.magma\0", true, false);
 			}
 
 			if (ImGui::MenuItem("Save Scene", "STRG+S"))
 			{
-				get_save_filename("SceneSave", "Save Scene", "Magma Scene (*.lva;*.magma;*.mgs){.lva,.magma,.mgs},.*", "", "");
+			//	get_save_filename("SceneSave", "Save Scene", "Magma Scene (*.lva;*.magma;*.mgs){.lva,.magma,.mgs},.*", "", "");
+				FileDialogAddInstance("Save Scene", "Magma Scene (*.lva, *.magma)\0*.lva;*.magma\0", false, false);
 			}
 
 			if (ImGui::MenuItem("New Scene", "STRG+N"))
@@ -543,6 +545,7 @@ void EditorFileDialog()
 
 	if (FileDialogGetResult("Load Model", MAX_CHAR_PATH_LENGTH, Path))
 	{
+		/*Example for a Path(it's windows style): "C:/textures/sky.png\0C:/textures/skin.png\0\0"*/
 		char* p = Path;
 		while (*p)
 		{
@@ -565,7 +568,7 @@ void EditorFileDialog()
 		ImGui::SetWindowFocus("Texture Inspector");
 	}
 
-	if (FileDialogGetResult("Load Model", MAX_CHAR_PATH_LENGTH, Path))
+	if (FileDialogGetResult("Load Animation", MAX_CHAR_PATH_LENGTH, Path))
 	{
 		char* p = Path;
 		while (*p)
@@ -577,58 +580,25 @@ void EditorFileDialog()
 		ImGui::SetWindowFocus("Animation Inspector");
 	}
 
-#ifdef LINUX_PORT
-	if (ifd::FileDialog::Instance().IsDone("LoadModel"))
+	if (FileDialogGetResult("Load Scene", MAX_CHAR_PATH_LENGTH, Path))
 	{
-		if (ifd::FileDialog::Instance().HasResult())
-			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
-				AddModel(0, (const char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str());
-		ifd::FileDialog::Instance().Close();
-		ImGui::SetWindowFocus("Mesh Inspector");
-	}
-	if (ifd::FileDialog::Instance().IsDone("LoadTexture"))
-	{
-		if (ifd::FileDialog::Instance().HasResult())
-			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
-				AddTexture((char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str(), true);
-		ifd::FileDialog::Instance().Close();
-		ImGui::SetWindowFocus("Texture Inspector");
-	}
-	if (ifd::FileDialog::Instance().IsDone("LoadAnimation"))
-	{
-		if (ifd::FileDialog::Instance().HasResult())
-			for (uint32_t i = 0; i < ifd::FileDialog::Instance().GetResults().size(); i++)
-				AddAnimation((char*)ifd::FileDialog::Instance().GetResults()[i].u8string().c_str(), 1024, 1024);
-		ifd::FileDialog::Instance().Close();
-		ImGui::SetWindowFocus("Animation Inspector");
-	}
-	if (ifd::FileDialog::Instance().IsDone("LoadScript"))
-	{
-		if (ifd::FileDialog::Instance().HasResult())
-			AddScript((const char*)ifd::FileDialog::Instance().GetResult().u8string().c_str());
-		ifd::FileDialog::Instance().Close();
-		ImGui::SetWindowFocus("Script Inspector");
-	}
-	if (ifd::FileDialog::Instance().IsDone("SaveScript"))
-	{
-		if (ifd::FileDialog::Instance().HasResult())
-			SaveScript((const char*)ifd::FileDialog::Instance().GetResult().u8string().c_str());
-		ifd::FileDialog::Instance().Close();
+		char* p = Path;
+		while (*p)
+		{
+			SceneLoad((char*)p);
+			p += (strlen(p) + 1);
+		}
 	}
 
-	if (ifd::FileDialog::Instance().IsDone("SceneLoad"))
+	if (FileDialogGetResult("Save Scene", MAX_CHAR_PATH_LENGTH, Path))
 	{
-		if (ifd::FileDialog::Instance().HasResult())
-			SceneLoad((const char*)ifd::FileDialog::Instance().GetResult().u8string().c_str());
-		ifd::FileDialog::Instance().Close();
+		char* p = Path;
+		while (*p)
+		{
+			SceneSave((char*)p);
+			p += (strlen(p) + 1);
+		}
 	}
-	if (ifd::FileDialog::Instance().IsDone("SceneSave"))
-	{
-		if (ifd::FileDialog::Instance().HasResult())
-			SceneSave((const char*)ifd::FileDialog::Instance().GetResult().u8string().c_str());
-		ifd::FileDialog::Instance().Close();
-	}
-#endif
 }
 
 void EditorDebugWindow()

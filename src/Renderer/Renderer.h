@@ -514,7 +514,6 @@ void DeleteMeshTexture(uint32_t TextureImage, uint32_t TextureIndex)
 
 void RendererRun()
 {
-	#ifdef LINUX_PORT
 	if (ImGuiTexturesToDelete.size() != 0)
 	{
 		OpenVkDeviceWaitIdle();
@@ -530,7 +529,6 @@ void RendererRun()
 
 		ImGuiTexturesToDelete.clear();
 	}	
-	#endif
 
 	if (DeleteTexture)
 	{

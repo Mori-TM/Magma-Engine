@@ -280,7 +280,7 @@ float MaterialOcclusion = 1.0;
 
 void SetDefaultMaterial(SceneMaterial* Material, const char* Name)
 {
-	strcpycut(Material->Name, Name);
+	sstrcpy(Material->Name, Name);
 	Material->Color = MaterialColor;
 	Material->Metallic = MaterialMetallic;
 	Material->Roughness = MaterialRoughness;
@@ -362,7 +362,7 @@ void ResetEntity(EntityInfo* Entity)
 	if (Count > 0)
 		ssprintf(Entity->Name, "Entity (%d)", Count);
 	else
-		strcpycut(Entity->Name, "Entity");
+		sstrcpy(Entity->Name, "Entity");
 }
 
 uint32_t AddDefaultEntity(uint32_t UsedComponent)
@@ -413,7 +413,7 @@ void AddMeshToEntity(uint32_t EntityIndex, uint32_t MeshIndex)
 uint32_t AddMesh(SceneMesh* MeshInfo)
 {
 	char Name[MAX_CHAR_NAME_LENGTH];
-	strcpycut(Name, MeshInfo->Name);
+	sstrcpy(Name, MeshInfo->Name);
 
 	CheckForSameNames(&SceneMeshes, ARRAY_SIZE(MeshInfo->Name), Name, MeshInfo->Name);
 
@@ -431,10 +431,10 @@ uint32_t AddMaterial(SceneMaterial* Material)
 	{
 		SetDefaultMaterial(&DefMaterial, MaterialName);
 		Material = &DefMaterial;
-		strcpycut(Name, MaterialName);
+		sstrcpy(Name, MaterialName);
 	}
 	else
-		strcpycut(Name, Material->Name);
+		sstrcpy(Name, Material->Name);
 
 	UpdatePBRTextureDescriptorSet(OPENVK_ERROR, Material->AlbedoIndex, Material->NormalIndex, Material->MetallicIndex, Material->RoughnessIndex, Material->OcclusionIndex);
 
@@ -747,7 +747,7 @@ uint32_t AddTexture(char* Path, bool ShowInAssetBrowser)
 	SceneTextureImage Image;
 	Image.ShowInAssetBrowser = ShowInAssetBrowser;
 	Image.TextureDescriptorSet = LoadTexture(Path, &Image);
-	strcpycut(Image.Path, Path);
+	sstrcpy(Image.Path, Path);
 	ConvertFilePath(Image.Path);
 
 	char* Name = GetFileNameFromPath(Path);
@@ -815,7 +815,7 @@ uint32_t AddAnimation(char* Path, int32_t TexWidth, int32_t TexHeight)
 
 	Animation.VertexBuffer = OpenVkCreateDynamicVertexBuffer(Animation.MeshData.NumTriangles * 3 * sizeof(SceneVertex));
 	Animation.Vertices = (SceneVertex*)malloc(Animation.MeshData.NumTriangles * 3 * sizeof(SceneVertex));
-	strcpycut(Animation.Path, Path);
+	sstrcpy(Animation.Path, Path);
 
 	char* Name = GetFileNameFromPath(Path);
 	CheckForSameNames(&SceneAnimations, ARRAY_SIZE(Animation.Name), Name, Animation.Name);
@@ -828,7 +828,7 @@ uint32_t AddAnimation(char* Path, int32_t TexWidth, int32_t TexHeight)
 void AddScript()
 {
 	SceneScript Script;
-	strcpycut(Script.Path, "None");
+	sstrcpy(Script.Path, "None");
 	Script.LineCount = 1;
 	Script.AllocatedLineCount = 1;
 	Script.Lines = (SceneScriptLine*)malloc(1 * sizeof(SceneScriptLine));
@@ -836,9 +836,9 @@ void AddScript()
 
 //	char* ScriptName = (char*)"Script";
 //	char* Script = (char*)"function Start()\nend\n\nfunction Update()\n\tx, y, z, rx, ry, rz, sx, sy, sz = GetEntity(\"Entity\")\n\tprint(x, y, z, rx, ry, rz, sx, sy, sz)\nend";
-//	strcpycut(SceneScripts[SceneScriptCount].Name, ScriptName);
-//	strcpycut(SceneScripts[SceneScriptCount].Path, "None");
-//	strcpycut(SceneScripts[SceneScriptCount].Script, Script);
+//	sstrcpy(SceneScripts[SceneScriptCount].Name, ScriptName);
+//	sstrcpy(SceneScripts[SceneScriptCount].Path, "None");
+//	sstrcpy(SceneScripts[SceneScriptCount].Script, Script);
 
 	char* Name = (char*)"Script";
 	CheckForSameNames(&SceneScripts, ARRAY_SIZE(Script.Name), Name, Script.Name);
@@ -866,7 +866,7 @@ bool ModelSetZeroAlphaOne = true;
 bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshInfo)
 {
 	MeshInfo->Destroyable = true;
-	strcpycut(MeshInfo->Path, Path);
+	sstrcpy(MeshInfo->Path, Path);
 	ConvertFilePath(MeshInfo->Path);
 	MeshInfo->MeshData = (SceneMeshData*)malloc(ModelData->MeshCount * sizeof(SceneMeshData));
 	if (!MeshInfo->MeshData)
@@ -952,8 +952,8 @@ bool LoadModelWave(const char* Path, WaveModelData* ModelData, SceneMesh* MeshIn
 		Material.Color.w = ModelSetZeroAlphaOne ? (ModelData->Materials[i].Dissolve < 0.01 ? 1.0 : ModelData->Materials[i].Dissolve) : ModelData->Materials[i].Dissolve;
 
 		
-		strcpycut(SceneMesh->Name, ModelData->Materials[i].MaterialName);
-		strcpycut(Material.Name, ModelData->Materials[i].MaterialName);
+		sstrcpy(SceneMesh->Name, ModelData->Materials[i].MaterialName);
+		sstrcpy(Material.Name, ModelData->Materials[i].MaterialName);
 	//	OpenVkRuntimeError("%s", Material.Name);
 		
 	//	SceneMesh->DescriptorSet = UpdatePBRTextureDescriptorSet(OPENVK_ERROR, Material.AlbedoIndex, Material.NormalIndex, Material.MetallicIndex, Material.RoughnessIndex, 0);
@@ -1026,7 +1026,7 @@ uint32_t AddModel(uint32_t Settings, const char* FileName)
 {
 	char LastPath[MAX_CHAR_PATH_LENGTH];
 	char Path[MAX_CHAR_PATH_LENGTH];
-	strcpycut(Path, FileName);
+	sstrcpy(Path, FileName);
 	for (uint32_t i = strlen(FileName) - 1; i > 0; i--)
 		if (Path[i] == '\\' || Path[i] == '/')
 		{
@@ -1068,7 +1068,7 @@ uint32_t AddModel(uint32_t Settings, const char* FileName)
 	uint32_t MeshIndex = ERROR32;
 	if (LoadModelWave(FileName, &Model, &MeshInfo))
 	{
-		strcpycut(MeshInfo.Name, GetFileNameFromPath((char*)FileName));
+		sstrcpy(MeshInfo.Name, GetFileNameFromPath((char*)FileName));
 		MeshIndex = AddMesh(&MeshInfo);
 
 		{
@@ -1117,11 +1117,11 @@ uint32_t SetMeshInfoForDefaultModel(DefaultModels Model, SceneMesh* MeshInfo)
 	switch (Model)
 	{
 	case DEFAULT_MODEL_PLANE:
-		strcpycut(ModelName, "Plane");
+		sstrcpy(ModelName, "Plane");
 
-		strcpycut(MeshInfo->Name, ModelName);
-		strcpycut(MeshInfo->Path, ModelName);
-		strcpycut(MeshInfo->MeshData[0].Name, ModelName);
+		sstrcpy(MeshInfo->Name, ModelName);
+		sstrcpy(MeshInfo->Path, ModelName);
+		sstrcpy(MeshInfo->MeshData[0].Name, ModelName);
 		MeshInfo->MeshData[0].VertexCount = ARRAY_SIZE(PlaneVertices);
 		MeshInfo->MeshData[0].IndexCount = ARRAY_SIZE(PlaneIndices);
 
@@ -1137,11 +1137,11 @@ uint32_t SetMeshInfoForDefaultModel(DefaultModels Model, SceneMesh* MeshInfo)
 		break;
 
 	case DEFAULT_MODEL_CUBE:
-		strcpycut(ModelName, "Cube");
+		sstrcpy(ModelName, "Cube");
 
-		strcpycut(MeshInfo->Name, ModelName);
-		strcpycut(MeshInfo->Path, ModelName);
-		strcpycut(MeshInfo->MeshData[0].Name, ModelName);
+		sstrcpy(MeshInfo->Name, ModelName);
+		sstrcpy(MeshInfo->Path, ModelName);
+		sstrcpy(MeshInfo->MeshData[0].Name, ModelName);
 		MeshInfo->MeshData[0].VertexCount = ARRAY_SIZE(CubeVertices);
 		MeshInfo->MeshData[0].IndexCount = 0;
 
@@ -1157,11 +1157,11 @@ uint32_t SetMeshInfoForDefaultModel(DefaultModels Model, SceneMesh* MeshInfo)
 		break;
 
 	case DEFAULT_MODEL_SPHERE:
-		strcpycut(ModelName, "Sphere");
+		sstrcpy(ModelName, "Sphere");
 
-		strcpycut(MeshInfo->Name, ModelName);
-		strcpycut(MeshInfo->Path, ModelName);
-		strcpycut(MeshInfo->MeshData[0].Name, ModelName);
+		sstrcpy(MeshInfo->Name, ModelName);
+		sstrcpy(MeshInfo->Path, ModelName);
+		sstrcpy(MeshInfo->MeshData[0].Name, ModelName);
 		MeshInfo->MeshData[0].VertexCount = SphereVertexCount;
 		MeshInfo->MeshData[0].IndexCount = SphereIndexCount;
 
@@ -1177,11 +1177,11 @@ uint32_t SetMeshInfoForDefaultModel(DefaultModels Model, SceneMesh* MeshInfo)
 		break;
 
 	case DEFAULT_MODEL_BEAN:
-		strcpycut(ModelName, "Bean");
+		sstrcpy(ModelName, "Bean");
 
-		strcpycut(MeshInfo->Name, ModelName);
-		strcpycut(MeshInfo->Path, ModelName);
-		strcpycut(MeshInfo->MeshData[0].Name, ModelName);
+		sstrcpy(MeshInfo->Name, ModelName);
+		sstrcpy(MeshInfo->Path, ModelName);
+		sstrcpy(MeshInfo->MeshData[0].Name, ModelName);
 		MeshInfo->MeshData[0].VertexCount = BeanVertexCount;
 		MeshInfo->MeshData[0].IndexCount = BeanIndexCount;
 
@@ -1243,7 +1243,7 @@ uint32_t AddPlane()
 	SceneMesh MeshInfo;
 
 	MeshInfo.Destroyable = false;
-	strcpycut(MeshInfo.Path, "Plane");
+	sstrcpy(MeshInfo.Path, "Plane");
 	MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
 	MeshInfo.MeshCount = 1;
 
@@ -1268,7 +1268,7 @@ uint32_t AddCube()
 	SceneMesh MeshInfo;
 
 	MeshInfo.Destroyable = false;
-	strcpycut(MeshInfo.Path, "Cube");
+	sstrcpy(MeshInfo.Path, "Cube");
 	MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
 	MeshInfo.MeshCount = 1;
 
@@ -1293,7 +1293,7 @@ uint32_t AddSphere()
 	SceneMesh MeshInfo;
 
 	MeshInfo.Destroyable = false;
-	strcpycut(MeshInfo.Path, "Sphere");
+	sstrcpy(MeshInfo.Path, "Sphere");
 	MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
 	MeshInfo.MeshCount = 1;
 
@@ -1318,7 +1318,7 @@ uint32_t AddBean()
 	SceneMesh MeshInfo;
 
 	MeshInfo.Destroyable = false;
-	strcpycut(MeshInfo.Path, "Bean");
+	sstrcpy(MeshInfo.Path, "Bean");
 	MeshInfo.MeshData = (SceneMeshData*)malloc(1 * sizeof(SceneMeshData));
 	MeshInfo.MeshCount = 1;
 

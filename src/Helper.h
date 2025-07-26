@@ -11,7 +11,8 @@
 
 //Just use for stack allocated strings in dst!!!
 //This is like strcpy but it checks if buffer size is not overrun
-#define strcpycut(dst, src) do { strncpy(dst, src, ARRAY_SIZE(dst)); dst[ARRAY_SIZE(dst) - 1] = '\0'; } while (0)
+//safe string copy
+#define sstrcpy(dst, src) do { strncpy(dst, src, ARRAY_SIZE(dst)); dst[ARRAY_SIZE(dst) - 1] = '\0'; } while (0)
 
 //Just use for stack allocated strings in Buffer!!!
 //This one always adds a null terminator at the end!

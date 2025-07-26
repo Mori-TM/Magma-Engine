@@ -203,7 +203,7 @@ bool WaveOpenFileDialog(const char* Title, bool IsMultiSelect, const char* FileE
 
 		//	strncpy(Filter, FileExtensions, WAVE_MAX_LENGTH);
 
-		size_t Length = strlen(FileExtensions);
+		size_t Length = FileExtensions == NULL ? 0 : strlen(FileExtensions);
 
 		for (size_t i = 0; i < Length; i++)
 		{
@@ -261,6 +261,7 @@ bool WaveOpenFileDialog(const char* Title, bool IsMultiSelect, const char* FileE
 	if (!File)
 		return false;
 
+	
 	char* Res = fgets(Path, WAVE_MAX_LENGTH, File);
 
 	pclose(File);
@@ -277,6 +278,7 @@ bool WaveOpenFileDialog(const char* Title, bool IsMultiSelect, const char* FileE
 				Path[i] = '\0';
 
 		Path[Length] = '\0'; //double \0 work windows equal
+	//	Path[Length + 1] = '\0';
 	}
 
 	return (Res == NULL ? false : true);

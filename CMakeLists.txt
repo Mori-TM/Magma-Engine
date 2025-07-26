@@ -52,8 +52,8 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.cpp")
 list(FILTER SOURCES EXCLUDE REGEX "${CMAKE_BINARY_DIR}/.*")  # Exclude build directory
 
 # Add Executable
-#add_executable(MyProject ${SOURCES})
-add_executable(MyProject src/main.cpp include/FileDialogs/dialogs.cpp include/Process/process.cpp)  # Explicitly list files or use proper globs
+add_executable(MyProject ${SOURCES})
+#add_executable(MyProject src/main.cpp include/FileDialogs/dialogs.cpp include/Process/process.cpp)  # Explicitly list files or use proper globs
 
 # Copy data folder to build directory
 #add_custom_command(
@@ -79,7 +79,7 @@ set_property(TARGET MyProject PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SO
 target_compile_definitions(MyProject PRIVATE SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 
 # Build FileDialogs CLI
-execute_process(COMMAND make -C ${CMAKE_CURRENT_SOURCE_DIR}/include/FileDialogs)
+#execute_process(COMMAND make -C ${CMAKE_CURRENT_SOURCE_DIR}/include/FileDialogs)
 
 ### Libraries ###
 

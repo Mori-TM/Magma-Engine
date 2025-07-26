@@ -310,6 +310,110 @@ void EndSingleTimeCommandBuffer(VkCommandBuffer CommandBuffer)
 
 	vkFreeCommandBuffers(VkRenderer.Device, VkRenderer.CommandPool, 1, &CommandBuffer);
 }
+/*
+ifd::FileDialog::Instance().CreateTexture = [](uint8_t *data, int w, int h, char fmt) -> void * {
+  int tex = 0;
+  
+  return (void *)(uintptr_t)tex;
+};
+
+ifd::FileDialog::Instance().DeleteTexture = [](void *tex) {
+  
+};
+*/
+
+
+uint32_t ImGuiUsedDescriptorPool = 0;
+
+ifd::ImageData CreateImGuiTexture(uint8_t* Data, int w, int h, char Format)
+{
+	if (ImGuiUsedDescriptorPool > IMGUI_DESCRIPTOR_POOL_SIZE)
+	{
+		ifd::ImageData ImageData;
+		memset(&ImageData, 0, sizeof(ifd::ImageData));
+		return ImageData;
+	}
+
+//	OpenVkDeviceWaitIdle();
+
+//	unsigned char TmpData[128 * 2 * 4];
+//	memset(&TmpData, 0, 128 * 2 * 4);
+
+	OpenVkTextureCreateInfo TextureCreateInfo;
+	TextureCreateInfo.Pixels = &Data;
+	TextureCreateInfo.Width = w;
+	TextureCreateInfo.Height = h;
+	TextureCreateInfo.Format = OPENVK_FORMAT_RGBA;
+	TextureCreateInfo.MipLevels = 5;
+	TextureCreateInfo.GenerateMipmaps = OpenVkTrue;
+	TextureCreateInfo.UseCustomMipmaps = OpenVkFalse;
+	uint32_t Image = OpenVkCreateTexture(&TextureCreateInfo);
+
+//	uint32_t Image = OpenVkCreateTextureImage(Data, w, h, OPENVK_FORMAT_RGBA);
+	uint32_t Sampler = OpenVkCreateImageSampler(OPENVK_FILTER_LINEAR, OPENVK_ADDRESS_MODE_CLAMP_TO_EDGE);
+
+	uint32_t DescriptorCounts[] = { 1 };
+	uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
+	uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_TEXTURE };
+	uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT };
+	uint32_t Bindings[] = { 0 };
+
+	OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
+	DescriptorSetCreateInfo.DescriptorSetLayout = TextureDescriptorSetLayout;
+	DescriptorSetCreateInfo.DescriptorPool = ImGuiDescriptorPool;
+	DescriptorSetCreateInfo.DescriptorWriteCount = 1;
+	DescriptorSetCreateInfo.DescriptorCounts = DescriptorCounts;
+	DescriptorSetCreateInfo.DescriptorTypes = DescriptorTypes;
+	DescriptorSetCreateInfo.Sampler = &Sampler;
+	DescriptorSetCreateInfo.ImageTypes = ImageTypes;
+	DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
+	DescriptorSetCreateInfo.Bindings = Bindings;
+	DescriptorSetCreateInfo.Images = &Image;
+	DescriptorSetCreateInfo.DescriptorSet = NULL;
+	DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
+
+	uint32_t DescriptorSet = OpenVkCreateDescriptorSet(&DescriptorSetCreateInfo);
+
+	ifd::ImageData ImageData;
+	memset(&ImageData, 0, sizeof(ifd::ImageData));
+	if (DescriptorSet == OPENVK_ERROR ||
+		Sampler == OPENVK_ERROR ||
+		Image == OPENVK_ERROR)
+		return ImageData;
+
+	ImageData.DescriptorSet = DescriptorSet;
+	ImageData.Sampler = Sampler;
+	ImageData.Image = Image;
+	
+	printf("Loaded Icon\n");
+
+	/*
+	SceneTextureImage* SceneTexture = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
+
+	ifd::ImageData ImageData;
+	ImageData.DescriptorSetOpenVk = SceneTexture->TextureDescriptorSet;
+	ImageData.DescriptorSet = GetDescriptorSet(SceneTexture->TextureDescriptorSet)[0];
+	ImageData.Sampler = SceneTexture->TextureSampler;
+	ImageData.Image = SceneTexture->TextureImage;
+	*/
+	ImGuiUsedDescriptorPool++;
+	return ImageData;
+}
+
+std::vector<ifd::ImageData> ImGuiTexturesToDelete;
+
+void DeleteImGuiTexture(ifd::ImageData DescriptorSet)
+{
+//	OpenVkDeviceWaitIdle();
+//	OpenVkDestroyImage(DescriptorSet.Image);
+//	OpenVkDestroySampler(DescriptorSet.Sampler);
+//	OpenVkFreeDescriptorSet(ImGuiDescriptorPool, DescriptorSet.DescriptorSet);
+	if (DescriptorSet.DescriptorSet == 0)
+		return;
+	printf("Deleted Icon\n");
+	ImGuiUsedDescriptorPool--;
+	ImGuiTexturesToDelete.push_back(DescriptorSet);
+}
 
 float FontMultiplyer = 1.25;//1.75
 
@@ -349,6 +453,10 @@ void ImGuiInit()
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 	
 	SetStyleImGui(UIStyleIndex - 3);
+
+
+	ifd::FileDialog::Instance().CreateTexture = CreateImGuiTexture;
+	ifd::FileDialog::Instance().DeleteTexture = DeleteImGuiTexture;
 }
 
 void ImGuiDestroy()

@@ -6,7 +6,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 #include <Renderdoc/renderdoc_app.h>
-//#include <SDL3_thread/SDL3_thread_Satus.h>
 #include <vulkan/vulkan.h>
 #include <thread>
 #include <future>
@@ -18,6 +17,7 @@
 #define MAGMA_ENGINE_TRACK_MEMORY
 #define CMA_STORE_DEBUG_NAME_IN_RAM
 #define OPENVK_STORE_DEBUG_NAME_IN_RAM
+#define FILE_DIALOG_USE_IMGUI
 
 #include <DynamicArray/DynamicArray.h>
 
@@ -57,6 +57,8 @@
 #include <OpenVK/OpenVK.h>
 
 #include "Helper.h"
+
+#include <ImGui/ImFileDialog/ImFileDialog.cpp>
 
 #include "Renderer/Renderer.h"
 
@@ -191,7 +193,7 @@ int32_t main(int32_t argc, char** argv)
 	*/
 
 //	char Path[MAX_CHAR_PATH_LENGTH];
-//	strcpycut(Path, "/home/moritz/C-Projects/Magma-Engine/src/Data/Textures/spiaggia_di_mondello.jpg");
+//	sstrcpy(Path, "/home/moritz/C-Projects/Magma-Engine/src/Data/Textures/spiaggia_di_mondello.jpg");
 //	char* NewPath = ConvertAbsoluteToRelativePath(Path);
 //	printf("Old: %s\nNew: %s\n", Path, NewPath);
 //	exit(0);
@@ -200,8 +202,6 @@ Restart:
 #ifdef MAGMA_ENGINE_TRACK_MEMORY
 	s_init();
 #endif
-
-	
 
 //	return 0;
 /*
@@ -247,7 +247,12 @@ Restart:
 	WaveHwnd = WmInfo.info.win.window;
 	*/
 
-	WaveHwnd = NULL;
+	//FIX - Needs testing on windows but should work
+	SDL_PropertiesID Properties = SDL_GetWindowProperties(MainHWnd.Wnd);
+	if (!Properties)
+		WaveHwnd = NULL;
+	else
+		WaveHwnd = (HWND)SDL_GetPointerProperty(Properties, SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
 #endif	
 
 /*

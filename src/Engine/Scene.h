@@ -104,8 +104,8 @@ void SceneInit()
 
 	SceneScripts = CMA_Create(sizeof(SceneScript), "Magma Engine, Scene Scripts");
 	SceneScript Script;
-	strcpycut(Script.Name, "None");
-	strcpycut(Script.Path, "None");
+	sstrcpy(Script.Name, "None");
+	sstrcpy(Script.Path, "None");
 	Script.LineCount = 0;
 	Script.AllocatedLineCount = 1;
 	Script.Lines = (SceneScriptLine*)malloc(1 * sizeof(SceneScriptLine));
@@ -548,7 +548,7 @@ void SceneLoadMaterial(JsonObject* Object)
 	{
 		JsonVariables* Variable = (JsonVariables*)DynamicArrayGetAt(&Object->Refrences, i);
 		if (strcmp(Variable->Name, "Name") == 0)
-			strcpycut(Material.Name, Variable->Data.Str);
+			sstrcpy(Material.Name, Variable->Data.Str);
 		else if (strcmp(Variable->Name, "AlbedoIndex") == 0) Material.AlbedoIndex = Variable->Data.Int;
 		else if (strcmp(Variable->Name, "NormalIndex") == 0) Material.NormalIndex = Variable->Data.Int;
 		else if (strcmp(Variable->Name, "MetallicIndex") == 0) Material.MetallicIndex = Variable->Data.Int;
@@ -571,7 +571,7 @@ void SceneLoadMeshData(SceneMeshData* MeshData, JsonObject* MeshDataElements)
 	{
 		JsonVariables* MeshDataVars = (JsonVariables*)DynamicArrayGetAt(&MeshDataElements->Refrences, j);
 
-		if (strcmp(MeshDataVars->Name, "Name") == 0)		strcpycut(MeshData->Name, MeshDataVars->Data.Str);
+		if (strcmp(MeshDataVars->Name, "Name") == 0)		sstrcpy(MeshData->Name, MeshDataVars->Data.Str);
 		else if (strcmp(MeshDataVars->Name, "MaterialIndex") == 0)	MeshData->MaterialIndex = MeshDataVars->Data.Int;
 		else if (strcmp(MeshDataVars->Name, "VertexOffset") == 0)	MeshData->VertexOffset = MeshDataVars->Data.Int;
 		else if (strcmp(MeshDataVars->Name, "VertexCount") == 0)	MeshData->VertexCount = MeshDataVars->Data.Int;
@@ -593,8 +593,8 @@ void SceneLoadMesh(JsonObject* Object)
 	for (size_t i = 0; i < Object->Refrences.Size; i++)
 	{
 		JsonVariables* Variable = (JsonVariables*)DynamicArrayGetAt(&Object->Refrences, i);
-		if (strcmp(Variable->Name, "Name") == 0)		strcpycut(MeshInfo.Name, Variable->Data.Str);
-		else if (strcmp(Variable->Name, "Path") == 0)	strcpycut(MeshInfo.Path, Variable->Data.Str);
+		if (strcmp(Variable->Name, "Name") == 0)		sstrcpy(MeshInfo.Name, Variable->Data.Str);
+		else if (strcmp(Variable->Name, "Path") == 0)	sstrcpy(MeshInfo.Path, Variable->Data.Str);
 		else if (strcmp(Variable->Name, "MeshCount") == 0)
 		{
 			MeshInfo.MeshCount = Variable->Data.Int;
@@ -703,7 +703,7 @@ void SceneLoadComponent(JsonObject* Variable)
 	for (size_t j = 0; j < Components->Refrences.Size; j++)
 	{
 		JsonVariables* Comp = (JsonVariables*)DynamicArrayGetAt(&Components->Refrences, j);
-		if (strcmp(Variable->Name, "Name") == 0) strcpycut(Entity.Mesh.Name, Variable->Data.Str);
+		if (strcmp(Variable->Name, "Name") == 0) sstrcpy(Entity.Mesh.Name, Variable->Data.Str);
 		else if (strcmp(Variable->Name, "MeshIndex") == 0) Entity.Mesh.MeshIndex = Variable->Data.Int;
 	}
 }
@@ -717,7 +717,7 @@ void SceneLoadEntity(JsonObject* Object)
 	for (size_t i = 0; i < Object->Refrences.Size; i++)
 	{
 		JsonVariables* Variable = (JsonVariables*)DynamicArrayGetAt(&Object->Refrences, i);
-		if (strcmp(Variable->Name, "Name") == 0) strcpycut(Entity.Name, Variable->Data.Str);
+		if (strcmp(Variable->Name, "Name") == 0) sstrcpy(Entity.Name, Variable->Data.Str);
 		else if (strcmp(Variable->Name, "Translate") == 0) SceneLoadArrayfloat(Entity.Translate.Arr, (JsonObject*)Variable);
 		else if (strcmp(Variable->Name, "Rotate") == 0) SceneLoadArrayfloat(Entity.Rotate.Arr, (JsonObject*)Variable);
 		else if (strcmp(Variable->Name, "Scale") == 0) SceneLoadArrayfloat(Entity.Scale.Arr, (JsonObject*)Variable);

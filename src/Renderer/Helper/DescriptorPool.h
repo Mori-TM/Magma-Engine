@@ -1,4 +1,4 @@
-#define IMGUI_DESCRIPTOR_POOL_SIZE 128
+#define IMGUI_DESCRIPTOR_POOL_SIZE 512
 uint32_t DescriptorPool;
 uint32_t ImGuiDescriptorPool;
 

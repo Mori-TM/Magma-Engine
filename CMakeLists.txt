@@ -53,6 +53,7 @@ list(FILTER SOURCES EXCLUDE REGEX "${CMAKE_BINARY_DIR}/.*")  # Exclude build dir
 
 # Add Executable
 add_executable(MyProject ${SOURCES})
+#add_executable(MyProject src/main.cpp include/FileDialogs/dialogs.cpp)
 #add_executable(MyProject src/main.cpp include/FileDialogs/dialogs.cpp include/Process/process.cpp)  # Explicitly list files or use proper globs
 
 # Copy data folder to build directory
@@ -80,6 +81,25 @@ target_compile_definitions(MyProject PRIVATE SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 
 # Build FileDialogs CLI
 #execute_process(COMMAND make -C ${CMAKE_CURRENT_SOURCE_DIR}/include/FileDialogs)
+
+if(UNIX AND NOT APPLE)  # Linux or BSD systems
+    find_package(PkgConfig REQUIRED)
+
+    # GTK (you can use gtk+-3.0 or gtk4 depending on your needs)
+    pkg_check_modules(GTK REQUIRED gtk+-3.0)
+    pkg_check_modules(GIO REQUIRED gio-2.0)
+
+    # Include GTK and GIO headers
+    include_directories(${GTK_INCLUDE_DIRS} ${GIO_INCLUDE_DIRS})
+    link_directories(${GTK_LIBRARY_DIRS} ${GIO_LIBRARY_DIRS})
+
+    # Link GTK and GIO
+    target_link_libraries(MyProject ${GTK_LIBRARIES} ${GIO_LIBRARIES})
+
+    # Optionally define GTK/GIO usage to your code
+    target_compile_definitions(MyProject PRIVATE USE_GTK_GIO)
+endif()
+
 
 ### Libraries ###
 

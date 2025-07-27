@@ -153,19 +153,19 @@ void EditorAssetBrowser()
 			{
 			//	get_open_filename("LoadModel", "Load Model", "All Models (*.obj;*.stl;*.gltf;*.glb){.obj,.stl,.gltf,.glb},.*", "", "", true);
 			//	ifd::FileDialog::Instance().Open("LoadModel", "Load Model", "All Models (*.obj;*.stl;*.gltf;*.glb)     {.obj,.stl,.gltf,.glb},.*", true);
-				FileDialogAddInstance("Load Model", "All Models (*.obj, *.stl, *.gltf, *.glb)\0*.obj;*.stl;*.gltf;*.glb\0", true, true);
+				FileDialogAddInstance("Load Model Dialog", "All Models (*.obj, *.stl, *.gltf, *.glb)\0*.obj;*.stl;*.gltf;*.glb\0", true, true);
 			}
 
 			if (ImGui::Selectable("Load Texture"))
 			{
 			//	get_open_filename("LoadTexture", "Load Texture", "Image files (*.png;*.jpg;*.tga;*.jpeg;*.hdr;*.psd;*.bmp){.png,.jpg,.tga,.jpeg,.hdr,.psd,.bmp},.*", "", "", true);
-				FileDialogAddInstance("Load Texture", "All Textures (*.png, *.jpg, *.tga, *.jpeg, *.hdr, *.psd, *.bmp)\0*.png;*.jpg;*.tga;*.jpeg;*.hdr;*.psd;*.bmp\0", true, true);
+				FileDialogAddInstance("Load Texture Dialog", "All Textures (*.png, *.jpg, *.tga, *.jpeg, *.hdr, *.psd, *.bmp)\0*.png;*.jpg;*.tga;*.jpeg;*.hdr;*.psd;*.bmp\0", true, true);
 			}
 
 			if (ImGui::Selectable("Load Animation"))
 			{
 			//	get_open_filename("LoadAnimation", "Load Animation", "Quake Models (*.md2;*.bin){.md2,.bin},.*", "", "", true);
-				FileDialogAddInstance("Load Animation", "All Animations (*.md2, *.bin)\0*.md2;*.bin\0", true, true);
+				FileDialogAddInstance("Load Animation Dialog", "All Animations (*.md2, *.bin)\0*.md2;*.bin\0", true, true);
 			}
 
 			ImGui::EndPopup();

@@ -471,7 +471,7 @@ void RendererEvent()
 	//	printf("Event\n");
 		RendererResize((MainHWnd.Event.type == SDL_EVENT_WINDOW_RESIZED));
 	}
-
+/*
 	if (MainHWnd.Event.type == SDL_EVENT_KEY_DOWN && MainHWnd.Event.key.key == SDLK_F12)
 	{
 		OpenVkDeviceWaitIdle();
@@ -486,6 +486,7 @@ void RendererEvent()
 			
 		}
 	}
+*/
 }
 
 void DeleteMeshTexture(uint32_t TextureImage, uint32_t TextureIndex)

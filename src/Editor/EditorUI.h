@@ -437,13 +437,13 @@ void EditorDrawMainMenuBar()
 			if (ImGui::MenuItem("Open Scene", "STRG+O"))
 			{
 			//	get_open_filename("SceneLoad", "Load Scene", "Magma Scene (*.lva;*.magma;*.mgs;*.mag){.lva,.magma,.mgs,.mag},.*", "", "", false);
-				FileDialogAddInstance("Load Scene", "Magma Scene (*.lva, *.magma)\0*.lva;*.magma\0", true, false);
+				FileDialogAddInstance("Load Scene Dialog", "Magma Scene (*.lva, *.magma)\0*.lva;*.magma\0", true, false);
 			}
 
 			if (ImGui::MenuItem("Save Scene", "STRG+S"))
 			{
 			//	get_save_filename("SceneSave", "Save Scene", "Magma Scene (*.lva;*.magma;*.mgs){.lva,.magma,.mgs},.*", "", "");
-				FileDialogAddInstance("Save Scene", "Magma Scene (*.lva, *.magma)\0*.lva;*.magma\0", false, false);
+				FileDialogAddInstance("Save Scene Dialog", "Magma Scene (*.lva, *.magma)\0*.lva;*.magma\0", false, false);
 			}
 
 			if (ImGui::MenuItem("New Scene", "STRG+N"))
@@ -543,7 +543,7 @@ void EditorFileDialog()
 {
 	char Path[MAX_CHAR_PATH_LENGTH];
 
-	if (FileDialogGetResult("Load Model", MAX_CHAR_PATH_LENGTH, Path))
+	if (FileDialogGetResult("Load Model Dialog", MAX_CHAR_PATH_LENGTH, Path))
 	{
 		/*Example for a Path(it's windows style): "C:/textures/sky.png\0C:/textures/skin.png\0\0"*/
 		char* p = Path;
@@ -556,7 +556,7 @@ void EditorFileDialog()
 		ImGui::SetWindowFocus("Mesh Inspector");
 	}
 
-	if (FileDialogGetResult("Load Texture", MAX_CHAR_PATH_LENGTH, Path))
+	if (FileDialogGetResult("Load Texture Dialog", MAX_CHAR_PATH_LENGTH, Path))
 	{
 		char* p = Path;
 		while (*p)
@@ -568,7 +568,7 @@ void EditorFileDialog()
 		ImGui::SetWindowFocus("Texture Inspector");
 	}
 
-	if (FileDialogGetResult("Load Animation", MAX_CHAR_PATH_LENGTH, Path))
+	if (FileDialogGetResult("Load Animation Dialog", MAX_CHAR_PATH_LENGTH, Path))
 	{
 		char* p = Path;
 		while (*p)
@@ -580,7 +580,7 @@ void EditorFileDialog()
 		ImGui::SetWindowFocus("Animation Inspector");
 	}
 
-	if (FileDialogGetResult("Load Scene", MAX_CHAR_PATH_LENGTH, Path))
+	if (FileDialogGetResult("Load Scene Dialog", MAX_CHAR_PATH_LENGTH, Path))
 	{
 		char* p = Path;
 		while (*p)
@@ -590,7 +590,7 @@ void EditorFileDialog()
 		}
 	}
 
-	if (FileDialogGetResult("Save Scene", MAX_CHAR_PATH_LENGTH, Path))
+	if (FileDialogGetResult("Save Scene Dialog", MAX_CHAR_PATH_LENGTH, Path))
 	{
 		char* p = Path;
 		while (*p)

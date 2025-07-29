@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "cstring": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "clocale": "cpp"
     }
 }

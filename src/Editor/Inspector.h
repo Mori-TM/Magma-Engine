@@ -321,11 +321,11 @@ void EditorTextureCombo(const char* Name, const char* ID, uint32_t* TextureIndex
 	ImGui::PopID();
 }
 
-void EditorMaterialCombo(const char* Name, const char* ID, uint32_t* MaterialIndex)
+void EditorMaterialCombo(const char* Name, size_t IDAdd, uint32_t* MaterialIndex)
 {
 	SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, *MaterialIndex);
 
-	ImGui::PushID(ID);
+	ImGui::PushID((void*)((char*)Material + IDAdd));
 	if (ImGui::BeginCombo(Name, Material->Name))
 	{
 		for (uint32_t i = 0; i < SceneTextures.Size; i++)
@@ -465,6 +465,9 @@ void EditorMeshInspector()
 				{
 					for (uint32_t i = 0; i < Mesh->MeshCount; i++)
 					{						
+						ImGui::Text("Vertex Count: %d", Mesh->MeshData[i].VertexCount);
+						ImGui::Text("Index Count: %d", Mesh->MeshData[i].IndexCount);
+
 						SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[i].MaterialIndex);
 						if (Material)
 						{
@@ -474,7 +477,7 @@ void EditorMeshInspector()
 							if (ImGui::CollapsingHeader(MeshName))
 							{
 								ImGui::SetCursorPosX(66);
-								EditorMaterialCombo("Material", "Material-Selecter", &Mesh->MeshData[i].MaterialIndex);
+								EditorMaterialCombo("Material", i, &Mesh->MeshData[i].MaterialIndex);
 
 								if (Mesh->MeshData[i].MaterialIndex != 0)
 								{

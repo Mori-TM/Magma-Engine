@@ -207,8 +207,8 @@ typedef struct
 
 	WaveVec3 Vertices;
 	WaveVec3 TexCoords;
-	WaveVec3 Normals;
 	WaveVec3 VertexColor;
+	WaveVec3 Normals;
 } WaveVertexData;
 
 typedef struct
@@ -427,9 +427,34 @@ inline char WaveFloatEqual(float f1, float f2)
 	}
 }
 
+WAVE_BOOL WaveVec3EqualVec3(WaveVec3* v1, WaveVec3* v2)
+{
+	return WaveFloatEqual(v1->x, v2->x) && WaveFloatEqual(v1->y, v2->y) && WaveFloatEqual(v1->z, v2->z);
+}
+
 char WaveCmpWithNormal = 1;
+//returns 0 on success
 inline int WaveCompareVertices(WaveVertexData* a, WaveVertexData* b)
 {
+	/*
+	Old comparing with this struct:
+	uint32_t VertexIndex;
+	uint32_t NewVertexIndex;
+
+	WaveVec3 Vertices;
+	WaveVec3 TexCoords;
+	WaveVec3 Normals;
+	WaveVec3 VertexColor;
+	*/
+	/*
+	char* A = (char*)a + 8;
+	char* B = (char*)b + 8;
+	
+	size_t Offset = sizeof(WaveVertexData) - 8 - sizeof(WaveVec3);
+	if (!WaveCmpWithNormal)
+		Offset -= sizeof(WaveVec3);
+	*/
+
 	char* A = (char*)a + 8;
 	char* B = (char*)b + 8;
 	
@@ -438,6 +463,20 @@ inline int WaveCompareVertices(WaveVertexData* a, WaveVertexData* b)
 		Offset -= sizeof(WaveVec3);
 
 	return memcmp(A, B, Offset);
+/*
+	if (WaveVec3EqualVec3(&a->Vertices, &b->Vertices) &&
+		WaveVec3EqualVec3(&a->TexCoords, &b->TexCoords))
+		{
+			if (WaveCmpWithNormal)
+				return !WaveVec3EqualVec3(&a->Normals, &b->Normals);
+			
+			return 0;
+		}
+	
+
+	return 1;
+	*/
+//	
 }
 
 int WaveCompareFunc(const void* a, const void* b)
@@ -910,6 +949,55 @@ uint32_t WaveGetStringCount(uint32_t StringLength, const char* String, uint32_t 
 	return Count;
 }
 
+int custom_vsscanf(const char *input, const char *format, va_list args) {
+    const char *f = format;
+    const char *s = input;
+    int assigned = 0;
+
+    while (*f && *s) {
+        if (isspace(*f)) {
+            while (isspace(*f)) f++;
+            while (isspace(*s)) s++;
+        } else if (*f == '%') {
+            f++;  // skip '%'
+            if (*f == 'd') {
+                int *iptr = va_arg(args, int *);
+                char *end;
+                *iptr = strtol(s, &end, 10);
+                if (s == end) break;
+                s = end;
+                assigned++;
+            } else if (*f == 'f') {
+                float *fptr = va_arg(args, float *);
+                char *end;
+                *fptr = strtof(s, &end);
+                if (s == end) break;
+                s = end;
+                assigned++;
+            } else if (*f == 's') {
+                char *buf = va_arg(args, char *);
+                while (*s && isspace(*s)) s++;
+                int len = 0;
+                while (*s && !isspace(*s)) {
+                    buf[len++] = *s++;
+                }
+                buf[len] = '\0';
+                assigned++;
+            } else {
+                // unsupported specifier
+                break;
+            }
+            f++;
+        } else {
+            if (*f != *s) break;
+            f++;
+            s++;
+        }
+    }
+
+    return assigned;
+}
+
 void WaveScan(char* Buffer, const char* Token, const char* Format, ...)
 {
 	uint32_t AddCount = strlen(Token);
@@ -918,11 +1006,40 @@ void WaveScan(char* Buffer, const char* Token, const char* Format, ...)
 	{
 		Buffer++;
 	}
-	
+
 	va_list Args;
 	va_start(Args, Format);
 	vsscanf(Buffer, Format, Args);
 	va_end(Args);
+}
+
+void WaveScanVec2(char* Buffer, const char* Token, WaveVec3* v)
+{
+    uint32_t AddCount = strlen(Token);
+	Buffer += AddCount;
+	while (*Buffer == ' ')
+	{
+		Buffer++;
+	}
+		
+	const char *pEnd;
+	v->x = strtof(Buffer, (char **)&pEnd);
+    v->y = strtof(pEnd, NULL);
+}
+
+void WaveScanVec3(char* Buffer, const char* Token, WaveVec3* v)
+{
+    uint32_t AddCount = strlen(Token);
+	Buffer += AddCount;
+	while (*Buffer == ' ')
+	{
+		Buffer++;
+	}
+		
+	const char *pEnd;
+	v->x = strtof(Buffer, (char **)&pEnd);
+    v->y = strtof(pEnd, (char **)&pEnd);
+    v->z = strtof(pEnd, NULL);
 }
 
 #define WAVE_LOADER_MAX_LINE_LENTH 2048
@@ -1242,17 +1359,17 @@ WaveModelData WaveLoadOBJ(const char* FilePath, size_t Length, char* Buffer, uin
 		}
 		else if (Line[0] == 'v' && Line[1] == ' ')
 		{
-			WaveScan(Line, "v", "%f %f %f\n", &Vertices[VertexCount].x, &Vertices[VertexCount].y, &Vertices[VertexCount].z);
+			WaveScanVec3(Line, "v", &Vertices[VertexCount]);
 			VertexCount++;
 		}
 		else if (Line[0] == 'v' && Line[1] == 't')
 		{
-			WaveScan(Line, "vt", "%f %f\n", &VertexTextures[VertexTextureCount].x, &VertexTextures[VertexTextureCount].y);
+			WaveScanVec2(Line, "vt", &VertexTextures[VertexTextureCount]);
 			VertexTextureCount++;
 		}
 		else if (Line[0] == 'v' && Line[1] == 'n')
 		{
-			WaveScan(Line, "vn", "%f %f %f\n", &VertexNormals[VertexNormalCount].x, &VertexNormals[VertexNormalCount].y, &VertexNormals[VertexNormalCount].z);
+			WaveScanVec3(Line, "vn", &VertexNormals[VertexNormalCount]);
 			VertexNormalCount++;
 		}
 		else if (Line[0] == 'f' && Line[1] == ' ')

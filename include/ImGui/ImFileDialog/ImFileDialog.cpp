@@ -1173,7 +1173,11 @@ namespace ifd {
     GtkIconInfo *gtkicon_info = nullptr;
 
     static bool gtkinit;
-    if (!gtkinit) gtk_init(nullptr, nullptr);
+    if (!gtkinit)
+    {
+      gtk_init(nullptr, nullptr);
+      setlocale(LC_NUMERIC, "C");
+    }
     gtkinit = true;
 
     {
@@ -1226,7 +1230,11 @@ namespace ifd {
         if (!(has_alpha && n_channels == 4)) {
           // Convert to RGBA format explicitly
           GdkPixbuf* converted = gdk_pixbuf_add_alpha(pixbuf, FALSE, 0, 0, 0);
+          g_object_unref(pixbuf);
           pixbuf = converted; // now use this pixbuf
+
+          pixels = gdk_pixbuf_get_pixels(pixbuf);
+          rowstride = gdk_pixbuf_get_rowstride(pixbuf);
           // Optionally unref the original
         }
 
@@ -1245,6 +1253,7 @@ namespace ifd {
         //  convert_bgra_to_rgba(rgba_buffer, width, height);
 
         m_icons[pathU8] = this->CreateTexture(rgba_buffer, width, height, 1);
+        g_object_unref(pixbuf);
         
         free(rgba_buffer);
       }
@@ -1914,8 +1923,6 @@ namespace ifd {
 
         m_setDirectory(newPath, false);
       }
-
-      
     }
     if (noBackHistory) ImGui::PopStyleVar();
     ImGui::SameLine();

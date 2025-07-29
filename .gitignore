@@ -14,6 +14,9 @@ MyProject.exe
 *.cmake
 *.pc
 *.spv
+*.spv
+*.obj
+*.mtl
 /Makefile
 /include/FileDialogs/lunasvg/Makefile
 /include/FileDialogs/lunasvg/plutovg/Makefile

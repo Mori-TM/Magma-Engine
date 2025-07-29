@@ -275,6 +275,8 @@ Restart:
 	RendererCreate();
 	bool Run = true;
 
+//	AddModel(0, "/home/moritz/Documents/GitHub/Magma-Engine/src/Room.obj");
+
 //	SceneLoad("SponzaScene.lva");//ExampleScene//PhysicsScene//SponzaScene
 
 	while (Run)

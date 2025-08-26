@@ -52,9 +52,8 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.cpp")
 list(FILTER SOURCES EXCLUDE REGEX "${CMAKE_BINARY_DIR}/.*")  # Exclude build directory
 
 # Add Executable
-add_executable(MyProject ${SOURCES})
-#add_executable(MyProject src/main.cpp include/FileDialogs/dialogs.cpp)
-#add_executable(MyProject src/main.cpp include/FileDialogs/dialogs.cpp include/Process/process.cpp)  # Explicitly list files or use proper globs
+#add_executable(MyProject ${SOURCES})
+add_executable(MyProject "src/main.cpp")
 
 # Copy data folder to build directory
 #add_custom_command(

@@ -96,6 +96,31 @@ struct HumanReadable {
 };
 
 namespace ifd {
+  bool popupIsOpened = false;
+  
+  bool better_exists(ghc::filesystem::path path) {
+    #if defined(_WIN32)
+    return (!path.wstring().empty() && path.is_absolute() && path.wstring().length() >= 2 &&
+    (!(path.wstring()[0] == L'\\' && path.wstring()[1] != L'\\')) && INVALID_FILE_ATTRIBUTES != 
+    GetFileAttributesW(path.wstring().c_str()) && GetLastError() != ERROR_FILE_NOT_FOUND);
+    #else
+    std::error_code ec;
+    return (!path.u8string().empty() && path.is_absolute() && ghc::filesystem::exists(path, ec));
+    #endif
+  }
+  
+  bool is_root_directory(ghc::filesystem::path path) {
+    #if defined(_WIN32)
+    return ((!path.wstring().empty() && path.wstring().length() == 3 &&
+    path.wstring()[1] == L':' && path.wstring()[2] == L'\\') ||
+    (!path.wstring().empty() && path.wstring().length() == 2 &&
+    path.wstring()[1] == L':'));
+    #else
+    std::error_code ec;
+    return (!path.u8string().empty() && path.u8string()[0] == '/');
+    #endif
+  }
+
   /* UI CONTROLS */
   bool FolderNode(const char *label, ImTextureID icon, bool& clicked) {
     ImGuiContext& g = *GImGui;
@@ -234,8 +259,11 @@ namespace ifd {
               newPath += "/";
             #endif
           }
-          path = ghc::filesystem::path(newPath);
-          ret = true;
+          ghc::filesystem::path temp = newPath;
+          if (better_exists(temp.parent_path()) || is_root_directory(temp)) {
+            path = temp;
+            ret = true;
+          }
         }
         anyOtherHC |= ImGui::IsItemHovered() | ImGui::IsItemClicked();
         ImGui::SameLine();
@@ -245,7 +273,7 @@ namespace ifd {
       }
       ImGui::PopStyleVar(2);
       // click state
-      if (!anyOtherHC && clicked) {
+      if (!anyOtherHC && clicked && !popupIsOpened) {
         strcpy(pathBuffer, path.string().c_str());
         *state |= 0b001;
         *state &= 0b011; // remove SetKeyboardFocus flag
@@ -276,15 +304,10 @@ namespace ifd {
       }
       std::error_code ec;
       ghc::filesystem::path pathToCheckExistenceFor = pathBuffer;
-      if (ImGui::InputTextEx("##pathbox_input", "", pathBuffer, 1024, size_arg, ImGuiInputTextFlags_EnterReturnsTrue) &&
-        #if defined(_WIN32)
-        (INVALID_FILE_ATTRIBUTES != GetFileAttributesW(pathToCheckExistenceFor.wstring().c_str()) && GetLastError() != ERROR_FILE_NOT_FOUND)) {
-        #else
-        ghc::filesystem::exists(pathToCheckExistenceFor, ec)) {
-        #endif
-        std::string tempStr(pathBuffer);
-        if (ghc::filesystem::exists(tempStr, ec))
-          path = ghc::filesystem::path(tempStr);
+      if (ImGui::InputTextEx("##pathbox_input", "", pathBuffer, 1024, size_arg, 
+        ImGuiInputTextFlags_EnterReturnsTrue) && better_exists(pathToCheckExistenceFor.parent_path()) && 
+        better_exists(pathToCheckExistenceFor)) {
+        path = pathToCheckExistenceFor;
         ret = true;
       }
       if (!skipActiveCheck && !ImGui::IsItemActive())
@@ -792,14 +815,6 @@ namespace ifd {
   bool FileDialog::m_finalize(const std::string& filename) {
     bool hasResult = (!filename.empty() && m_type != IFD_DIALOG_DIRECTORY) || m_type == IFD_DIALOG_DIRECTORY;
     std::error_code ec;
-    auto exists = [](ghc::filesystem::path path) {
-      #if defined(_WIN32)
-      return (INVALID_FILE_ATTRIBUTES != GetFileAttributesW(path.wstring().c_str()) && GetLastError() != ERROR_FILE_NOT_FOUND);
-      #else
-      std::error_code ec;
-      return ghc::filesystem::exists(path, ec);
-      #endif
-    };
     
     if (hasResult) {
       if (!m_isMultiselect || m_selections.size() <= 1) {
@@ -807,7 +822,7 @@ namespace ifd {
         if (path.is_absolute()) m_result.push_back(path);
         else m_result.push_back(m_currentDirectory / path);
         if (m_type == IFD_DIALOG_DIRECTORY || m_type == IFD_DIALOG_FILE) {
-          if (!exists(m_result.back())) {
+          if (!better_exists(m_result.back())) {
             m_result.clear();
             goto failure;
           }
@@ -817,7 +832,7 @@ namespace ifd {
           if (sel.is_absolute()) m_result.push_back(sel);
           else m_result.push_back(m_currentDirectory / sel);
           if (m_type == IFD_DIALOG_DIRECTORY || m_type == IFD_DIALOG_FILE) {
-            if (!exists(m_result.back())) {
+            if (!better_exists(m_result.back())) {
               m_result.clear();
               goto failure;
             }
@@ -825,7 +840,19 @@ namespace ifd {
         }
       }
       
-      if (m_type == IFD_DIALOG_SAVE) {
+      if (m_type == IFD_DIALOG_DIRECTORY) {
+        #if defined(_WIN32)
+        if (!m_result.empty() && !m_result.back().u8string().empty() && 
+          m_result.back().u8string().back() != '\\') {
+          m_result.back() = m_result.back().u8string() + "\\";
+        }
+        #else
+        if (!m_result.empty() && !m_result.back().u8string().empty() && 
+          m_result.back().u8string().back() != '/') {
+          m_result.back() = m_result.back().u8string() + "/";
+        }
+        #endif
+      } else if (m_type == IFD_DIALOG_SAVE) {
         // add the extension
         if (m_filterSelection < m_filterExtensions.size() && m_filterExtensions[m_filterSelection].size() > 0) {
           if (!m_result.back().has_extension()) {
@@ -836,19 +863,25 @@ namespace ifd {
       }
     }
 
-    if (!m_result.empty() && m_type == IFD_DIALOG_SAVE &&
-      !exists(m_result.back()) && !ghc::filesystem::is_directory(m_result.back(), ec)) {
+    if (!m_result.empty() && m_type == IFD_DIALOG_FILE && !better_exists(m_result.back().parent_path())) {
+      m_result.clear();
+      goto failure;
+    } if (!m_result.empty() && m_type == IFD_DIALOG_SAVE && !better_exists(m_result.back().parent_path())) {
+      m_result.clear();
+      goto failure;
+    } else if (!m_result.empty() && m_type == IFD_DIALOG_SAVE &&
+      !better_exists(m_result.back()) && !ghc::filesystem::is_directory(m_result.back(), ec)) {
       m_isOpen = false;
       return true;
     } else if (!m_result.empty() && m_type == IFD_DIALOG_SAVE && filename.empty()) {
       m_isOpen = false;
       return true;
     } else if (!m_result.empty() && m_type == IFD_DIALOG_FILE &&
-      exists(m_result.back()) && !ghc::filesystem::is_directory(m_result.back(), ec)) {
+      better_exists(m_result.back()) && !ghc::filesystem::is_directory(m_result.back(), ec)) {
       m_isOpen = false;
       return true;
     } else if (!m_result.empty() && m_type == IFD_DIALOG_DIRECTORY &&
-      exists(m_result.back()) && ghc::filesystem::is_directory(m_result.back(), ec)) {
+      better_exists(m_result.back()) && ghc::filesystem::is_directory(m_result.back(), ec)) {
       m_isOpen = false;
       return true;
     }
@@ -1829,43 +1862,53 @@ namespace ifd {
       ImGui::OpenPopup((IFD_ENTER_DIRECTORY_NAME + std::string("##newdir")).c_str());
     ImGui::SetNextWindowSize(ImVec2(ImGui::CalcTextSize(IFD_ARE_YOU_SURE_YOU_WANT_TO_DELETE).x, 0.0f), 0);
     if (ImGui::BeginPopupModal((IFD_ARE_YOU_SURE + std::string("##delete")).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
-      if (m_selectedFileItem >= static_cast<int>(m_content.size()) || m_content.size() == 0)
+      popupIsOpened = true;
+      if (m_selectedFileItem >= static_cast<int>(m_content.size()) || m_content.size() == 0) {
+        popupIsOpened = false;
         ImGui::CloseCurrentPopup();
-      else {
+	  } else {
         const FileData& data = m_content[m_selectedFileItem];
         ImGui::TextWrapped(IFD_ARE_YOU_SURE_YOU_WANT_TO_DELETE, data.Path.filename().string().c_str());
         if (ImGui::Button(IFD_YES)) {
           std::error_code ec;
           ghc::filesystem::remove_all(data.Path, ec);
           m_setDirectory(m_currentDirectory, false); // refresh
+          popupIsOpened = false;
           ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
-        if (ImGui::Button(IFD_NO))
+        if (ImGui::Button(IFD_NO)) {
+		  popupIsOpened = false;
           ImGui::CloseCurrentPopup();
+		}
       }
       ImGui::EndPopup();
     }
     ImGui::SetNextWindowSize(ImVec2(ImGui::CalcTextSize(IFD_ARE_YOU_SURE_YOU_WANT_TO_OVERWRITE).x, 0.0f), 0);
     if (ImGui::BeginPopupModal((IFD_OVERWRITE_FILE + std::string("##overwrite")).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
-      if (m_selectedFileItem >= static_cast<int>(m_content.size()) || m_content.size() == 0)
+	  popupIsOpened = true;
+      if (m_selectedFileItem >= static_cast<int>(m_content.size()) || m_content.size() == 0) {
+	    popupIsOpened = false;
         ImGui::CloseCurrentPopup();
-      else {
+	  } else {
         const FileData& data = m_content[m_content.size() - 1];
         ImGui::TextWrapped(IFD_ARE_YOU_SURE_YOU_WANT_TO_OVERWRITE, m_inputTextbox);
         if (ImGui::Button(IFD_YES)) {
           m_isOpen = false;
+	      popupIsOpened = false;
           ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button(IFD_NO)) {
           m_result.clear();
+		  popupIsOpened = false;
           ImGui::CloseCurrentPopup();
         }
       }
       ImGui::EndPopup();
     }
     if (ImGui::BeginPopupModal((IFD_ENTER_FILE_NAME + std::string("##newfile")).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
+	  popupIsOpened = true;
       ImGui::PushItemWidth(ImGui::CalcTextSize((IFD_ENTER_FILE_NAME + std::string("##newfile")).c_str()).x);
       ImGui::InputText("##newfilename", m_newEntryBuffer, 1024); // TODO: remove hardcoded literals
       ImGui::PopItemWidth();
@@ -1878,16 +1921,19 @@ namespace ifd {
         m_setDirectory(m_currentDirectory, false); // refresh
         m_newEntryBuffer[0] = 0;
 
+        popupIsOpened = false;
         ImGui::CloseCurrentPopup();
       }
       ImGui::SameLine();
       if (ImGui::Button(IFD_CANCEL)) {
         m_newEntryBuffer[0] = 0;
+		popupIsOpened = false;
         ImGui::CloseCurrentPopup();
       }
       ImGui::EndPopup();
     }
     if (ImGui::BeginPopupModal((IFD_ENTER_DIRECTORY_NAME + std::string("##newdir")).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
+	  popupIsOpened = true;
       ImGui::PushItemWidth(ImGui::CalcTextSize((IFD_ENTER_DIRECTORY_NAME + std::string("##newdir")).c_str()).x);
       ImGui::InputText("##newfilename", m_newEntryBuffer, 1024); // TODO: remove hardcoded literals
       ImGui::PopItemWidth();
@@ -1897,10 +1943,12 @@ namespace ifd {
         ghc::filesystem::create_directory(m_currentDirectory / std::string(m_newEntryBuffer), ec);
         m_setDirectory(m_currentDirectory, false); // refresh
         m_newEntryBuffer[0] = 0;
+        popupIsOpened = false;
         ImGui::CloseCurrentPopup();
       }
       ImGui::SameLine();
       if (ImGui::Button(IFD_CANCEL)) {
+		popupIsOpened = false;
         ImGui::CloseCurrentPopup();
         m_newEntryBuffer[0] = 0;
       }
@@ -1943,8 +1991,11 @@ namespace ifd {
     ImGui::SameLine();
     
     if (ImGui::ArrowButtonEx("##up", ImGuiDir_Up, ImVec2(GUI_ELEMENT_SIZE, GUI_ELEMENT_SIZE))) {
-      if (m_currentDirectory.has_parent_path())
+      // specifying path.parent_path().parent_path() instead of 
+      // path.parent_path() fixes crash with WSL root directory
+      if (better_exists(m_currentDirectory.parent_path().parent_path())) {
         m_setDirectory(m_currentDirectory.parent_path());
+      }
     }
     
     ghc::filesystem::path curDirCopy = m_currentDirectory;
@@ -2036,3 +2087,4 @@ namespace ifd {
       m_isOpen = false;
   }
 }
+

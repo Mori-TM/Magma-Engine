@@ -18,8 +18,7 @@
 #include "Helper/Sampler.h"
 #include "Helper/GUI.h"
 
-#include "Raytracing/Raytracing.h"
-
+#include "Raytracing/RaytracingHelper.h"
 #include "PassBuilder/PassBuilder.h"
 
 #include "../Engine/Engine.h"
@@ -29,6 +28,7 @@
 #include "../Engine/ECS.h"
 #include "../Engine/FpsCamera.h"
 #include "../Engine/Scene.h"
+#include "../Engine/ResourceManager.h"
 #ifdef LINUX_PORT
 #include "../Engine/ScriptEngine.h"
 #endif
@@ -41,6 +41,8 @@
 #include "../Editor/EntityManager.h"
 #include "../Editor/Inspector.h"
 #include "../Editor/EditorUI.h"
+
+#include "Raytracing/Raytracing.h"
 
 #include "Pipelines/BlurPipeline.h"
 #include "Pipelines/DebugPipeline.h"
@@ -471,7 +473,7 @@ void RendererEvent()
 	//	printf("Event\n");
 		RendererResize((MainHWnd.Event.type == SDL_EVENT_WINDOW_RESIZED));
 	}
-/*
+
 	if (MainHWnd.Event.type == SDL_EVENT_KEY_DOWN && MainHWnd.Event.key.key == SDLK_F12)
 	{
 		OpenVkDeviceWaitIdle();
@@ -486,35 +488,13 @@ void RendererEvent()
 			
 		}
 	}
-*/
 }
 
-void DeleteMeshTexture(uint32_t TextureImage, uint32_t TextureIndex)
-{
-	if (TextureIndex != 0)
-	{
-		SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, TextureIndex);
-		if (Image != NULL && Image->TextureImage != 0 && Image->TextureSampler != 0)
-		{
-			SceneTextureImage* DefaultImage = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
-			if (DefaultImage == NULL)
-			{
-				printf("WTF is the default texture?\n");
-				exit(0);
-			}
 
-			if (Image->TextureImage != DefaultImage->TextureImage)		OpenVkDestroyImage(Image->TextureImage);
-			if (Image->TextureSampler != DefaultImage->TextureSampler)  OpenVkDestroySampler(Image->TextureSampler);
-
-//			OpenVkDestroyImage(Image->TextureImage);
-//			OpenVkDestroySampler(Image->TextureSampler);
-			CMA_Pop(&SceneTextures, TextureIndex);
-		}
-	}
-}
 
 void RendererRun()
 {
+	#ifdef LINUX_PORT
 	if (ImGuiTexturesToDelete.size() != 0)
 	{
 		OpenVkDeviceWaitIdle();
@@ -530,165 +510,23 @@ void RendererRun()
 
 		ImGuiTexturesToDelete.clear();
 	}	
+	#endif
 
-	if (DeleteTexture)
-	{
-		DeleteTexture = false;
-
-		SceneTextureImage* DefaultImage = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
-		if (DefaultImage == NULL)
-		{ 
-			printf("WTF is the default texture?\n");
-			exit(0);
-		}
-
-		if (TextureToDelete != DefaultImage->TextureImage)	 OpenVkDestroyImage(TextureToDelete);
-		if (SamplerToDelete != DefaultImage->TextureSampler) OpenVkDestroySampler(SamplerToDelete);
-
-		RendererResize(false);
-	}
-	if (ModelToDeleteOptions != MODEL_DELETE_NOTHING)
-	{
-		SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, ModelToDelete);
-		if (Mesh != NULL)
-		{
-			if (ModelToDeleteOptions & MODEL_DELETE_TEXURES)
-			{
-				for (uint32_t i = 0; i < Mesh->MeshCount; i++)
-				{
-					SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[i].MaterialIndex);
-					if (Material)
-					{
-						SceneTextureImage* Albedo	= (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->AlbedoIndex);
-						SceneTextureImage* Normal	= (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->NormalIndex);
-						SceneTextureImage* Metallic = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->MetallicIndex);
-						SceneTextureImage* Roughness= (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->RoughnessIndex);
-						SceneTextureImage* Occlusion= (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->OcclusionIndex);
-
-						if (Albedo) 	DeleteMeshTexture(Albedo->TextureImage,		Material->AlbedoIndex);
-						if (Normal) 	DeleteMeshTexture(Normal->TextureImage,		Material->NormalIndex);
-						if (Metallic) 	DeleteMeshTexture(Metallic->TextureImage,	Material->MetallicIndex);
-						if (Roughness) 	DeleteMeshTexture(Roughness->TextureImage,	Material->RoughnessIndex);
-						if (Occlusion) 	DeleteMeshTexture(Occlusion->TextureImage,	Material->OcclusionIndex);
-
-						Material->AlbedoIndex = 0;
-						Material->NormalIndex = 0;
-						Material->MetallicIndex = 0;
-						Material->RoughnessIndex = 0;
-						Material->OcclusionIndex = 0;
-					}					
-				}				
-			}
-
-			if (ModelToDeleteOptions & MODEL_DELETE_MATERIALS)
-			{
-				for (uint32_t i = 0; i < Mesh->MeshCount; i++)
-				{
-					SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[i].MaterialIndex);
-					if (Material)
-						DeleteMaterial(Mesh->MeshData[i].MaterialIndex);
-				}
-			}
-
-			if (ModelToDeleteOptions & MODEL_DELETE_MESH && Mesh->Destroyable)
-			{
-				if (Mesh->VertexBuffer != OPENVK_ERROR)
-					OpenVkDestroyBuffer(Mesh->VertexBuffer);
-				if (Mesh->IndexBuffer != OPENVK_ERROR)
-					OpenVkDestroyBuffer(Mesh->IndexBuffer);
-
-				if (Mesh->Vertices)
-					free(Mesh->Vertices);
-				if (Mesh->Indices)
-					free(Mesh->Indices);
-			}
-
-			free(Mesh->MeshData);
-		}
-
-		printf("Oi: %zu\n", SceneMeshes.Size);
-		CMA_Pop(&SceneMeshes, ModelToDelete);
-		SelectedMesh = 0;
-		printf("steve: %zu\n", SceneMeshes.Size);
-
-		for (uint32_t i = 1; i < SceneMeshes.Size; i++)
-			if (CMA_GetAt(&SceneMeshes, i) != NULL)
-				SelectedMesh = i;
-
-		ModelToDeleteOptions = MODEL_DELETE_NOTHING;
-
-		RendererResize(false);
-	}
-	if (ReloadShaders)
-	{
-		ReloadShaders = false;
-
-		ShaderCompilerRequest();
-		
-		OpenVkDeviceWaitIdle();
-
-		//FIX - Use OpenVk function!!!
-		for (uint32_t i = 0; i < VkRenderer.Pipelines.Size; i++)
-		{
-			if (i != OpenVkGUI.Pipeline)
-			{
-				//FIX - check if works the if statement
-				if (!(OpenVkHasRaytracingSupport() && i == RTR.RaytracingPipeline))
-				{
-					VkPipeline* Pipeline = (VkPipeline*)CMA_GetAt(&VkRenderer.Pipelines, i);
-					if (Pipeline != NULL)
-						vkDestroyPipeline(VkRenderer.Device, *Pipeline, NULL);
-
-					CMA_Pop(&VkRenderer.Pipelines, i);
-				}
-			}		
-		}
-		
-	//	OpenVkGUIRecreatePipeline();
-		CreateGraphicsPipelines();
-		RendererResize(false);
-	}
-
-//	RaytracingBuild();
+	CheckForTextureDeletion();
+	CheckForModelDeletion();
+	CheckForShaderReloading();
+	CheckForTextureUpdates();
 
 	GetDeltaTime();
-//	OpenVkDrawFrame(RendererDraw, RendererResize, RendererUpdate);
-
+	
 	if (OpenVkHasRaytracingSupport())
 	{
 		RaytracingRestBuild();
-
-		for (uint32_t i = 0; i < EntityCount; i++)
-		{
-			if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH] ||
-				Entities[i].UsedComponents[COMPONENT_TYPE_ANIMATION])
-			{
-				if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
-				{
-					SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
-					if (Mesh != NULL && Mesh->MeshCount > 0)
-					{
-						mat4 Model;
-						LoadMat4IdentityP(&Model);
-						Model = ScaleMat4P(&Model, &Entities[i].Scale);
-						Model = RotateXMat4P(&Model, ToRadians(Entities[i].Rotate.x));
-						Model = RotateYMat4P(&Model, ToRadians(Entities[i].Rotate.y));
-						Model = RotateZMat4P(&Model, ToRadians(Entities[i].Rotate.z));
-						Model = TranslateMat4P(&Model, &Entities[i].Translate);
-
-						Model = TransposeMat4(&Model);
-
-						RaytracingAddEntityMesh(Entities[i].Mesh.MeshIndex, &Model, Mesh);
-					}
-				}
-			}
-		}
-
+		RaytracingFillBuild();
 		RaytracingBuild();
 	}
-
-
+	
+	
+	//	OpenVkDrawFrame(RendererDraw, RendererResize, RendererUpdate);
 	FrameTime = GetExecutionTimeOpenVkRender(OpenVkDrawFrame, RendererDraw, RendererResize, RendererUpdate);
-//	if (RenderRaytraced)
-//		exit(22);
 }

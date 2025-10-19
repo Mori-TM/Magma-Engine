@@ -8,9 +8,9 @@ void EditorEntityInspector()
 
 			if (ImGui::CollapsingHeader("TRANSFORM"))
 			{
-				ImGuiVec3Control("Translation", &Entities[SelectedEntity].Translate, 0.0, 120.0);
-				ImGuiVec3Control("Rotation", &Entities[SelectedEntity].Rotate, 0.0, 120.0);
-				ImGuiVec3Control("Scale", &Entities[SelectedEntity].Scale, 1.0, 120.0);
+				ImGuiVec3Control("Translation", Entities[SelectedEntity].Translate.Arr, 0.0, 120.0);
+				ImGuiVec3Control("Rotation", Entities[SelectedEntity].Rotate.Arr, 0.0, 120.0);
+				ImGuiVec3Control("Scale", Entities[SelectedEntity].Scale.Arr, 1.0, 120.0);
 				
 				mat4 TransformMatrix;
 				LoadMat4IdentityP(&TransformMatrix);
@@ -295,8 +295,10 @@ void EditorEntityInspector()
 	ImGui::End();
 }
 
-void EditorTextureCombo(const char* Name, const char* ID, uint32_t* TextureIndex)
+bool EditorTextureCombo(const char* Name, const char* ID, uint32_t* TextureIndex)
 {
+	bool Modification = false;
+
 	SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, *TextureIndex);
 
 	ImGui::PushID(ID);
@@ -309,8 +311,11 @@ void EditorTextureCombo(const char* Name, const char* ID, uint32_t* TextureIndex
 			if (Image != NULL)
 			{
 				//FIX - Legacy function ImageButton - imgui_widgets and imgui.h
-				if (ImGui::ImageButton(&GetDescriptorSet(Image->TextureDescriptorSet)[0], ImVec2(30, 30)))
+				if (ImGui::ImageButton(Image->Name, &GetDescriptorSet(Image->TextureDescriptorSet)[0], ImVec2(30, 30)))
+				{
 					*TextureIndex = i;
+					Modification = true;
+				}
 
 				ImGui::SameLine();
 				ImGui::Text(Image->Name);
@@ -319,10 +324,14 @@ void EditorTextureCombo(const char* Name, const char* ID, uint32_t* TextureIndex
 		ImGui::EndCombo();
 	}
 	ImGui::PopID();
+
+	return Modification;
 }
 
-void EditorMaterialCombo(const char* Name, size_t IDAdd, uint32_t* MaterialIndex)
+bool EditorMaterialCombo(const char* Name, size_t IDAdd, uint32_t* MaterialIndex)
 {
+	bool Modification = false;
+
 	SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, *MaterialIndex);
 
 	ImGui::PushID((void*)((char*)Material + IDAdd));
@@ -335,25 +344,34 @@ void EditorMaterialCombo(const char* Name, size_t IDAdd, uint32_t* MaterialIndex
 			if (Material != NULL)
 			{
 				if (ImGui::Button(Material->Name))
+				{
 					*MaterialIndex = i;
+					Modification = true;
+				}
 			}
 		}
 		ImGui::EndCombo();
 	}
 	ImGui::PopID();
+
+	return Modification;
 }
 
-void MaterialEditor(SceneMaterial* Material, float Offset)
+bool MaterialEditor(SceneMaterial* Material, float Offset)
 {
+	bool TextureChange = false;
+
 	ImGui::SetCursorPosX(Offset); ImGui::ColorPicker4("Color", (float*)&Material->Color, ImGuiColorEditFlags_AlphaBar);
-	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Albedo", "A-Mat", &Material->AlbedoIndex);
-	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Normal", "N-Mat", &Material->NormalIndex);
-	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Metallic", "M-Mat", &Material->MetallicIndex);
+	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Albedo", "A-Mat", &Material->AlbedoIndex) == (TextureChange = true);
+	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Normal", "N-Mat", &Material->NormalIndex) == (TextureChange = true);
+	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Metallic", "M-Mat", &Material->MetallicIndex) == (TextureChange = true);
 	ImGui::SetCursorPosX(Offset); ImGui::SliderFloat("Metallic Strength", &Material->Metallic, 0.0, 1.0);
-	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Roughness", "R-Mat", &Material->RoughnessIndex);
+	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Roughness", "R-Mat", &Material->RoughnessIndex) == (TextureChange = true);
 	ImGui::SetCursorPosX(Offset); ImGui::SliderFloat("Roughness Strength", &Material->Roughness, 0.0, 1.0);
-	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Occlusion", "O-Mat", &Material->OcclusionIndex);
+	ImGui::SetCursorPosX(Offset); EditorTextureCombo("Occlusion", "O-Mat", &Material->OcclusionIndex) == (TextureChange = true);
 	ImGui::SetCursorPosX(Offset); ImGui::SliderFloat("Occlusion Strength", &Material->Occlusion, 0.0, 1.0);
+
+	return TextureChange;
 }
 
 void EditorMaterialInspector()
@@ -486,7 +504,11 @@ void EditorMeshInspector()
 									if (ImGui::CollapsingHeader("Material Options"))
 									{
 										ImGui::PushID(Material);
-										MaterialEditor(Material, 99);
+										if (MaterialEditor(Material, 99))
+										{
+										//	Mesh->MeshData[i].
+											Material->DescriptorSet = UpdatePBRTextureDescriptorSetFromMaterial(Material->DescriptorSet, Mesh->MeshData[i].MaterialIndex);
+										}
 										ImGui::PopID();
 									}
 									ImGui::PopID();

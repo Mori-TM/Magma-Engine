@@ -34,6 +34,7 @@
 #include <stb/stb_image_resize.h>
 
 #include <ImGui/imconfig.h>
+/*
 #include <ImGui/imgui_tables.cpp>
 #include <ImGui/imgui_internal.h>
 #include <ImGui/imgui.cpp>
@@ -41,7 +42,17 @@
 #include <ImGui/imgui_widgets.cpp>
 #include <ImGui/imgui_demo.cpp>
 #include <ImGui/imgui_impl_sdl3.cpp>
+*/
+
+//#define IMGUI_STB_NAMESPACE
+#include <ImGui/imconfig.h>
+#include <ImGui/imgui.h>
+#include <ImGui/imgui_custom.h>
+//#include <ImGui/imgui_internal.h>
+#include <ImGui/imgui_impl_sdl3.h>
 #include <ImGui/imgui_impl_vulkan_but_better.h>
+#include <ImGui/ImFileDialog/ImFileDialog.h>
+
 
 #include <Wave/WaveMath.h>
 #include <Wave/WaveMesh.h>
@@ -58,7 +69,6 @@
 
 #include "Helper.h"
 
-#include <ImGui/ImFileDialog/ImFileDialog.cpp>
 
 #include "Renderer/Renderer.h"
 
@@ -113,11 +123,11 @@ void BenchmarkAndTest() {
     size_t indices[TEST_SIZE];
 
     // Push TEST_SIZE elements
-	for (int i = 0; i < TEST_SIZE; i++) {
-		TestStruct data;
+    for (int i = 0; i < TEST_SIZE; i++) {
+        TestStruct data;
 		data.value = i;
 		strcpy(data.name, "Test");
-	
+
         snprintf(data.name, sizeof(data.name), "Item %d", i);
         indices[i] = CMA_Push(&zone, &data);
     }
@@ -190,7 +200,8 @@ int32_t main(int32_t argc, char** argv)
 	Argc = argc;
 	Argv = argv;
 	printf("Argv: %s\n", Argv[0]);
-	*/
+	
+*/
 
 //	char Path[MAX_CHAR_PATH_LENGTH];
 //	sstrcpy(Path, "/home/moritz/C-Projects/Magma-Engine/src/Data/Textures/spiaggia_di_mondello.jpg");
@@ -219,8 +230,7 @@ Restart:
 //	execlp("sh", "sh", "-c", "glslc /home/moritz/C-Projects/Magma-Engine/src/Data/Shader/FXAAFragment.frag -o /home/moritz/C-Projects/Magma-Engine/src/Data/Shader/FXAAFragment.spv", NULL);
 //	exit(0);
 
-//	double Time = GetExecutionTime(CompileShader);
-//	printf("Compiler Time: %f\n", Time);
+	
 	ShaderCompilerRequest();
 	//CompileShader();
 //	exit(0);
@@ -240,13 +250,13 @@ Restart:
 	SDL_GetWindowSize(MainHWnd.Wnd, (int*)&MainHWnd.Width, (int*)&MainHWnd.Height);
 	SDL_SetWindowPosition(MainHWnd.Wnd, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 #ifdef _WIN32
-	/*
+/*
 	SDL_SysWMinfo WmInfo;
 	SDL_VERSION(&WmInfo.version);
 	SDL_GetWindowWMInfo(MainHWnd.Wnd, &WmInfo);
 	WaveHwnd = WmInfo.info.win.window;
-	*/
-
+*/
+	
 	//FIX - Needs testing on windows but should work
 	SDL_PropertiesID Properties = SDL_GetWindowProperties(MainHWnd.Wnd);
 	if (!Properties)
@@ -277,7 +287,7 @@ Restart:
 
 //	AddModel(0, "/home/moritz/Documents/GitHub/Magma-Engine/src/Room.obj");
 
-//	SceneLoad("SponzaScene.lva");//ExampleScene//PhysicsScene//SponzaScene
+//	SceneLoad("PhysicsScene (copy).lva");//ExampleScene//PhysicsScene//SponzaScene
 
 	while (Run)
 	{

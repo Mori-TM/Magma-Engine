@@ -135,11 +135,11 @@ void main()
 
     float time_of_day = 18.0;
    vec3 dir = normalize(gl_WorldRayDirectionEXT);
-    dir = rotate(radians(25.), vec3(1., 0., 0.)) * dir;
+    dir = rotate(radians(0.), vec3(1., 0., 0.)) * dir;
     dir = rotate((time_of_day - 8.) * radians(360.) / 24., vec3(0., 1., 0.)) * dir;
     dir = normalize(dir);
 
-    HitValue.HitValue = skybox(dir, time_of_day);
+    HitValue.HitValue = skybox(dir, time_of_day).bgr * vec3(0.5);
 
     /*
     vec3 Dir = normalize(gl_WorldRayDirectionEXT);

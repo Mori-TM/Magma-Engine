@@ -47,8 +47,13 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
 
+#include "../imgui.h"
+#include "../imgui_internal.h"
 
-
+#ifndef STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#endif
+#include "stb_image.h"
 
 #if ((defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
 //#include <lunasvg.h>
@@ -72,7 +77,7 @@
 #endif
 #include <sys/stat.h>
 
-#define ICON_SIZE ImGui::GetFont()->FontSize + 3
+#define ICON_SIZE ImGui::GetFontBaked()->Size + 3//ImGui::GetFont()->FontSize + 3
 #define GUI_ELEMENT_SIZE std::max(GImGui->FontSize + 10.f, 24.f)
 #define DEFAULT_ICON_SIZE 32
 #define MAX_VISBLE_NAME_LENGTH 22
@@ -96,6 +101,8 @@ struct HumanReadable {
 };
 
 namespace ifd {
+  VkDescriptorSet* (*GetDescriptorSet)(uint32_t DescriptorSet);
+
   /* UI CONTROLS */
   bool FolderNode(const char *label, ImTextureID icon, bool& clicked) {
     ImGuiContext& g = *GImGui;

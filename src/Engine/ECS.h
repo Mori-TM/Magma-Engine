@@ -255,10 +255,10 @@ uint32_t UpdatePBRTextureDescriptorSet(uint32_t OldDescriptorSet, uint32_t Albed
 		DescriptorSetCreateInfo.Images = Images;
 		DescriptorSetCreateInfo.ImageLayouts = ImageLayouts;
 		DescriptorSetCreateInfo.Bindings = Bindings;
-	//	if (OldDescriptorSet == OPENVK_ERROR)
+		if (OldDescriptorSet == OPENVK_ERROR)
 			DescriptorSetCreateInfo.DescriptorSet = NULL;
-	//	else
-	//		DescriptorSetCreateInfo.DescriptorSet = &OldDescriptorSet;
+		else
+			DescriptorSetCreateInfo.DescriptorSet = &OldDescriptorSet;
 
 		DescriptorSetCreateInfo.VariableDescriptorSetCount = 0;
 
@@ -270,6 +270,15 @@ uint32_t UpdatePBRTextureDescriptorSet(uint32_t OldDescriptorSet, uint32_t Albed
 	}
 
 	return OldDescriptorSet;
+}
+
+uint32_t UpdatePBRTextureDescriptorSetFromMaterial(uint32_t OldDescriptorSet, uint32_t MaterialIndex)
+{
+	SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, MaterialIndex);
+	if (!Material)
+		return 0;
+
+	return UpdatePBRTextureDescriptorSet(OldDescriptorSet, Material->AlbedoIndex, Material->NormalIndex, Material->Metallic, Material->RoughnessIndex, Material->OcclusionIndex);
 }
 
 char MaterialName[MAX_CHAR_NAME_LENGTH] = "Material";

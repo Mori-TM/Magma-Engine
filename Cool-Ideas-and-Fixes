@@ -3,5 +3,4 @@ Node(File) base pipeline system: Adding pipeline in the engine via button, setti
 fixes:
 Forward pipeline doesnt handle texture updates
 
-File dialog looks like ass on windows
 WaveLoader: Bumpmaps dont load if it has parameters

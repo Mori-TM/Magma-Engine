@@ -13,13 +13,13 @@
 #include "CMA.h"
 #include "DynamicArray.h"
 #ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+//#define STB_IMAGE_IMPLEMENTATION
 #endif
+#include "stb_image.h"
 #ifndef STB_TRUETYPE_IMPLEMENTATION
 #define STB_TRUETYPE_IMPLEMENTATION
-#include "stb_truetype.h"
 #endif
+#include "stb_truetype.h"
 
 #include "OpenVK_Defines.h"
 #include "OpenVK_Helper.h"

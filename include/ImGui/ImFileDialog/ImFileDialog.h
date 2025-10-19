@@ -38,7 +38,8 @@
 #define NOMINMAX
 #endif
 
-#include "apifilesystem/filesystem.cpp"
+#include <vulkan/vulkan.h>
+#include "apifilesystem/filesystem.hpp"
 
 #include "apifilesystem/ghc/filesystem.hpp"
 
@@ -50,6 +51,8 @@
 #define IFD_DIALOG_HEIGHT    (int)((!ngs::fs::environment_get_variable("IMGUI_DIALOG_HEIGHT").empty()) ? strtoul(ngs::fs::environment_get_variable("IMGUI_DIALOG_HEIGHT").c_str(), nullptr, 10) : 360)
 
 namespace ifd {
+  extern VkDescriptorSet* (*GetDescriptorSet)(uint32_t DescriptorSet);
+
   struct ImageData
     {
         uint32_t DescriptorSet;

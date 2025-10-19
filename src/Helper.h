@@ -68,6 +68,8 @@ void ShaderCompilerWait()
 }
 #else
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 //#define GetCurrentDir getcwd
 
 const char* ShaderCompilerCommands[] =

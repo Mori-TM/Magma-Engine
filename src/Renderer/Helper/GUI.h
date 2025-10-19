@@ -70,7 +70,7 @@ void SetStyleImGui(uint32_t Style)
 		//	Colors[ImGuiCol_ModalWindowDarkening] = bgColor;
 		Colors[ImGuiCol_DragDropTarget] = bgColor;
 		Colors[ImGuiCol_NavHighlight] = bgColor;
-		Colors[ImGuiCol_DockingPreview] = panelActiveColor;
+//		Colors[ImGuiCol_DockingPreview] = panelActiveColor;
 		Colors[ImGuiCol_Tab] = bgColor;
 		Colors[ImGuiCol_TabActive] = panelActiveColor;
 		Colors[ImGuiCol_TabUnfocused] = bgColor;
@@ -141,8 +141,8 @@ void SetStyleImGui(uint32_t Style)
 		colors[ImGuiCol_TabActive] = ImVec4(0.13f, 0.75f, 1.00f, 0.80f);
 		colors[ImGuiCol_TabUnfocused] = ImVec4(0.18f, 0.18f, 0.18f, 1.00f);
 		colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.36f, 0.36f, 0.36f, 0.54f);
-		colors[ImGuiCol_DockingPreview] = ImVec4(0.13f, 0.75f, 0.55f, 0.80f);
-		colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.13f, 0.13f, 0.13f, 0.80f);
+//		colors[ImGuiCol_DockingPreview] = ImVec4(0.13f, 0.75f, 0.55f, 0.80f);
+//		colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.13f, 0.13f, 0.13f, 0.80f);
 		colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
 		colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
 		colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
@@ -310,6 +310,7 @@ void EndSingleTimeCommandBuffer(VkCommandBuffer CommandBuffer)
 
 	vkFreeCommandBuffers(VkRenderer.Device, VkRenderer.CommandPool, 1, &CommandBuffer);
 }
+
 /*
 ifd::FileDialog::Instance().CreateTexture = [](uint8_t *data, int w, int h, char fmt) -> void * {
   int tex = 0;
@@ -426,9 +427,9 @@ void ImGuiInit()
 	IO->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 	DefaultFont = IO->Fonts->AddFontFromFileTTF("Data/Fonts/Roboto-Medium.ttf", 18.0 * FontMultiplyer);
-	IconFontSmall = IO->Fonts->AddFontFromFileTTF("Data/Fonts/MagmaIcons.ttf", 18.0 * FontMultiplyer);
-	IconFontLarge = IO->Fonts->AddFontFromFileTTF("Data/Fonts/MagmaIcons.ttf", 85.0);
-	IconFontExt = IO->Fonts->AddFontFromFileTTF("Data/Fonts/MagmaIconsExt.ttf", 18.0 * FontMultiplyer);
+	ImGuiIconFontSmall = IconFontSmall = IO->Fonts->AddFontFromFileTTF("Data/Fonts/MagmaIcons.ttf", 18.0 * FontMultiplyer);
+	ImGuiIconFontLarge = IconFontLarge = IO->Fonts->AddFontFromFileTTF("Data/Fonts/MagmaIcons.ttf", 85.0);
+	ImGuiIconFontExt = IconFontExt = IO->Fonts->AddFontFromFileTTF("Data/Fonts/MagmaIconsExt.ttf", 18.0 * FontMultiplyer);
 	
 	ImGui::StyleColorsDark();
 	ImGui_ImplSDL3_InitForVulkan(MainHWnd.Wnd);
@@ -453,9 +454,8 @@ void ImGuiInit()
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 	
 	SetStyleImGui(UIStyleIndex - 3);
-
-
 	ifd::FileDialog::Instance().CreateTexture = CreateImGuiTexture;
+	ifd::GetDescriptorSet = GetDescriptorSet;
 	ifd::FileDialog::Instance().DeleteTexture = DeleteImGuiTexture;
 }
 

@@ -46,15 +46,33 @@ include_directories(
 )
 
 # Collect all source files
-file(GLOB_RECURSE SOURCES "src/*.cpp" "include/*.h")
+#file(GLOB_RECURSE SOURCES "src/*.cpp" "include/*.h")
 
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.cpp")
-list(FILTER SOURCES EXCLUDE REGEX "${CMAKE_BINARY_DIR}/.*")  # Exclude build directory
+#file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.cpp")
+#list(FILTER SOURCES EXCLUDE REGEX "${CMAKE_BINARY_DIR}/.*")  # Exclude build directory
+# Collect all .cpp files recursively
+# List of directories that contain source code
+set(SRC_DIRS
+    "${CMAKE_SOURCE_DIR}/src"
+    "${CMAKE_SOURCE_DIR}/include/ImGui"
+#    "${CMAKE_SOURCE_DIR}/modules"
+)
+
+# Gather all .cpp and .h files from those directories
+set(SRC_FILES "")
+foreach(dir ${SRC_DIRS})
+    file(GLOB_RECURSE DIR_SRC CONFIGURE_DEPENDS
+        "${dir}/*.cpp"
+        "${dir}/*.h"
+    )
+    list(APPEND SRC_FILES ${DIR_SRC})
+endforeach()
 
 # Add Executable
-add_executable(MyProject ${SOURCES})
-#add_executable(MyProject src/main.cpp include/FileDialogs/dialogs.cpp)
-#add_executable(MyProject src/main.cpp include/FileDialogs/dialogs.cpp include/Process/process.cpp)  # Explicitly list files or use proper globs
+#add_executable(MyProject ${SOURCES})
+#add_executable(MyProject src/main.cpp)  # Explicitly list files or use proper globs
+add_executable(${PROJECT_NAME} ${SRC_FILES})
+
 
 # Copy data folder to build directory
 #add_custom_command(

@@ -47,7 +47,7 @@ void CreateShadowPipeline()
 	GraphicsPipelineCreateInfo.y = 0;
 	GraphicsPipelineCreateInfo.Width = ShadowMapWidth;
 	GraphicsPipelineCreateInfo.Height = ShadowMapHeight;
-	GraphicsPipelineCreateInfo.DepthClamp = true;
+	GraphicsPipelineCreateInfo.DepthClamp = false;
 	GraphicsPipelineCreateInfo.PolygonMode = OPENVK_POLYGON_MODE_FILL;
 	GraphicsPipelineCreateInfo.LineWidth = 3.0;
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_NONE;

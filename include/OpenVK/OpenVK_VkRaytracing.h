@@ -336,7 +336,7 @@ uint32_t VkCreateRaytracingGeometry(OpenVkRaytracingGeometryCreateInfo* Info)
 	AccelerationStructureGeometry.geometry.triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
 	AccelerationStructureGeometry.geometry.triangles.vertexFormat = VkGetOpenVkFormat(Info->VertexFormat, NULL);
 	AccelerationStructureGeometry.geometry.triangles.vertexData = VertexBufferDeviceAddress;
-	AccelerationStructureGeometry.geometry.triangles.maxVertex = Info->VertexCount;
+	AccelerationStructureGeometry.geometry.triangles.maxVertex = 3;//Info->VertexCount;
 	AccelerationStructureGeometry.geometry.triangles.vertexStride = Info->VertexSize;
 	AccelerationStructureGeometry.geometry.triangles.indexType = (Info->IndexCount == 0 ? VK_INDEX_TYPE_NONE_KHR : VK_INDEX_TYPE_UINT32);
 	AccelerationStructureGeometry.geometry.triangles.indexData = IndexBufferDeviceAddress;
@@ -466,7 +466,7 @@ uint32_t VkCreateBottomLevelAS(uint32_t GeometryCount, uint32_t* InGeometry, Ope
 	return CMA_Push(&VkRaytracer.AccelerationStructures, &BottomLevelAS);
 }
 
-uint32_t VkCreateASInstance(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS)
+uint32_t VkCreateASInstance(OpenVkTransformMatrix Matrix, uint32_t InstanceCustomIndex, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS)
 {
 	VkAccelerationStructure* AccelerationStructure = (VkAccelerationStructure*)CMA_GetAt(&VkRaytracer.AccelerationStructures, BottomLevelAS);
 	if (AccelerationStructure == NULL)
@@ -474,7 +474,7 @@ uint32_t VkCreateASInstance(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFro
 
 	VkAccelerationStructureInstanceKHR Instance;
 	memcpy(&Instance.transform, &Matrix, sizeof(VkTransformMatrixKHR));
-	Instance.instanceCustomIndex = 0;
+	Instance.instanceCustomIndex = InstanceCustomIndex;
 	Instance.mask = 0xFF;
 	Instance.instanceShaderBindingTableRecordOffset = 0;
 	Instance.flags = (TriangleFrontCCW ? VK_GEOMETRY_INSTANCE_TRIANGLE_FRONT_COUNTERCLOCKWISE_BIT_KHR : VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR);

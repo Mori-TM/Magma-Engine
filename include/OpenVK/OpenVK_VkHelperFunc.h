@@ -161,7 +161,7 @@ typedef struct
 	uint32_t PresentFamily;
 } VkQueueFamilyIndices;
 
-VkRendererInfo VkRenderer = { 0 };
+VkRendererInfo VkRenderer = { NULL };
 
 uint32_t VkGetBestSuitablePhysicalDevice(uint32_t DeviceCount, VkPhysicalDevice* Devices)
 {
@@ -184,15 +184,21 @@ uint32_t VkGetBestSuitablePhysicalDevice(uint32_t DeviceCount, VkPhysicalDevice*
 		vkGetPhysicalDeviceFeatures(Devices[i], &VkRenderer.PhysicalDeviceFeatures);
 
 		if (VkRenderer.PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
-			Score++;
-		if (VkRenderer.PhysicalDeviceFeatures.textureCompressionBC == VK_TRUE)
-			Score++;
-		if (VkRenderer.PhysicalDeviceFeatures.depthClamp == VK_TRUE)
-			Score++;
-		if (VkRenderer.PhysicalDeviceFeatures.samplerAnisotropy == VK_TRUE)
-			Score++;
-		if (VkRenderer.PhysicalDeviceFeatures.multiViewport == VK_TRUE)
-			Score++;
+			Score += 8;
+
+		if (VkRenderer.PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+			Score += 4;
+
+		if (VkRenderer.PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
+			Score += 1;
+	//	if (VkRenderer.PhysicalDeviceFeatures.textureCompressionBC == VK_TRUE)
+	//		Score++;
+	//	if (VkRenderer.PhysicalDeviceFeatures.depthClamp == VK_TRUE)
+	//		Score++;
+	//	if (VkRenderer.PhysicalDeviceFeatures.samplerAnisotropy == VK_TRUE)
+	//		Score++;
+	//	if (VkRenderer.PhysicalDeviceFeatures.multiViewport == VK_TRUE)
+	//		Score++;
 
 		if (Score > MaxScore)
 		{

@@ -263,13 +263,14 @@ uint32_t VkCreateRenderer(const char**(*GetExtensions)(uint32_t* ExtensionCount)
 
 	VkPhysicalDeviceFeatures DeviceFeatures;
 	memset(&DeviceFeatures, 0, sizeof(VkPhysicalDeviceFeatures));
-	DeviceFeatures.samplerAnisotropy = VK_TRUE;
-	DeviceFeatures.sampleRateShading = VK_TRUE;
-	DeviceFeatures.fillModeNonSolid = VK_TRUE;
-	DeviceFeatures.wideLines = VK_TRUE;
-	DeviceFeatures.depthClamp = VK_TRUE;
-	DeviceFeatures.independentBlend = VK_TRUE;
-	DeviceFeatures.shaderInt64 = VK_TRUE;
+	DeviceFeatures.samplerAnisotropy = VkRenderer.PhysicalDeviceFeatures.samplerAnisotropy;
+	DeviceFeatures.sampleRateShading = VkRenderer.PhysicalDeviceFeatures.sampleRateShading;
+	DeviceFeatures.fillModeNonSolid = VkRenderer.PhysicalDeviceFeatures.fillModeNonSolid;
+	DeviceFeatures.wideLines = VkRenderer.PhysicalDeviceFeatures.wideLines;
+	DeviceFeatures.depthClamp = VkRenderer.PhysicalDeviceFeatures.depthClamp;
+	DeviceFeatures.independentBlend = VkRenderer.PhysicalDeviceFeatures.independentBlend;
+	DeviceFeatures.shaderInt64 = VkRenderer.PhysicalDeviceFeatures.shaderInt64;
+	
 
 	VkRenderer.DeviceExtensions[VkRenderer.DeviceExtensionCount++] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
@@ -749,11 +750,11 @@ uint32_t VkCreateGraphicsPipeline(OpenVkGraphicsPipelineCreateInfo* Info)
 	Rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	Rasterizer.pNext = NULL;
 	Rasterizer.flags = 0;
-	Rasterizer.depthClampEnable = Info->DepthClamp;//VK_TRUE
-	OpenVkRuntimeWarning("Depth Clamping changed, check if evrything works");
+	Rasterizer.depthClampEnable = VkRenderer.PhysicalDeviceFeatures.depthClamp ? Info->DepthClamp : VK_FALSE;//VK_TRUE
+//	OpenVkRuntimeWarning("Depth Clamping changed, check if evrything works");
 	Rasterizer.rasterizerDiscardEnable = VK_FALSE;
 	Rasterizer.polygonMode = (VkPolygonMode)Info->PolygonMode;
-	Rasterizer.lineWidth = Info->LineWidth;
+	Rasterizer.lineWidth = VkRenderer.PhysicalDeviceFeatures.wideLines ? Info->LineWidth : 1.0f;
 	Rasterizer.cullMode = Info->CullMode;
 	Rasterizer.frontFace = (VkFrontFace)Info->FrontFace;
 	Rasterizer.depthBiasEnable = VK_FALSE;

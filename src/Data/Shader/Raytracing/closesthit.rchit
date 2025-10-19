@@ -48,18 +48,70 @@ struct ObjDesc
 	uint64_t bs2;
 };
 
-struct Vertex  // See ObjLoader, copy of VertexObj, could be compressed for device
+/*
+typedef struct
 {
-  vec4 PosTexX;
-vec4 NormalTexY;
-  vec4 BS;
-};
+	float VertexOffset;//Used for Indices offset
+	float TextureIndex;
+	float Unused0;
+	float Unused1;
+} SceneVertexExtData;
+
+typedef struct
+{
+	vec4 PosTexX;
+	vec4 NormalTexY;
+	SceneVertexExtData Data;
+
+//	vec3 Pos;
+//	vec2 TexCoord;
+//	vec3 Normal;
+} SceneVertex;
+*/
 
 layout(binding = 3, set = 0) uniform sampler2D textures[];
 
-layout(buffer_reference, scalar) buffer Vertices {Vertex v[]; }; // Positions of an object
+layout(buffer_reference, scalar) buffer Vertices {vec4 v[]; }; // Positions of an object
 layout(buffer_reference, scalar) buffer Indices {uint i[]; };
-layout(set = 1, binding = 0, scalar) buffer ObjDesc_ { ObjDesc i[]; } objDesc;
+layout(set = 1, binding = 0) buffer ObjDesc_ { ObjDesc i[]; } objDesc;
+
+struct Vertex
+{
+  vec3 pos;
+  vec2 uv;
+};
+
+struct Triangle {
+	Vertex vertices[3];
+	vec2 uv;
+};
+
+// This function will unpack our vertex buffer data into a single triangle and calculates uv coordinates
+Triangle unpackTriangle(uint index, int vertexSize) 
+{
+	ObjDesc    objResource = objDesc.i[0];//gl_InstanceCustomIndexEXT
+
+	Triangle tri;
+	const uint triIndex = index * 3;
+
+//	Indices    indices     = Indices(bufferReferences.indices);
+	Indices    indices     = Indices(objResource.indexAddress);
+	Vertices   vertices    = Vertices(objResource.vertexAddress);
+
+	// Unpack vertices
+	// Data is packed as vec4 so we can map to the glTF vertex structure from the host side
+	for (uint i = 0; i < 3; i++) {
+		const uint offset = indices.i[triIndex + i] * (vertexSize / 16);
+		vec4 d0 = vertices.v[offset + 0]; // pos.xyz, n.x
+		vec4 d1 = vertices.v[offset + 1]; // n.yz, uv.xy
+		tri.vertices[i].pos = d0.xyz;
+		tri.vertices[i].uv = vec2(d0.w, d1.w);
+	}
+	// Calculate values at barycentric coordinates
+	vec3 barycentricCoords = vec3(1.0f - Attribs.x - Attribs.y, Attribs.x, Attribs.y);
+	tri.uv = tri.vertices[0].uv * barycentricCoords.x + tri.vertices[1].uv * barycentricCoords.y + tri.vertices[2].uv * barycentricCoords.z;
+	return tri;
+}
 
 
 vec3 Uncharted2Tonemap(vec3 x)
@@ -78,66 +130,12 @@ void main()
 {
 	const vec3 BarycentricCoords = vec3(1.0f - Attribs.x - Attribs.y, Attribs.x, Attribs.y);
 
+	ObjDesc    objResource = objDesc.i[gl_InstanceID];
 
-	ObjDesc    objResource = objDesc.i[gl_InstanceCustomIndexEXT];
-	
-	Vertices   vertices    = Vertices(objResource.vertexAddress);
-
-	// Indices of the triangle
-//	ivec3 ind = indices.i[gl_PrimitiveID];
-
-	ivec3 ind;
-
-	if (objResource.indexAddress == 0)
-	{
-		ind = ivec3(3 * gl_PrimitiveID, 3 * gl_PrimitiveID + 1, 3 * gl_PrimitiveID + 2);
-	}
-	else
-	{
-		Indices    indices     = Indices(objResource.indexAddress);
-		ind = ivec3(indices.i[3 * gl_PrimitiveID], indices.i[3 * gl_PrimitiveID + 1], indices.i[3 * gl_PrimitiveID + 2]);
-
-	}
-
-	
-	// Vertex of the triangle
-	Vertex v0 = vertices.v[ind.x];
-	Vertex v1 = vertices.v[ind.y];
-	Vertex v2 = vertices.v[ind.z];
+	Triangle tri = unpackTriangle(gl_PrimitiveID, 48);
 
 
-
-//	vec3 normal = normalize(v0.Normal.xyz * BarycentricCoords.x + v1.Normal.xyz * BarycentricCoords.y + v2.Normal.xyz * BarycentricCoords.z);
-	// normal = normalize(vec3(normal * gl_WorldToObjectEXT));
-	vec2 texCoord = vec2(v0.PosTexX.w, v0.NormalTexY.w) * BarycentricCoords.x + vec2(v1.PosTexX.w, v1.NormalTexY.w)  * BarycentricCoords.y + vec2(v2.PosTexX.w, v2.NormalTexY.w)  * BarycentricCoords.z;
-
-	float TexIndex = v0.BS.y;// * BarycentricCoords.x + v1.BS.y * BarycentricCoords.y + v2.BS.y * BarycentricCoords.z;
-
-
-	
-//	HitValue.HitValue = vec3(texture(textures[nonuniformEXT(int(BarycentricCoords.z) > 49 ? 49 : int(BarycentricCoords.z) )], BarycentricCoords.xy).xyz);
-	HitValue.HitValue = vec3(texture(textures[nonuniformEXT(int(TexIndex))], texCoord.xy).xyz);
-//	HitValue.HitValue = vec3(texCoord.xy, TexIndex);
-	
-	float Exposure = 4.0;
-	float Gamma = 0.9;//1.3
-
-//	HitValue.HitValue = Uncharted2Tonemap(HitValue.HitValue * Exposure);
-//
-//	const vec3 Uncharted2TonemapConst = (1.0f / Uncharted2Tonemap(vec3(11.2f)));
-//	HitValue.HitValue = HitValue.HitValue * Uncharted2TonemapConst;	
-//	HitValue.HitValue = pow(HitValue.HitValue, vec3(1.0f / Gamma));
-
-	float Reflect = .3 - ((HitValue.HitValue.x + HitValue.HitValue.y + HitValue.HitValue.z) / 3);
-
-	HitValue.Distance = gl_RayTmaxEXT;
-	HitValue.Normal = vec3(0.0);
-//	if (normal.y > 0.99)
-//		HitValue.Reflector = -0.9;
-//	else
-		HitValue.Reflector = .8;
- 
-//	HitValue.HitValue = vec3(texture(textures[nonuniformEXT(int(TexIndex))], texCoord).xyz);
+	HitValue.HitValue = vec3(tri.uv, 0.0);//tri.uv, gl_InstanceID
 
 	// Shadow casting
 	if (HitValue.Index == 0)

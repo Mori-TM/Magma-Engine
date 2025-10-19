@@ -176,6 +176,8 @@ void WavePlayAudio()
 
 #elif __linux__
 #include <sys/resource.h>
+#include <unistd.h>
+#include <limits.h>
 
 /*
 Filters are like on windows:

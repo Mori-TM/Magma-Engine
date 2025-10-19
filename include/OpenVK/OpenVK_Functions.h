@@ -52,7 +52,7 @@ uint32_t	(*OpenVkCreateTranformBuffer		)(OpenVkTransformMatrix Matrix);
 uint32_t	(*OpenVkCreateRaytracingGeometry	)(OpenVkRaytracingGeometryCreateInfo* Info);
 void		(*OpenVkDestroyRaytracingGeometry	)(uint32_t Geometry);
 uint32_t	(*OpenVkCreateBottomLevelAS			)(uint32_t GeometryCount, uint32_t* InGeometry, OpenVkBool AllowUpdate, uint32_t* OldBottomLevelAS);
-uint32_t	(*OpenVkCreateASInstance			)(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS);
+uint32_t	(*OpenVkCreateASInstance			)(OpenVkTransformMatrix Matrix, uint32_t InstanceCustomIndex, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS);
 void		(*OpenVkDestroyASInstance			)(uint32_t Instance);
 OpenVkBool	(*OpenVkUpdateASInstance			)(OpenVkTransformMatrix Matrix, OpenVkBool TriangleFrontCCW, uint32_t BottomLevelAS, uint32_t Instance);
 OpenVkBool	(*OpenVkCreateTopLevelAS			)(uint32_t InstanceCount, uint32_t* Instances, uint32_t MaxPrimitiveCount, OpenVkBool AllowUpdate, uint32_t* OldTopLevelAS);

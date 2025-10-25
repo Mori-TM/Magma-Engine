@@ -193,16 +193,24 @@ void CreateForwardUniformBuffer()
 void CreateForwardDescriptorSet()
 {
 	{
-		uint32_t DescriptorCounts[] = { 1, 1, 1, 1 };
+		uint32_t DescriptorCounts[] = { 1, 1, 1, SHADOW_MAP_CASCADE_COUNT };
 		uint32_t DescriptorTypes[] = { OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER, OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER };
 		uint32_t UniformBuffers[] = { GBufferVertexUniformBuffer, SceneFragmentUniformBuffer, SceneFragmentStorageBuffer };
 		size_t UniformSizes[] = { sizeof(GBufferVertexUniformBufferObject), sizeof(SceneFragmentUniformBufferObject), sizeof(SceneFragmentStorageBufferObject) };
 		uint32_t Bindings[] = { 0, 1, 2, 3 };
 
-		uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_ATTACHMENT };
-		uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_DEPTH_OUTPUT };
-		uint32_t Images[] = { ShadowDepthAttachment };
-		uint32_t Sampler[] = { ShadowSampler };
+		uint32_t ImageTypes[SHADOW_MAP_CASCADE_COUNT];
+		uint32_t ImageLayouts[SHADOW_MAP_CASCADE_COUNT];
+		uint32_t Images[SHADOW_MAP_CASCADE_COUNT];
+		uint32_t Sampler[SHADOW_MAP_CASCADE_COUNT];
+		
+		for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+		{
+			ImageTypes[i] = OPENVK_IMAGE_TYPE_ATTACHMENT;
+			ImageLayouts[i] = OPENVK_IMAGE_LAYOUT_DEPTH_OUTPUT;
+			Images[i] = ShadowDepthAttachments[i];
+			Sampler[i] = ShadowSampler;
+		}
 
 		OpenVkDescriptorSetCreateInfo DescriptorSetCreateInfo;
 		DescriptorSetCreateInfo.DescriptorSetLayout = ForwardStaticDescriptorSetLayout;

@@ -520,7 +520,7 @@ void SceneLoadScene(JsonObject* Object)
 	{
 		ShadowMapHeight = Variable->Data.Int;
 		ShadowMapSizeTmp = ShadowMapHeight;
-		ShadowMapWidth = ShadowMapHeight * SHADOW_MAP_CASCADE_COUNT;
+		ShadowMapWidth = ShadowMapHeight;
 	}
 }
 

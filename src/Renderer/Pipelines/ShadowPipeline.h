@@ -1,6 +1,7 @@
 void CreateShadowRenderPass()
 {
-	ShadowDepthAttachment = OpenVkCreateDepthImageAttachment(ShadowMapWidth, ShadowMapHeight, 1, true, OPENVK_FORMAT_DEFAULT);
+	for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+		ShadowDepthAttachments[i] = OpenVkCreateDepthImageAttachment(ShadowMapWidth, ShadowMapHeight, 1, true, OPENVK_FORMAT_DEFAULT);
 
 	uint32_t Attachments[] = { OPENVK_ATTACHMENT_DEPTH };
 	uint32_t AttachmentFormats[] = { OPENVK_FORMAT_DEFAULT };
@@ -47,7 +48,7 @@ void CreateShadowPipeline()
 	GraphicsPipelineCreateInfo.y = 0;
 	GraphicsPipelineCreateInfo.Width = ShadowMapWidth;
 	GraphicsPipelineCreateInfo.Height = ShadowMapHeight;
-	GraphicsPipelineCreateInfo.DepthClamp = false;
+	GraphicsPipelineCreateInfo.DepthClamp = true;
 	GraphicsPipelineCreateInfo.PolygonMode = OPENVK_POLYGON_MODE_FILL;
 	GraphicsPipelineCreateInfo.LineWidth = 3.0;
 	GraphicsPipelineCreateInfo.CullMode = OPENVK_CULL_MODE_NONE;
@@ -79,15 +80,17 @@ void CreateShadowPipeline()
 
 void CreateShadowFramebuffers()
 {
-	uint32_t Attachments[] = { ShadowDepthAttachment };
-
 	OpenVkFramebufferCreateInfo FramebufferCreateInfo;
-	FramebufferCreateInfo.AttachmentCount = ARRAY_SIZE(Attachments);
-	FramebufferCreateInfo.Attachments = Attachments;
+	FramebufferCreateInfo.AttachmentCount = 1;
 	FramebufferCreateInfo.RenderPass = ShadowRenderPass;
 	FramebufferCreateInfo.Width = ShadowMapWidth;
 	FramebufferCreateInfo.Height = ShadowMapHeight;
-	ShadowFramebuffer = OpenVkCreateFramebuffer(&FramebufferCreateInfo);
+	
+	for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+	{
+		FramebufferCreateInfo.Attachments = &ShadowDepthAttachments[i];
+		ShadowFramebuffers[i] = OpenVkCreateFramebuffer(&FramebufferCreateInfo);
+	}
 }
 
 void CreateShadowDescriptorSet()
@@ -309,6 +312,8 @@ void UpdateAnimation(uint32_t AnimationIndex)
 
 void ShadowDraw()
 {
+	
+
 	OpenVkBeginRenderPassInfo BeginInfo;
 	BeginInfo.ClearColor[0] = 0.01;
 	BeginInfo.ClearColor[1] = 0.01;
@@ -317,128 +322,133 @@ void ShadowDraw()
 	BeginInfo.ClearColors = 0;
 	BeginInfo.ClearDepth = true;
 	BeginInfo.RenderPass = ShadowRenderPass;
-	BeginInfo.Framebuffer = ShadowFramebuffer;
 	BeginInfo.x = 0;
 	BeginInfo.y = 0;
 	BeginInfo.Width = ShadowMapWidth;
 	BeginInfo.Height = ShadowMapHeight;
-	OpenVkBeginRenderPass(&BeginInfo);
+
+	for (uint32_t j = 0; j < SHADOW_MAP_CASCADE_COUNT; j++)
 	{
-		OpenVkSetScissor(0, 0, ShadowMapWidth, ShadowMapHeight);
-		for (uint32_t j = 0; j < SHADOW_MAP_CASCADE_COUNT; j++)
-		{
-			uint32_t Offset = (ShadowMapHeight * j);
+		BeginInfo.Framebuffer = ShadowFramebuffers[j];
+		OpenVkBeginRenderPass(&BeginInfo);
+		{			
+			OpenVkSetScissor(0, 0, ShadowMapWidth, ShadowMapHeight);
+			OpenVkSetViewport(0, 0, ShadowMapWidth, ShadowMapHeight);
 			
-			OpenVkSetViewport(Offset, 0, ShadowMapHeight, ShadowMapHeight);
-
-			uint32_t Pipeline = ShadowPipelineNoneCull;
-			switch (ShadowCullMode)
 			{
-			case CULL_MODE_BACK:
-				Pipeline = ShadowPipelineBackCull;
-				break;
-			case CULL_MODE_FRONT:
-				Pipeline = ShadowPipelineFrontCull;
-				break;
-			default:
-				break;
-			}
-
-			OpenVkBindPipeline(Pipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
-
-			mat4 Model;
-
-			uint32_t TextureDescriptorSet = 0;
-			uint32_t LastTextureDescriptorSet = 0;
-
-			for (uint32_t i = 0; i < EntityCount; i++)
-			{
-				LoadMat4IdentityP(&Model);
-				Model = ScaleMat4P(&Model, &Entities[i].Scale);
-				Model = RotateXMat4P(&Model, ToRadians(Entities[i].Rotate.x));
-				Model = RotateYMat4P(&Model, ToRadians(Entities[i].Rotate.y));
-				Model = RotateZMat4P(&Model, ToRadians(Entities[i].Rotate.z));
-				Model = TranslateMat4P(&Model, &Entities[i].Translate);
-
-				ShadowVertexPc.PVM = MultiplyMat4P(&Cascades[j].ProjectionView, &Model);
-
+//				uint32_t Offset = (ShadowMapHeight * j);
 				
-				SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Entities[i].Material.MaterialIndex);
-				if (Material == NULL)
-					Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, 0);
 
-				SceneTextureImage* Image;
-				if (Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
-					Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->AlbedoIndex);
-				else
-					Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
-
-				if (Image != NULL)
-					TextureDescriptorSet = Image->TextureDescriptorSet;
-
-				if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
+				uint32_t Pipeline = ShadowPipelineNoneCull;
+				switch (ShadowCullMode)
 				{
-					SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
-					if (Mesh != NULL && Mesh->MeshCount > 0)
-					{
-						OpenVkPushConstant(ShadowLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(ShadowVertexPushConstant), &ShadowVertexPc);
-
-						if (Mesh->IndexBuffer != OPENVK_ERROR)
-							OpenVkBindIndexBuffer(Mesh->VertexBuffer, Mesh->IndexBuffer);
-						else
-							OpenVkBindVertexBuffer(Mesh->VertexBuffer);
-
-						for (uint32_t m = 0; m < Mesh->MeshCount; m++)
-						{
-							if (Mesh->MeshData[m].Render[j + 1])
-							{
-								if (!Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
-								{
-									Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[m].MaterialIndex);
-									if (Material)
-									{
-										SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->AlbedoIndex);
-										if (Image != NULL)
-											TextureDescriptorSet = Image->TextureDescriptorSet;
-									}									
-								}
-
-								if (LastTextureDescriptorSet != TextureDescriptorSet)
-									OpenVkBindDescriptorSet(ShadowLayout, 0, TextureDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-
-								LastTextureDescriptorSet = TextureDescriptorSet;
-
-								if (Mesh->IndexBuffer != OPENVK_ERROR)
-									OpenVkDrawIndices(Mesh->MeshData[m].IndexOffset, Mesh->MeshData[m].IndexCount, 0);//Mesh->MeshData[m].VertexOffset
-								else
-									OpenVkDrawVertices(Mesh->MeshData[m].VertexOffset, Mesh->MeshData[m].VertexCount);
-							}							
-						}
-					}
+				case CULL_MODE_BACK:
+					Pipeline = ShadowPipelineBackCull;
+					break;
+				case CULL_MODE_FRONT:
+					Pipeline = ShadowPipelineFrontCull;
+					break;
+				default:
+					break;
 				}
-				if (Entities[i].UsedComponents[COMPONENT_TYPE_ANIMATION])
+
+				OpenVkBindPipeline(Pipeline, OPENVK_PIPELINE_TYPE_GRAPHICS);
+
+				mat4 Model;
+
+				uint32_t TextureDescriptorSet = 0;
+				uint32_t LastTextureDescriptorSet = 0;
+
+				for (uint32_t i = 0; i < EntityCount; i++)
 				{
-					if (Entities[i].Animation.AnimationIndex != 0)
+					LoadMat4IdentityP(&Model);
+					Model = ScaleMat4P(&Model, &Entities[i].Scale);
+					Model = RotateXMat4P(&Model, ToRadians(Entities[i].Rotate.x));
+					Model = RotateYMat4P(&Model, ToRadians(Entities[i].Rotate.y));
+					Model = RotateZMat4P(&Model, ToRadians(Entities[i].Rotate.z));
+					Model = TranslateMat4P(&Model, &Entities[i].Translate);
+
+					ShadowVertexPc.PVM = MultiplyMat4P(&Cascades[j].ProjectionView, &Model);
+
+					
+					SceneMaterial* Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Entities[i].Material.MaterialIndex);
+					if (Material == NULL)
+						Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, 0);
+
+					SceneTextureImage* Image;
+					if (Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
+						Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->AlbedoIndex);
+					else
+						Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, 0);
+
+					if (Image != NULL)
+						TextureDescriptorSet = Image->TextureDescriptorSet;
+
+					if (Entities[i].UsedComponents[COMPONENT_TYPE_MESH])
 					{
-						SceneAnimation* Animation = (SceneAnimation*)CMA_GetAt(&SceneAnimations, Entities[i].Animation.AnimationIndex);
-						if (Animation != NULL)
+						SceneMesh* Mesh = (SceneMesh*)CMA_GetAt(&SceneMeshes, Entities[i].Mesh.MeshIndex);
+						if (Mesh != NULL && Mesh->MeshCount > 0)
 						{
 							OpenVkPushConstant(ShadowLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(ShadowVertexPushConstant), &ShadowVertexPc);
 
-							UpdateAnimation(Entities[i].Animation.AnimationIndex);
+							if (Mesh->IndexBuffer != OPENVK_ERROR)
+								OpenVkBindIndexBuffer(Mesh->VertexBuffer, Mesh->IndexBuffer);
+							else
+								OpenVkBindVertexBuffer(Mesh->VertexBuffer);
 
-							if (LastTextureDescriptorSet != TextureDescriptorSet)
-								OpenVkBindDescriptorSet(ShadowLayout, 0, TextureDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
-							LastTextureDescriptorSet = TextureDescriptorSet;
+							for (uint32_t m = 0; m < Mesh->MeshCount; m++)
+							{
+								if (Mesh->MeshData[m].Render[j + 1])
+								{
+									if (!Entities[i].UsedComponents[COMPONENT_TYPE_MATERIAL])
+									{
+										Material = (SceneMaterial*)CMA_GetAt(&SceneMaterials, Mesh->MeshData[m].MaterialIndex);
+										if (Material)
+										{
+											SceneTextureImage* Image = (SceneTextureImage*)CMA_GetAt(&SceneTextures, Material->AlbedoIndex);
+											if (Image != NULL)
+												TextureDescriptorSet = Image->TextureDescriptorSet;
+										}									
+									}
 
-							OpenVkBindDynamicVertexBuffer(Animation->VertexBuffer);
-							OpenVkDrawVertices(0, Animation->MeshData.NumTriangles * 3);
+									if (LastTextureDescriptorSet != TextureDescriptorSet)
+										OpenVkBindDescriptorSet(ShadowLayout, 0, TextureDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+
+									LastTextureDescriptorSet = TextureDescriptorSet;
+
+									if (Mesh->IndexBuffer != OPENVK_ERROR)
+										OpenVkDrawIndices(Mesh->MeshData[m].IndexOffset, Mesh->MeshData[m].IndexCount, 0);//Mesh->MeshData[m].VertexOffset
+									else
+										OpenVkDrawVertices(Mesh->MeshData[m].VertexOffset, Mesh->MeshData[m].VertexCount);
+								}							
+							}
+						}
+					}
+					if (Entities[i].UsedComponents[COMPONENT_TYPE_ANIMATION])
+					{
+						if (Entities[i].Animation.AnimationIndex != 0)
+						{
+							SceneAnimation* Animation = (SceneAnimation*)CMA_GetAt(&SceneAnimations, Entities[i].Animation.AnimationIndex);
+							if (Animation != NULL)
+							{
+								OpenVkPushConstant(ShadowLayout, OPENVK_SHADER_TYPE_VERTEX, 0, sizeof(ShadowVertexPushConstant), &ShadowVertexPc);
+
+								UpdateAnimation(Entities[i].Animation.AnimationIndex);
+
+								if (LastTextureDescriptorSet != TextureDescriptorSet)
+									OpenVkBindDescriptorSet(ShadowLayout, 0, TextureDescriptorSet, OPENVK_PIPELINE_TYPE_GRAPHICS);
+								LastTextureDescriptorSet = TextureDescriptorSet;
+
+								OpenVkBindDynamicVertexBuffer(Animation->VertexBuffer);
+								OpenVkDrawVertices(0, Animation->MeshData.NumTriangles * 3);
+							}
 						}
 					}
 				}
 			}
 		}
-	}
-	OpenVkEndRenderPass();
+		OpenVkEndRenderPass();
 
+	}
+	
 }

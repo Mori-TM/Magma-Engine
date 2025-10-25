@@ -15,7 +15,7 @@ layout(set = 0, binding = 2) uniform sampler2D SamplerAlbedo;
 layout(set = 0, binding = 3) uniform sampler2D SamplerPBR;
 layout(set = 0, binding = 4) uniform sampler2D SamplerWorldPos;
 layout(set = 0, binding = 5) uniform sampler2D SamplerSSAO;
-layout(set = 0, binding = 6) uniform sampler2D ShadowMap;
+layout(set = 0, binding = 6) uniform sampler2D ShadowMap[SHADOW_MAP_CASCADE_COUNT];
 
 layout(set = 0, binding = 7) uniform UniformBufferObject
 {
@@ -180,7 +180,7 @@ float TextureProjection(vec4 ShadowCoord, vec2 Offset, uint CascadeIndex, float 
 
 	if (ShadowCoord.z > -1.0 && ShadowCoord.z < 1.0) 
 	{
-		float Dist = texture(ShadowMap, ShadowCoord.st + Offset).r;
+		float Dist = texture(ShadowMap[CascadeIndex], ShadowCoord.st + Offset).r;
 		if (ShadowCoord.w > 0.0 && Dist < ShadowCoord.z - Bias) //0.003
 		{
 			Shadow = Ambient;
@@ -192,7 +192,7 @@ float TextureProjection(vec4 ShadowCoord, vec2 Offset, uint CascadeIndex, float 
 
 float FilterPCF(vec4 ShadowCoord, int Range, float Scale, uint CascadeIndex, float Ambient)
 {
-	vec2 TextureDimension = textureSize(ShadowMap, 0).yy;
+	vec2 TextureDimension = textureSize(ShadowMap[CascadeIndex], 0).xy;
 
 	float DX = Scale / TextureDimension.x;
 	float DY = Scale / TextureDimension.y;
@@ -267,8 +267,8 @@ float GetShadow(float Ambient)
 
 	vec4 ShadowCoord = (UBO.CascadeProjectionView[CascadeIndex]) * vec4(WorldPos.xyz, 1.0);	
 
-	ShadowCoord.x /= float(SHADOW_MAP_CASCADE_COUNT);
-	ShadowCoord.x += (1.0 / float(SHADOW_MAP_CASCADE_COUNT)) * float(CascadeIndex); 
+//	ShadowCoord.x /= float(SHADOW_MAP_CASCADE_COUNT);
+//	ShadowCoord.x += (1.0 / float(SHADOW_MAP_CASCADE_COUNT)) * float(CascadeIndex); 
 
 	float Shadow = 0.0;
 	if (UBO.CascadeRange[CascadeIndex] > 0.1)

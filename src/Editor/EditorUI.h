@@ -807,7 +807,7 @@ void EditorSceneSettings()
 			if (ImGui::Button("Apply"))
 			{
 				ShadowMapHeight = ShadowMapSizeTmp;
-				ShadowMapWidth = ShadowMapHeight * SHADOW_MAP_CASCADE_COUNT;
+				ShadowMapWidth = ShadowMapHeight;
 				ReloadShaders = true;
 			}
 
@@ -853,7 +853,7 @@ void EditorRenderStages()
 			{
 				ImGui::Text(DebugAttachmentNames[i]);
 				//		ImGui::PushID(DebugDescriptorSets[i]);
-				if (ImGuiImageButtonID(DebugAttachmentNames[i], &GetDescriptorSet(DebugDescriptorSets[i])[0], i == 0 ? ImVec2(ImageSize.x, ImageSize.x / 3) : ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
+				if (ImGuiImageButtonID(DebugAttachmentNames[i], &GetDescriptorSet(DebugDescriptorSets[i])[0], ImageSize, ImVec2(0, 0), ImVec2(1, 1), 0))
 					SceneRenderDescriptorSet = DebugDescriptorSets[i];
 
 				ImGui::NewLine();

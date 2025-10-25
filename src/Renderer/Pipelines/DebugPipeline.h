@@ -66,7 +66,7 @@ void CreateDebugDescriptorSets()
 {
 	uint32_t Attachments[] =
 	{
-		ShadowDepthAttachment,
+		ShadowDepthAttachments[0],
 		GBufferAttachments[0],
 		GBufferAttachments[1],
 		GBufferAttachments[2],

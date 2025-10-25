@@ -127,8 +127,9 @@ void CreateSceneDescriptorSets()
 	}
 	
 	{
-		uint32_t Attachments[] = { GBufferAttachments[0], GBufferAttachments[1], GBufferAttachments[2], GBufferAttachments[3], GBufferAttachments[4], RenderSSAOBlur ? SSAOBlurColorAttachment : SSAOColorAttachment, ShadowDepthAttachment };
-		uint32_t DescriptorCounts[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+		uint32_t Attachments[G_BUFFER_ATTACHMENT_COUNT + SHADOW_MAP_CASCADE_COUNT] = { GBufferAttachments[0], GBufferAttachments[1], GBufferAttachments[2], GBufferAttachments[3], GBufferAttachments[4], RenderSSAOBlur ? SSAOBlurColorAttachment : SSAOColorAttachment };
+
+		uint32_t DescriptorCounts[] = { 1, 1, 1, 1, 1, 1, SHADOW_MAP_CASCADE_COUNT, 1, 1 };
 		uint32_t DescriptorTypes[] = 
 		{ 
 			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
@@ -141,10 +142,18 @@ void CreateSceneDescriptorSets()
 			OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER
 		};
-		uint32_t ImageTypes[] = { OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT, OPENVK_IMAGE_TYPE_ATTACHMENT };
-		uint32_t ImageLayouts[] = { OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, OPENVK_IMAGE_LAYOUT_DEPTH_OUTPUT };
+
+		uint32_t ImageTypes[ARRAY_SIZE(Attachments)]; 		FillUintArray(ImageTypes, OPENVK_IMAGE_TYPE_ATTACHMENT, ARRAY_SIZE(Attachments));
+		uint32_t ImageLayouts[ARRAY_SIZE(Attachments)];  	FillUintArray(ImageLayouts, OPENVK_IMAGE_LAYOUT_COLOR_OUTPUT, G_BUFFER_ATTACHMENT_COUNT);
+		uint32_t Sampler[ARRAY_SIZE(Attachments)]; 			FillUintArray(Sampler, GBufferSampler, G_BUFFER_ATTACHMENT_COUNT);
+		for (uint32_t i = G_BUFFER_ATTACHMENT_COUNT; i < G_BUFFER_ATTACHMENT_COUNT + SHADOW_MAP_CASCADE_COUNT; i++)
+		{
+			Attachments[i] = ShadowDepthAttachments[i - G_BUFFER_ATTACHMENT_COUNT];
+			ImageLayouts[i] = OPENVK_IMAGE_LAYOUT_DEPTH_OUTPUT;
+			Sampler[i] = ShadowSampler;
+		}
+		
 		uint32_t Bindings[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
-		uint32_t Sampler[] = { GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler, GBufferSampler, ShadowSampler };
 		uint32_t Buffers[] = { SceneFragmentUniformBuffer, SceneFragmentStorageBuffer };
 		size_t BufferSizes[] = { sizeof(SceneFragmentUniformBufferObject), sizeof(SceneFragmentStorageBufferObject) };
 

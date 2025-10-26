@@ -13,11 +13,11 @@ layout(set = 0, binding = 0) uniform sampler2D SamplerPosition;
 layout(set = 0, binding = 1) uniform sampler2D SamplerViewNormal;
 layout(set = 0, binding = 2) uniform sampler2D SamplerAlbedo;
 layout(set = 0, binding = 3) uniform sampler2D SamplerPBR;
-layout(set = 0, binding = 4) uniform sampler2D SamplerWorldPos;
-layout(set = 0, binding = 5) uniform sampler2D SamplerSSAO;
-layout(set = 0, binding = 6) uniform sampler2D ShadowMap[SHADOW_MAP_CASCADE_COUNT];
+//layout(set = 0, binding = 4) uniform sampler2D SamplerWorldPos;
+layout(set = 0, binding = 4) uniform sampler2D SamplerSSAO;
+layout(set = 0, binding = 5) uniform sampler2D ShadowMap[SHADOW_MAP_CASCADE_COUNT];
 
-layout(set = 0, binding = 7) uniform UniformBufferObject
+layout(set = 0, binding = 6) uniform UniformBufferObject
 {
 	vec4 CascadeSplits;
 	vec4 CascadeRange;
@@ -26,6 +26,9 @@ layout(set = 0, binding = 7) uniform UniformBufferObject
 	mat4 CascadeProjectionView[SHADOW_MAP_CASCADE_COUNT];
 	vec4 CameraPosition;
 	mat4 View;
+	mat4 InvViewProj;
+	mat4 InvView;
+	mat4 InvProj;
 	vec4 ClearColor;
 	float Gamma;
 	float Exposure;
@@ -33,7 +36,7 @@ layout(set = 0, binding = 7) uniform UniformBufferObject
 	uint RenderSSAO;
 } UBO;
 
-layout(set = 0, binding = 8) readonly buffer StorageBufferObject 
+layout(set = 0, binding = 7) readonly buffer StorageBufferObject 
 { 
 	vec4 LightPos[MAX_NUMBER_OF_LIGHTS];
 	vec4 LightColor[MAX_NUMBER_OF_LIGHTS];
@@ -252,7 +255,7 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 
 //get set in main
 vec3 PosRelToCam = vec3(0.0);
-vec4 WorldPos = vec4(0.0);
+vec3 WorldPos = vec3(0.0);
 
 float GetShadow(float Ambient)
 {
@@ -374,20 +377,173 @@ vec3 unpack_normal_octahedron(vec2 packed_nrm) {
 
 }
 
+vec3 ReconstructWorldPos(vec2 uv, float linearDepth, mat4 invViewProj) 
+{
+    float z = linearDepth;
+    
+    vec4 clipSpacePos = vec4(uv * 2.0 - 1.0, z, 1.0);
+    vec4 viewSpacePos = UBO.InvProj * clipSpacePos;
+    
+    viewSpacePos /= viewSpacePos.w;
+
+    vec4 worldSpacePosition = UBO.InvView * viewSpacePos;
+
+    return worldSpacePosition.xyz;
+}
+
+// Reconstruct view space position from depth
+vec3 ViewPositionFromDepth(vec2 texcoord, float depth)
+{
+  // Get x/w and y/w from the viewport position
+  vec3 projectedPos = vec3(texcoord, depth);// * 2.0f - 1.0f;;
+
+  // Transform by the inverse projection matrix
+  vec4 positionVS = UBO.InvViewProj * vec4(projectedPos, 1.0f);
+
+  // Divide by w to get the view-space position
+  return positionVS.xyz / positionVS.w;
+}
+
+vec3 FresnelSchlickAprox(vec3 F0, float cosTheta)
+{
+    return mix(F0, vec3(1.0), pow(1.01 - cosTheta, 5.0));
+}
+
+// Schlick-Frensel approximation with added roughness lerp for ambient IBL
+// See: https://seblagarde.wordpress.com/2011/08/17/hello-world/
+vec3 FresnelSchlickWithRoughness(vec3 F0, float cosTheta, float roughness)
+{
+  return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+
+
+// Full Cook-Torrence BRDF
+vec3 CookTorrenceSpecularBRDF(vec3 F, vec3 N, vec3 V, vec3 H, vec3 L, float roughness)
+{
+  float D = DistributionGGX(N, H, roughness);
+  float G = GeometrySmith(N, V, L, roughness);
+
+  vec3 numerator    = D * G * F;
+  float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+  vec3 specular     = numerator / max(denominator, 0.001);
+
+  return specular;
+}
+
+vec3 orenNayarFast(vec3 n, vec3 l, vec3 v, vec3 albedo, float roughness) {
+    float sigma2 = roughness * roughness;
+
+    // Precompute Oren-Nayar coefficients
+    float A = 1.0 - (sigma2 / (2.0 * (sigma2 + 0.33)));
+    float B = 0.45 * sigma2 / (sigma2 + 0.09);
+
+    float cosThetaI = max(dot(n, l), 0.0);
+    float cosThetaR = max(dot(n, v), 0.0);
+
+    // Use max/min trick to approximate alpha and beta
+    float alpha = max(cosThetaI, cosThetaR);
+    float beta  = min(cosThetaI, cosThetaR);
+
+    // Approximate azimuthal term using dot of light/view tangent projections
+    vec3 lProj = l - n * cosThetaI;
+    vec3 vProj = v - n * cosThetaR;
+    float cosPhiDiff = 0.0;
+    float lLen = length(lProj);
+    float vLen = length(vProj);
+    if (lLen > 1e-4 && vLen > 1e-4) {
+        cosPhiDiff = max(dot(lProj, vProj) / (lLen * vLen), 0.0);
+    }
+
+    // Approximate Oren-Nayar BRDF
+    float diffuse = cosThetaI * (A + B * cosPhiDiff * (alpha * beta) / max(beta, 0.0001));
+
+    return albedo * diffuse / 3.14159265;
+}
+
+float orenNayarDiffuse(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float sigma = roughness * roughness * (PI / 2.0);
+    float sigma2 = sigma * sigma;
+
+    float NdotL = max(dot(N, L), 0.0);
+    float NdotV = max(dot(N, V), 0.0);
+    if (NdotL <= 0.0 || NdotV <= 0.0)
+        return 0.0;
+
+    float A = 1.0 - (0.5 * sigma2 / (sigma2 + 0.33));
+    float B = 0.45 * sigma2 / (sigma2 + 0.09);
+
+    float LdotV = max(dot(L, V), 0.0);
+    float s = LdotV - NdotL * NdotV;
+    float t = (s > 0.0) ? max(NdotL, NdotV) : 1.0;
+    float alpha = acos(t == NdotL ? NdotL : NdotV);
+    float beta  = acos(t == NdotL ? NdotV : NdotL);
+
+    // Compute Oren-Nayar term
+    float oren = (A + B * s / t) * NdotL;
+
+    return oren;
+}
+
+//see https://github.com/tullrich/deferred-pbr
+vec3 DirectRadiance(vec3 P, vec3 N, vec3 V, vec3 L, vec3 Light, vec3 albedo, float Roughness, float Metalness, vec3 F0, vec3 LightColor)
+{
+  // Direction to light in viewspace
+//  vec3 L = normalize(MainLightPosition.xyz - P * MainLightPosition.w);
+
+  // Half-Vector between light and eye in viewspace
+  vec3 H = normalize(L + V);
+
+  // cos(angle) between surface normal and light
+  float NdL = max(0.001, dot(N, L));
+
+  // cos(angle) between surface half vector and eye
+  float HdV = max(0.001, dot(H, V));
+
+  // Cook Torrence Terms
+  vec3 F = FresnelSchlickAprox(F0, HdV);
+  vec3 kD =  vec3(1.0) - F;
+
+  // BRDF
+  vec3 specBrdf = CookTorrenceSpecularBRDF(F, N, V, H, L, Roughness);
+//  vec3 diffuseBrdf = kD * (albedo / PI) * (1.0 - Metalness); // Lambert diffuse
+	vec3 diffuseBrdf = orenNayarFast(N, L, V, albedo, Roughness * (PI / 2));
+
+  // Point/Directional light attenuation
+//  float A = mix(1.0f, 1.0 / (1.0 + 0.1 * dot(MainLightPosition.xyz - P, MainLightPosition.xyz - P)), MainLightPosition.w);
+	float distance = length(Light);
+	float attenuation = 1.0 / (distance * distance);
+  // L
+  vec3 radiance = attenuation * LightColor ;
+  return (specBrdf + diffuseBrdf) * radiance * NdL;
+}
+
+
+
+
 void main() 
 {	
 	vec4 PositionTex = texture(SamplerPosition,	FragTexCoord);
 	vec4 ViewNormalTex   = texture(SamplerViewNormal,	FragTexCoord);
 	vec4 AlbedoTex   = texture(SamplerAlbedo,	FragTexCoord);
 	vec4 PBRTex		 = texture(SamplerPBR,		FragTexCoord);
-	vec4 WorldPosTex = texture(SamplerWorldPos,	FragTexCoord);
+//	vec4 WorldPosTex = texture(SamplerWorldPos,	FragTexCoord);
 //	vec2 NormalTex = texture(SamplerNormal,	FragTexCoord).xy;
 
 //	vec3 ViewNormal = normalize(ViewNormalTex.rgb);
-	vec3 fragPos = PositionTex.rgb;
-	PosRelToCam = fragPos;
+//	vec3 fragPos = PositionTex.rgb;
+	PosRelToCam = vec4(UBO.View * vec4(PositionTex.xyz, 1.0)).xyz;
 	vec4 Albedo = AlbedoTex;
-	WorldPos = WorldPosTex;
+	WorldPos = PositionTex.xyz;//ReconstructWorldPos(FragTexCoord, PositionTex.w, UBO.InvViewProj);
+
+
+//	WorldPos = -P;
+	//WorldPos = 
+
+//	OutColor.rgb = vec3(WorldPos );
+//	OutColor.a = 1.0;
+//	return;
 
 	const float Eps = 0.01;
 
@@ -412,7 +568,7 @@ void main()
 	}
 	
 //	vec3 Normal = normalize(vec3(ViewNormalTex.w, NormalTex.x, NormalTex.y));
-	vec3 Normal = unpack_normal_octahedron(vec2(ViewNormalTex.w, WorldPosTex.w));
+	vec3 Normal = unpack_normal_octahedron(vec2(ViewNormalTex.w, PBRTex.w));
 	 
 	float SSAO = texture(SamplerSSAO, FragTexCoord).r;
 
@@ -420,11 +576,29 @@ void main()
 	vec3 N = Normal;
 					//Upload Camera Pos
 	vec3 V = normalize(UBO.CameraPosition.xyz - WorldPos.xyz);
-
+	 
 	vec3 F0 = vec3(0.04); 
 	F0 = mix(F0, Albedo.xyz, Metallic);
 	vec3 Lo = vec3(0.0);
 	vec3 LoShadow = vec3(0.0);
+
+  // Direction to eye in viewspace
+  /*
+  	vec3 P = ViewPositionFromDepth(FragTexCoord, PositionTex.w);
+	vec3 V = normalize(-P);
+
+	vec3 L = normalize(SBO.LightPos[0].xyz);
+
+	
+
+	vec3 LightColor = SBO.LightColor[0].xyz * vec3(SBO.LightColor[0].w);
+	OutColor.rgb = DirectRadiance(P, N, V, L, L, Albedo.rgb, Roughness, Metallic, F0, LightColor);
+	OutColor.a = 1.0;
+//	OutColor = vec4(orenNayarFast(N, L, V, Albedo.rgb, Roughness * (PI / 2)) * LightColor, 1.0);
+//	OutColor = Albedo;
+	return;
+
+	*/
 	
 	OutColor = vec4(1.0);
 
@@ -440,7 +614,7 @@ void main()
 		switch (SBO.LightType[i])
 		{
 		case 0:
-			Light = SBO.LightPos[i].xyz - WorldPos.xyz;
+			Light = SBO.LightPos[i].xyz - WorldPos.xyz;//SBO.LightPos[i].w//WorldPos.xyz;
 			L = normalize(Light);
 			break;
 
@@ -493,11 +667,23 @@ void main()
 
 		if (SBO.LightCastShadow[i] == 1 && !HasShadow)
 		{
-			LoShadow += (kD * Albedo.xyz / PI + specular) * radiance * NdotL;
+			// Oren–Nayar diffuse instead of Lambert
+			float oren = orenNayarDiffuse(N, V, L, Roughness);
+			vec3 diffuse = Albedo.xyz / PI * oren;
+
+			LoShadow += (kD * diffuse + specular) * radiance;  
+		//	LoShadow += (kD * Albedo.xyz / PI + specular) * radiance * NdotL;
+		//	LoShadow += DirectRadiance(PositionTex.xyz, N, V, L, L, Albedo.rgb, Roughness * (PI / 2), Metallic, F0, LightColor);
 		}			
 		else
 		{
-			Lo += (kD * Albedo.xyz / PI + specular) * radiance * NdotL;
+			// Oren–Nayar diffuse instead of Lambert
+			float oren = orenNayarDiffuse(N, V, L, Roughness);
+			vec3 diffuse = Albedo.xyz / PI * oren;
+
+			Lo += (kD * diffuse + specular) * radiance;  
+		//	Lo += (kD * Albedo.xyz / PI + specular) * radiance * NdotL;
+		//	Lo += DirectRadiance(PositionTex.xyz, N, V, L, L, Albedo.rgb, Roughness, Metallic, F0, LightColor);
 		}
 
 		if (SBO.LightCastShadow[i] == 1)

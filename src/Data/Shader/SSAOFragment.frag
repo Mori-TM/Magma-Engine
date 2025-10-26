@@ -16,6 +16,7 @@ layout (binding = 3) uniform UniformBufferObject
 {
 	vec4 Samples[SSAO_KERNEL_SIZE];
 	mat4 Projection;
+	mat4 View;
 } UBO;
 
 #define MAX_SSAO_DIST 30.0
@@ -23,7 +24,8 @@ layout (binding = 3) uniform UniformBufferObject
 void main() 
 {
 	// Get G-Buffer values
-	vec3 FragPos = texture(SamplerPositionDepth, FragTexCoord).rgb;
+	vec3 WorldPos = texture(SamplerPositionDepth, FragTexCoord).rgb;
+	vec3 FragPos = vec4(UBO.View * vec4(WorldPos.xyz, 1.0)).xyz;
 //	if (FragPos.z > MAX_SSAO_DIST || FragPos.z < -MAX_SSAO_DIST)
 //	{
 //		OutColor = 1.0;

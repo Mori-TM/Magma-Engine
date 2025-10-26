@@ -71,7 +71,6 @@ void CreateDebugDescriptorSets()
 		GBufferAttachments[1],
 		GBufferAttachments[2],
 		GBufferAttachments[3],
-		GBufferAttachments[4],
 		SSAOColorAttachment,
 		SSAOBlurColorAttachment,
 		SceneAttachment,

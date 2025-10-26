@@ -183,6 +183,7 @@ void CreateSSAODescriptorSets()
 void SSAOUpdateUniformBuffer()
 {
 	SSAOFragmentUBO.Projection = GBufferVertexUBO.Projection;
+	SSAOFragmentUBO.View = GBufferVertexUBO.View;
 	OpenVkUpdateBuffer(sizeof(SSAOFragmentUniformBufferObject), &SSAOFragmentUBO, SSAOFragmentUniformBuffer);
 }
 

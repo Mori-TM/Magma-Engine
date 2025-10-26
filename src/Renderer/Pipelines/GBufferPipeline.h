@@ -4,14 +4,13 @@ void CreateGBufferRenderPass()
 	GBufferAttachments[0] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, Format);
 	GBufferAttachments[1] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, Format);
 	GBufferAttachments[2] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_RGBA);
-	GBufferAttachments[3] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_RGBA);
-	GBufferAttachments[4] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, Format);
-	GBufferAttachments[5] = OpenVkCreateDepthImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_DEFAULT);
+	GBufferAttachments[3] = OpenVkCreateColorImageAttachment(SceneWidth, SceneHeight, 1, true, Format);
+	GBufferAttachments[4] = OpenVkCreateDepthImageAttachment(SceneWidth, SceneHeight, 1, true, OPENVK_FORMAT_DEFAULT);
 
-	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_DEPTH };
-	uint32_t AttachmentFormats[] = { Format, Format, OPENVK_FORMAT_RGBA, OPENVK_FORMAT_RGBA, Format, OPENVK_FORMAT_DEFAULT };
-	uint32_t AttachmentDescriptions[] = { OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR };
-	uint32_t MsaaSamples[] = { 1, 1, 1, 1, 1, 1 };
+	uint32_t Attachments[] = { OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_COLOR, OPENVK_ATTACHMENT_DEPTH };
+	uint32_t AttachmentFormats[] = { Format, Format, OPENVK_FORMAT_RGBA, Format, OPENVK_FORMAT_DEFAULT };
+	uint32_t AttachmentDescriptions[] = { OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR, OPENVK_ATTACHMENT_DESCRIPTION_LOAD_CLEAR };
+	uint32_t MsaaSamples[] = { 1, 1, 1, 1, 1 };
 	GBufferRenderPass = OpenVkCreateRenderPass(G_BUFFER_ATTACHMENT_COUNT, Attachments, AttachmentFormats, AttachmentDescriptions, MsaaSamples, OPENVK_RENDER_PASS_SAMPLED);
 }
 

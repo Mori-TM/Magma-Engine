@@ -16,7 +16,7 @@ uint32_t DebugPipelineFatLine;
 DebugVertexPushConstant DebugVertexPc;
 
 bool RenderDebugDescriptorSet = false;
-uint32_t DebugDescriptorSets[11];
+uint32_t DebugDescriptorSets[10];
 
 const char* DebugAttachmentNames[] =
 {
@@ -25,7 +25,6 @@ const char* DebugAttachmentNames[] =
 	"G-Buffer: View Normal",
 	"G-Buffer: Albedo",
 	"G-Buffer: PBR",
-	"G-Buffer: World Pos",
 	"SSAO Pass",
 	"SSAO Blur Pass",
 	"Scene Pass",

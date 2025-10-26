@@ -62,6 +62,12 @@ float atan2(in float y, in float x)
     return mix(PI/2.0 - atan(x,y), atan(y,x), s);
 }
 
+vec3 GetPosRelToCam(vec2 UV)
+{
+	vec3 WorldPos = texture(SamplerPosition, UV).rgb;
+	return vec4(UBO.View * vec4(WorldPos.xyz, 1.0)).xyz;
+}
+
 void main()
 {
 //	OutColor = vec4(texture(DepthPosition, FragTexCoord).rgb, 1.0);
@@ -89,7 +95,7 @@ void main()
 	vec3 viewNormal = normalize(NormalTex.rgb);
 //	vec3 viewPos = textureLod(DepthPosition, FragTexCoord, 2).xyz;
 //	vec3 viewPos = PositionFromDepth(texture(DepthPosition, FragTexCoord).w);
-    vec3 viewPos = texture(SamplerPosition, FragTexCoord).xyz;
+    vec3 viewPos = GetPosRelToCam(FragTexCoord);//texture(SamplerPosition, FragTexCoord).xyz;
 
 	vec3 viewPosNormalized = normalize(viewPos);
 	vec3 albedo = texture(SamplerAlbedo, FragTexCoord).rgb;
@@ -153,7 +159,7 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
 		projectedCoord.xy /= projectedCoord.w;
 		projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
  
-		depth = texture(SamplerPosition, projectedCoord.xy).z;
+		depth = GetPosRelToCam(projectedCoord.xy).z;//texture(SamplerPosition, projectedCoord.xy).z;
 
  
 		dDepth = hitCoord.z - depth;
@@ -191,7 +197,7 @@ vec4 RayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth)
 		projectedCoord.xy /= projectedCoord.w;
 		projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
  
-		depth = texture(SamplerPosition, projectedCoord.xy).z;
+		depth = GetPosRelToCam(projectedCoord.xy).z;//texture(SamplerPosition, projectedCoord.xy).z;
 		if(depth > 1000.0)
 			continue;
  

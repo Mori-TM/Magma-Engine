@@ -127,17 +127,16 @@ void CreateSceneDescriptorSets()
 	}
 	
 	{
-		uint32_t Attachments[G_BUFFER_ATTACHMENT_COUNT + SHADOW_MAP_CASCADE_COUNT] = { GBufferAttachments[0], GBufferAttachments[1], GBufferAttachments[2], GBufferAttachments[3], GBufferAttachments[4], RenderSSAOBlur ? SSAOBlurColorAttachment : SSAOColorAttachment };
+		uint32_t Attachments[G_BUFFER_ATTACHMENT_COUNT + SHADOW_MAP_CASCADE_COUNT] = { GBufferAttachments[0], GBufferAttachments[1], GBufferAttachments[2], GBufferAttachments[3], RenderSSAOBlur ? SSAOBlurColorAttachment : SSAOColorAttachment };
 
-		uint32_t DescriptorCounts[] = { 1, 1, 1, 1, 1, 1, SHADOW_MAP_CASCADE_COUNT, 1, 1 };
+		uint32_t DescriptorCounts[] = { 1, 1, 1, 1, 1, SHADOW_MAP_CASCADE_COUNT, 1, 1 };
 		uint32_t DescriptorTypes[] = 
 		{ 
 			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
 			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
 			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
 			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
-			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
-			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
+			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER,  
 			OPENVK_DESCRIPTOR_TYPE_IMAGE_SAMPLER, 
 			OPENVK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			OPENVK_DESCRIPTOR_TYPE_STORAGE_BUFFER
@@ -153,7 +152,7 @@ void CreateSceneDescriptorSets()
 			Sampler[i] = ShadowSampler;
 		}
 		
-		uint32_t Bindings[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+		uint32_t Bindings[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
 		uint32_t Buffers[] = { SceneFragmentUniformBuffer, SceneFragmentStorageBuffer };
 		size_t BufferSizes[] = { sizeof(SceneFragmentUniformBufferObject), sizeof(SceneFragmentStorageBufferObject) };
 
@@ -251,6 +250,10 @@ void SceneUpdateUniformBuffer()
 		SceneFragmentUBO.CascadeProjectionView[i] = Cascades[i].ProjectionViewBias;
 	}
 	SceneFragmentUBO.View = GBufferVertexUBO.View;
+	mat4 ViewProj = MultiplyMat4(GBufferVertexUBO.Projection, GBufferVertexUBO.View);
+	SceneFragmentUBO.InvViewProj = InverseMat4(ViewProj);
+	SceneFragmentUBO.InvView = InverseMat4(GBufferVertexUBO.View);
+	SceneFragmentUBO.InvProj = InverseMat4(GBufferVertexUBO.Projection);
 	SceneFragmentUBO.RenderSSAO = RenderSSAO;
 	SceneFragmentUBO.ClearColor.r = ClearColor.r;
 	SceneFragmentUBO.ClearColor.g = ClearColor.g;

@@ -23,6 +23,9 @@ layout(set = 0, binding = 1) uniform UniformBufferObject
 	mat4 CascadeProjectionView[SHADOW_MAP_CASCADE_COUNT];
 	vec4 CameraPosition;
 	mat4 View;
+	mat4 InvViewProj;
+	mat4 InvView;
+	mat4 InvProj;
 	vec4 ClearColor;
 	float Gamma;
 	float Exposure;
@@ -338,6 +341,31 @@ vec3 unpack_normal_octahedron(vec2 packed_nrm) {
 
 }
 
+float orenNayarDiffuse(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float sigma = roughness * roughness * (PI / 2.0);
+    float sigma2 = sigma * sigma;
+
+    float NdotL = max(dot(N, L), 0.0);
+    float NdotV = max(dot(N, V), 0.0);
+    if (NdotL <= 0.0 || NdotV <= 0.0)
+        return 0.0;
+
+    float A = 1.0 - (0.5 * sigma2 / (sigma2 + 0.33));
+    float B = 0.45 * sigma2 / (sigma2 + 0.09);
+
+    float LdotV = max(dot(L, V), 0.0);
+    float s = LdotV - NdotL * NdotV;
+    float t = (s > 0.0) ? max(NdotL, NdotV) : 1.0;
+    float alpha = acos(t == NdotL ? NdotL : NdotV);
+    float beta  = acos(t == NdotL ? NdotV : NdotL);
+
+    // Compute Oren-Nayar term
+    float oren = (A + B * s / t) * NdotL;
+
+    return oren;
+}
+
 void main()
 {
 	const float Eps = 0.01;
@@ -432,11 +460,21 @@ void main()
 
 		if (SBO.LightCastShadow[i] == 1 && !HasShadow)
 		{
-			LoShadow += (kD * Albedo.xyz / PI + specular) * radiance * NdotL;
+			// Oren–Nayar diffuse instead of Lambert
+			float oren = orenNayarDiffuse(N, V, L, Roughness);
+			vec3 diffuse = Albedo.xyz / PI * oren;
+
+			LoShadow += (kD * diffuse + specular) * radiance;  
+//			LoShadow += (kD * Albedo.xyz / PI + specular) * radiance * NdotL;
 		}			
 		else
 		{
-			Lo += (kD * Albedo.xyz / PI + specular) * radiance * NdotL;
+			// Oren–Nayar diffuse instead of Lambert
+			float oren = orenNayarDiffuse(N, V, L, Roughness);
+			vec3 diffuse = Albedo.xyz / PI * oren;
+
+			Lo += (kD * diffuse + specular) * radiance;  
+		//	Lo += (kD * Albedo.xyz / PI + specular) * radiance * NdotL;
 		}
 
 		if (SBO.LightCastShadow[i] == 1)

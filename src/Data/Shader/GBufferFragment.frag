@@ -5,7 +5,7 @@ layout (location = 0) out vec4 OutPosition;
 layout (location = 1) out vec4 OutViewNormal;
 layout (location = 2) out vec4 OutAlbedo;
 layout (location = 3) out vec4 OutPBR;
-layout (location = 4) out vec4 OutWorldPos;
+//layout (location = 4) out vec4 OutWorldPos;
 
 layout(location = 0) in vec3 FragViewNormal;
 layout(location = 1) in vec3 FragNormal;
@@ -33,8 +33,15 @@ layout(push_constant) uniform PushConstants
 
 float LinearDepth(float Depth)
 {
+	
 	float z = Depth * 2.0f - 1.0f; 
 	return (2.0f * PushConst.NearPlane * PushConst.FarPlane) / (PushConst.FarPlane + PushConst.NearPlane - z * (PushConst.FarPlane - PushConst.NearPlane));	
+	
+	/*
+	 float near = PushConst.NearPlane;
+    float far  = PushConst.FarPlane;
+    return (near * far) / (far - Depth * (far - near));
+	*/
 }
 
 vec3 GetNormalFromMap()
@@ -97,7 +104,7 @@ void main()
 
 	vec2 NormalPack = pack_normal_octahedron(GetNormalFromMap());//normalize(FragNormal);
 
-	OutPosition = vec4(FragPosRelToCam.xyz, LinearDepth(gl_FragCoord.z));
+	OutPosition = vec4(FragWorldPos.xyz, LinearDepth(gl_FragCoord.z));
 
 	OutViewNormal = vec4(normalize(FragViewNormal), NormalPack.x);				//use GetNormalFromMap
 //	float PrevAlpha = OutAlbedo.w;
@@ -106,14 +113,14 @@ void main()
 	OutPBR.r = texture(MetallicMap, FragTexCoord).r * PushConst.Metallic;
 	OutPBR.g = texture(RoughnessMap, FragTexCoord).r * PushConst.Roughness;
 	OutPBR.b = texture(OcclusionMap, FragTexCoord).r * PushConst.Occlusion;
-	OutPBR.a = 1.0;
+	OutPBR.a = NormalPack.y;
 
 //	OutPBR.g = PushConst.Roughness;
 //	OutPBR.b = PushConst.Occlusion;
 
 	
-	OutWorldPos.x = FragWorldPos.x;
-	OutWorldPos.y = FragWorldPos.y;
-	OutWorldPos.z = FragWorldPos.z;
-	OutWorldPos.w = NormalPack.y;
+//	OutWorldPos.x = FragWorldPos.x;
+//	OutWorldPos.y = FragWorldPos.y;
+//	OutWorldPos.z = FragWorldPos.z;
+//	OutWorldPos.w = ;
 }

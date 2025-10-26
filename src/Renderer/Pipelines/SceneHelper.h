@@ -47,6 +47,9 @@ typedef struct
 	mat4 CascadeProjectionView[SHADOW_MAP_CASCADE_COUNT];	//Update every frame
 	vec4 CameraPosition;	//Update every frame in G-Buffer pipeline, not the best place to update!
 	mat4 View;				//Update every frame
+	mat4 InvViewProj;		//Update every frame
+	mat4 InvView;			//Update every frame
+	mat4 InvProj;			//Update every frame
 	vec4 ClearColor;		//Update every frame
 	float Gamma;			//Update via imgui or ResetSceneSettings()
 	float Exposure;			//Update via imgui or ResetSceneSettings()

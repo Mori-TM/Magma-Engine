@@ -5,6 +5,7 @@ typedef struct
 {
 	vec4 Samples[SSAO_KERNEL_SIZE];
 	mat4 Projection;
+	mat4 View;
 } SSAOFragmentUniformBufferObject;
 
 uint32_t SSAOLayout;
